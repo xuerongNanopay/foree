@@ -1,4 +1,4 @@
-module xue/foree
+module xue.io/foree
 
 go 1.22.5
 

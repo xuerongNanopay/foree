@@ -4,7 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 */
 package main
 
-import "xue/foree/cmd"
+import "xue.io/foree/cmd"
 
 func main() {
 	cmd.Execute()
