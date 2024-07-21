@@ -1,4 +1,4 @@
-module xue.io/foree
+module xue.io/go-pay
 
 go 1.22.5
 

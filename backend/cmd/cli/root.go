@@ -11,9 +11,9 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "foree",
-	Short: "Foree Application",
-	Long:  `Foree Application`,
+	Use:   "go-pay",
+	Short: "go-pay Application",
+	Long:  `go-pay Application`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
