@@ -1,6 +1,9 @@
 package transaction
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type TransactionStage string
 type TransactionStatus string
@@ -57,6 +60,29 @@ type TransactionStatusHistory struct {
 	updateAt time.Timer
 }
 
-func processTx(tx Transaction) {
+func (t *Transaction) processTx() (*Transaction, error) {
+	stage := t.stage
 
+	switch stage {
+	case INTERAC_CI:
+		return t.processIntracCi()
+	case IDM:
+		return t.processIDM()
+	case NBP_CO:
+		return t.processNbpCo()
+	default:
+		return t, fmt.Errorf("Unknown transaction stage: `%v`", stage)
+	}
+}
+
+func (t *Transaction) processIntracCi() (*Transaction, error) {
+	return t, nil
+}
+
+func (t *Transaction) processIDM() (*Transaction, error) {
+	return t, nil
+}
+
+func (t *Transaction) processNbpCo() (*Transaction, error) {
+	return t, nil
 }
