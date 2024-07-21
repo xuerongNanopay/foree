@@ -2,13 +2,13 @@ package auth
 
 import "time"
 
-type AuthenticatorStatus uint
+type AuthenticatorStatus string
 
 const (
-	Unverify AuthenticatorStatus = iota + 1
-	Active
-	Suspend
-	Disable
+	Unverify AuthenticatorStatus = "unverify"
+	Active   AuthenticatorStatus = "active"
+	Suspend  AuthenticatorStatus = "suspend"
+	Disable  AuthenticatorStatus = "disable"
 )
 
 type Authenticator struct {

@@ -2,13 +2,13 @@ package user
 
 import "time"
 
-type UserStatus uint
+type UserStatus string
 
 const (
-	Pending = iota + 1
-	Active
-	Suspend
-	Disable
+	Pending UserStatus = "pending"
+	Active  UserStatus = "active"
+	Suspend UserStatus = "suspend"
+	Disable UserStatus = "disable"
 )
 
 type User struct {
