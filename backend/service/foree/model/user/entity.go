@@ -31,6 +31,7 @@ type User struct {
 
 	group string
 
-	createAt time.Timer
-	updateAt time.Timer
+	onboardAt time.Timer
+	createAt  time.Timer
+	updateAt  time.Timer
 }

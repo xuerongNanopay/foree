@@ -14,6 +14,7 @@ const (
 type Authenticator struct {
 	id uint64
 
-	createAt time.Timer
-	updateAt time.Timer
+	verifiedAt time.Timer
+	createAt   time.Timer
+	updateAt   time.Timer
 }
