@@ -38,6 +38,15 @@ type Transaction struct {
 	updateAt time.Timer
 }
 
+type IdmPayload struct {
+	transactionId uint64
+
+	payload string
+
+	createAt time.Timer
+	updateAt time.Timer
+}
+
 type TransactionStatusHistory struct {
 	transactionId uint64
 
@@ -45,6 +54,7 @@ type TransactionStatusHistory struct {
 	status TransactionStatus
 
 	createAt time.Timer
+	updateAt time.Timer
 }
 
 func processTx(tx Transaction) {
