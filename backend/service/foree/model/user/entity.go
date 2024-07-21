@@ -2,6 +2,15 @@ package user
 
 import "time"
 
+type UserStatus uint
+
+const (
+	Pending = iota + 1
+	Active
+	Suspend
+	Disable
+)
+
 type User struct {
 	id uint64
 
