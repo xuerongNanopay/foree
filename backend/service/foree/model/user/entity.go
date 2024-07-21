@@ -5,10 +5,10 @@ import "time"
 type UserStatus string
 
 const (
-	Pending UserStatus = "pending"
-	Active  UserStatus = "active"
-	Suspend UserStatus = "suspend"
-	Disable UserStatus = "disable"
+	PENDING UserStatus = "PENDING"
+	ACTIVE  UserStatus = "ACTIVE"
+	SUSPEND UserStatus = "SUSPEND"
+	DISABLE UserStatus = "DISABLE"
 )
 
 type User struct {
