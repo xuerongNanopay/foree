@@ -61,9 +61,7 @@ type TransactionStatusHistory struct {
 }
 
 func (t *Transaction) processTx() (*Transaction, error) {
-	stage := t.stage
-
-	switch stage {
+	switch t.stage {
 	case INTERAC_CI:
 		return t.processIntracCi()
 	case IDM:
@@ -71,12 +69,15 @@ func (t *Transaction) processTx() (*Transaction, error) {
 	case NBP_CO:
 		return t.processNbpCo()
 	default:
-		return t, fmt.Errorf("Unknown transaction stage: `%v`", stage)
+		return t, fmt.Errorf("Unknown transaction stage `%v`", t.stage)
 	}
 }
 
 func (t *Transaction) processIntracCi() (*Transaction, error) {
-	return t, nil
+	switch t.status {
+	default:
+		return t, fmt.Errorf("Unknown transaction status `%v` in stage `%v`", t.status, t.stage)
+	}
 }
 
 func (t *Transaction) processIDM() (*Transaction, error) {
