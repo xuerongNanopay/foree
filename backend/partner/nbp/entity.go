@@ -1,22 +1,37 @@
 package nbp
 
 type responseWrapper[R any] struct {
-	rawRequest  string
-	httpStatus  int
-	rawResponse int
-	data        R
+	RawRequest  string
+	HttpStatus  int
+	RawResponse int
+	Data        R
+}
+
+type authenticate struct {
+	ResponseCode    string `json:"ResponseCode"`
+	ResponseMessage string `json:"ResponseMessage"`
+	Token           string `json:"Token"`
+	TokenExpiry     string `json:"Token_Expiry"`
 }
 
 type BankList struct {
-	responseCode    string          `json:"ResponseCode"`
-	responseMessage string          `json:"ResponseMessage"`
-	banklist        []BankListEntry `json:"banklist"`
+	ResponseCode    string          `json:"ResponseCode"`
+	ResponseMessage string          `json:"ResponseMessage"`
+	Banklist        []BankListEntry `json:"banklist"`
 }
 
 type BankListEntry struct {
-	bankName string `json:"bankName"`
-	bankAbbr string `json:"bankAbbr"`
+	BankName string `json:"bankName"`
+	BankAbbr string `json:"bankAbbr"`
 }
 
 type HelloResponse responseWrapper[string]
 type BankListResponse responseWrapper[BankList]
+
+type authenticateRequest struct {
+	AgencyCode int32
+	UserName   string
+	Password   string
+}
+
+// type authenticateRequest
