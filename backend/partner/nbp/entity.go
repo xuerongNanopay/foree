@@ -25,6 +25,17 @@ type BankListEntry struct {
 	BankAbbr string `json:"bankAbbr"`
 }
 
+type AccountEnquiry struct {
+	ResponseCode    string `json:"ResponseCode"`
+	ResponseMessage string `json:"ResponseMessage"`
+	IBAN            string `json:"IBAN"`
+	AccountNo       string `json:"AccountNo"`
+	AccountTitle    string `json:"AccountTitle"`
+	BranchCode      int32  `json:"BranchCode"`
+	AccountStatus   string `json:"AccountStatus"`
+	BankName        string `json:"BankName"`
+}
+
 type HelloResponse responseWrapper[string]
 type BankListResponse responseWrapper[BankList]
 
