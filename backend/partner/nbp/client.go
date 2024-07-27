@@ -7,5 +7,5 @@ type NBPClient interface {
 	LoadRemittance(LoadRemittanceRequest) (*LoadRemittanceResponse, error)
 	TransactionStatusByIds(TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error)
 	TransactionStatusByDate(TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error)
-	//TODO: Cancel Transaction
+	CancelTransaction(CancelTransactionRequest) (*CancelTransactionResponse, error)
 }

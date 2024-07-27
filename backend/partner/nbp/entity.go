@@ -43,6 +43,12 @@ type LoadRemittance struct {
 	TrackingId      string `json:"Tracking_Id"`
 }
 
+type CancelTransaction struct {
+	ResponseCode    string `json:"ResponseCode"`
+	ResponseMessage string `json:"ResponseMessage"`
+	GlobalId        string `json:"Global_Id"`
+}
+
 type TransactionStatus struct {
 	GlobalId                string `json:"Global_Id"`
 	TrackingId              string `json:"Tracking_Id"`
@@ -74,6 +80,7 @@ type AccountEnquiryResponse responseWrapper[AccountEnquiry]
 type LoadRemittanceResponse responseWrapper[LoadRemittance]
 type TransactionStatusByIdsResponse responseWrapper[TransactionStatuses]
 type TransactionStatusByDateResponse responseWrapper[TransactionStatuses]
+type CancelTransactionResponse responseWrapper[CancelTransaction]
 
 type AuthenticateRequest struct {
 	AgencyCode int32
@@ -136,4 +143,11 @@ type TransactionStatusByDateRequest struct {
 	token      string `json:"Token"`
 	agencyCode string `json:"Agency_Code"`
 	Date       string `json:"Date"`
+}
+
+type CancelTransactionRequest struct {
+	token              string `json:"Token"`
+	agencyCode         string `json:"Agency_Code"`
+	GlobalId           string `json:"Global_Id"`
+	CancellationReason string `json:"Cancellation_Reason"`
 }
