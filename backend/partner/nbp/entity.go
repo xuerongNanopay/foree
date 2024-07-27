@@ -98,3 +98,9 @@ type LoadRemittanceRequest struct {
 	RemitterNationality             string  `json:"remitter_Nationality"`
 	RemitterBeneficiaryRelationship string  `json:"remitter_BeneficiaryRelationship"`
 }
+
+type TransactionStatusByIdsRequest struct {
+	token      string `json:"Token"`
+	agencyCode string `json:"Agency_Code"`
+	Ids        string `json:"ids"`
+}
