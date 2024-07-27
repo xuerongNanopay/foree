@@ -70,6 +70,7 @@ type TransactionStatuses struct {
 type HelloResponse responseWrapper[string]
 type authenticateResponse responseWrapper[authenticate]
 type BankListResponse responseWrapper[BankList]
+type AccountEnquiryResponse responseWrapper[AccountEnquiry]
 type LoadRemittanceResponse responseWrapper[LoadRemittance]
 type TransactionStatusByIdsResponse responseWrapper[TransactionStatuses]
 type TransactionStatusByDateResponse responseWrapper[TransactionStatuses]
