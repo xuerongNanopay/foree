@@ -36,9 +36,17 @@ type AccountEnquiry struct {
 	BankName        string `json:"BankName"`
 }
 
+type LoadRemittance struct {
+	ResponseCode    string `json:"ResponseCode"`
+	ResponseMessage string `json:"ResponseMessage"`
+	GlobalId        string `json:"Global_Id"`
+	TrackingId      string `json:"Tracking_Id"`
+}
+
 type HelloResponse responseWrapper[string]
 type authenticateResponse responseWrapper[authenticate]
 type BankListResponse responseWrapper[BankList]
+type LoadRemittanceResponse responseWrapper[LoadRemittance]
 
 type AuthenticateRequest struct {
 	AgencyCode int32
@@ -88,5 +96,5 @@ type LoadRemittanceRequest struct {
 	RemitterDOB                     string  `json:"remitter_DOB"` //yyyy-MM-dd
 	RemitterPOB                     string  `json:"remitter_POB"`
 	RemitterNationality             string  `json:"remitter_Nationality"`
-	RemitterBeneficiaryRelationship string  `json:"remitter_BeneficiaryRelationship`
+	RemitterBeneficiaryRelationship string  `json:"remitter_BeneficiaryRelationship"`
 }
