@@ -43,6 +43,24 @@ type LoadRemittance struct {
 	TrackingId      string `json:"Tracking_Id"`
 }
 
+type TransactionStatus struct {
+	GlobalId                string `json:"Global_Id"`
+	TrackingId              string `json:"Tracking_Id"`
+	Status                  string `json:"status"`
+	StatusDetails           string `json:"Status_Details"`
+	BeneficiaryIdType       string `json:"Beneficiary_Id_Type"`
+	BeneficiaryIdNumber     string `json:"Beneficiary_Id_Number"`
+	BranchCode              uint32 `json:"Branch_Code"`
+	BranchName              string `json:"Branch_Name"`
+	BeneficiaryName         string `json:"Beneficiary_Name"`
+	BeneficiaryIdExpiryDate string `json:"Beneficiary_Id_Expiry_Date"`
+	BeneficiaryIdIssueDate  string `json:"Beneficiary_Id_Issue_Date"`
+	BeneficiaryIdIssuedBy   string `json:"Beneficiary_Id_Issued_By"`
+	BeneficiaryDateOfBirth  string `json:"Beneficiary_Date_Of_Birth"`
+	ProcessingDate          string `json:"Processing_Date"`
+	ProcessingTime          string `json:"Processing_Time"`
+}
+
 type HelloResponse responseWrapper[string]
 type authenticateResponse responseWrapper[authenticate]
 type BankListResponse responseWrapper[BankList]
