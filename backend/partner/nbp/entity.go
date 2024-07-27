@@ -61,10 +61,17 @@ type TransactionStatus struct {
 	ProcessingTime          string `json:"Processing_Time"`
 }
 
+type TransactionStatusByIds struct {
+	ResponseCode        string              `json:"ResponseCode"`
+	ResponseMessage     string              `json:"ResponseMessage"`
+	TransactionStatuses []TransactionStatus `json:"transactionStatuses"`
+}
+
 type HelloResponse responseWrapper[string]
 type authenticateResponse responseWrapper[authenticate]
 type BankListResponse responseWrapper[BankList]
 type LoadRemittanceResponse responseWrapper[LoadRemittance]
+type TransactionStatusByIdsResponse responseWrapper[TransactionStatusByIds]
 
 type AuthenticateRequest struct {
 	AgencyCode int32
