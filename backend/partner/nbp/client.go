@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+type authCache struct {
+}
+
 type NBPClient interface {
 	Hello() (*HelloResponse, error)
 	BankList() (*BankListResponse, error)
