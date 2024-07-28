@@ -1,7 +1,7 @@
 package nbp
 
 type responseWrapper[R any] struct {
-	HttpStatus  int
+	StatusCode  int
 	RawRequest  string
 	RawResponse string
 	Data        R

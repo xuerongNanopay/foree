@@ -1,5 +1,11 @@
 package nbp
 
+import (
+	"io"
+	"net/http"
+	"time"
+)
+
 type NBPClient interface {
 	Hello() (*HelloResponse, error)
 	BankList() (*BankListResponse, error)
@@ -10,36 +16,60 @@ type NBPClient interface {
 	CancelTransaction(CancelTransactionRequest) (*CancelTransactionResponse, error)
 }
 
-func NewNBPClient() NBPClient {
-	return &NBPClientImpl{}
+func NewNBPClient(config NBPConfig) NBPClient {
+	return &NBPClientImpl{
+		Config: config,
+		httpClient: &http.Client{
+			Timeout: 4 * time.Minute, // At least 3 minutes
+		},
+	}
 }
 
 type NBPClientImpl struct {
+	Config     NBPConfig
+	httpClient *http.Client
 }
 
-func (*NBPClientImpl) Hello() (*HelloResponse, error) {
+func (c *NBPClientImpl) Hello() (*HelloResponse, error) {
+	url := c.Config.BaseUrl + "/Hello"
+	resp, err := http.Get(url)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	raw := string(body)
+
+	ret := &HelloResponse{
+		StatusCode:  resp.StatusCode,
+		RawResponse: raw,
+		Data:        raw,
+	}
+
+	return ret, nil
+}
+
+func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
 	return nil, nil
 }
 
-func (*NBPClientImpl) BankList() (*BankListResponse, error) {
+func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryResponse, error) {
 	return nil, nil
 }
 
-func (*NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryResponse, error) {
+func (c *NBPClientImpl) LoadRemittance(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
 	return nil, nil
 }
 
-func (*NBPClientImpl) LoadRemittance(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
+func (c *NBPClientImpl) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error) {
 	return nil, nil
 }
 
-func (*NBPClientImpl) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error) {
+func (c *NBPClientImpl) TransactionStatusByDate(r TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error) {
 	return nil, nil
 }
-
-func (*NBPClientImpl) TransactionStatusByDate(r TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error) {
-	return nil, nil
-}
-func (*NBPClientImpl) CancelTransaction(r CancelTransactionRequest) (*CancelTransactionResponse, error) {
+func (c *NBPClientImpl) CancelTransaction(r CancelTransactionRequest) (*CancelTransactionResponse, error) {
 	return nil, nil
 }
