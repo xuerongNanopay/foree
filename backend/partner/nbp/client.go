@@ -40,8 +40,11 @@ func (c *NBPClientImpl) Hello() (*HelloResponse, error) {
 
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
-	raw := string(body)
+	if err != nil {
+		return nil, err
+	}
 
+	raw := string(body)
 	ret := &HelloResponse{
 		StatusCode:  resp.StatusCode,
 		RawResponse: raw,
