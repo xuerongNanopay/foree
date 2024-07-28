@@ -82,12 +82,6 @@ type TransactionStatusByIdsResponse responseWrapper[TransactionStatuses]
 type TransactionStatusByDateResponse responseWrapper[TransactionStatuses]
 type CancelTransactionResponse responseWrapper[CancelTransaction]
 
-type AuthenticateRequest struct {
-	AgencyCode int32
-	UserName   string
-	Password   string
-}
-
 type BankListRequest struct {
 	token      string `json:"Token"`
 	agencyCode string `json:"Agency_Code"`

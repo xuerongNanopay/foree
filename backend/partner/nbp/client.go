@@ -61,6 +61,14 @@ func (c *NBPClientImpl) Hello() (*HelloResponse, error) {
 	return ret, nil
 }
 
+func (c *NBPClientImpl) authenticate() (*authenticate, error) {
+	return nil, nil
+}
+
+func (c *NBPClientImpl) updateToken() {
+	//Mutex
+}
+
 func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
 	return nil, nil
 }
