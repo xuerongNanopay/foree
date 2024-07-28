@@ -11,7 +11,7 @@ type NBPClientMock struct {
 
 func (*NBPClientMock) Hello() (*HelloResponse, error) {
 	r := &HelloResponse{
-		HttpStatus:  http.StatusOK,
+		StatusCode:  http.StatusOK,
 		RawResponse: "Welcome, NBP E-Remittance API",
 		Data:        "Welcome, NBP E-Remittance API",
 	}
