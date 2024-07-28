@@ -7,6 +7,9 @@ import (
 )
 
 type authCache struct {
+	token          string
+	rawTokenExpiry string
+	tokenExpiry    time.Time
 }
 
 type NBPClient interface {
@@ -31,11 +34,12 @@ func NewNBPClient(config NBPConfig) NBPClient {
 type NBPClientImpl struct {
 	Config     NBPConfig
 	httpClient *http.Client
+	auth       *authCache
 }
 
 func (c *NBPClientImpl) Hello() (*HelloResponse, error) {
 	url := c.Config.BaseUrl + "/Hello"
-	resp, err := http.Get(url)
+	resp, err := c.httpClient.Get(url)
 
 	if err != nil {
 		return nil, err
