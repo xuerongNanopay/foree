@@ -1,5 +1,7 @@
 package nbp
 
+import "net/http"
+
 func NewMockNBPClient() NBPClient {
 	return &NBPClientMock{}
 }
@@ -8,7 +10,12 @@ type NBPClientMock struct {
 }
 
 func (*NBPClientMock) Hello() (*HelloResponse, error) {
-	return nil, nil
+	r := &HelloResponse{
+		HttpStatus:  http.StatusOK,
+		RawResponse: "Welcome, NBP E-Remittance API",
+		Data:        "Welcome, NBP E-Remittance API",
+	}
+	return r, nil
 }
 
 func (*NBPClientMock) BankList() (*BankListResponse, error) {
