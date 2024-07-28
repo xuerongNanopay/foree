@@ -1,6 +1,7 @@
 package nbp
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -62,6 +63,9 @@ func (c *NBPClientImpl) Hello() (*HelloResponse, error) {
 }
 
 func (c *NBPClientImpl) authenticate() (*authenticate, error) {
+	url := fmt.Sprintf("%s/Authenticate?Agency_Code=%s", c.Config.AgencyCode)
+	basicAuth := fmt.Sprintf("%s:%s", c.Config.Username, c.Config.Password)
+
 	return nil, nil
 }
 
