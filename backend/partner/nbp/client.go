@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -39,6 +40,7 @@ type NBPClientImpl struct {
 	Config     NBPConfig
 	httpClient *http.Client
 	auth       *authCache
+	mu         sync.Mutex
 }
 
 func (c *NBPClientImpl) Hello() (*HelloResponse, error) {
@@ -119,8 +121,42 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 	}, nil
 }
 
-func (c *NBPClientImpl) updateToken() {
-	//Mutex
+func (c *NBPClientImpl) updateToken() error {
+	if isTokenAvailable(c.auth, c.Config.TokenExpiryThreshold) {
+		return nil
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if isTokenAvailable(c.auth, c.Config.TokenExpiryThreshold) {
+		return nil
+	}
+
+	authResp, err := c.authenticate()
+	if err != nil {
+		//TODO: Fatal
+		return fmt.Errorf("NBP Client authenticate: raise error `%s`", err.Error())
+	}
+
+	statusCode := authResp.StatusCode
+	if statusCode != 200 && statusCode != 400 {
+		//TODO: Error
+		return fmt.Errorf("NBP Client authenticate: status code `%v` response body `%s`", authResp.StatusCode, authResp.RawResponse)
+	}
+
+	code := authResp.Data.ResponseCode
+	if code == "402" || code == "404" || code == "407" {
+		//TODO: Fatal
+		return fmt.Errorf("NBP Client authenticate: status code `%v` response body `%s`", authResp.StatusCode, authResp.RawResponse)
+	}
+
+	if code == "403" {
+		//TODO: Error
+		return fmt.Errorf("NBP Client authenticate: status code `%v` response body `%s`", authResp.StatusCode, authResp.RawResponse)
+	}
+
+	//TODO: Update token.
+
+	return nil
 }
 
 func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
