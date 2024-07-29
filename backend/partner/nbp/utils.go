@@ -14,3 +14,16 @@ func parseTokenExpiryDate(rawExpiry string) (time.Time, error) {
 
 	return t, nil
 }
+
+// TODO: add tests
+func isTokenAvailable(cache *authCache, threshold int64) bool {
+	if cache == nil || cache.token == "" || cache.tokenExpiry == nil {
+		return false
+	}
+
+	if cache.tokenExpiry.Unix()+threshold >= time.Now().Unix() {
+		return false
+	}
+
+	return true
+}

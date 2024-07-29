@@ -5,5 +5,5 @@ type NBPConfig struct {
 	AgencyCode           string
 	Username             string
 	Password             string
-	TokenExpiryThreshold int32
+	TokenExpiryThreshold int64
 }

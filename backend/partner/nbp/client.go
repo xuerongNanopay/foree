@@ -13,7 +13,7 @@ import (
 type authCache struct {
 	token          string
 	rawTokenExpiry string
-	tokenExpiry    time.Time
+	tokenExpiry    *time.Time
 }
 
 type NBPClient interface {
