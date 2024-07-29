@@ -154,7 +154,20 @@ func (c *NBPClientImpl) updateToken() error {
 		return fmt.Errorf("NBP Client authenticate: status code `%v` response body `%s`", authResp.StatusCode, authResp.RawResponse)
 	}
 
-	//TODO: Update token.
+	token := authResp.Data.Token
+	rawTokenExpiry := authResp.Data.TokenExpiry
+	tokenExpiry, err := parseTokenExpiryDate(rawTokenExpiry)
+	if err != nil {
+		//TODO: alarm/warming. We can't parse the time but we can still use the token.
+	}
+
+	auth := &authCache{
+		token:          token,
+		rawTokenExpiry: rawTokenExpiry,
+		tokenExpiry:    tokenExpiry,
+	}
+
+	c.auth = auth
 
 	return nil
 }
@@ -179,5 +192,16 @@ func (c *NBPClientImpl) TransactionStatusByDate(r TransactionStatusByDateRequest
 	return nil, nil
 }
 func (c *NBPClientImpl) CancelTransaction(r CancelTransactionRequest) (*CancelTransactionResponse, error) {
+	return nil, nil
+}
+
+func (c *NBPClientImpl) retry(attempts int, sleep time.Duration, f func() error) (interface{}, error) {
+	var tokenErr error
+	for i := 0; i < attempts; i++ {
+		tokenErr = c.updateToken()
+		if tokenErr != nil {
+
+		}
+	}
 	return nil, nil
 }
