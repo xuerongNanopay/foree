@@ -1,6 +1,14 @@
 package nbp
 
-type responseCommon struct {
+type responseGetter interface {
+	GetStatusCode() int
+	GetRawRequest() string
+	GetRawResponse() string
+	GetResponseCode() string
+	GetResponseMessage() string
+}
+
+type ResponseCommon struct {
 	StatusCode      int    `json:"-"`
 	RawRequest      string `json:"-"`
 	RawResponse     string `json:"-"`
@@ -8,18 +16,38 @@ type responseCommon struct {
 	ResponseMessage string `json:"ResponseMessage"`
 }
 
+func (r *ResponseCommon) GetStatusCode() int {
+	return r.StatusCode
+}
+
+func (r *ResponseCommon) GetRawRequest() string {
+	return r.RawRequest
+}
+
+func (r *ResponseCommon) GetRawResponse() string {
+	return r.RawResponse
+}
+
+func (r *ResponseCommon) GetResponseCode() string {
+	return r.ResponseCode
+}
+
+func (r *ResponseCommon) GetResponseMessage() string {
+	return r.ResponseMessage
+}
+
 type HelloResponse struct {
-	responseCommon
+	ResponseCommon
 }
 
 type authenticateResponse struct {
-	responseCommon
+	ResponseCommon
 	Token       string `json:"Token"`
 	TokenExpiry string `json:"Token_Expiry"`
 }
 
 type BankListResponse struct {
-	responseCommon
+	ResponseCommon
 	Banklist []BankListEntry `json:"banklist"`
 }
 
@@ -29,7 +57,7 @@ type BankListEntry struct {
 }
 
 type AccountEnquiryResponse struct {
-	responseCommon
+	ResponseCommon
 	IBAN          string `json:"IBAN"`
 	AccountNo     string `json:"AccountNo"`
 	AccountTitle  string `json:"AccountTitle"`
@@ -39,13 +67,13 @@ type AccountEnquiryResponse struct {
 }
 
 type LoadRemittanceResponse struct {
-	responseCommon
+	ResponseCommon
 	GlobalId   string `json:"Global_Id"`
 	TrackingId string `json:"Tracking_Id"`
 }
 
 type CancelTransactionResponse struct {
-	responseCommon
+	ResponseCommon
 	GlobalId string `json:"Global_Id"`
 }
 
@@ -68,12 +96,12 @@ type TransactionStatus struct {
 }
 
 type TransactionStatusByIdsResponse struct {
-	responseCommon
+	ResponseCommon
 	TransactionStatuses []TransactionStatus `json:"transactionStatuses"`
 }
 
 type TransactionStatusByDateResponse struct {
-	responseCommon
+	ResponseCommon
 	TransactionStatuses []TransactionStatus `json:"transactionStatuses"`
 }
 

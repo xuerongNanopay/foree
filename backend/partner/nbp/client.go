@@ -61,7 +61,7 @@ func (c *NBPClientImpl) Hello() (*HelloResponse, error) {
 
 	raw := string(body)
 	ret := &HelloResponse{
-		responseCommon: responseCommon{
+		ResponseCommon: ResponseCommon{
 			StatusCode:  resp.StatusCode,
 			RawResponse: raw,
 		},
@@ -98,7 +98,7 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 		}
 		raw := string(body)
 		return &authenticateResponse{
-			responseCommon: responseCommon{
+			ResponseCommon: ResponseCommon{
 				StatusCode:  resp.StatusCode,
 				RawResponse: raw,
 			},
@@ -112,7 +112,7 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 	}
 
 	auth := &authenticateResponse{
-		responseCommon: responseCommon{
+		ResponseCommon: ResponseCommon{
 			StatusCode:  resp.StatusCode,
 			RawResponse: string(body),
 		},
@@ -183,15 +183,14 @@ func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
 }
 
 func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryResponse, error) {
-	// _, err := c.retry(func() (*responseWrapper[interface{}], error) {
-	// 	ret := &AccountEnquiryResponse{}
-	// 	aa := ret.(*responseWrapper[interface{}])
-	// 	return aa, nil
-	// })
-	// if err != nil {
-	// 	fmt.Print("aaa")
-	// }
-	return nil, nil
+	resp, err := c.retry(func() (responseGetter, error) {
+		ret := &AccountEnquiryResponse{}
+		return ret, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*AccountEnquiryResponse), nil
 }
 
 func (c *NBPClientImpl) LoadRemittance(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
@@ -209,35 +208,35 @@ func (c *NBPClientImpl) CancelTransaction(r CancelTransactionRequest) (*CancelTr
 	return nil, nil
 }
 
-// func (c *NBPClientImpl) retry(f func() (*responseWrapper[interface{}], error)) (interface{}, error) {
-// 	attempts := c.Config.AuthAttempts
-// 	if attempts < 1 {
-// 		attempts = 3
-// 	}
+func (c *NBPClientImpl) retry(f func() (responseGetter, error)) (responseGetter, error) {
+	attempts := c.Config.AuthAttempts
+	if attempts < 1 {
+		attempts = 3
+	}
 
-// 	var tokenErr error
-// 	for i := 0; i < attempts; i++ {
-// 		tokenErr = c.updateToken()
-// 		if tokenErr != nil {
-// 			time.Sleep(4 * time.Second)
-// 		} else {
-// 			r, err := f()
-// 			if err != nil {
-// 				return r, err
-// 			}
+	var tokenErr error
+	for i := 0; i < attempts; i++ {
+		tokenErr = c.updateToken()
+		if tokenErr != nil {
+			time.Sleep(4 * time.Second)
+		} else {
+			r, err := f()
+			if err != nil {
+				return r, err
+			}
 
-// 			if r.Data != nil && (*r.Data).GetResponseCode() == "401" {
-// 				//TODO: log
-// 				//Reset authCache.
-// 				c.mu.Lock()
-// 				c.auth = nil
-// 				c.mu.Unlock()
-// 				time.Sleep(4 * time.Second)
-// 			} else {
-// 				return r, nil
-// 			}
+			if r.GetResponseCode() == "401" {
+				//TODO: log
+				//Reset authCache if the token is already expired.
+				c.mu.Lock()
+				c.auth = nil
+				c.mu.Unlock()
+				time.Sleep(4 * time.Second)
+			} else {
+				return r, nil
+			}
 
-// 		}
-// 	}
-// 	return nil, tokenErr
-// }
+		}
+	}
+	return nil, tokenErr
+}
