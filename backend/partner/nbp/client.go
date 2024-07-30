@@ -175,7 +175,8 @@ func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
 }
 
 func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryResponse, error) {
-	resp, err := c.retry(func() (responseGetter, error) {
+	//Only retry twice, and sleep interval in 4 sec.
+	resp, err := c.retry(2, 4, func() (responseGetter, error) {
 		url := fmt.Sprintf("%s/AccountEnquiry", c.Config.BaseUrl)
 
 		r.Token = c.auth.token
@@ -244,7 +245,12 @@ func (c *NBPClientImpl) LoadRemittanceThirdParty(r LoadRemittanceRequest) (*Load
 }
 
 func (c *NBPClientImpl) loadRemittance(endpoint string, r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
-	resp, err := c.retry(func() (responseGetter, error) {
+	attempts := 3
+	if c.Config.AuthAttempts > attempts {
+		attempts = c.Config.AuthAttempts
+	}
+	//At least retry 3 times, and sleep interval is 30 seconds.
+	resp, err := c.retry(attempts, 30, func() (responseGetter, error) {
 		url := fmt.Sprintf("%s/%s", c.Config.BaseUrl, endpoint)
 		r.Token = c.auth.token
 		r.AgencyCode = c.Config.AgencyCode
@@ -310,17 +316,16 @@ func (c *NBPClientImpl) CancelTransaction(r CancelTransactionRequest) (*CancelTr
 	return nil, nil
 }
 
-func (c *NBPClientImpl) retry(f func() (responseGetter, error)) (responseGetter, error) {
-	attempts := c.Config.AuthAttempts
+func (c *NBPClientImpl) retry(attempts int, sleepInSecond time.Duration, f func() (responseGetter, error)) (responseGetter, error) {
 	if attempts < 1 {
-		attempts = 3
+		attempts = 1
 	}
 
 	var tokenErr error
 	for i := 0; i < attempts; i++ {
 		tokenErr = c.updateToken()
 		if tokenErr != nil {
-			time.Sleep(4 * time.Second)
+			time.Sleep(sleepInSecond * time.Second)
 		} else {
 			r, err := f()
 			if err != nil {
@@ -333,7 +338,7 @@ func (c *NBPClientImpl) retry(f func() (responseGetter, error)) (responseGetter,
 				c.mu.Lock()
 				c.auth = nil
 				c.mu.Unlock()
-				time.Sleep(4 * time.Second)
+				time.Sleep(sleepInSecond * time.Second)
 			} else {
 				return r, nil
 			}
