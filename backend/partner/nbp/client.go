@@ -21,7 +21,9 @@ type NBPClient interface {
 	Hello() (*HelloResponse, error)
 	BankList() (*BankListResponse, error)
 	AccountEnquiry(AccountEnquiryRequest) (*AccountEnquiryResponse, error)
-	LoadRemittance(LoadRemittanceRequest) (*LoadRemittanceResponse, error)
+	LoadRemittanceCash(LoadRemittanceRequest) (*LoadRemittanceResponse, error)
+	LoadRemittanceAccounts(LoadRemittanceRequest) (*LoadRemittanceResponse, error)
+	LoadRemittanceThirdParty(LoadRemittanceRequest) (*LoadRemittanceResponse, error)
 	TransactionStatusByIds(TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error)
 	TransactionStatusByDate(TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error)
 	CancelTransaction(CancelTransactionRequest) (*CancelTransactionResponse, error)
@@ -229,8 +231,72 @@ func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiry
 	return resp.(*AccountEnquiryResponse), nil
 }
 
-func (c *NBPClientImpl) LoadRemittance(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
-	return nil, nil
+func (c *NBPClientImpl) loadRemittance(endpoint string, r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
+	resp, err := c.retry(func() (responseGetter, error) {
+		url := fmt.Sprintf("%s/%s", c.Config.BaseUrl, endpoint)
+		r.Token = c.auth.token
+		r.AgencyCode = c.Config.AgencyCode
+
+		rawReqeust, err := json.Marshal(r)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		ret := &LoadRemittanceResponse{
+			ResponseCommon: ResponseCommon{
+				StatusCode:  resp.StatusCode,
+				RawRequest:  string(rawReqeust),
+				RawResponse: string(body),
+			},
+		}
+
+		if resp.StatusCode != 200 && resp.StatusCode != 400 {
+			return ret, nil
+		}
+
+		derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+		if derr != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+		return ret, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*LoadRemittanceResponse), nil
+}
+
+func (c *NBPClientImpl) LoadRemittanceCash(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
+	return c.loadRemittance("LoadRemittanceCash", r)
+}
+
+func (c *NBPClientImpl) LoadRemittanceAccounts(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
+	return c.loadRemittance("LoadRemittanceAccounts", r)
+}
+
+func (c *NBPClientImpl) LoadRemittanceThirdParty(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
+	return c.loadRemittance("LoadRemittanceThirdParty", r)
 }
 
 func (c *NBPClientImpl) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error) {

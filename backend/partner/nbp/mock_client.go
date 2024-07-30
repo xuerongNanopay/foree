@@ -27,7 +27,15 @@ func (*NBPClientMock) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryRe
 	return nil, nil
 }
 
-func (*NBPClientMock) LoadRemittance(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
+func (*NBPClientMock) LoadRemittanceCash(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
+	return nil, nil
+}
+
+func (*NBPClientMock) LoadRemittanceAccounts(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
+	return nil, nil
+}
+
+func (*NBPClientMock) LoadRemittanceThirdParty(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
 	return nil, nil
 }
 
