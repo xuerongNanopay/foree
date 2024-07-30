@@ -1,5 +1,15 @@
 package nbp
 
+type NBPResponseCommon interface {
+	GetResponseCode() string
+	GetResponseMessage() string
+}
+
+type responseCommon struct {
+	ResponseCode    string `json:"ResponseCode"`
+	ResponseMessage string `json:"ResponseMessage"`
+}
+
 type responseWrapper[R any] struct {
 	StatusCode  int
 	RawRequest  string
@@ -8,16 +18,14 @@ type responseWrapper[R any] struct {
 }
 
 type authenticate struct {
-	ResponseCode    string `json:"ResponseCode"`
-	ResponseMessage string `json:"ResponseMessage"`
-	Token           string `json:"Token"`
-	TokenExpiry     string `json:"Token_Expiry"`
+	responseCommon
+	Token       string `json:"Token"`
+	TokenExpiry string `json:"Token_Expiry"`
 }
 
 type BankList struct {
-	ResponseCode    string          `json:"ResponseCode"`
-	ResponseMessage string          `json:"ResponseMessage"`
-	Banklist        []BankListEntry `json:"banklist"`
+	responseCommon
+	Banklist []BankListEntry `json:"banklist"`
 }
 
 type BankListEntry struct {
@@ -26,27 +34,24 @@ type BankListEntry struct {
 }
 
 type AccountEnquiry struct {
-	ResponseCode    string `json:"ResponseCode"`
-	ResponseMessage string `json:"ResponseMessage"`
-	IBAN            string `json:"IBAN"`
-	AccountNo       string `json:"AccountNo"`
-	AccountTitle    string `json:"AccountTitle"`
-	BranchCode      int32  `json:"BranchCode"`
-	AccountStatus   string `json:"AccountStatus"`
-	BankName        string `json:"BankName"`
+	responseCommon
+	IBAN          string `json:"IBAN"`
+	AccountNo     string `json:"AccountNo"`
+	AccountTitle  string `json:"AccountTitle"`
+	BranchCode    int32  `json:"BranchCode"`
+	AccountStatus string `json:"AccountStatus"`
+	BankName      string `json:"BankName"`
 }
 
 type LoadRemittance struct {
-	ResponseCode    string `json:"ResponseCode"`
-	ResponseMessage string `json:"ResponseMessage"`
-	GlobalId        string `json:"Global_Id"`
-	TrackingId      string `json:"Tracking_Id"`
+	responseCommon
+	GlobalId   string `json:"Global_Id"`
+	TrackingId string `json:"Tracking_Id"`
 }
 
 type CancelTransaction struct {
-	ResponseCode    string `json:"ResponseCode"`
-	ResponseMessage string `json:"ResponseMessage"`
-	GlobalId        string `json:"Global_Id"`
+	responseCommon
+	GlobalId string `json:"Global_Id"`
 }
 
 type TransactionStatus struct {
@@ -68,8 +73,7 @@ type TransactionStatus struct {
 }
 
 type TransactionStatuses struct {
-	ResponseCode        string              `json:"ResponseCode"`
-	ResponseMessage     string              `json:"ResponseMessage"`
+	responseCommon
 	TransactionStatuses []TransactionStatus `json:"transactionStatuses"`
 }
 

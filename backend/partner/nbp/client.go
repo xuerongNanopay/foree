@@ -195,7 +195,7 @@ func (c *NBPClientImpl) CancelTransaction(r CancelTransactionRequest) (*CancelTr
 	return nil, nil
 }
 
-func (c *NBPClientImpl) retry(attempts int, sleep time.Duration, f func() (interface{}, error)) (interface{}, error) {
+func (c *NBPClientImpl) retry(attempts int, sleep time.Duration, f func() (NBPResponseCommon, error)) (interface{}, error) {
 	var tokenErr error
 	for i := 0; i < attempts; i++ {
 		tokenErr = c.updateToken()
