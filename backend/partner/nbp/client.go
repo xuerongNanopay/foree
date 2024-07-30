@@ -76,7 +76,7 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 	basicAuth = base64.StdEncoding.EncodeToString([]byte(basicAuth))
 	basicAuth = fmt.Sprintf("Basic %v", basicAuth)
 
-	r, err := http.NewRequest("POST", url, nil)
+	r, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
 		//Unlikely; Fatal
 		return nil, err
@@ -96,22 +96,17 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode != 200 && resp.StatusCode != 400 {
-		raw := string(body)
-		return &authenticateResponse{
-			ResponseCommon: ResponseCommon{
-				StatusCode:  resp.StatusCode,
-				RawResponse: raw,
-			},
-		}, nil
-	}
-
 	auth := &authenticateResponse{
 		ResponseCommon: ResponseCommon{
 			StatusCode:  resp.StatusCode,
 			RawResponse: string(body),
 		},
 	}
+
+	if resp.StatusCode != 200 && resp.StatusCode != 400 {
+		return auth, nil
+	}
+
 	derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(auth)
 	if derr != nil {
 		//Fatal: Decode json should always success, need Alert
@@ -181,10 +176,53 @@ func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiry
 	resp, err := c.retry(func() (responseGetter, error) {
 		url := fmt.Sprintf("%s/AccountEnquiry", c.Config.BaseUrl)
 
-		r, err := 
-		ret := &AccountEnquiryResponse{}
+		r.token = c.auth.token
+		r.agencyCode = c.Config.AgencyCode
+
+		rawReqeust, err := json.Marshal(r)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		ret := &AccountEnquiryResponse{
+			ResponseCommon: ResponseCommon{
+				StatusCode:  resp.StatusCode,
+				RawRequest:  string(rawReqeust),
+				RawResponse: string(body),
+			},
+		}
+
+		if resp.StatusCode != 200 && resp.StatusCode != 400 {
+			return ret, nil
+		}
+
+		derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+		if derr != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
 		return ret, nil
 	})
+
 	if err != nil {
 		return nil, err
 	}
