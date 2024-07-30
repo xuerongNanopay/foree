@@ -10,6 +10,14 @@ type responseCommon struct {
 	ResponseMessage string `json:"ResponseMessage"`
 }
 
+func (c *responseCommon) GetResponseCode() string {
+	return c.ResponseCode
+}
+
+func (c *responseCommon) GetResponseMessage() string {
+	return c.ResponseMessage
+}
+
 type responseWrapper[R any] struct {
 	StatusCode  int
 	RawRequest  string
