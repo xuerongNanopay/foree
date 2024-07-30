@@ -231,6 +231,18 @@ func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiry
 	return resp.(*AccountEnquiryResponse), nil
 }
 
+func (c *NBPClientImpl) LoadRemittanceCash(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
+	return c.loadRemittance("LoadRemittanceCash", r)
+}
+
+func (c *NBPClientImpl) LoadRemittanceAccounts(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
+	return c.loadRemittance("LoadRemittanceAccounts", r)
+}
+
+func (c *NBPClientImpl) LoadRemittanceThirdParty(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
+	return c.loadRemittance("LoadRemittanceThirdParty", r)
+}
+
 func (c *NBPClientImpl) loadRemittance(endpoint string, r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
 	resp, err := c.retry(func() (responseGetter, error) {
 		url := fmt.Sprintf("%s/%s", c.Config.BaseUrl, endpoint)
@@ -285,18 +297,6 @@ func (c *NBPClientImpl) loadRemittance(endpoint string, r LoadRemittanceRequest)
 		return nil, err
 	}
 	return resp.(*LoadRemittanceResponse), nil
-}
-
-func (c *NBPClientImpl) LoadRemittanceCash(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
-	return c.loadRemittance("LoadRemittanceCash", r)
-}
-
-func (c *NBPClientImpl) LoadRemittanceAccounts(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
-	return c.loadRemittance("LoadRemittanceAccounts", r)
-}
-
-func (c *NBPClientImpl) LoadRemittanceThirdParty(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
-	return c.loadRemittance("LoadRemittanceThirdParty", r)
 }
 
 func (c *NBPClientImpl) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error) {
