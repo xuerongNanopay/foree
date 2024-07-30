@@ -78,7 +78,7 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 
 	r, err := http.NewRequest("POST", url, nil)
 	if err != nil {
-		//Unlikely
+		//Unlikely; Fatal
 		return nil, err
 	}
 
@@ -90,12 +90,13 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 	}
 	defer resp.Body.Close()
 
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
 	if resp.StatusCode != 200 && resp.StatusCode != 400 {
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			//Unlikely
-			return nil, err
-		}
 		raw := string(body)
 		return &authenticateResponse{
 			ResponseCommon: ResponseCommon{
@@ -103,12 +104,6 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 				RawResponse: raw,
 			},
 		}, nil
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		//Unlikely
-		return nil, err
 	}
 
 	auth := &authenticateResponse{
@@ -184,6 +179,9 @@ func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
 
 func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryResponse, error) {
 	resp, err := c.retry(func() (responseGetter, error) {
+		url := fmt.Sprintf("%s/AccountEnquiry", c.Config.BaseUrl)
+
+		r, err := 
 		ret := &AccountEnquiryResponse{}
 		return ret, nil
 	})
