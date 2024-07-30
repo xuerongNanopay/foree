@@ -1,38 +1,24 @@
 package nbp
 
-type NBPResponseCommon interface {
-	GetResponseCode() string
-	GetResponseMessage() string
-}
-
 type responseCommon struct {
+	StatusCode      int    `json:"-"`
+	RawRequest      string `json:"-"`
+	RawResponse     string `json:"-"`
 	ResponseCode    string `json:"ResponseCode"`
 	ResponseMessage string `json:"ResponseMessage"`
 }
 
-func (c *responseCommon) GetResponseCode() string {
-	return c.ResponseCode
+type HelloResponse struct {
+	responseCommon
 }
 
-func (c *responseCommon) GetResponseMessage() string {
-	return c.ResponseMessage
-}
-
-// Let R to be a pointer, because sometime we don't get valid json in response body.
-type responseWrapper[R any] struct {
-	StatusCode  int
-	RawRequest  string
-	RawResponse string
-	Data        *R
-}
-
-type authenticate struct {
+type authenticateResponse struct {
 	responseCommon
 	Token       string `json:"Token"`
 	TokenExpiry string `json:"Token_Expiry"`
 }
 
-type BankList struct {
+type BankListResponse struct {
 	responseCommon
 	Banklist []BankListEntry `json:"banklist"`
 }
@@ -42,7 +28,7 @@ type BankListEntry struct {
 	BankAbbr string `json:"bankAbbr"`
 }
 
-type AccountEnquiry struct {
+type AccountEnquiryResponse struct {
 	responseCommon
 	IBAN          string `json:"IBAN"`
 	AccountNo     string `json:"AccountNo"`
@@ -52,13 +38,13 @@ type AccountEnquiry struct {
 	BankName      string `json:"BankName"`
 }
 
-type LoadRemittance struct {
+type LoadRemittanceResponse struct {
 	responseCommon
 	GlobalId   string `json:"Global_Id"`
 	TrackingId string `json:"Tracking_Id"`
 }
 
-type CancelTransaction struct {
+type CancelTransactionResponse struct {
 	responseCommon
 	GlobalId string `json:"Global_Id"`
 }
@@ -81,19 +67,15 @@ type TransactionStatus struct {
 	ProcessingTime          string `json:"Processing_Time"`
 }
 
-type TransactionStatuses struct {
+type TransactionStatusByIdsResponse struct {
 	responseCommon
 	TransactionStatuses []TransactionStatus `json:"transactionStatuses"`
 }
 
-type HelloResponse responseWrapper[string]
-type authenticateResponse responseWrapper[authenticate]
-type BankListResponse responseWrapper[BankList]
-type AccountEnquiryResponse responseWrapper[AccountEnquiry]
-type LoadRemittanceResponse responseWrapper[LoadRemittance]
-type TransactionStatusByIdsResponse responseWrapper[TransactionStatuses]
-type TransactionStatusByDateResponse responseWrapper[TransactionStatuses]
-type CancelTransactionResponse responseWrapper[CancelTransaction]
+type TransactionStatusByDateResponse struct {
+	responseCommon
+	TransactionStatuses []TransactionStatus `json:"transactionStatuses"`
+}
 
 type BankListRequest struct {
 	token      string `json:"Token"`
