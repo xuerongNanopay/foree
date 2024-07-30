@@ -18,11 +18,12 @@ func (c *responseCommon) GetResponseMessage() string {
 	return c.ResponseMessage
 }
 
+// Let R to be a pointer, because sometime we don't get valid json in response body.
 type responseWrapper[R any] struct {
 	StatusCode  int
 	RawRequest  string
 	RawResponse string
-	Data        R
+	Data        *R
 }
 
 type authenticate struct {

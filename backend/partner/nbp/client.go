@@ -159,6 +159,7 @@ func (c *NBPClientImpl) updateToken() error {
 	tokenExpiry, err := parseTokenExpiryDate(rawTokenExpiry)
 	if err != nil {
 		//TODO: alarm/warming. We can't parse the time but we can still use the token.
+		fmt.Printf("NBP Client authenticate: unable to parse token_expiry `%v`", rawTokenExpiry)
 	}
 
 	auth := &authCache{
@@ -195,13 +196,34 @@ func (c *NBPClientImpl) CancelTransaction(r CancelTransactionRequest) (*CancelTr
 	return nil, nil
 }
 
-func (c *NBPClientImpl) retry(attempts int, sleep time.Duration, f func() (NBPResponseCommon, error)) (interface{}, error) {
+func (c *NBPClientImpl) retry(attempts int, sleep time.Duration, f func() (responseWrapper[NBPResponseCommon], error)) (interface{}, error) {
+	if attempts < 1 {
+		attempts = 1
+	}
+
 	var tokenErr error
 	for i := 0; i < attempts; i++ {
 		tokenErr = c.updateToken()
 		if tokenErr != nil {
+			time.Sleep(4 * time.Second)
+		} else {
+			r, err := f()
+			if err != nil {
+				return r, err
+			}
+
+			if r.Data != nil && (*r.Data).GetResponseCode() == "401" {
+				//TODO: log
+				//Reset authCache.
+				c.mu.Lock()
+				c.auth = nil
+				c.mu.Unlock()
+				time.Sleep(4 * time.Second)
+			} else {
+				return r, nil
+			}
 
 		}
 	}
-	return nil, nil
+	return nil, tokenErr
 }
