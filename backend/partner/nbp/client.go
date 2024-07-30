@@ -61,9 +61,10 @@ func (c *NBPClientImpl) Hello() (*HelloResponse, error) {
 
 	raw := string(body)
 	ret := &HelloResponse{
-		StatusCode:  resp.StatusCode,
-		RawResponse: raw,
-		Data:        raw,
+		responseCommon: responseCommon{
+			StatusCode:  resp.StatusCode,
+			RawResponse: raw,
+		},
 	}
 
 	return ret, nil
@@ -97,8 +98,10 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 		}
 		raw := string(body)
 		return &authenticateResponse{
-			StatusCode:  resp.StatusCode,
-			RawResponse: raw,
+			responseCommon: responseCommon{
+				StatusCode:  resp.StatusCode,
+				RawResponse: raw,
+			},
 		}, nil
 	}
 
@@ -108,17 +111,19 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 		return nil, err
 	}
 
-	auth := &authenticate{}
+	auth := &authenticateResponse{
+		responseCommon: responseCommon{
+			StatusCode:  resp.StatusCode,
+			RawResponse: string(body),
+		},
+	}
 	derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(auth)
 	if derr != nil {
 		//Fatal: Decode json should always success, need Alert
 		return nil, derr
 	}
 
-	return &authenticateResponse{
-		StatusCode:  resp.StatusCode,
-		RawResponse: string(body),
-	}, nil
+	return auth, nil
 }
 
 func (c *NBPClientImpl) updateToken() error {
@@ -143,7 +148,7 @@ func (c *NBPClientImpl) updateToken() error {
 		return fmt.Errorf("NBP Client authenticate: status code `%v` response body `%s`", authResp.StatusCode, authResp.RawResponse)
 	}
 
-	code := authResp.Data.ResponseCode
+	code := authResp.ResponseCode
 	if code == "402" || code == "404" || code == "407" {
 		//TODO: Fatal
 		return fmt.Errorf("NBP Client authenticate: status code `%v` response body `%s`", authResp.StatusCode, authResp.RawResponse)
@@ -154,8 +159,8 @@ func (c *NBPClientImpl) updateToken() error {
 		return fmt.Errorf("NBP Client authenticate: status code `%v` response body `%s`", authResp.StatusCode, authResp.RawResponse)
 	}
 
-	token := authResp.Data.Token
-	rawTokenExpiry := authResp.Data.TokenExpiry
+	token := authResp.Token
+	rawTokenExpiry := authResp.TokenExpiry
 	tokenExpiry, err := parseTokenExpiryDate(rawTokenExpiry)
 	if err != nil {
 		//TODO: alarm/warming. We can't parse the time but we can still use the token.
@@ -178,6 +183,14 @@ func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
 }
 
 func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryResponse, error) {
+	// _, err := c.retry(func() (*responseWrapper[interface{}], error) {
+	// 	ret := &AccountEnquiryResponse{}
+	// 	aa := ret.(*responseWrapper[interface{}])
+	// 	return aa, nil
+	// })
+	// if err != nil {
+	// 	fmt.Print("aaa")
+	// }
 	return nil, nil
 }
 
@@ -196,34 +209,35 @@ func (c *NBPClientImpl) CancelTransaction(r CancelTransactionRequest) (*CancelTr
 	return nil, nil
 }
 
-func (c *NBPClientImpl) retry(attempts int, sleep time.Duration, f func() (responseWrapper[NBPResponseCommon], error)) (interface{}, error) {
-	if attempts < 1 {
-		attempts = 1
-	}
+// func (c *NBPClientImpl) retry(f func() (*responseWrapper[interface{}], error)) (interface{}, error) {
+// 	attempts := c.Config.AuthAttempts
+// 	if attempts < 1 {
+// 		attempts = 3
+// 	}
 
-	var tokenErr error
-	for i := 0; i < attempts; i++ {
-		tokenErr = c.updateToken()
-		if tokenErr != nil {
-			time.Sleep(4 * time.Second)
-		} else {
-			r, err := f()
-			if err != nil {
-				return r, err
-			}
+// 	var tokenErr error
+// 	for i := 0; i < attempts; i++ {
+// 		tokenErr = c.updateToken()
+// 		if tokenErr != nil {
+// 			time.Sleep(4 * time.Second)
+// 		} else {
+// 			r, err := f()
+// 			if err != nil {
+// 				return r, err
+// 			}
 
-			if r.Data != nil && (*r.Data).GetResponseCode() == "401" {
-				//TODO: log
-				//Reset authCache.
-				c.mu.Lock()
-				c.auth = nil
-				c.mu.Unlock()
-				time.Sleep(4 * time.Second)
-			} else {
-				return r, nil
-			}
+// 			if r.Data != nil && (*r.Data).GetResponseCode() == "401" {
+// 				//TODO: log
+// 				//Reset authCache.
+// 				c.mu.Lock()
+// 				c.auth = nil
+// 				c.mu.Unlock()
+// 				time.Sleep(4 * time.Second)
+// 			} else {
+// 				return r, nil
+// 			}
 
-		}
-	}
-	return nil, tokenErr
-}
+// 		}
+// 	}
+// 	return nil, tokenErr
+// }
