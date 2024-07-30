@@ -10,12 +10,13 @@ type NBPClientMock struct {
 }
 
 func (*NBPClientMock) Hello() (*HelloResponse, error) {
-	r := &HelloResponse{
-		StatusCode:  http.StatusOK,
-		RawResponse: "Welcome, NBP E-Remittance API",
-		Data:        "Welcome, NBP E-Remittance API",
+	ret := &HelloResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:  http.StatusOK,
+			RawResponse: "Welcome, NBP E-Remittance API",
+		},
 	}
-	return r, nil
+	return ret, nil
 }
 
 func (*NBPClientMock) BankList() (*BankListResponse, error) {

@@ -105,22 +105,24 @@ type TransactionStatusByDateResponse struct {
 	TransactionStatuses []TransactionStatus `json:"transactionStatuses"`
 }
 
+type requestCommon struct {
+	Token      string `json:"Token"`
+	AgencyCode string `json:"Agency_Code"`
+}
+
 type BankListRequest struct {
-	token      string `json:"Token"`
-	agencyCode string `json:"Agency_Code"`
+	requestCommon
 }
 
 type AccountEnquiryRequest struct {
-	token      string `json:"Token"`
-	agencyCode string `json:"Agency_Code"`
+	requestCommon
 	AccountNo  string `json:"AccountNo"`
-	BranchCode int32  `json:"AccountNo"`
+	BranchCode int32  `json:"BranchCode"`
 	BankName   string `json:"BankName"`
 }
 
 type LoadRemittanceRequest struct {
-	token                           string  `json:"Token"`
-	agencyCode                      string  `json:"Agency_Code"`
+	requestCommon
 	GlobalId                        string  `json:"Global_Id"`
 	Currency                        string  `json:"Currency"`
 	Amount                          float64 `json:"Amount"` //see: https://stackoverflow.com/questions/61811463/golang-encode-float-to-json-with-specified-precision
@@ -151,20 +153,17 @@ type LoadRemittanceRequest struct {
 }
 
 type TransactionStatusByIdsRequest struct {
-	token      string `json:"Token"`
-	agencyCode string `json:"Agency_Code"`
-	Ids        string `json:"Ids"`
+	requestCommon
+	Ids string `json:"Ids"`
 }
 
 type TransactionStatusByDateRequest struct {
-	token      string `json:"Token"`
-	agencyCode string `json:"Agency_Code"`
-	Date       string `json:"Date"`
+	requestCommon
+	Date string `json:"Date"`
 }
 
 type CancelTransactionRequest struct {
-	token              string `json:"Token"`
-	agencyCode         string `json:"Agency_Code"`
+	requestCommon
 	GlobalId           string `json:"Global_Id"`
 	CancellationReason string `json:"Cancellation_Reason"`
 }

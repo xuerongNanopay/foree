@@ -176,8 +176,8 @@ func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiry
 	resp, err := c.retry(func() (responseGetter, error) {
 		url := fmt.Sprintf("%s/AccountEnquiry", c.Config.BaseUrl)
 
-		r.token = c.auth.token
-		r.agencyCode = c.Config.AgencyCode
+		r.Token = c.auth.token
+		r.AgencyCode = c.Config.AgencyCode
 
 		rawReqeust, err := json.Marshal(r)
 		if err != nil {
