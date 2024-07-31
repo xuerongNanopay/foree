@@ -171,7 +171,64 @@ func (c *NBPClientImpl) updateToken() error {
 }
 
 func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
-	return nil, nil
+	// This API is not very important.
+	// Normally, caller will handle retry.
+	resp, err := c.retry(1, 0, func() (responseGetter, error) {
+		url := fmt.Sprintf("%s/BankList", c.Config.BaseUrl)
+
+		r := requestCommon{
+			Token:      c.auth.token,
+			AgencyCode: c.Config.AgencyCode,
+		}
+
+		rawReqeust, err := json.Marshal(r)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		ret := &BankListResponse{
+			ResponseCommon: ResponseCommon{
+				StatusCode:  resp.StatusCode,
+				RawRequest:  string(rawReqeust),
+				RawResponse: string(body),
+			},
+		}
+
+		if resp.StatusCode != 200 && resp.StatusCode != 400 {
+			return ret, nil
+		}
+
+		derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+		if derr != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+		return ret, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*BankListResponse), nil
 }
 
 func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryResponse, error) {
@@ -306,14 +363,179 @@ func (c *NBPClientImpl) loadRemittance(endpoint string, r LoadRemittanceRequest)
 }
 
 func (c *NBPClientImpl) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error) {
-	return nil, nil
+	resp, err := c.retry(1, 0, func() (responseGetter, error) {
+		url := fmt.Sprintf("%s/TransactionStatusByIds", c.Config.BaseUrl)
+
+		r.Token = c.auth.token
+		r.AgencyCode = c.Config.AgencyCode
+
+		rawReqeust, err := json.Marshal(r)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		ret := &TransactionStatusByIdsResponse{
+			ResponseCommon: ResponseCommon{
+				StatusCode:  resp.StatusCode,
+				RawRequest:  string(rawReqeust),
+				RawResponse: string(body),
+			},
+		}
+
+		if resp.StatusCode != 200 && resp.StatusCode != 400 {
+			return ret, nil
+		}
+
+		derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+		if derr != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+		return ret, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*TransactionStatusByIdsResponse), nil
 }
 
 func (c *NBPClientImpl) TransactionStatusByDate(r TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error) {
-	return nil, nil
+	resp, err := c.retry(1, 0, func() (responseGetter, error) {
+		url := fmt.Sprintf("%s/TransactionStatus", c.Config.BaseUrl)
+
+		r.Token = c.auth.token
+		r.AgencyCode = c.Config.AgencyCode
+
+		rawReqeust, err := json.Marshal(r)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		ret := &TransactionStatusByDateResponse{
+			ResponseCommon: ResponseCommon{
+				StatusCode:  resp.StatusCode,
+				RawRequest:  string(rawReqeust),
+				RawResponse: string(body),
+			},
+		}
+
+		if resp.StatusCode != 200 && resp.StatusCode != 400 {
+			return ret, nil
+		}
+
+		derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+		if derr != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+		return ret, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*TransactionStatusByDateResponse), nil
 }
+
 func (c *NBPClientImpl) CancelTransaction(r CancelTransactionRequest) (*CancelTransactionResponse, error) {
-	return nil, nil
+	attempts := 3
+	if c.Config.AuthAttempts > attempts {
+		attempts = c.Config.AuthAttempts
+	}
+
+	resp, err := c.retry(attempts, 30, func() (responseGetter, error) {
+		url := fmt.Sprintf("%s/CancelTransaction", c.Config.BaseUrl)
+
+		r.Token = c.auth.token
+		r.AgencyCode = c.Config.AgencyCode
+
+		rawReqeust, err := json.Marshal(r)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+
+		ret := &CancelTransactionResponse{
+			ResponseCommon: ResponseCommon{
+				StatusCode:  resp.StatusCode,
+				RawRequest:  string(rawReqeust),
+				RawResponse: string(body),
+			},
+		}
+
+		if resp.StatusCode != 200 && resp.StatusCode != 400 {
+			return ret, nil
+		}
+
+		derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+		if derr != nil {
+			//Unlikely; Fatal
+			return nil, err
+		}
+		return ret, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*CancelTransactionResponse), nil
 }
 
 func (c *NBPClientImpl) retry(attempts int, sleepInSecond time.Duration, f func() (responseGetter, error)) (responseGetter, error) {
@@ -325,7 +547,9 @@ func (c *NBPClientImpl) retry(attempts int, sleepInSecond time.Duration, f func(
 	for i := 0; i < attempts; i++ {
 		tokenErr = c.updateToken()
 		if tokenErr != nil {
-			time.Sleep(sleepInSecond * time.Second)
+			if i < attempts-1 {
+				time.Sleep(sleepInSecond * time.Second)
+			}
 		} else {
 			r, err := f()
 			if err != nil {
@@ -333,12 +557,9 @@ func (c *NBPClientImpl) retry(attempts int, sleepInSecond time.Duration, f func(
 			}
 
 			if r.GetResponseCode() == "401" {
-				//TODO: log
-				//Reset authCache if the token is already expired.
-				c.mu.Lock()
-				c.auth = nil
-				c.mu.Unlock()
-				time.Sleep(sleepInSecond * time.Second)
+				if i < attempts-1 {
+					time.Sleep(sleepInSecond * time.Second)
+				}
 			} else {
 				return r, nil
 			}
