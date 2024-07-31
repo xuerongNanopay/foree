@@ -5,4 +5,5 @@ type IDMConfig struct {
 	Username    string
 	Password    string
 	HashingSalt string
+	Profile     string
 }
