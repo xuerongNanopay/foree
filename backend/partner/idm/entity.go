@@ -95,3 +95,10 @@ type IDMResponse struct {
 	PolicyEvalutionResult           string `json:"res"`
 	TransactionEvaluationResultCode []int  `json:"rcd"`
 }
+
+func (r *IDMResponse) GetResultStatus() string {
+	if r.PolicyEvalutionResult == "" {
+		return r.FraudEvaluationResult
+	}
+	return r.PolicyEvalutionResult
+}
