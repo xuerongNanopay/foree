@@ -6,6 +6,15 @@ import (
 	"time"
 )
 
+const (
+	TxStatusRejected  = "REJECTED"
+	TxStatusError     = "ERROR"
+	TxStatusPaid      = "PAID"
+	TxStatusCancelled = "CANCELLED"
+	TxStatusInProcess = "IN_PROCESS"
+	TxStatusPending   = "PENDING"
+)
+
 type responseGetter interface {
 	GetStatusCode() int
 	GetRawRequest() string
