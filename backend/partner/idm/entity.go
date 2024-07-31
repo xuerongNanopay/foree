@@ -25,7 +25,7 @@ type IDMRequest struct {
 	UserEmail               string    `json:"tea,omitempty"`
 	Ip                      string    `json:"ip,omitempty"`
 	PhoneNumber             string    `json:"phn,omitempty"`
-	Dob                     IDMDate   `json:"dob,omitempty"`
+	Dob                     *IDMDate  `json:"dob,omitempty"`
 	BillingFirstName        string    `json:"bfn,omitempty"`
 	BillingMiddleName       string    `json:"bmn,omitempty"`
 	BillingLastname         string    `json:"bln,omitempty"`
