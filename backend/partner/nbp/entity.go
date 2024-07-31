@@ -26,6 +26,12 @@ const (
 	AccStatusBusiness             = "BUSINESS"
 )
 
+const (
+	pmtModeCash               = "CASH"
+	pmtModeAccountTransfers   = "ACCOUNT_TRANSFERS"
+	pmtModeThirdPartyPayments = "THIRD_PARTY_PAYMENTS"
+)
+
 type responseGetter interface {
 	GetStatusCode() int
 	GetRawRequest() string
