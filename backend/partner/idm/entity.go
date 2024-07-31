@@ -85,15 +85,15 @@ type ResponseCommon struct {
 
 type IDMResponse struct {
 	ResponseCommon
-	CurrentUserReputation           string `json:"user"`
-	PreviousUserReputation          string `json:"upr"`
-	FraudEvaluationResult           string `json:"frp"`
-	FraudRuleName                   string `json:"frn"`
-	FraudRuleDescription            string `json:"frd"`
-	TransactionId                   string `json:"tid"`
-	UserReputationDescription       string `json:"erd"`
-	PolicyEvalutionResult           string `json:"res"`
-	TransactionEvaluationResultCode []int  `json:"rcd"`
+	CurrentUserReputation     string `json:"user"`
+	PreviousUserReputation    string `json:"upr"`
+	FraudEvaluationResult     string `json:"frp"`
+	FraudRuleName             string `json:"frn"`
+	FraudRuleDescription      string `json:"frd"`
+	TransactionId             string `json:"tid"`
+	UserReputationDescription string `json:"erd"`
+	PolicyEvalutionResult     string `json:"res"`
+	// TransactionEvaluationResultCode []int  `json:"rcd"`
 }
 
 func (r *IDMResponse) GetResultStatus() string {
