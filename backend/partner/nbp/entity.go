@@ -106,8 +106,8 @@ type TransactionStatusByDateResponse struct {
 }
 
 type requestCommon struct {
-	Token      string `json:"Token"`
-	AgencyCode string `json:"Agency_Code"`
+	Token      string `json:"Token,,omitempty"`
+	AgencyCode string `json:"Agency_Code,,omitempty"`
 }
 
 type BankListRequest struct {
@@ -116,9 +116,9 @@ type BankListRequest struct {
 
 type AccountEnquiryRequest struct {
 	requestCommon
-	AccountNo  string `json:"AccountNo"`
-	BranchCode int32  `json:"BranchCode"`
-	BankName   string `json:"BankName"`
+	AccountNo  string `json:"AccountNo,,omitempty"`
+	BranchCode int32  `json:"BranchCode,,omitempty"`
+	BankName   string `json:"BankName,,omitempty"`
 }
 
 type LoadRemittanceRequest struct {
@@ -154,16 +154,16 @@ type LoadRemittanceRequest struct {
 
 type TransactionStatusByIdsRequest struct {
 	requestCommon
-	Ids string `json:"Ids"`
+	Ids string `json:"Ids,,omitempty"`
 }
 
 type TransactionStatusByDateRequest struct {
 	requestCommon
-	Date string `json:"Date"`
+	Date string `json:"Date,,omitempty"`
 }
 
 type CancelTransactionRequest struct {
 	requestCommon
-	GlobalId           string `json:"Global_Id"`
-	CancellationReason string `json:"Cancellation_Reason"`
+	GlobalId           string `json:"Global_Id,,omitempty"`
+	CancellationReason string `json:"Cancellation_Reason,,omitempty"`
 }
