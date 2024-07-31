@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+const (
+	ResultStatusAccept        = "ACCEPT"
+	ResultStatusDeny          = "DENY"
+	ResultStatusMannualReview = "MANUAL_REVIEW"
+)
+
 type IDMAmount float64
 
 func (a IDMAmount) MarshalJSON() ([]byte, error) {
@@ -71,8 +77,21 @@ type IDMRequest struct {
 	RemitterOccupation      string    `json:"memo16,omitempty"`
 }
 
-type IDMResponse struct {
+type ResponseCommon struct {
 	StatusCode  int    `json:"-"`
 	RawRequest  string `json:"-"`
 	RawResponse string `json:"-"`
+}
+
+type IDMResponse struct {
+	ResponseCommon
+	CurrentUserReputation           string `json:"user"`
+	PreviousUserReputation          string `json:"upr"`
+	FraudEvaluationResult           string `json:"frp"`
+	FraudRuleName                   string `json:"frn"`
+	FraudRuleDescription            string `json:"frd"`
+	TransactionId                   string `json:"tid"`
+	UserReputationDescription       string `json:"erd"`
+	PolicyEvalutionResult           string `json:"res"`
+	TransactionEvaluationResultCode []int  `json:"rcd"`
 }
