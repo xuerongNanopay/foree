@@ -70,3 +70,9 @@ type IDMRequest struct {
 	PurposeOfTransfer       string    `json:"memo15,omitempty"`
 	RemitterOccupation      string    `json:"memo16,omitempty"`
 }
+
+type IDMResponse struct {
+	StatusCode  int    `json:"-"`
+	RawRequest  string `json:"-"`
+	RawResponse string `json:"-"`
+}
