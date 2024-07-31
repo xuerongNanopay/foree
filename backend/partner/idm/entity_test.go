@@ -1,6 +1,7 @@
 package idm
 
 import (
+	"bytes"
 	"encoding/json"
 	"testing"
 	"time"
@@ -25,6 +26,35 @@ func TestEntityMarshal(t *testing.T) {
 		}
 		if test1 != string(s) {
 			t.Errorf("IDMRequest marshal incorrect, got `%v`", string(s))
+		}
+	})
+}
+
+func TestEntityUnMarshal(t *testing.T) {
+	t.Run("IDMResponse should unmarshal correctly", func(t *testing.T) {
+		test1 := `{"frp":"ACCEPT","ednaScoreCard":{}}`
+		resp := &IDMResponse{
+			ResponseCommon: ResponseCommon{
+				StatusCode:  200,
+				RawResponse: test1,
+			},
+		}
+
+		err := json.NewDecoder(bytes.NewBuffer([]byte(test1))).Decode(resp)
+		if err != nil {
+			t.Errorf("IDMResponse unmarshal should not get err, but got `%v`", err.Error())
+		}
+
+		if resp.StatusCode != 200 {
+			t.Errorf("expect `200` but got `%v`", resp.StatusCode)
+		}
+
+		if resp.FraudEvaluationResult != ResultStatusAccept {
+			t.Errorf("expect `%v` but got `%v`", ResultStatusAccept, resp.FraudEvaluationResult)
+		}
+
+		if resp.RawResponse != test1 {
+			t.Errorf("expect RawResponse persist, but got `%v`", resp.RawResponse)
 		}
 	})
 }
