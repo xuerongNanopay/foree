@@ -70,6 +70,27 @@ func TestEntityMarshal(t *testing.T) {
 			t.Errorf("LoadReimttanceRequest marshal incorrect, got `%v`", string(s))
 		}
 	})
+
+	t.Run("TransactionStatusByIdsRequest should marshal correctly", func(t *testing.T) {
+		test1 := `{"Token":"dummy","Agency_Code":"dummy","Ids":"NP01,NP02,NP03"}`
+
+		req := TransactionStatusByIdsRequest{
+			requestCommon: requestCommon{
+				Token:      "dummy",
+				AgencyCode: "dummy",
+			},
+			Ids: []string{"NP01", "NP02", "NP03"},
+		}
+
+		s, err := json.Marshal(req)
+		if err != nil {
+			t.Errorf("TransactionStatusByIdsRequest marshal should not get err, but got `%v`", err.Error())
+		}
+
+		if test1 != string(s) {
+			t.Errorf("TransactionStatusByIdsRequest marshal incorrect, got `%v`", string(s))
+		}
+	})
 }
 
 func TestEntityUnMarshal(t *testing.T) {

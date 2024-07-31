@@ -2,6 +2,7 @@ package nbp
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -111,8 +112,8 @@ type TransactionStatusByDateResponse struct {
 }
 
 type requestCommon struct {
-	Token      string `json:"Token,,omitempty"`
-	AgencyCode string `json:"Agency_Code,,omitempty"`
+	Token      string `json:"Token,omitempty"`
+	AgencyCode string `json:"Agency_Code,omitempty"`
 }
 
 type BankListRequest struct {
@@ -121,9 +122,9 @@ type BankListRequest struct {
 
 type AccountEnquiryRequest struct {
 	requestCommon
-	AccountNo  string `json:"AccountNo,,omitempty"`
-	BranchCode int32  `json:"BranchCode,,omitempty"`
-	BankName   string `json:"BankName,,omitempty"`
+	AccountNo  string `json:"AccountNo,omitempty"`
+	BranchCode int32  `json:"BranchCode,omitempty"`
+	BankName   string `json:"BankName,omitempty"`
 }
 
 type NBPAmount float64
@@ -172,18 +173,24 @@ type LoadRemittanceRequest struct {
 	RemitterBeneficiaryRelationship string    `json:"remitter_BeneficiaryRelationship,omitempty"`
 }
 
+type NBPIds []string
+
+func (d NBPIds) MarshalJSON() ([]byte, error) {
+	return []byte("\"" + strings.Join(d, ",") + "\""), nil
+}
+
 type TransactionStatusByIdsRequest struct {
 	requestCommon
-	Ids string `json:"Ids,,omitempty"`
+	Ids NBPIds `json:"Ids,omitempty"`
 }
 
 type TransactionStatusByDateRequest struct {
 	requestCommon
-	Date string `json:"Date,,omitempty"`
+	Date *NBPDate `json:"Date,omitempty"`
 }
 
 type CancelTransactionRequest struct {
 	requestCommon
-	GlobalId           string `json:"Global_Id,,omitempty"`
-	CancellationReason string `json:"Cancellation_Reason,,omitempty"`
+	GlobalId           string `json:"Global_Id,omitempty"`
+	CancellationReason string `json:"Cancellation_Reason,omitempty"`
 }
