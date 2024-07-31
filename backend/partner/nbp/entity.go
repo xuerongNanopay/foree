@@ -123,33 +123,33 @@ type AccountEnquiryRequest struct {
 
 type LoadRemittanceRequest struct {
 	requestCommon
-	GlobalId                        string  `json:"Global_Id"`
-	Currency                        string  `json:"Currency"`
-	Amount                          float64 `json:"Amount"` //see: https://stackoverflow.com/questions/61811463/golang-encode-float-to-json-with-specified-precision
-	PmtMode                         string  `json:"Pmt_Mode"`
-	RemitterName                    string  `json:"Remitter_Name"`
-	RemitterAddress                 string  `json:"Remitter_Address"`
-	RemitterEmail                   string  `json:"Remitter_Email"`
-	RemitterContact                 string  `json:"Remitter_Contact"`
-	RemitterIdType                  string  `json:"Remitter_Id_Type"`
-	RemitterId                      string  `json:"Remitter_Id"`
-	BeneficiaryName                 string  `json:"Beneficiary_Name"`
-	BeneficiaryAddress              string  `json:"Beneficiary_Address"`
-	BeneficiaryContact              string  `json:"Beneficiary_Contact"`
-	BeneficiaryExpectedId           string  `json:"Beneficiary_Expectedid"`
-	BeneficiaryBank                 string  `json:"Beneficiary_Bank"`
-	BeneficiaryBranch               string  `json:"Beneficiary_Branch"`
-	BeneficiaryAccount              string  `json:"Beneficiary_Account"`
-	PurposeRemittance               string  `json:"Purpose_Remittance"`
-	BeneficiaryCity                 string  `json:"Beneficiary_City"`
-	OriginatingCountry              string  `json:"Originating_Country"`
-	TransactionDate                 string  `json:"Transaction_Date"` //yyyy-MM-dd
-	RemitterAccountNo               string  `json:"remitter_AccountNo"`
-	RemitterFatherName              string  `json:"remitter_FatherName"`
-	RemitterDOB                     string  `json:"remitter_DOB"` //yyyy-MM-dd
-	RemitterPOB                     string  `json:"remitter_POB"`
-	RemitterNationality             string  `json:"remitter_Nationality"`
-	RemitterBeneficiaryRelationship string  `json:"remitter_BeneficiaryRelationship"`
+	GlobalId                        string  `json:"Global_Id,omitempty"`
+	Currency                        string  `json:"Currency,omitempty"`
+	Amount                          float64 `json:"Amount,omitempty"` //see: https://stackoverflow.com/questions/61811463/golang-encode-float-to-json-with-specified-precision
+	PmtMode                         string  `json:"Pmt_Mode,omitempty"`
+	RemitterName                    string  `json:"Remitter_Name,omitempty"`
+	RemitterAddress                 string  `json:"Remitter_Address,omitempty"`
+	RemitterEmail                   string  `json:"Remitter_Email,omitempty"`
+	RemitterContact                 string  `json:"Remitter_Contact,omitempty"`
+	RemitterIdType                  string  `json:"Remitter_Id_Type,omitempty"`
+	RemitterId                      string  `json:"Remitter_Id,omitempty"`
+	BeneficiaryName                 string  `json:"Beneficiary_Name,omitempty"`
+	BeneficiaryAddress              string  `json:"Beneficiary_Address,omitempty"`
+	BeneficiaryContact              string  `json:"Beneficiary_Contact,omitempty"`
+	BeneficiaryExpectedId           string  `json:"Beneficiary_Expectedid,omitempty"`
+	BeneficiaryBank                 string  `json:"Beneficiary_Bank,omitempty"`
+	BeneficiaryBranch               string  `json:"Beneficiary_Branch,omitempty"`
+	BeneficiaryAccount              string  `json:"Beneficiary_Account,omitempty"`
+	PurposeRemittance               string  `json:"Purpose_Remittance,omitempty"`
+	BeneficiaryCity                 string  `json:"Beneficiary_City,omitempty"`
+	OriginatingCountry              string  `json:"Originating_Country,omitempty"`
+	TransactionDate                 string  `json:"Transaction_Date,omitempty"` //yyyy-MM-dd
+	RemitterAccountNo               string  `json:"remitter_AccountNo,omitempty"`
+	RemitterFatherName              string  `json:"remitter_FatherName,omitempty"`
+	RemitterDOB                     string  `json:"remitter_DOB,omitempty"` //yyyy-MM-dd
+	RemitterPOB                     string  `json:"remitter_POB,omitempty"`
+	RemitterNationality             string  `json:"remitter_Nationality,omitempty"`
+	RemitterBeneficiaryRelationship string  `json:"remitter_BeneficiaryRelationship,omitempty"`
 }
 
 type TransactionStatusByIdsRequest struct {
