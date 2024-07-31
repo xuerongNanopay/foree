@@ -50,15 +50,39 @@ func (*NBPClientMock) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryRe
 }
 
 func (*NBPClientMock) LoadRemittanceCash(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
-	return nil, nil
+	return &LoadRemittanceResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:      200,
+			ResponseCode:    "201",
+			ResponseMessage: "Remittance credited successfully.",
+		},
+		GlobalId:   r.GlobalId,
+		TrackingId: r.GlobalId,
+	}, nil
 }
 
 func (*NBPClientMock) LoadRemittanceAccounts(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
-	return nil, nil
+	return &LoadRemittanceResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:      200,
+			ResponseCode:    "201",
+			ResponseMessage: "Remittance credited successfully.",
+		},
+		GlobalId:   r.GlobalId,
+		TrackingId: r.GlobalId,
+	}, nil
 }
 
 func (*NBPClientMock) LoadRemittanceThirdParty(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
-	return nil, nil
+	return &LoadRemittanceResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:      200,
+			ResponseCode:    "201",
+			ResponseMessage: "Remittance credited successfully.",
+		},
+		GlobalId:   r.GlobalId,
+		TrackingId: r.GlobalId,
+	}, nil
 }
 
 func (*NBPClientMock) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error) {
@@ -69,5 +93,12 @@ func (*NBPClientMock) TransactionStatusByDate(r TransactionStatusByDateRequest) 
 	return nil, nil
 }
 func (*NBPClientMock) CancelTransaction(r CancelTransactionRequest) (*CancelTransactionResponse, error) {
-	return nil, nil
+	return &CancelTransactionResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:      200,
+			ResponseCode:    "201",
+			ResponseMessage: "Remittance cancelled successfully",
+		},
+		GlobalId: r.GlobalId,
+	}, nil
 }
