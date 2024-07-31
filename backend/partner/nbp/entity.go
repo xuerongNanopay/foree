@@ -15,6 +15,17 @@ const (
 	TxStatusPending   = "PENDING"
 )
 
+const (
+	AccStatusActive               = "Active"
+	AccStatusDormantOrInoperative = "Dormant or Inoperative"
+	AccStatusUnclaimedDeposit     = "Unclaimed Deposit"
+	AccStatusClosed               = "Closed"
+	AccStatusCloseOutInProcess    = "Close Out in Process"
+	AccStatusFC                   = "FC"
+	AccStatusDeceased             = "DECEASED"
+	AccStatusBusiness             = "BUSINESS"
+)
+
 type responseGetter interface {
 	GetStatusCode() int
 	GetRawRequest() string

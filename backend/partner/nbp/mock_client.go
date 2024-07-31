@@ -20,11 +20,33 @@ func (*NBPClientMock) Hello() (*HelloResponse, error) {
 }
 
 func (*NBPClientMock) BankList() (*BankListResponse, error) {
-	return nil, nil
+	return &BankListResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:      200,
+			ResponseCode:    "201",
+			ResponseMessage: "Bank list retrieved successfully",
+		},
+		Banklist: []BankListEntry{
+			{
+				BankName: "ALLIED BANK LIMITED",
+				BankAbbr: "ABL",
+			},
+		},
+	}, nil
 }
 
 func (*NBPClientMock) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryResponse, error) {
-	return nil, nil
+	return &AccountEnquiryResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:      200,
+			ResponseCode:    "201",
+			ResponseMessage: "Account Details retrieved successfully",
+		},
+		BankName:      r.BankName,
+		BranchCode:    r.BranchCode,
+		AccountNo:     r.AccountNo,
+		AccountStatus: AccStatusActive,
+	}, nil
 }
 
 func (*NBPClientMock) LoadRemittanceCash(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
