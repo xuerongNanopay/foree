@@ -58,3 +58,20 @@ func TestEntityUnMarshal(t *testing.T) {
 		}
 	})
 }
+
+func TestGetResultStatus(t *testing.T) {
+	t.Run("GetResultStatus should work", func(t *testing.T) {
+		resp := &IDMResponse{
+			FraudEvaluationResult: ResultStatusMannualReview,
+		}
+		if resp.GetResultStatus() != ResultStatusMannualReview {
+			t.Errorf("expect `%v` but got `%v`", ResultStatusMannualReview, resp.GetResultStatus())
+		}
+		resp = &IDMResponse{
+			PolicyEvalutionResult: ResultStatusAccept,
+		}
+		if resp.GetResultStatus() != ResultStatusAccept {
+			t.Errorf("expect `%v` but got `%v`", ResultStatusAccept, resp.GetResultStatus())
+		}
+	})
+}
