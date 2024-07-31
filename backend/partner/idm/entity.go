@@ -1,6 +1,9 @@
 package idm
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type IDMAmount float64
 
@@ -9,10 +12,20 @@ func (a IDMAmount) MarshalJSON() ([]byte, error) {
 	return []byte(s), nil
 }
 
+type IDMDate time.Time
+
+func (d IDMDate) MarshalJSON() ([]byte, error) {
+	t := time.Time(d)
+	s := t.Format(time.DateOnly)
+	return []byte("\"" + s + "\""), nil
+}
+
 type IDMRequest struct {
 	UserAccountIdentifier   string    `json:"man,omitempty"`
 	UserEmail               string    `json:"tea,omitempty"`
 	Ip                      string    `json:"ip,omitempty"`
+	PhoneNumber             string    `json:"phn,omitempty"`
+	Dob                     IDMDate   `json:"dob,omitempty"`
 	BillingFirstName        string    `json:"bfn,omitempty"`
 	BillingMiddleName       string    `json:"bmn,omitempty"`
 	BillingLastname         string    `json:"bln,omitempty"`
@@ -34,7 +47,8 @@ type IDMRequest struct {
 	DestDigitalAccNOHash    string    `json:"dphash,omitempty"`
 	SrcACHHash              string    `json:"pach,omitempty"`
 	SrcDigitalAccNOHash     string    `json:"phash,omitempty"`
-	TransactionCreationTime string    `json:"tti,omitempty"`
+	TransactionIdentifier   string    `json:"tid,omitempty"`
+	TransactionCreationTime int64     `json:"tti,omitempty"`
 	Amount                  IDMAmount `json:"amt,omitempty"`
 	Currency                string    `json:"ccy,omitempty"`
 	Profile                 string    `json:"profile,omitempty"`
