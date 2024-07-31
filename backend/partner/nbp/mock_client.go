@@ -1,6 +1,9 @@
 package nbp
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 func NewMockNBPClient() NBPClient {
 	return &NBPClientMock{}
@@ -86,11 +89,28 @@ func (*NBPClientMock) LoadRemittanceThirdParty(r LoadRemittanceRequest) (*LoadRe
 }
 
 func (*NBPClientMock) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error) {
-	return nil, nil
+	var txStatuses []TransactionStatus
+	ids := []string(r.Ids)
+
+	for i := 0; i < len(ids); i++ {
+		txStatuses = append(txStatuses, TransactionStatus{
+			GlobalId: ids[i],
+			Status:   TxStatusPaid,
+		})
+	}
+
+	return &TransactionStatusByIdsResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:      200,
+			ResponseCode:    "201",
+			ResponseMessage: "Remittance status retrieved successfully",
+		},
+		TransactionStatuses: txStatuses,
+	}, nil
 }
 
 func (*NBPClientMock) TransactionStatusByDate(r TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error) {
-	return nil, nil
+	return nil, fmt.Errorf("TransactionStatusByDate is not implemented for mock client")
 }
 func (*NBPClientMock) CancelTransaction(r CancelTransactionRequest) (*CancelTransactionResponse, error) {
 	return &CancelTransactionResponse{
