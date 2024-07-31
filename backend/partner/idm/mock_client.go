@@ -1,7 +1,7 @@
 package idm
 
 func NewMockIDMClient() IDMClient {
-
+	return &IDMClientImpl{}
 }
 
 type IDMClientMock struct {
