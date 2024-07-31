@@ -3,11 +3,12 @@ package nbp
 import (
 	"encoding/json"
 	"testing"
+	"time"
 )
 
 func TestEntityMarshal(t *testing.T) {
 	t.Run("LoadRemittanceRequest should marshal correctly", func(t *testing.T) {
-		test1 := `{"Token":"dummy","Agency_Code":"dummy","Remitter_Name":"xuerong","remitter_DOB":"1989-06-04"}`
+		test1 := `{"Token":"dummy","Agency_Code":"dummy","Remitter_Name":"xuerong"}`
 
 		l := &LoadRemittanceRequest{
 			requestCommon: requestCommon{
@@ -15,7 +16,6 @@ func TestEntityMarshal(t *testing.T) {
 				AgencyCode: "dummy",
 			},
 			RemitterName: "xuerong",
-			RemitterDOB:  "1989-06-04",
 		}
 
 		s, err := json.Marshal(l)
@@ -29,6 +29,7 @@ func TestEntityMarshal(t *testing.T) {
 
 	t.Run("NBPAmount should marshal correctly", func(t *testing.T) {
 		test1 := `{"Token":"dummy","Agency_Code":"dummy","Amount":64.64,"Remitter_Name":"xuerong","remitter_DOB":"1989-06-04"}`
+		d := NBPDate(time.Date(1989, time.June, 4, 0, 0, 0, 0, time.UTC))
 
 		l := &LoadRemittanceRequest{
 			requestCommon: requestCommon{
@@ -36,7 +37,7 @@ func TestEntityMarshal(t *testing.T) {
 				AgencyCode: "dummy",
 			},
 			RemitterName: "xuerong",
-			RemitterDOB:  "1989-06-04",
+			RemitterDOB:  &d,
 			Amount:       64.644,
 		}
 

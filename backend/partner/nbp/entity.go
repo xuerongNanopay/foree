@@ -1,6 +1,9 @@
 package nbp
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type responseGetter interface {
 	GetStatusCode() int
@@ -130,6 +133,14 @@ func (a NBPAmount) MarshalJSON() ([]byte, error) {
 	return []byte(s), nil
 }
 
+type NBPDate time.Time
+
+func (d NBPDate) MarshalJSON() ([]byte, error) {
+	t := time.Time(d)
+	s := t.Format(time.DateOnly)
+	return []byte("\"" + s + "\""), nil
+}
+
 type LoadRemittanceRequest struct {
 	requestCommon
 	GlobalId                        string    `json:"Global_Id,omitempty"`
@@ -155,8 +166,8 @@ type LoadRemittanceRequest struct {
 	TransactionDate                 string    `json:"Transaction_Date,omitempty"` //yyyy-MM-dd
 	RemitterAccountNo               string    `json:"remitter_AccountNo,omitempty"`
 	RemitterFatherName              string    `json:"remitter_FatherName,omitempty"`
-	RemitterDOB                     string    `json:"remitter_DOB,omitempty"` //yyyy-MM-dd
-	RemitterPOB                     string    `json:"remitter_POB,omitempty"`
+	RemitterDOB                     *NBPDate  `json:"remitter_DOB,omitempty"` //yyyy-MM-dd
+	RemitterPOB                     *NBPDate  `json:"remitter_POB,omitempty"`
 	RemitterNationality             string    `json:"remitter_Nationality,omitempty"`
 	RemitterBeneficiaryRelationship string    `json:"remitter_BeneficiaryRelationship,omitempty"`
 }
