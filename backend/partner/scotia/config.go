@@ -2,6 +2,7 @@ package scotia
 
 import (
 	"fmt"
+	"strings"
 )
 
 const (
@@ -198,5 +199,9 @@ func (c _scotiaConfig) SetPublicKeyDir(u string) {
 }
 
 func (c _scotiaConfig) String() string {
-	return fmt.Sprintf("%v", c)
+	ret := []string{}
+	for key, value := range c {
+		ret = append(ret, fmt.Sprintf("%v:%v", key, value))
+	}
+	return strings.Join(ret, "\n")
 }
