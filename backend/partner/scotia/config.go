@@ -59,7 +59,7 @@ func (c _scotiaConfig) GetBaseUrl() string {
 }
 
 func (c _scotiaConfig) SetBaseUrl(u string) {
-
+	c[ConfigBaseUrl] = u
 }
 
 func (c _scotiaConfig) GetAuthUsername() string {
@@ -74,7 +74,7 @@ func (c _scotiaConfig) GetAuthUsername() string {
 }
 
 func (c _scotiaConfig) SetAuthUsername(u string) {
-
+	c[ConfigBasicAuthUsername] = u
 }
 
 func (c _scotiaConfig) GetAuthPassword() string {
@@ -89,7 +89,7 @@ func (c _scotiaConfig) GetAuthPassword() string {
 }
 
 func (c _scotiaConfig) SetAuthPassword(u string) {
-
+	c[] = u
 }
 
 func (c _scotiaConfig) GetClientId() string {
@@ -104,7 +104,7 @@ func (c _scotiaConfig) GetClientId() string {
 }
 
 func (c _scotiaConfig) SetClientId(u string) {
-
+	c[ConfigClientId] = u
 }
 
 func (c _scotiaConfig) GetJWTKid() string {
@@ -119,7 +119,7 @@ func (c _scotiaConfig) GetJWTKid() string {
 }
 
 func (c _scotiaConfig) SetJWTKid(u string) {
-
+	c[ConfigJWTKid] = u
 }
 
 func (c _scotiaConfig) GetJWTAudience() string {
@@ -134,7 +134,7 @@ func (c _scotiaConfig) GetJWTAudience() string {
 }
 
 func (c _scotiaConfig) SetJWTAudience(u string) {
-
+	c[ConfigJWTAudience] = u
 }
 
 func (c _scotiaConfig) GetJWTExpiry() int {
@@ -149,7 +149,7 @@ func (c _scotiaConfig) GetJWTExpiry() int {
 }
 
 func (c _scotiaConfig) SetJWTExpiry(u int) {
-
+	c[ConfigJWTExpiry] = u
 }
 
 func (c _scotiaConfig) GetScope() string {
@@ -164,7 +164,7 @@ func (c _scotiaConfig) GetScope() string {
 }
 
 func (c _scotiaConfig) SetScope(u string) {
-
+	c[ConfigScope] = u
 }
 
 func (c _scotiaConfig) GetPrivateKeyDir() string {
@@ -179,7 +179,7 @@ func (c _scotiaConfig) GetPrivateKeyDir() string {
 }
 
 func (c _scotiaConfig) SetPrivateKeyDir(u string) {
-
+	c[ConfigPrivateKeyDir] = u
 }
 
 func (c _scotiaConfig) GetPublicKeyDir() string {
@@ -194,7 +194,7 @@ func (c _scotiaConfig) GetPublicKeyDir() string {
 }
 
 func (c _scotiaConfig) SetPublicKeyDir(u string) {
-
+	c[ConfigPublicKeyDir] = u
 }
 
 func (c _scotiaConfig) String() string {
