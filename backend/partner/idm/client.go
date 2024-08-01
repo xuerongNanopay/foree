@@ -13,21 +13,22 @@ type IDMClient interface {
 	Transfer(req IDMRequest) (*IDMResponse, error)
 }
 
-func NewIDMClient(config IDMConfig) IDMClient {
+func NewIDMClient(config map[string]string) IDMClient {
+	idmConfig := NewIDMConfigWithDefaultConfig(config)
 	return &IDMClientImpl{
-		Config:     config,
+		config:     idmConfig,
 		httpClient: &http.Client{},
 	}
 }
 
 type IDMClientImpl struct {
-	Config     IDMConfig
+	config     IDMConfig
 	httpClient *http.Client
 }
 
 func (c *IDMClientImpl) Transfer(req IDMRequest) (*IDMResponse, error) {
-	url := fmt.Sprintf("%s/account/transfer", c.Config.BaseUrl)
-	basicAuth := fmt.Sprintf("%s:%s", c.Config.Username, c.Config.Password)
+	url := fmt.Sprintf("%s/account/transfer", c.config.GetBaseUrl())
+	basicAuth := fmt.Sprintf("%s:%s", c.config.GetAuthUsername(), c.config.GetAuthPassword())
 	basicAuth = base64.StdEncoding.EncodeToString([]byte(basicAuth))
 	basicAuth = fmt.Sprintf("Basic %v", basicAuth)
 

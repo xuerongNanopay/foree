@@ -19,6 +19,32 @@ const (
 	ConfigScope             = "SCOTIA_SCOPE"
 )
 
+type ScotiaConfig interface {
+	GetBaseUrl() string
+	SetBaseUrl(u string)
+	GetAuthUsername() string
+	SetAuthUsername(u string)
+	GetAuthPassword() string
+	SetAuthPassword(u string)
+	GetClientId() string
+	SetClientId(u string)
+	GetJWTKid() string
+	SetJWTKid(u string)
+	GetJWTAudience() string
+	SetJWTAudience(u string)
+	GetJWTExpiry() int
+	SetJWTExpiry(u int)
+	GetPrivateKeyDir() string
+	SetPrivateKeyDir(u string)
+	GetPublicKeyDir() string
+	SetPublicKeyDir(u string)
+	GetScope() string
+	SetScope(u string)
+	ShowConfigs() map[string]string
+}
+
+type _scotiaConfig map[string]interface{}
+
 func NewScotiaConfig() ScotiaConfig {
 	m := make(map[string]interface{}, 16)
 	return _scotiaConfig(m)
@@ -63,32 +89,6 @@ func NewScotiaConfigWithDefaultConfig(configs map[string]string) ScotiaConfig {
 	}
 	return m
 }
-
-type ScotiaConfig interface {
-	GetBaseUrl() string
-	SetBaseUrl(u string)
-	GetAuthUsername() string
-	SetAuthUsername(u string)
-	GetAuthPassword() string
-	SetAuthPassword(u string)
-	GetClientId() string
-	SetClientId(u string)
-	GetJWTKid() string
-	SetJWTKid(u string)
-	GetJWTAudience() string
-	SetJWTAudience(u string)
-	GetJWTExpiry() int
-	SetJWTExpiry(u int)
-	GetPrivateKeyDir() string
-	SetPrivateKeyDir(u string)
-	GetPublicKeyDir() string
-	SetPublicKeyDir(u string)
-	GetScope() string
-	SetScope(u string)
-	ShowConfigs() map[string]string
-}
-
-type _scotiaConfig map[string]interface{}
 
 func (c _scotiaConfig) GetBaseUrl() string {
 	return getStringConfig(c, ConfigBaseUrl)
