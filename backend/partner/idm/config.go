@@ -9,8 +9,8 @@ const (
 	ConfigBaseUrl           = "IDM_BASE_URL"
 	ConfigBasicAuthUsername = "IDM_BASIC_AUTH_USERNAME"
 	ConfigBasicAuthPassword = "IDM_BASIC_AUTH_PASSWORD"
-	ConfigHashingSalt       = "IDM_HashingSalt"
-	ConfigProfile           = "IDM_Profie"
+	ConfigHashingSalt       = "IDM_HASHING_SALT"
+	ConfigProfile           = "IDM_PROFILE"
 )
 
 type IDMConfig interface {
