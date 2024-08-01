@@ -9,6 +9,7 @@ import (
 )
 
 type ScotiaClient interface {
+	GetConfigs() map[string]string
 }
 
 type rsa struct {
@@ -32,6 +33,10 @@ func NewScotiaClientImpl(configs map[string]string) ScotiaClient {
 type scotiaClientImpl struct {
 	config ScotiaConfig
 	rsa    *rsa
+}
+
+func (s *scotiaClientImpl) GetConfigs() map[string]string {
+	return s.config.ShowConfigs()
 }
 
 func (s *scotiaClientImpl) signJWT() (string, error) {

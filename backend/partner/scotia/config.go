@@ -85,6 +85,7 @@ type ScotiaConfig interface {
 	SetPublicKeyDir(u string)
 	GetScope() string
 	SetScope(u string)
+	ShowConfigs() map[string]string
 }
 
 type _scotiaConfig map[string]interface{}
@@ -245,4 +246,12 @@ func (c _scotiaConfig) String() string {
 		ret = append(ret, fmt.Sprintf("%v:%v", key, value))
 	}
 	return strings.Join(ret, "\n")
+}
+
+func (c _scotiaConfig) ShowConfigs() map[string]string {
+	ret := make(map[string]string, len(c))
+	for key, value := range c {
+		ret[key] = fmt.Sprintf("%v", value)
+	}
+	return ret
 }

@@ -5,7 +5,7 @@ import (
 )
 
 func TestScotiaConfig(t *testing.T) {
-	t.Run("", func(t *testing.T) {
+	t.Run("config should construct correctly", func(t *testing.T) {
 
 	})
 }
