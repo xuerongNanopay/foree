@@ -90,7 +90,7 @@ func (c _scotiaConfig) GetAuthPassword() string {
 }
 
 func (c _scotiaConfig) SetAuthPassword(u string) {
-	c[] = u
+	c[ConfigBasicAuthPassword] = u
 }
 
 func (c _scotiaConfig) GetClientId() string {
