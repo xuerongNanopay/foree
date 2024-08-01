@@ -50,7 +50,7 @@ func NewNBPConfigWithDefaultConfig(configs map[string]string) NBPConfig {
 		m.SetAuthPassword(val)
 	}
 	if val, ok := configs[ConfigAgencyCode]; ok {
-		m.SetAuthPassword(val)
+		m.SetAgencyCode(val)
 	}
 	if val, ok := configs[ConfigAuthAttempts]; ok {
 		n, err := strconv.Atoi(val)
