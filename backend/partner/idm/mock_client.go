@@ -11,6 +11,9 @@ func (s *IDMClientMock) GetConfigs() map[string]string {
 	return map[string]string{}
 }
 
+func (s *IDMClientMock) SetConfig(key string, value string) {
+}
+
 func (c *IDMClientMock) Transfer(req IDMRequest) (*IDMResponse, error) {
 	return &IDMResponse{
 		FraudEvaluationResult: ResultStatusAccept,

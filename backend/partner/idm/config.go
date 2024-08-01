@@ -24,6 +24,7 @@ type IDMConfig interface {
 	SetHashingSalt(u string)
 	GetProfile() string
 	SetProfile(u string)
+	SetConfig(key string, value string)
 	ShowConfigs() map[string]string
 }
 
@@ -36,6 +37,11 @@ func NewIDMConfig() IDMConfig {
 
 func NewIDMConfigWithDefaultConfig(configs map[string]string) IDMConfig {
 	m := _idmConfig(make(map[string]interface{}, len(configs)))
+	m = setConfigFromMap(m, configs)
+	return m
+}
+
+func setConfigFromMap(m _idmConfig, configs map[string]string) _idmConfig {
 	if val, ok := configs[ConfigBaseUrl]; ok {
 		m.SetBaseUrl(val)
 	}
@@ -107,6 +113,11 @@ func (c _idmConfig) String() string {
 		ret = append(ret, fmt.Sprintf("%v:%v", key, value))
 	}
 	return strings.Join(ret, "\n")
+}
+
+func (c _idmConfig) SetConfig(key string, value string) {
+	m := map[string]string{key: value}
+	setConfigFromMap(c, m)
 }
 
 func (c _idmConfig) ShowConfigs() map[string]string {

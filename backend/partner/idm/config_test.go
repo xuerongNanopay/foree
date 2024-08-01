@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestScotiaConfig(t *testing.T) {
+func TestIDMConfig(t *testing.T) {
 
 	config := map[string]string{
 		ConfigBaseUrl:           "http://www.dummy.com",
@@ -35,6 +35,18 @@ func TestScotiaConfig(t *testing.T) {
 		sc.SetProfile("new profile")
 		if sc1.GetProfile() != sc.GetProfile() {
 			t.Errorf("expect scotiaConfig shoule be a reference type")
+		}
+
+	})
+
+	t.Run("SetConfig should work", func(t *testing.T) {
+
+		sc := NewIDMConfigWithDefaultConfig(config)
+
+		sc.SetConfig(ConfigBaseUrl, "aaa")
+
+		if sc.GetBaseUrl() != "aaa" {
+			t.Errorf("expect %v, but %v", "aaa", sc.GetBaseUrl())
 		}
 
 	})
