@@ -2,6 +2,7 @@ package scotia
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -19,8 +20,48 @@ const (
 )
 
 func NewScotiaConfig() ScotiaConfig {
-	m := make(map[string]interface{}, 15)
+	m := make(map[string]interface{}, 16)
 	return _scotiaConfig(m)
+}
+
+func NewScotiaConfigWithDefaultConfig(configs map[string]string) ScotiaConfig {
+	m := _scotiaConfig(make(map[string]interface{}, 16))
+	if val, ok := configs[ConfigBaseUrl]; ok {
+		m.SetBaseUrl(val)
+	}
+	if val, ok := configs[ConfigBasicAuthUsername]; ok {
+		m.SetAuthUsername(val)
+	}
+	if val, ok := configs[ConfigBasicAuthPassword]; ok {
+		m.SetAuthPassword(val)
+	}
+	if val, ok := configs[ConfigClientId]; ok {
+		m.SetClientId(val)
+	}
+	if val, ok := configs[ConfigJWTKid]; ok {
+		m.SetJWTKid(val)
+	}
+	if val, ok := configs[ConfigJWTAudience]; ok {
+		m.SetJWTAudience(val)
+	}
+	if val, ok := configs[ConfigJWTExpiry]; ok {
+		n, err := strconv.Atoi(val)
+		if err != nil {
+			//log?
+			panic(err)
+		}
+		m.SetJWTExpiry(n)
+	}
+	if val, ok := configs[ConfigPrivateKeyDir]; ok {
+		m.SetPrivateKeyDir(val)
+	}
+	if val, ok := configs[ConfigPublicKeyDir]; ok {
+		m.SetPublicKeyDir(val)
+	}
+	if val, ok := configs[ConfigScope]; ok {
+		m.SetScope(val)
+	}
+	return m
 }
 
 type ScotiaConfig interface {
