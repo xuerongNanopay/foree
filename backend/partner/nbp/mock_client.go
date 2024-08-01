@@ -12,6 +12,10 @@ func NewMockNBPClient() NBPClient {
 type NBPClientMock struct {
 }
 
+func (s *NBPClientMock) GetConfigs() map[string]string {
+	return map[string]string{}
+}
+
 func (*NBPClientMock) Hello() (*HelloResponse, error) {
 	ret := &HelloResponse{
 		ResponseCommon: ResponseCommon{

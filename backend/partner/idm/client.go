@@ -11,6 +11,7 @@ import (
 
 type IDMClient interface {
 	Transfer(req IDMRequest) (*IDMResponse, error)
+	GetConfigs() map[string]string
 }
 
 func NewIDMClient(config map[string]string) IDMClient {
@@ -24,6 +25,10 @@ func NewIDMClient(config map[string]string) IDMClient {
 type IDMClientImpl struct {
 	config     IDMConfig
 	httpClient *http.Client
+}
+
+func (s *IDMClientImpl) GetConfigs() map[string]string {
+	return map[string]string{}
 }
 
 func (c *IDMClientImpl) Transfer(req IDMRequest) (*IDMResponse, error) {

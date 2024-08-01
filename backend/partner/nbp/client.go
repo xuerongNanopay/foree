@@ -27,6 +27,7 @@ type NBPClient interface {
 	TransactionStatusByIds(TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error)
 	TransactionStatusByDate(TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error)
 	CancelTransaction(CancelTransactionRequest) (*CancelTransactionResponse, error)
+	GetConfigs() map[string]string
 }
 
 func NewNBPClient(configs map[string]string) NBPClient {
@@ -45,6 +46,10 @@ type NBPClientImpl struct {
 	httpClient *http.Client
 	auth       *authCache
 	mu         sync.Mutex
+}
+
+func (s *NBPClientImpl) GetConfigs() map[string]string {
+	return s.config.ShowConfigs()
 }
 
 func (c *NBPClientImpl) Hello() (*HelloResponse, error) {
