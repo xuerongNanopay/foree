@@ -35,7 +35,7 @@ func NewIDMConfig() IDMConfig {
 }
 
 func NewIDMConfigWithDefaultConfig(configs map[string]string) IDMConfig {
-	m := _idmConfig(make(map[string]interface{}, 16))
+	m := _idmConfig(make(map[string]interface{}, len(configs)))
 	if val, ok := configs[ConfigBaseUrl]; ok {
 		m.SetBaseUrl(val)
 	}

@@ -29,9 +29,11 @@ type NBPClient interface {
 	CancelTransaction(CancelTransactionRequest) (*CancelTransactionResponse, error)
 }
 
-func NewNBPClient(config NBPConfig) NBPClient {
+func NewNBPClient(configs map[string]string) NBPClient {
+	nbpConfig := NewNBPConfigWithDefaultConfig(configs)
+
 	return &NBPClientImpl{
-		Config: config,
+		config: nbpConfig,
 		httpClient: &http.Client{
 			Timeout: 4 * time.Minute, // At least 3 minutes
 		},
@@ -39,14 +41,14 @@ func NewNBPClient(config NBPConfig) NBPClient {
 }
 
 type NBPClientImpl struct {
-	Config     NBPConfig
+	config     NBPConfig
 	httpClient *http.Client
 	auth       *authCache
 	mu         sync.Mutex
 }
 
 func (c *NBPClientImpl) Hello() (*HelloResponse, error) {
-	url := c.Config.BaseUrl + "/Hello"
+	url := c.config.GetBaseUrl() + "/Hello"
 	resp, err := c.httpClient.Get(url)
 
 	if err != nil {
@@ -73,8 +75,8 @@ func (c *NBPClientImpl) Hello() (*HelloResponse, error) {
 }
 
 func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
-	url := fmt.Sprintf("%s/Authenticate?Agency_Code=%s", c.Config.BaseUrl, c.Config.AgencyCode)
-	basicAuth := fmt.Sprintf("%s:%s", c.Config.Username, c.Config.Password)
+	url := fmt.Sprintf("%s/Authenticate?Agency_Code=%s", c.config.GetBaseUrl(), c.config.GetAgencyCode())
+	basicAuth := fmt.Sprintf("%s:%s", c.config.GetAuthUsername(), c.config.GetAuthPassword())
 	basicAuth = base64.StdEncoding.EncodeToString([]byte(basicAuth))
 	basicAuth = fmt.Sprintf("Basic %v", basicAuth)
 
@@ -119,12 +121,12 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 }
 
 func (c *NBPClientImpl) updateToken() error {
-	if isTokenAvailable(c.auth, c.Config.TokenExpiryThreshold) {
+	if isTokenAvailable(c.auth, c.config.GetTokenExpiryThreshold()) {
 		return nil
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if isTokenAvailable(c.auth, c.Config.TokenExpiryThreshold) {
+	if isTokenAvailable(c.auth, c.config.GetTokenExpiryThreshold()) {
 		return nil
 	}
 
@@ -174,11 +176,11 @@ func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
 	// This API is not very important.
 	// Normally, caller will handle retry.
 	resp, err := c.retry(1, 0, func() (responseGetter, error) {
-		url := fmt.Sprintf("%s/BankList", c.Config.BaseUrl)
+		url := fmt.Sprintf("%s/BankList", c.config.GetBaseUrl())
 
 		r := requestCommon{
 			Token:      c.auth.token,
-			AgencyCode: c.Config.AgencyCode,
+			AgencyCode: c.config.GetAgencyCode(),
 		}
 
 		rawReqeust, err := json.Marshal(r)
@@ -234,10 +236,10 @@ func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
 func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryResponse, error) {
 	//Only retry twice, and sleep interval in 4 sec.
 	resp, err := c.retry(2, 4, func() (responseGetter, error) {
-		url := fmt.Sprintf("%s/AccountEnquiry", c.Config.BaseUrl)
+		url := fmt.Sprintf("%s/AccountEnquiry", c.config.GetBaseUrl())
 
 		r.Token = c.auth.token
-		r.AgencyCode = c.Config.AgencyCode
+		r.AgencyCode = c.config.GetAgencyCode()
 
 		rawReqeust, err := json.Marshal(r)
 		if err != nil {
@@ -306,14 +308,14 @@ func (c *NBPClientImpl) LoadRemittanceThirdParty(r LoadRemittanceRequest) (*Load
 
 func (c *NBPClientImpl) loadRemittance(endpoint string, r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
 	attempts := 3
-	if c.Config.AuthAttempts > attempts {
-		attempts = c.Config.AuthAttempts
+	if c.config.GetAuthAttempts() > attempts {
+		attempts = c.config.GetAuthAttempts()
 	}
 	//At least retry 3 times, and sleep interval is 30 seconds.
 	resp, err := c.retry(attempts, 30, func() (responseGetter, error) {
-		url := fmt.Sprintf("%s/%s", c.Config.BaseUrl, endpoint)
+		url := fmt.Sprintf("%s/%s", c.config.GetBaseUrl(), endpoint)
 		r.Token = c.auth.token
-		r.AgencyCode = c.Config.AgencyCode
+		r.AgencyCode = c.config.GetAgencyCode()
 
 		rawReqeust, err := json.Marshal(r)
 		if err != nil {
@@ -367,10 +369,10 @@ func (c *NBPClientImpl) loadRemittance(endpoint string, r LoadRemittanceRequest)
 
 func (c *NBPClientImpl) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error) {
 	resp, err := c.retry(1, 0, func() (responseGetter, error) {
-		url := fmt.Sprintf("%s/TransactionStatusByIds", c.Config.BaseUrl)
+		url := fmt.Sprintf("%s/TransactionStatusByIds", c.config.GetBaseUrl())
 
 		r.Token = c.auth.token
-		r.AgencyCode = c.Config.AgencyCode
+		r.AgencyCode = c.config.GetAgencyCode()
 
 		rawReqeust, err := json.Marshal(r)
 		if err != nil {
@@ -424,10 +426,10 @@ func (c *NBPClientImpl) TransactionStatusByIds(r TransactionStatusByIdsRequest) 
 
 func (c *NBPClientImpl) TransactionStatusByDate(r TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error) {
 	resp, err := c.retry(1, 0, func() (responseGetter, error) {
-		url := fmt.Sprintf("%s/TransactionStatus", c.Config.BaseUrl)
+		url := fmt.Sprintf("%s/TransactionStatus", c.config.GetBaseUrl())
 
 		r.Token = c.auth.token
-		r.AgencyCode = c.Config.AgencyCode
+		r.AgencyCode = c.config.GetAgencyCode()
 
 		rawReqeust, err := json.Marshal(r)
 		if err != nil {
@@ -481,15 +483,15 @@ func (c *NBPClientImpl) TransactionStatusByDate(r TransactionStatusByDateRequest
 
 func (c *NBPClientImpl) CancelTransaction(r CancelTransactionRequest) (*CancelTransactionResponse, error) {
 	attempts := 3
-	if c.Config.AuthAttempts > attempts {
-		attempts = c.Config.AuthAttempts
+	if c.config.GetAuthAttempts() > attempts {
+		attempts = c.config.GetAuthAttempts()
 	}
 
 	resp, err := c.retry(attempts, 30, func() (responseGetter, error) {
-		url := fmt.Sprintf("%s/CancelTransaction", c.Config.BaseUrl)
+		url := fmt.Sprintf("%s/CancelTransaction", c.config.GetBaseUrl())
 
 		r.Token = c.auth.token
-		r.AgencyCode = c.Config.AgencyCode
+		r.AgencyCode = c.config.GetAgencyCode()
 
 		rawReqeust, err := json.Marshal(r)
 		if err != nil {

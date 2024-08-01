@@ -51,7 +51,7 @@ func NewScotiaConfig() ScotiaConfig {
 }
 
 func NewScotiaConfigWithDefaultConfig(configs map[string]string) ScotiaConfig {
-	m := _scotiaConfig(make(map[string]interface{}, 16))
+	m := _scotiaConfig(make(map[string]interface{}, len(configs)))
 	if val, ok := configs[ConfigBaseUrl]; ok {
 		m.SetBaseUrl(val)
 	}
