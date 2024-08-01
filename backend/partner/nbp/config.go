@@ -28,6 +28,7 @@ type NBPConfig interface {
 	SetAuthAttempts(u int)
 	GetTokenExpiryThreshold() int64
 	SetTokenExpiryThreshold(u int64)
+	SetConfig(key string, value string)
 	ShowConfigs() map[string]string
 }
 
@@ -40,6 +41,11 @@ func NewNBPConfig() NBPConfig {
 
 func NewNBPConfigWithDefaultConfig(configs map[string]string) NBPConfig {
 	m := _nbpConfig(make(map[string]interface{}, len(configs)))
+	m = setConfigFromMap(m, configs)
+	return m
+}
+
+func setConfigFromMap(m _nbpConfig, configs map[string]string) _nbpConfig {
 	if val, ok := configs[ConfigBaseUrl]; ok {
 		m.SetBaseUrl(val)
 	}
@@ -148,6 +154,11 @@ func (c _nbpConfig) String() string {
 		ret = append(ret, fmt.Sprintf("%v:%v", key, value))
 	}
 	return strings.Join(ret, "\n")
+}
+
+func (c _nbpConfig) SetConfig(key string, value string) {
+	m := map[string]string{key: value}
+	setConfigFromMap(c, m)
 }
 
 func (c _nbpConfig) ShowConfigs() map[string]string {

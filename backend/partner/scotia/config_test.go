@@ -52,4 +52,16 @@ func TestScotiaConfig(t *testing.T) {
 		}
 
 	})
+
+	t.Run("SetConfig should work", func(t *testing.T) {
+
+		sc := NewScotiaConfigWithDefaultConfig(config)
+
+		sc.SetConfig(ConfigBaseUrl, "aaa")
+
+		if sc.GetBaseUrl() != "aaa" {
+			t.Errorf("expect %v, but %v", "aaa", sc.GetBaseUrl())
+		}
+
+	})
 }

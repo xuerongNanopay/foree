@@ -28,6 +28,7 @@ type NBPClient interface {
 	TransactionStatusByDate(TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error)
 	CancelTransaction(CancelTransactionRequest) (*CancelTransactionResponse, error)
 	GetConfigs() map[string]string
+	SetConfig(key string, value string)
 }
 
 func NewNBPClient(configs map[string]string) NBPClient {
@@ -50,6 +51,10 @@ type NBPClientImpl struct {
 
 func (s *NBPClientImpl) GetConfigs() map[string]string {
 	return s.config.ShowConfigs()
+}
+
+func (s *NBPClientImpl) SetConfig(key string, value string) {
+	s.config.SetConfig(key, value)
 }
 
 func (c *NBPClientImpl) Hello() (*HelloResponse, error) {

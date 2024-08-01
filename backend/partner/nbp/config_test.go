@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestScotiaConfig(t *testing.T) {
+func TestNBPConfig(t *testing.T) {
 
 	config := map[string]string{
 		ConfigBaseUrl:              "http://www.dummy.com",
@@ -44,6 +44,18 @@ func TestScotiaConfig(t *testing.T) {
 		sc.SetAgencyCode("new Agency Code")
 		if sc1.GetAgencyCode() != sc.GetAgencyCode() {
 			t.Errorf("expect scotiaConfig shoule be a reference type")
+		}
+
+	})
+
+	t.Run("SetConfig should work", func(t *testing.T) {
+
+		sc := NewNBPConfigWithDefaultConfig(config)
+
+		sc.SetConfig(ConfigBaseUrl, "aaa")
+
+		if sc.GetBaseUrl() != "aaa" {
+			t.Errorf("expect %v, but %v", "aaa", sc.GetBaseUrl())
 		}
 
 	})

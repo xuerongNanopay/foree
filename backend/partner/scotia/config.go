@@ -40,6 +40,7 @@ type ScotiaConfig interface {
 	SetPublicKeyDir(u string)
 	GetScope() string
 	SetScope(u string)
+	SetConfig(key string, value string)
 	ShowConfigs() map[string]string
 }
 
@@ -52,6 +53,11 @@ func NewScotiaConfig() ScotiaConfig {
 
 func NewScotiaConfigWithDefaultConfig(configs map[string]string) ScotiaConfig {
 	m := _scotiaConfig(make(map[string]interface{}, len(configs)))
+	m = setConfigFromMap(m, configs)
+	return m
+}
+
+func setConfigFromMap(m _scotiaConfig, configs map[string]string) _scotiaConfig {
 	if val, ok := configs[ConfigBaseUrl]; ok {
 		m.SetBaseUrl(val)
 	}
@@ -191,6 +197,11 @@ func (c _scotiaConfig) String() string {
 		ret = append(ret, fmt.Sprintf("%v:%v", key, value))
 	}
 	return strings.Join(ret, "\n")
+}
+
+func (c _scotiaConfig) SetConfig(key string, value string) {
+	m := map[string]string{key: value}
+	setConfigFromMap(c, m)
 }
 
 func (c _scotiaConfig) ShowConfigs() map[string]string {

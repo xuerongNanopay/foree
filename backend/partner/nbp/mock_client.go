@@ -16,6 +16,9 @@ func (s *NBPClientMock) GetConfigs() map[string]string {
 	return map[string]string{}
 }
 
+func (s *NBPClientMock) SetConfig(key string, value string) {
+}
+
 func (*NBPClientMock) Hello() (*HelloResponse, error) {
 	ret := &HelloResponse{
 		ResponseCommon: ResponseCommon{
