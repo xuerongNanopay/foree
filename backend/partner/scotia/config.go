@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	ConfigBaseUrl           = "SCOTIA_BASEURL"
+	ConfigBaseUrl           = "SCOTIA_BASE_URL"
 	ConfigBasicAuthUsername = "SCOTIA_BASIC_AUTH_USERNAME"
 	ConfigBasicAuthPassword = "SCOTIA_BASIC_AUTH_PASSWORD"
 	ConfigClientId          = "SCOTIA_CLIENT_ID"
@@ -91,14 +91,7 @@ type ScotiaConfig interface {
 type _scotiaConfig map[string]interface{}
 
 func (c _scotiaConfig) GetBaseUrl() string {
-	if val, ok := c[ConfigBaseUrl]; ok {
-		v, k := val.(string)
-		if k {
-			return v
-		}
-		return ""
-	}
-	return ""
+	return getStringConfig(c, ConfigBaseUrl)
 }
 
 func (c _scotiaConfig) SetBaseUrl(u string) {
@@ -106,14 +99,7 @@ func (c _scotiaConfig) SetBaseUrl(u string) {
 }
 
 func (c _scotiaConfig) GetAuthUsername() string {
-	if val, ok := c[ConfigBasicAuthUsername]; ok {
-		v, k := val.(string)
-		if k {
-			return v
-		}
-		return ""
-	}
-	return ""
+	return getStringConfig(c, ConfigBasicAuthUsername)
 }
 
 func (c _scotiaConfig) SetAuthUsername(u string) {
@@ -121,14 +107,7 @@ func (c _scotiaConfig) SetAuthUsername(u string) {
 }
 
 func (c _scotiaConfig) GetAuthPassword() string {
-	if val, ok := c[ConfigBasicAuthPassword]; ok {
-		v, k := val.(string)
-		if k {
-			return v
-		}
-		return ""
-	}
-	return ""
+	return getStringConfig(c, ConfigBasicAuthPassword)
 }
 
 func (c _scotiaConfig) SetAuthPassword(u string) {
@@ -136,14 +115,7 @@ func (c _scotiaConfig) SetAuthPassword(u string) {
 }
 
 func (c _scotiaConfig) GetClientId() string {
-	if val, ok := c[ConfigClientId]; ok {
-		v, k := val.(string)
-		if k {
-			return v
-		}
-		return ""
-	}
-	return ""
+	return getStringConfig(c, ConfigClientId)
 }
 
 func (c _scotiaConfig) SetClientId(u string) {
@@ -151,14 +123,7 @@ func (c _scotiaConfig) SetClientId(u string) {
 }
 
 func (c _scotiaConfig) GetJWTKid() string {
-	if val, ok := c[ConfigJWTKid]; ok {
-		v, k := val.(string)
-		if k {
-			return v
-		}
-		return ""
-	}
-	return ""
+	return getStringConfig(c, ConfigJWTKid)
 }
 
 func (c _scotiaConfig) SetJWTKid(u string) {
@@ -166,14 +131,7 @@ func (c _scotiaConfig) SetJWTKid(u string) {
 }
 
 func (c _scotiaConfig) GetJWTAudience() string {
-	if val, ok := c[ConfigJWTAudience]; ok {
-		v, k := val.(string)
-		if k {
-			return v
-		}
-		return ""
-	}
-	return ""
+	return getStringConfig(c, ConfigJWTAudience)
 }
 
 func (c _scotiaConfig) SetJWTAudience(u string) {
@@ -189,6 +147,7 @@ func (c _scotiaConfig) GetJWTExpiry() int {
 		return 0
 	}
 	return 0
+
 }
 
 func (c _scotiaConfig) SetJWTExpiry(u int) {
@@ -196,14 +155,7 @@ func (c _scotiaConfig) SetJWTExpiry(u int) {
 }
 
 func (c _scotiaConfig) GetScope() string {
-	if val, ok := c[ConfigScope]; ok {
-		v, k := val.(string)
-		if k {
-			return v
-		}
-		return ""
-	}
-	return ""
+	return getStringConfig(c, ConfigScope)
 }
 
 func (c _scotiaConfig) SetScope(u string) {
@@ -211,14 +163,7 @@ func (c _scotiaConfig) SetScope(u string) {
 }
 
 func (c _scotiaConfig) GetPrivateKeyDir() string {
-	if val, ok := c[ConfigPrivateKeyDir]; ok {
-		v, k := val.(string)
-		if k {
-			return v
-		}
-		return ""
-	}
-	return ""
+	return getStringConfig(c, ConfigPrivateKeyDir)
 }
 
 func (c _scotiaConfig) SetPrivateKeyDir(u string) {
@@ -226,18 +171,18 @@ func (c _scotiaConfig) SetPrivateKeyDir(u string) {
 }
 
 func (c _scotiaConfig) GetPublicKeyDir() string {
-	if val, ok := c[ConfigPublicKeyDir]; ok {
-		v, k := val.(string)
-		if k {
-			return v
-		}
-		return ""
-	}
-	return ""
+	return getStringConfig(c, ConfigPublicKeyDir)
 }
 
 func (c _scotiaConfig) SetPublicKeyDir(u string) {
 	c[ConfigPublicKeyDir] = u
+}
+
+func getStringConfig(config _scotiaConfig, key string) string {
+	if val, ok := config[key]; ok {
+		return fmt.Sprintf("%v", val)
+	}
+	return ""
 }
 
 func (c _scotiaConfig) String() string {
