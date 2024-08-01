@@ -22,7 +22,11 @@ func initRSA(config ScotiaConfig) (*rsa, error) {
 }
 
 func NewScotiaClientImpl(configs map[string]string) ScotiaClient {
-	return &scotiaClientImpl{}
+	scotiaConfig := NewScotiaConfigWithDefaultConfig(configs)
+
+	return &scotiaClientImpl{
+		config: scotiaConfig,
+	}
 }
 
 type scotiaClientImpl struct {
