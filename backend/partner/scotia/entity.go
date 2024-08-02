@@ -1,6 +1,18 @@
 package scotia
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
+
+const (
+	ProductionCodeDomestic = "DOMESTIC"
+	CDIndicatorCREDIT      = "CRDT"
+	CDIndicatorDebit       = "DBIT"
+	LanguageEN             = "EN"
+	LanguageFR             = "FR"
+	CurrencyCAD            = "CAD"
+)
 
 type ScotiaDatetime time.Time
 
@@ -10,13 +22,56 @@ func (d ScotiaDatetime) MarshalJSON() ([]byte, error) {
 	return []byte("\"" + s + "\""), nil
 }
 
-type RequestPayment struct {
-	Paymentdata *RequestPaymentData `json:"data,omitempty"`
+type ScotiaAmount float64
+
+func (a ScotiaAmount) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf("%.2f", a)
+	return []byte(s), nil
+}
+
+type ScotiaAmtData struct {
+	Amount   ScotiaAmount `json:"amount,omitempty"`
+	Currency string       `json:"currency,omitempty"`
+}
+
+type SchemeNameData struct {
+	Code        string `json:"code,omitempty"`
+	Proprietary string `json:"proprietary,omitempty"`
+}
+
+type OtherData struct {
+	Identification string          `json:"identification,omitempty"`
+	SchemeName     *SchemeNameData `json:"scheme_name,omitempty"`
+}
+
+type OrganisationIdentification struct {
+	Other []OtherData `json:"other,omitempty"`
+}
+
+type IdentificationData struct {
+	OrganisationIdentification *OrganisationIdentification `json:"organisation_identification,omitempty"`
+}
+
+type InitiatingPartyData struct {
+	Name               string              `json:"name,omitempty"`
+	Identification     *IdentificationData `json:"identification,omitempty"`
+	CountryOfResidence string              `json:"country_of_residence,omitempty"`
 }
 
 type RequestPaymentData struct {
-	ProductCode            string `json:"product_code,omitempty"`
-	MessageIdentification  string `json:"message_identification,omitempty"`
-	EndToEndIdentification string `json:"end_to_end_identification,omitempty"`
-	CreditDebitIndicator   string `json:"credit_debit_indicator,omitempty"`
+	ProductCode                    string               `json:"product_code,omitempty"`
+	MessageIdentification          string               `json:"message_identification,omitempty"`
+	EndToEndIdentification         string               `json:"end_to_end_identification,omitempty"`
+	CreditDebitIndicator           string               `json:"credit_debit_indicator,omitempty"`
+	CreationDatetime               *ScotiaDatetime      `json:"creation_date_time,omitempty"`
+	PaymentExpiryDate              *ScotiaDatetime      `json:"payment_expiry_date,omitempty"`
+	SuppressResponderNotifications bool                 `json:"suppress_responder_notifications,omitempty"`
+	ReturnUrl                      string               `json:"return_url,omitempty"` //Need?
+	Language                       string               `json:"language,omitempty"`
+	InstructedAmtData              *ScotiaAmtData       `json:"instructed_amount,omitempty"`
+	InitiatingParty                *InitiatingPartyData `json:"initiating_party,omitempty"`
+}
+
+type RequestPayment struct {
+	Paymentdata *RequestPaymentData `json:"data,omitempty"`
 }
