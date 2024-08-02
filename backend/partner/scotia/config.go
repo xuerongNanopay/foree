@@ -7,16 +7,17 @@ import (
 )
 
 const (
-	ConfigBaseUrl           = "SCOTIA_BASE_URL"
-	ConfigBasicAuthUsername = "SCOTIA_BASIC_AUTH_USERNAME"
-	ConfigBasicAuthPassword = "SCOTIA_BASIC_AUTH_PASSWORD"
-	ConfigClientId          = "SCOTIA_CLIENT_ID"
-	ConfigJWTKid            = "SCOTIA_JWT_KID"
-	ConfigJWTAudience       = "SCOTIA_JWT_AUDIENCE"
-	ConfigJWTExpiry         = "SCOTIA_JWT_Expiry"
-	ConfigPrivateKeyDir     = "SCOTIA_PRIVATE_KEY_DIR"
-	ConfigPublicKeyDir      = "SCOTIA_Public_KEY_DIR"
-	ConfigScope             = "SCOTIA_SCOPE"
+	ConfigBaseUrl              = "SCOTIA_BASE_URL"
+	ConfigBasicAuthUsername    = "SCOTIA_BASIC_AUTH_USERNAME"
+	ConfigBasicAuthPassword    = "SCOTIA_BASIC_AUTH_PASSWORD"
+	ConfigClientId             = "SCOTIA_CLIENT_ID"
+	ConfigJWTKid               = "SCOTIA_JWT_KID"
+	ConfigJWTAudience          = "SCOTIA_JWT_AUDIENCE"
+	ConfigJWTExpiry            = "SCOTIA_JWT_Expiry"
+	ConfigPrivateKeyDir        = "SCOTIA_PRIVATE_KEY_DIR"
+	ConfigPublicKeyDir         = "SCOTIA_Public_KEY_DIR"
+	ConfigScope                = "SCOTIA_SCOPE"
+	ConfigPaymentRequestExpiry = "SCOTIA_PAYMENT_REQUEST_EXPIRY"
 )
 
 type ScotiaConfig interface {
@@ -40,6 +41,8 @@ type ScotiaConfig interface {
 	SetPublicKeyDir(u string)
 	GetScope() string
 	SetScope(u string)
+	GetPaymentRequestExpiry() int
+	SetPaymentRequestExpiry(u int)
 	SetConfig(key string, value string)
 	ShowConfigs() map[string]string
 }
@@ -83,6 +86,14 @@ func setConfigFromMap(m _scotiaConfig, configs map[string]string) _scotiaConfig 
 			panic(err)
 		}
 		m.SetJWTExpiry(n)
+	}
+	if val, ok := configs[ConfigPaymentRequestExpiry]; ok {
+		n, err := strconv.Atoi(val)
+		if err != nil {
+			//log?
+			panic(err)
+		}
+		m.SetPaymentRequestExpiry(n)
 	}
 	if val, ok := configs[ConfigPrivateKeyDir]; ok {
 		m.SetPrivateKeyDir(val)
@@ -145,15 +156,7 @@ func (c _scotiaConfig) SetJWTAudience(u string) {
 }
 
 func (c _scotiaConfig) GetJWTExpiry() int {
-	if val, ok := c[ConfigJWTExpiry]; ok {
-		v, k := val.(int)
-		if k {
-			return v
-		}
-		return 0
-	}
-	return 0
-
+	return getIntConfig(c, ConfigJWTExpiry)
 }
 
 func (c _scotiaConfig) SetJWTExpiry(u int) {
@@ -184,11 +187,13 @@ func (c _scotiaConfig) SetPublicKeyDir(u string) {
 	c[ConfigPublicKeyDir] = u
 }
 
-func getStringConfig(config _scotiaConfig, key string) string {
-	if val, ok := config[key]; ok {
-		return fmt.Sprintf("%v", val)
-	}
-	return ""
+func (c _scotiaConfig) GetPaymentRequestExpiry() int {
+	return getIntConfig(c, ConfigPaymentRequestExpiry)
+
+}
+
+func (c _scotiaConfig) SetPaymentRequestExpiry(u int) {
+	c[ConfigPaymentRequestExpiry] = u
 }
 
 func (c _scotiaConfig) String() string {
@@ -210,4 +215,22 @@ func (c _scotiaConfig) ShowConfigs() map[string]string {
 		ret[key] = fmt.Sprintf("%v", value)
 	}
 	return ret
+}
+
+func getStringConfig(config _scotiaConfig, key string) string {
+	if val, ok := config[key]; ok {
+		return fmt.Sprintf("%v", val)
+	}
+	return ""
+}
+
+func getIntConfig(config _scotiaConfig, key string) int {
+	if val, ok := config[key]; ok {
+		v, k := val.(int)
+		if k {
+			return v
+		}
+		return 0
+	}
+	return 0
 }

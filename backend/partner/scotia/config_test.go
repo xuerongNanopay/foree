@@ -7,16 +7,17 @@ import (
 func TestScotiaConfig(t *testing.T) {
 
 	config := map[string]string{
-		ConfigBaseUrl:           "http://www.dummy.com",
-		ConfigBasicAuthUsername: "xue",
-		ConfigBasicAuthPassword: "11111",
-		ConfigClientId:          "xxuuee",
-		ConfigJWTKid:            "yyyy",
-		ConfigJWTAudience:       "zzzz",
-		ConfigJWTExpiry:         "300",
-		ConfigPrivateKeyDir:     "~/test",
-		ConfigPublicKeyDir:      "~/test_pub",
-		ConfigScope:             "lllll",
+		ConfigBaseUrl:              "http://www.dummy.com",
+		ConfigBasicAuthUsername:    "xue",
+		ConfigBasicAuthPassword:    "11111",
+		ConfigClientId:             "xxuuee",
+		ConfigJWTKid:               "yyyy",
+		ConfigJWTAudience:          "zzzz",
+		ConfigJWTExpiry:            "300",
+		ConfigPrivateKeyDir:        "~/test",
+		ConfigPublicKeyDir:         "~/test_pub",
+		ConfigScope:                "lllll",
+		ConfigPaymentRequestExpiry: "44",
 	}
 
 	t.Run("config should construct correctly", func(t *testing.T) {
