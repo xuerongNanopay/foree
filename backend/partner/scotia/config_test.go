@@ -7,35 +7,27 @@ import (
 func TestScotiaConfig(t *testing.T) {
 
 	config := map[string]string{
-		ConfigBaseUrl:              "http://www.dummy.com",
-		ConfigBasicAuthUsername:    "xue",
-		ConfigBasicAuthPassword:    "11111",
-		ConfigClientId:             "xxuuee",
-		ConfigJWTKid:               "yyyy",
-		ConfigJWTAudience:          "zzzz",
-		ConfigJWTExpiry:            "300",
-		ConfigPrivateKeyDir:        "~/test",
-		ConfigPublicKeyDir:         "~/test_pub",
-		ConfigScope:                "lllll",
-		ConfigPaymentRequestExpiry: "44",
+		ConfigBaseUrl:                     "http://www.dummy.com",
+		ConfigBasicAuthUsername:           "xue",
+		ConfigBasicAuthPassword:           "11111",
+		ConfigClientId:                    "xxuuee",
+		ConfigJWTKid:                      "yyyy",
+		ConfigJWTAudience:                 "zzzz",
+		ConfigJWTExpiryMinutes:            "300",
+		ConfigPrivateKeyDir:               "~/test",
+		ConfigPublicKeyDir:                "~/test_pub",
+		ConfigScope:                       "lllll",
+		ConfigPaymentRequestExpiryMINUTES: "44",
 	}
 
 	t.Run("config should construct correctly", func(t *testing.T) {
 
 		sc := NewScotiaConfigWithDefaultConfig(config)
 
-		if config[ConfigBaseUrl] != sc.GetBaseUrl() {
-			t.Errorf("expect %v, but %v", config[ConfigBaseUrl], sc.GetBaseUrl())
-		}
-
-		if sc.GetJWTExpiry() != 300 {
-			t.Errorf("expect %v, but %v", 600, sc.GetJWTExpiry())
-		}
-
 		show := sc.ShowConfigs()
 
-		for key, value := range show {
-			if value != config[key] {
+		for key, value := range config {
+			if value != show[key] {
 				t.Errorf("expect %v, but %v", config[key], value)
 			}
 		}

@@ -49,7 +49,7 @@ func (s *scotiaClientImpl) signJWT() (string, error) {
 		Subject:   s.config.GetClientId(),
 		Audience:  []string{s.config.GetJWTAudience()},
 		Issuer:    s.config.GetClientId(),
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(s.config.GetJWTExpiry()) * time.Minute)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(s.config.GetJWTExpiryMinutes()) * time.Minute)),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	token.Header["kid"] = s.config.GetJWTKid()
