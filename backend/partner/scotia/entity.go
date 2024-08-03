@@ -161,5 +161,20 @@ type RequestPaymentResponseData struct {
 
 type RequestPaymentResponse struct {
 	ResponseCommon
-	ResponseData *RequestPaymentResponseData `json:"data,omitempty"`
+	ResponseData RequestPaymentResponseData `json:"data,omitempty"`
+}
+
+type PaymentStatusData struct {
+	PaymentId                      string        `json:"payment_id,omitempty"`
+	RequestReference               string        `json:"request_reference,omitempty"`
+	RequestAmount                  ScotiaAmtData `json:"request_amount,omitempty"`
+	PartialFulfillmentAllowed      bool          `json:"partial_fulfillment_allowed,omitempty"`
+	RequestDate                    string        `json:"request_date,omitempty"`
+	ExpiryDate                     string        `json:"expiry_date,omitempty"`
+	RequestStatus                  string        `json:"request_status,omitempty"`
+	NotificationStatus             string        `json:"notification_status,omitempty"`
+	SuppressResponderNotifications bool          `json:"suppress_responder_notifications,omitempty"`
+	OriginatingChannelIndicator    string        `json:"originating_channel_indicator,omitempty"`
+	GatewayUrl                     string        `json:"gateway_url,omitempty"`
+	AdditionalRemittanceInfo       string        `json:"additinoal_remittance_info,omitempty"`
 }

@@ -68,8 +68,8 @@ func (s *scotiaClientImpl) SetConfig(key string, value string) {
 	s.config.SetConfig(key, value)
 }
 
-func (s *scotiaClientImpl) RequestPayment() (string, error) {
-
+func (s *scotiaClientImpl) RequestPayment() (*RequestPaymentResponse, error) {
+	return nil, nil
 }
 
 func (s *scotiaClientImpl) signJWT() (string, error) {
