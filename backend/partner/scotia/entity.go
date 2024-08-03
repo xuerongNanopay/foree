@@ -130,6 +130,14 @@ type RequestPaymentRequest struct {
 	RequestData *RequestPaymentRequestData `json:"data,omitempty"`
 }
 
+type NotificationData struct {
+	Code      string `json:"code,omitempty"`
+	Message   string `json:"message,omitempty"`
+	Severity  string `json:"severity,omitempty"`
+	Uuid      string `json:"uuid,omitempty"`
+	Timestamp string `json:"timestamp,omitempty"`
+}
+
 type RequestPaymentResponseData struct {
 	PaymentId               string `json:"payment_id,omitempty"`
 	ClearingSystemReference string `json:"clearing_system_reference,omitempty"`
@@ -137,5 +145,6 @@ type RequestPaymentResponseData struct {
 }
 
 type RequestPaymentResponse struct {
-	ResponseData *RequestPaymentResponseData `json:"data,omitempty"`
+	ResponseData  *RequestPaymentResponseData `json:"data,omitempty"`
+	Notifications []NotificationData          `json:"notifications,omitempty"`
 }
