@@ -74,22 +74,51 @@ type CreditorData struct {
 	ContactDetails     *ContactDetailsData `json:"contact_details,omitempty"`
 }
 
+type CreditorAccountData struct {
+	Identification string `json:"identification,omitempty"`
+	Currency       string `json:"currency,omitempty"`
+	SchemeName     string `json:"scheme_nam,omitempty"`
+}
+
+type FraudSupplementaryInfoData struct {
+	CustomerAuthenticationMethod string `json:"customer_authentication_method,omitempty"`
+	CustomerIpAddress            string `json:"customer_ip_address,omitempty"`
+}
+
+type PaymentConditionData struct {
+	AmountModificationAllowed  bool `json:"amount_modification_allowed,omitempty"`
+	EarlyPaymentAllowed        bool `json:"early_payment_allowed,omitempty"`
+	GuaranteedPaymentRequested bool `json:"guaranteed_payment_requested,omitempty"`
+}
+
+type CategoryPurposeData struct {
+	Code string `json:"code,omitempty"`
+}
+
+type PaymentTypeInformationData struct {
+	CategoryPurpose *CategoryPurposeData `json:"category_purpose,omitempty"`
+}
+
 type RequestPaymentData struct {
-	ProductCode                    string               `json:"product_code,omitempty"`
-	MessageIdentification          string               `json:"message_identification,omitempty"`
-	EndToEndIdentification         string               `json:"end_to_end_identification,omitempty"`
-	CreditDebitIndicator           string               `json:"credit_debit_indicator,omitempty"`
-	CreationDatetime               *ScotiaDatetime      `json:"creation_date_time,omitempty"`
-	PaymentExpiryDate              *ScotiaDatetime      `json:"payment_expiry_date,omitempty"`
-	SuppressResponderNotifications bool                 `json:"suppress_responder_notifications,omitempty"`
-	ReturnUrl                      string               `json:"return_url,omitempty"` //Need?
-	Language                       string               `json:"language,omitempty"`
-	InstructedAmtData              *ScotiaAmtData       `json:"instructed_amount,omitempty"`
-	InitiatingParty                *InitiatingPartyData `json:"initiating_party,omitempty"`
-	Debtor                         *DebtorData          `json:"debtor,omitempty"`
-	UltimateDebtor                 *DebtorData          `json:"ultimate_debtor,omitempty"`
-	Creditor                       *CreditorData        `json:"creditor,omitempty"`
-	UltimateCreditor               *CreditorData        `json:"ultimate_creditor,omitempty"`
+	ProductCode                    string                      `json:"product_code,omitempty"`
+	MessageIdentification          string                      `json:"message_identification,omitempty"`
+	EndToEndIdentification         string                      `json:"end_to_end_identification,omitempty"`
+	CreditDebitIndicator           string                      `json:"credit_debit_indicator,omitempty"`
+	CreationDatetime               *ScotiaDatetime             `json:"creation_date_time,omitempty"`
+	PaymentExpiryDate              *ScotiaDatetime             `json:"payment_expiry_date,omitempty"`
+	SuppressResponderNotifications bool                        `json:"suppress_responder_notifications,omitempty"`
+	ReturnUrl                      string                      `json:"return_url,omitempty"` //Need?
+	Language                       string                      `json:"language,omitempty"`
+	InstructedAmtData              *ScotiaAmtData              `json:"instructed_amount,omitempty"`
+	InitiatingParty                *InitiatingPartyData        `json:"initiating_party,omitempty"`
+	Debtor                         *DebtorData                 `json:"debtor,omitempty"`
+	UltimateDebtor                 *DebtorData                 `json:"ultimate_debtor,omitempty"`
+	Creditor                       *CreditorData               `json:"creditor,omitempty"`
+	UltimateCreditor               *CreditorData               `json:"ultimate_creditor,omitempty"`
+	CreditorAccount                *CreditorAccountData        `json:"creditor_account,omitempty"`
+	FraudSupplementaryInfo         *FraudSupplementaryInfoData `json:"fraud_supplementary_info,omitempty"`
+	PaymentCondition               *PaymentConditionData       `json:"payment_condition,omitempty"`
+	PaymentTypeInformation         *PaymentTypeInformationData `json:"payment_type_information,omitempty"`
 }
 
 type RequestPayment struct {
