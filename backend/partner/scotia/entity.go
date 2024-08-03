@@ -44,18 +44,34 @@ type OtherData struct {
 	SchemeName     *SchemeNameData `json:"scheme_name,omitempty"`
 }
 
-type OrganisationIdentification struct {
+type OrganisationIdentificationData struct {
 	Other []OtherData `json:"other,omitempty"`
 }
 
 type IdentificationData struct {
-	OrganisationIdentification *OrganisationIdentification `json:"organisation_identification,omitempty"`
+	OrganisationIdentification *OrganisationIdentificationData `json:"organisation_identification,omitempty"`
 }
 
 type InitiatingPartyData struct {
 	Name               string              `json:"name,omitempty"`
 	Identification     *IdentificationData `json:"identification,omitempty"`
 	CountryOfResidence string              `json:"country_of_residence,omitempty"`
+}
+
+type ContactDetailsData struct {
+	EmailAddress string `json:"email_address,omitempty"`
+}
+
+type DebtorData struct {
+	Name               string              `json:"name,omitempty"`
+	CountryOfResidence string              `json:"country_of_residence,omitempty"`
+	ContactDetails     *ContactDetailsData `json:"contact_details,omitempty"`
+}
+
+type CreditorData struct {
+	Name               string              `json:"name,omitempty"`
+	CountryOfResidence string              `json:"country_of_residence,omitempty"`
+	ContactDetails     *ContactDetailsData `json:"contact_details,omitempty"`
 }
 
 type RequestPaymentData struct {
@@ -70,6 +86,10 @@ type RequestPaymentData struct {
 	Language                       string               `json:"language,omitempty"`
 	InstructedAmtData              *ScotiaAmtData       `json:"instructed_amount,omitempty"`
 	InitiatingParty                *InitiatingPartyData `json:"initiating_party,omitempty"`
+	Debtor                         *DebtorData          `json:"debtor,omitempty"`
+	UltimateDebtor                 *DebtorData          `json:"ultimate_debtor,omitempty"`
+	Creditor                       *CreditorData        `json:"creditor,omitempty"`
+	UltimateCreditor               *CreditorData        `json:"ultimate_creditor,omitempty"`
 }
 
 type RequestPayment struct {
