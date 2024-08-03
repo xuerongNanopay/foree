@@ -14,6 +14,21 @@ const (
 	CurrencyCAD            = "CAD"
 )
 
+type ResponseCommon struct {
+	StatusCode    int                `json:"-"`
+	RawRequest    string             `json:"-"`
+	RawResponse   string             `json:"-"`
+	Notifications []NotificationData `json:"notifications,omitempty"`
+}
+
+type tokenResponse struct {
+	ResponseCommon
+	AccessToken string `json:"access_token,omitempty"`
+	Scope       string `json:"scope,omitempty"`
+	TokenType   string `json:"tokenType,omitempty"`
+	ExpiresIn   int64  `json:"expires_in,omitempty"`
+}
+
 type ScotiaDatetime time.Time
 
 func (d ScotiaDatetime) MarshalJSON() ([]byte, error) {
@@ -145,6 +160,6 @@ type RequestPaymentResponseData struct {
 }
 
 type RequestPaymentResponse struct {
-	ResponseData  *RequestPaymentResponseData `json:"data,omitempty"`
-	Notifications []NotificationData          `json:"notifications,omitempty"`
+	ResponseCommon
+	ResponseData *RequestPaymentResponseData `json:"data,omitempty"`
 }
