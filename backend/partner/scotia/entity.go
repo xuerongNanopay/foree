@@ -103,7 +103,7 @@ type RemittanceInformationData struct {
 	Unstructured []string `json:"unstructured,omitempty"`
 }
 
-type RequestPaymentData struct {
+type RequestPaymentRequestData struct {
 	ProductCode                    string                      `json:"product_code,omitempty"`
 	MessageIdentification          string                      `json:"message_identification,omitempty"`
 	EndToEndIdentification         string                      `json:"end_to_end_identification,omitempty"`
@@ -126,6 +126,16 @@ type RequestPaymentData struct {
 	RemittanceInformation          *RemittanceInformationData  `json:"remittance_information,omitempty"`
 }
 
-type RequestPayment struct {
-	Paymentdata *RequestPaymentData `json:"data,omitempty"`
+type RequestPaymentRequest struct {
+	RequestData *RequestPaymentRequestData `json:"data,omitempty"`
+}
+
+type RequestPaymentResponseData struct {
+	PaymentId               string `json:"payment_id,omitempty"`
+	ClearingSystemReference string `json:"clearing_system_reference,omitempty"`
+	Status                  string `json:"status,omitempty"` //not sure if this field exists
+}
+
+type RequestPaymentResponse struct {
+	ResponseData *RequestPaymentResponseData `json:"data,omitempty"`
 }
