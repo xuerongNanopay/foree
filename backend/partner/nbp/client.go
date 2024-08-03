@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type authCache struct {
+type tokenData struct {
 	token          string
 	rawTokenExpiry string
 	tokenExpiry    *time.Time
@@ -45,7 +45,7 @@ func NewNBPClient(configs map[string]string) NBPClient {
 type NBPClientImpl struct {
 	config     NBPConfig
 	httpClient *http.Client
-	auth       *authCache
+	auth       *tokenData
 	mu         sync.Mutex
 }
 
@@ -131,12 +131,12 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 }
 
 func (c *NBPClientImpl) updateToken() error {
-	if isTokenAvailable(c.auth, c.config.GetTokenExpiryThreshold()) {
+	if isValidToken(c.auth, c.config.GetTokenExpiryThreshold()) {
 		return nil
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if isTokenAvailable(c.auth, c.config.GetTokenExpiryThreshold()) {
+	if isValidToken(c.auth, c.config.GetTokenExpiryThreshold()) {
 		return nil
 	}
 
@@ -171,7 +171,7 @@ func (c *NBPClientImpl) updateToken() error {
 		fmt.Printf("NBP Client authenticate: unable to parse token_expiry `%v`", rawTokenExpiry)
 	}
 
-	auth := &authCache{
+	auth := &tokenData{
 		token:          token,
 		rawTokenExpiry: rawTokenExpiry,
 		tokenExpiry:    tokenExpiry,

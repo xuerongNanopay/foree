@@ -3,6 +3,7 @@ package scotia
 import (
 	cryptoRsa "crypto/rsa"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -11,6 +12,12 @@ import (
 type ScotiaClient interface {
 	GetConfigs() map[string]string
 	SetConfig(key string, value string)
+}
+
+type tokenData struct {
+	token          string
+	rawTokenExpiry string
+	tokenExpiry    *time.Time
 }
 
 type rsa struct {
@@ -34,6 +41,8 @@ func NewScotiaClientImpl(configs map[string]string) ScotiaClient {
 type scotiaClientImpl struct {
 	config ScotiaConfig
 	rsa    *rsa
+	auth   *tokenData
+	mu     sync.Mutex
 }
 
 func (s *scotiaClientImpl) GetConfigs() map[string]string {

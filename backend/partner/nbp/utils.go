@@ -15,7 +15,7 @@ func parseTokenExpiryDate(rawExpiry string) (*time.Time, error) {
 	return &t, nil
 }
 
-func isTokenAvailable(auth *authCache, threshold int64) bool {
+func isValidToken(auth *tokenData, threshold int64) bool {
 	if auth == nil || auth.token == "" || auth.tokenExpiry == nil {
 		return false
 	}
