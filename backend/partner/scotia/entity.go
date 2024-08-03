@@ -99,6 +99,10 @@ type PaymentTypeInformationData struct {
 	CategoryPurpose *CategoryPurposeData `json:"category_purpose,omitempty"`
 }
 
+type RemittanceInformationData struct {
+	Unstructured []string `json:"unstructured,omitempty"`
+}
+
 type RequestPaymentData struct {
 	ProductCode                    string                      `json:"product_code,omitempty"`
 	MessageIdentification          string                      `json:"message_identification,omitempty"`
@@ -119,6 +123,7 @@ type RequestPaymentData struct {
 	FraudSupplementaryInfo         *FraudSupplementaryInfoData `json:"fraud_supplementary_info,omitempty"`
 	PaymentCondition               *PaymentConditionData       `json:"payment_condition,omitempty"`
 	PaymentTypeInformation         *PaymentTypeInformationData `json:"payment_type_information,omitempty"`
+	RemittanceInformation          *RemittanceInformationData  `json:"remittance_information,omitempty"`
 }
 
 type RequestPayment struct {
