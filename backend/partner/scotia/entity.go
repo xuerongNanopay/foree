@@ -181,5 +181,22 @@ type PaymentStatusData struct {
 
 type PaymentStatusResponse struct {
 	ResponseCommon
-	Data PaymentStatusData `json:"data,omitempty"`
+	PaymentStatuses []PaymentStatusData `json:"data,omitempty"`
+}
+
+type PaymentDetailData struct {
+	CreationDatetime               string        `json:"creation_datetime,omitempty"`
+	OriginalCreationDatetime       string        `json:"original_creation_datetime,omitempty"`
+	OriginalEndToEndIdentification string        `json:"original_end_to_end_identification,omitempty"`
+	TransactionStatus              string        `json:"transaction_status,omitempty"`
+	AcceptanceDatetime             string        `json:"acceptance_datetime,omitempty"`
+	ClearingSystemReference        string        `json:"clearing_system_reference,omitempty"`
+	Amount                         ScotiaAmtData `json:"amount,omitempty"`
+	RequestedExecutionDate         string        `json:"requested_execution_date,omitempty"`
+	ExpiryDate                     string        `json:"expiry_date,omitempty"`
+}
+
+type PaymentDetailResponse struct {
+	ResponseCommon
+	PaymentDetail PaymentDetailData `json:"data,omitempty"`
 }
