@@ -71,18 +71,7 @@ func (s *scotiaClientImpl) SetConfig(key string, value string) {
 }
 
 func (s *scotiaClientImpl) CancelPayment(req CancelPaymentRequest) (*CancelPaymentResponse, error) {
-
-}
-
-func (s *scotiaClientImpl) RequestPayment(req RequestPaymentRequest) (*RequestPaymentResponse, error) {
-	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests", s.config.GetBaseUrl())
-
-	token, err := s.getToken()
-	if err != nil {
-		return nil, err
-	}
-
-	basicAuth := fmt.Sprintf("Basic %v", token)
+	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests/%v/cancel", s.config.GetBaseUrl(), req.PaymentId)
 
 	rawReqeust, err := json.Marshal(req)
 	if err != nil {
@@ -96,9 +85,64 @@ func (s *scotiaClientImpl) RequestPayment(req RequestPaymentRequest) (*RequestPa
 		return nil, err
 	}
 
-	s.setCommonHeaders(r)
-	r.Header.Add("Content-Type", "application/json")
-	r.Header.Add("Authorization", basicAuth)
+	r.Header.Add("x-b3-spanid", req.EndToEndId)
+	r.Header.Add("x-b3-traceid", req.EndToEndId)
+	cErr := s.setCommonHeaders(r)
+	if cErr != nil {
+		return nil, cErr
+	}
+
+	resp, err := s.httpClient.Do(r)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	ret := &CancelPaymentResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:  resp.StatusCode,
+			RawRequest:  string(rawReqeust),
+			RawResponse: string(body),
+		},
+	}
+
+	derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+	if derr != nil {
+		//TODO: Logger error. return token caller should hanlde the Error
+		return ret, nil
+	}
+
+	return ret, nil
+
+}
+
+func (s *scotiaClientImpl) RequestPayment(req RequestPaymentRequest) (*RequestPaymentResponse, error) {
+	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests", s.config.GetBaseUrl())
+
+	rawReqeust, err := json.Marshal(req)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	r, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	r.Header.Add("x-b3-spanid", req.RequestData.EndToEndIdentification)
+	r.Header.Add("x-b3-traceid", req.RequestData.MessageIdentification)
+	cErr := s.setCommonHeaders(r)
+	if cErr != nil {
+		return nil, cErr
+	}
 
 	resp, err := s.httpClient.Do(r)
 	if err != nil {
@@ -203,7 +247,15 @@ func (s *scotiaClientImpl) signJWT() (string, error) {
 	return ss, nil
 }
 
-func (s *scotiaClientImpl) setCommonHeaders(r *http.Request) {
+func (s *scotiaClientImpl) setCommonHeaders(r *http.Request) error {
+	token, err := s.getToken()
+	if err != nil {
+		return err
+	}
+
+	basicAuth := fmt.Sprintf("Basic %v", token)
+	r.Header.Add("Content-Type", "application/json")
+	r.Header.Add("Authorization", basicAuth)
 	r.Header.Add("customer-profile-id", s.config.GetProfileId())
 	r.Header.Add("x-country-code", s.config.GetCountryCode())
 	r.Header.Add("x-api-key", s.config.GetApiKey())
