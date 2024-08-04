@@ -348,6 +348,8 @@ func (s *scotiaClientImpl) setCommonHeaders(r *http.Request) error {
 	r.Header.Add("customer-profile-id", s.config.GetProfileId())
 	r.Header.Add("x-country-code", s.config.GetCountryCode())
 	r.Header.Add("x-api-key", s.config.GetApiKey())
+
+	return nil
 }
 
 // If token is invalid, then update token
