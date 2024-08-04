@@ -17,6 +17,9 @@ const (
 	ConfigPrivateKeyDir     = "SCOTIA_PRIVATE_KEY_DIR"
 	ConfigPublicKeyDir      = "SCOTIA_Public_KEY_DIR"
 	ConfigScope             = "SCOTIA_SCOPE"
+	ConfigProfileId         = "SCOTIA_PROFILE_ID"
+	ConfigApiKey            = "SCOTIA_API_KEY"
+	ConfigCountryCode       = "SCOTIA_COUNTRY_CODE"
 )
 
 type ScotiaConfig interface {
@@ -40,6 +43,12 @@ type ScotiaConfig interface {
 	SetPublicKeyDir(u string)
 	GetScope() string
 	SetScope(u string)
+	GetProfileId() string
+	SetProfileId(u string)
+	GetApiKey() string
+	SetApiKey(u string)
+	GetCountryCode() string
+	SetCountryCode(u string)
 	SetConfig(key string, value string)
 	ShowConfigs() map[string]string
 }
@@ -89,6 +98,15 @@ func setConfigFromMap(m _scotiaConfig, configs map[string]string) _scotiaConfig 
 	}
 	if val, ok := configs[ConfigPublicKeyDir]; ok {
 		m.SetPublicKeyDir(val)
+	}
+	if val, ok := configs[ConfigProfileId]; ok {
+		m.SetProfileId(val)
+	}
+	if val, ok := configs[ConfigApiKey]; ok {
+		m.SetApiKey(val)
+	}
+	if val, ok := configs[ConfigCountryCode]; ok {
+		m.SetCountryCode(val)
 	}
 	if val, ok := configs[ConfigScope]; ok {
 		m.SetScope(val)
@@ -174,6 +192,30 @@ func (c _scotiaConfig) GetPublicKeyDir() string {
 
 func (c _scotiaConfig) SetPublicKeyDir(u string) {
 	c[ConfigPublicKeyDir] = u
+}
+
+func (c _scotiaConfig) GetProfileId() string {
+	return getStringConfig(c, ConfigProfileId)
+}
+
+func (c _scotiaConfig) SetProfileId(u string) {
+	c[ConfigProfileId] = u
+}
+
+func (c _scotiaConfig) GetApiKey() string {
+	return getStringConfig(c, ConfigApiKey)
+}
+
+func (c _scotiaConfig) SetApiKey(u string) {
+	c[ConfigApiKey] = u
+}
+
+func (c _scotiaConfig) GetCountryCode() string {
+	return getStringConfig(c, ConfigCountryCode)
+}
+
+func (c _scotiaConfig) SetCountryCode(u string) {
+	c[ConfigCountryCode] = u
 }
 
 func (c _scotiaConfig) String() string {

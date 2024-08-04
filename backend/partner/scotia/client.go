@@ -22,6 +22,8 @@ const (
 )
 
 type ScotiaClient interface {
+	RequestPayment(req RequestPaymentRequest) (*RequestPaymentResponse, error)
+
 	GetConfigs() map[string]string
 	SetConfig(key string, value string)
 }
@@ -68,37 +70,74 @@ func (s *scotiaClientImpl) SetConfig(key string, value string) {
 	s.config.SetConfig(key, value)
 }
 
-func (s *scotiaClientImpl) RequestPayment() (*RequestPaymentResponse, error) {
-	return nil, nil
-}
+func (s *scotiaClientImpl) RequestPayment(req RequestPaymentRequest) (*RequestPaymentResponse, error) {
+	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests", s.config.GetBaseUrl())
 
-func (s *scotiaClientImpl) signJWT() (string, error) {
-	claims := &jwt.RegisteredClaims{
-		Subject:   s.config.GetClientId(),
-		Audience:  []string{s.config.GetJWTAudience()},
-		Issuer:    s.config.GetClientId(),
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(s.config.GetJWTExpiryMinutes()) * time.Minute)),
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	token.Header["kid"] = s.config.GetJWTKid()
-	ss, err := token.SignedString(s.rsa.signKey)
+	token, err := s.getToken()
 	if err != nil {
-		return "", fmt.Errorf("ScotiaClientImpl JWT signature got error `%v`", err.Error())
+		return nil, err
 	}
-	return ss, nil
+
+	basicAuth := fmt.Sprintf("Basic %v", token)
+
+	rawReqeust, err := json.Marshal(req)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	r, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	s.setCommonHeaders(r)
+	r.Header.Add("Content-Type", "application/json")
+	r.Header.Add("Authorization", basicAuth)
+
+	resp, err := s.httpClient.Do(r)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	ret := &RequestPaymentResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:  resp.StatusCode,
+			RawRequest:  string(rawReqeust),
+			RawResponse: string(body),
+		},
+	}
+
+	derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+	if derr != nil {
+		//TODO: Logger error. return token caller should hanlde the Error
+		return ret, nil
+	}
+
+	return ret, nil
+
 }
 
 func (s *scotiaClientImpl) tokenRequest() (*tokenResponse, error) {
 	endpoint := fmt.Sprintf("%s/scotiabank/wam/vi/getToken", s.config.GetBaseUrl())
-	formData := url.Values{}
 	basicAuth := fmt.Sprintf("%s:%s", s.config.GetAuthUsername(), s.config.GetAuthPassword())
 	basicAuth = base64.StdEncoding.EncodeToString([]byte(basicAuth))
 	basicAuth = fmt.Sprintf("Basic %v", basicAuth)
+
 	jwt, err := s.signJWT()
 	if err != nil {
 		return nil, err
 	}
 
+	formData := url.Values{}
 	formData.Add("grant_type", "client_credentials")
 	formData.Add("scope", s.config.GetScope())
 	formData.Add("client_id", s.config.GetClientId())
@@ -112,6 +151,7 @@ func (s *scotiaClientImpl) tokenRequest() (*tokenResponse, error) {
 	}
 
 	r.Header.Add("Authorization", basicAuth)
+	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := s.httpClient.Do(r)
 	if err != nil {
@@ -141,6 +181,28 @@ func (s *scotiaClientImpl) tokenRequest() (*tokenResponse, error) {
 
 	return token, nil
 
+}
+
+func (s *scotiaClientImpl) signJWT() (string, error) {
+	claims := &jwt.RegisteredClaims{
+		Subject:   s.config.GetClientId(),
+		Audience:  []string{s.config.GetJWTAudience()},
+		Issuer:    s.config.GetClientId(),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(s.config.GetJWTExpiryMinutes()) * time.Minute)),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	token.Header["kid"] = s.config.GetJWTKid()
+	ss, err := token.SignedString(s.rsa.signKey)
+	if err != nil {
+		return "", fmt.Errorf("ScotiaClientImpl JWT signature got error `%v`", err.Error())
+	}
+	return ss, nil
+}
+
+func (s *scotiaClientImpl) setCommonHeaders(r *http.Request) {
+	r.Header.Add("customer-profile-id", s.config.GetProfileId())
+	r.Header.Add("x-country-code", s.config.GetCountryCode())
+	r.Header.Add("x-api-key", s.config.GetApiKey())
 }
 
 // If token is invalid, then update token

@@ -17,6 +17,9 @@ func TestScotiaConfig(t *testing.T) {
 		ConfigPrivateKeyDir:     "~/test",
 		ConfigPublicKeyDir:      "~/test_pub",
 		ConfigScope:             "lllll",
+		ConfigApiKey:            "vvvv",
+		ConfigProfileId:         "dsafdasf",
+		ConfigCountryCode:       "CA",
 	}
 
 	t.Run("config should construct correctly", func(t *testing.T) {
