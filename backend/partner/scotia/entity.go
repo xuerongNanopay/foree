@@ -161,7 +161,7 @@ type RequestPaymentResponseData struct {
 
 type RequestPaymentResponse struct {
 	ResponseCommon
-	ResponseData RequestPaymentResponseData `json:"data,omitempty"`
+	Data RequestPaymentResponseData `json:"data,omitempty"`
 }
 
 type PaymentStatusData struct {
@@ -177,4 +177,9 @@ type PaymentStatusData struct {
 	OriginatingChannelIndicator    string        `json:"originating_channel_indicator,omitempty"`
 	GatewayUrl                     string        `json:"gateway_url,omitempty"`
 	AdditionalRemittanceInfo       string        `json:"additinoal_remittance_info,omitempty"`
+}
+
+type PaymentStatusResponse struct {
+	ResponseCommon
+	Data PaymentStatusData `json:"data,omitempty"`
 }

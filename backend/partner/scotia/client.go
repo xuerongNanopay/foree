@@ -28,7 +28,7 @@ type ScotiaClient interface {
 
 type tokenData struct {
 	token       string
-	tokenExpiry *time.Time
+	tokenExpiry time.Time
 	scope       string
 	tokenType   string
 	expirysIn   int64
@@ -170,11 +170,21 @@ func (s *scotiaClientImpl) maybeUpdateToken() error {
 		return fmt.Errorf("scotialClientImpl: token request failed with status code `%v`, response payload `%v`", tokenResp.StatusCode, tokenResp.RawResponse)
 	}
 
+	newAuth := &tokenData{
+		token:       tokenResp.AccessToken,
+		tokenType:   tokenResp.TokenType,
+		scope:       tokenResp.Scope,
+		expirysIn:   tokenResp.ExpiresIn,
+		tokenExpiry: time.Now().Add(tokenExpiryInMinutes * time.Minute),
+	}
+
+	s.auth = newAuth
+
 	return nil
 }
 
 func isValidToken(auth *tokenData, threshold int64) bool {
-	if auth == nil || auth.token == "" || auth.tokenExpiry == nil {
+	if auth == nil || auth.token == "" || auth.tokenExpiry.IsZero() {
 		return false
 	}
 
