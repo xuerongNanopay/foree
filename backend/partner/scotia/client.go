@@ -1,5 +1,7 @@
 package scotia
 
+//TODO: read RSA from file.
+
 import (
 	"bytes"
 	cryptoRsa "crypto/rsa"
