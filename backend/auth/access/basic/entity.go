@@ -18,8 +18,8 @@ type BasicAccess struct {
 	Email          string            `json:"email"`
 	Passowrd       string            `json:"-"`
 	VerifyCode     string            `json:"-"`
-	CodeVerifiedAt time.Time         `json:"-"`
-	CreateAt       time.Timer        `json:"-"`
-	UpdateAt       time.Timer        `json:"-"`
+	CodeVerifiedAt time.Time         `json:"codeVerifiedAt"`
+	CreateAt       time.Timer        `json:"createAt"`
+	UpdateAt       time.Timer        `json:"updateAt"`
 	UserId         uint64            `json:"userId"`
 }

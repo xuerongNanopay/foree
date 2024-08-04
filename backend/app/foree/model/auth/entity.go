@@ -1,4 +1,4 @@
-package auth
+package foree_auth
 
 import "time"
 
