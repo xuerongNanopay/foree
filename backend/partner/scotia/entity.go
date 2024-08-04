@@ -201,6 +201,15 @@ type PaymentDetailResponse struct {
 	PaymentDetail PaymentDetailData `json:"data,omitempty"`
 }
 
+type CancelPaymentData struct {
+	Status string `json:"status,omitempty"`
+}
+
+type CancelPaymentResponse struct {
+	ResponseCommon
+	CancelStatus CancelPaymentData `json:"data,omitempty"`
+}
+
 type CancelPaymentRequest struct {
 	PaymentId    string `json:"-"`
 	EndToEndId   string `json:"-"`

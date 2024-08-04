@@ -70,6 +70,10 @@ func (s *scotiaClientImpl) SetConfig(key string, value string) {
 	s.config.SetConfig(key, value)
 }
 
+func (s *scotiaClientImpl) CancelPayment(req CancelPaymentRequest) (*CancelPaymentResponse, error) {
+
+}
+
 func (s *scotiaClientImpl) RequestPayment(req RequestPaymentRequest) (*RequestPaymentResponse, error) {
 	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests", s.config.GetBaseUrl())
 
