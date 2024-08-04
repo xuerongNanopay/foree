@@ -23,7 +23,9 @@ const (
 
 type ScotiaClient interface {
 	RequestPayment(req RequestPaymentRequest) (*RequestPaymentResponse, error)
-
+	PaymentDetail(req *PaymentDetailRequest) (*PaymentDetailResponse, error)
+	PaymentStatus(req *PaymentStatusRequest) (*PaymentStatusResponse, error)
+	CancelPayment(req CancelPaymentRequest) (*CancelPaymentResponse, error)
 	GetConfigs() map[string]string
 	SetConfig(key string, value string)
 }
@@ -68,6 +70,93 @@ func (s *scotiaClientImpl) GetConfigs() map[string]string {
 
 func (s *scotiaClientImpl) SetConfig(key string, value string) {
 	s.config.SetConfig(key, value)
+}
+
+func (s *scotiaClientImpl) PaymentStatus(req *PaymentStatusRequest) (*PaymentStatusResponse, error) {
+	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests", s.config.GetBaseUrl())
+	r, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	r.Header.Add("x-b3-spanid", req.EndToEndId)
+	r.Header.Add("x-b3-traceid", req.EndToEndId)
+	r.Header.Add("request_for_payment_id", req.PaymentId)
+	cErr := s.setCommonHeaders(r)
+	if cErr != nil {
+		return nil, cErr
+	}
+
+	resp, err := s.httpClient.Do(r)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	ret := &PaymentStatusResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:  resp.StatusCode,
+			RawResponse: string(body),
+		},
+	}
+
+	derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+	if derr != nil {
+		//TODO: Logger error. return token caller should hanlde the Error
+		return ret, nil
+	}
+
+	return ret, nil
+}
+
+func (s *scotiaClientImpl) PaymentDetail(req *PaymentDetailRequest) (*PaymentDetailResponse, error) {
+	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests/%v", s.config.GetBaseUrl(), req.PaymentId)
+	r, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	r.Header.Add("x-b3-spanid", req.EndToEndId)
+	r.Header.Add("x-b3-traceid", req.EndToEndId)
+	cErr := s.setCommonHeaders(r)
+	if cErr != nil {
+		return nil, cErr
+	}
+
+	resp, err := s.httpClient.Do(r)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	ret := &PaymentDetailResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:  resp.StatusCode,
+			RawResponse: string(body),
+		},
+	}
+
+	derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+	if derr != nil {
+		//TODO: Logger error. return token caller should hanlde the Error
+		return ret, nil
+	}
+
+	return ret, nil
 }
 
 func (s *scotiaClientImpl) CancelPayment(req CancelPaymentRequest) (*CancelPaymentResponse, error) {
