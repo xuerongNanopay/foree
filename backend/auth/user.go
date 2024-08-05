@@ -97,6 +97,7 @@ func (repo *UserRepo) GetUniqueById(id int64) (*User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("GetById: %v", err)
 	}
+	defer rows.Close()
 
 	var u *User
 

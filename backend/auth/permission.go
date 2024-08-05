@@ -2,6 +2,7 @@ package auth
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -9,7 +10,7 @@ import (
 const (
 	SQLPermissionByGroupId = `
 		SELECT 
-			p.id
+			p.id, p.description, p.is_enable
 		FROM group_permission as gp
 		INNER JOIN permission as p ON gp.permission_id=p.id
 		WHERE p.is_enable = true and pg.is_enable = true and pg.group_id = ?
@@ -52,8 +53,41 @@ type PermissionRepo struct {
 	db *sql.DB
 }
 
-func (repo *PermissionRepo) GetAllByGroupId(groupId string) ([]Permission, error) {
-	return nil, nil
+func (repo *PermissionRepo) GetAllByGroupId(groupId string) ([]*Permission, error) {
+	rows, err := repo.db.Query(SQLPermissionByGroupId)
+
+	if err != nil {
+		return nil, fmt.Errorf("GetAllByGroupId: %v", err)
+	}
+	defer rows.Close()
+
+	ps := make([]*Permission, 16)
+	for rows.Next() {
+		p, err := scanRowIntoPermission(rows)
+		if err != nil {
+			return nil, fmt.Errorf("GetAllByGroupId: %v", err)
+		}
+		ps = append(ps, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("GetAllByGroupId: %v", err)
+	}
+
+	return ps, nil
+}
+
+func scanRowIntoPermission(rows *sql.Rows) (*Permission, error) {
+	p := new(Permission)
+	err := rows.Scan(
+		&p.ID,
+		&p.Description,
+		&p.IsEnable,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
 }
 
 func IsPermissionGrand(requiredPermission string, ownedPermission string) bool {
