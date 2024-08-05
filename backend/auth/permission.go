@@ -2,6 +2,7 @@ package auth
 
 import (
 	"database/sql"
+	"strings"
 	"time"
 )
 
@@ -54,4 +55,28 @@ type PermissionRepo struct {
 
 func (repo *PermissionRepo) GetAllByGroupId(groupId string) ([]Permission, error) {
 	return nil, nil
+}
+
+func IsPermissionGrand(requiredPermission string, ownedPermission string) bool {
+	if requiredPermission == "" || ownedPermission == "" {
+		return false
+	}
+	if requiredPermission == ownedPermission {
+		return true
+	}
+
+	r := strings.Split(requiredPermission, "::")
+	o := strings.Split(requiredPermission, "::")
+
+	if len(r) != len(o) {
+		return false
+	}
+
+	for i := 0; i < len(r); i++ {
+		if r[i] != o[i] && o[i] != "*" {
+			return false
+		}
+	}
+
+	return true
 }
