@@ -42,6 +42,7 @@ type SessionRepo struct {
 func (repo *SessionRepo) Insert(session *Session) (*Session, error) {
 	sessionId := fmt.Sprintf("%v::%v", session.UserId, uuid.New().String())
 	session.ID = sessionId
+
 	repo.rwLock.Lock()
 	defer repo.rwLock.Unlock()
 	repo.mem[sessionId] = session
