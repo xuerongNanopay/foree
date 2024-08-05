@@ -2,7 +2,11 @@ package auth
 
 import (
 	"database/sql"
+	"fmt"
+	"sync"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // How do we store the session. // Redis?
@@ -11,15 +15,16 @@ import (
 // }
 
 type Session struct {
-	ID          uint64       `json:"id"`
-	UserId      uint64       `json:"userId"`
-	User        User         `json:"user"`
-	Permissions []Permission `json:"permission"`
-	UserAgent   string       `json:"userAgent"`
-	Ip          string       `json:"ip"`
-	ExpireAt    time.Time    `json:"expire_at"`
-	CreateAt    time.Time    `json:"createAt"`
-	UpdateAt    time.Time    `json:"updateAt"`
+	ID             string       `json:"id"`
+	UserId         uint64       `json:"userId"`
+	User           User         `json:"user"`
+	Permissions    []Permission `json:"permission"`
+	UserAgent      string       `json:"userAgent"`
+	Ip             string       `json:"ip"`
+	LatestActiveAt time.Time    `json:"latest_active_at"`
+	ExpireAt       time.Time    `json:"expire_at"`
+	CreateAt       time.Time    `json:"createAt"`
+	UpdateAt       time.Time    `json:"updateAt"`
 }
 
 func NewSessionRepo(db *sql.DB) *SessionRepo {
@@ -27,21 +32,35 @@ func NewSessionRepo(db *sql.DB) *SessionRepo {
 }
 
 // TODO: Thread Safe.
+// TODO: Improve
 type SessionRepo struct {
 	// db *sql.DB
-	mem map[string]*Session
+	mem    map[string]*Session
+	rwLock *sync.RWMutex
 }
 
 func (repo *SessionRepo) Insert(session *Session) (*Session, error) {
-	// repo.mem
+	sessionId := fmt.Sprintf("%v::%v", session.UserId, uuid.New().String())
+	session.ID = sessionId
+	repo.rwLock.Lock()
+	defer repo.rwLock.Unlock()
+	repo.mem[sessionId] = session
 	return nil, nil
 }
 
-func (repo *SessionRepo) Delete(id string) error {
-	// repo.mem
-	return nil
+func (repo *SessionRepo) Delete(id string) {
+
+	repo.rwLock.Lock()
+	defer repo.rwLock.Unlock()
+	delete(repo.mem, id)
 }
 
-func (repo *SessionRepo) GetUniqueById(id string) (*Session, error) {
-	return nil, nil
+func (repo *SessionRepo) GetUniqueById(id string) *Session {
+	repo.rwLock.RLock()
+	defer repo.rwLock.RUnlock()
+	s, ok := repo.mem[id]
+	if !ok {
+		return nil
+	}
+	return s
 }
