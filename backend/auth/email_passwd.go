@@ -2,6 +2,7 @@ package auth
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -54,7 +55,7 @@ const (
 )
 
 type EmailPasswd struct {
-	ID             uint64            `json:"id"`
+	ID             int64             `json:"id"`
 	Status         EmailPasswdStatus `json:"status"`
 	Email          string            `json:"email"`
 	Passowrd       string            `json:"-"`
@@ -62,7 +63,7 @@ type EmailPasswd struct {
 	CodeVerifiedAt time.Time         `json:"codeVerifiedAt"`
 	CreateAt       time.Time         `json:"createAt"`
 	UpdateAt       time.Time         `json:"updateAt"`
-	UserId         uint64            `json:"userId"`
+	UserId         int64             `json:"userId"`
 }
 
 func NewEmailPasswdRepo(db *sql.DB) *EmailPasswdRepo {
@@ -73,8 +74,22 @@ type EmailPasswdRepo struct {
 	db *sql.DB
 }
 
-func (repo *EmailPasswdRepo) Insert(ep EmailPasswd) (*EmailPasswd, error) {
-	return nil, nil
+func (repo *EmailPasswdRepo) Insert(ep EmailPasswd) (int64, error) {
+	result, err := repo.db.Exec(
+		SQLEmailPasswdInsert,
+		ep.Email,
+		ep.Passowrd,
+		ep.Status,
+		ep.VerifyCode,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("Insert: %v", err)
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("Insert: %v", err)
+	}
+	return id, nil
 }
 
 func (repo *EmailPasswdRepo) GetUniqueByEmail(email string) (*EmailPasswd, error) {
@@ -82,22 +97,42 @@ func (repo *EmailPasswdRepo) GetUniqueByEmail(email string) (*EmailPasswd, error
 }
 
 func (repo *EmailPasswdRepo) UpdateStatusByEmail(email string, status EmailPasswdStatus) error {
+	_, err := repo.db.Exec(SQLEmailPasswdUpdateStatusByEmail, status, email)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (repo *EmailPasswdRepo) UpdatePasswdByEmail(email string, passwd string) error {
+	_, err := repo.db.Exec(SQLEmailPasswdUpdatePasswdByEmail, passwd, email)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (repo *EmailPasswdRepo) UpdateVerifyCodeByEmail(email string, newCode string) error {
+	_, err := repo.db.Exec(SQLEmailPasswdUpdateVerifyCodeByEmail, newCode, email)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (repo *EmailPasswdRepo) UpdateCodeVerifiedAtByEmail(email string, t time.Time) error {
+	_, err := repo.db.Exec(SQLEmailPasswdUpdateCodeVerifiedAtByEmail, t, email)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (repo *EmailPasswdRepo) UpdateUserIdByEmail(email string, userId int64) error {
+	_, err := repo.db.Exec(SQLEmailPasswdUpdateUserIdByEmail, userId, email)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
