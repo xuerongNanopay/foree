@@ -1,6 +1,9 @@
 package auth
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 // ReadOnly
 // Super: *::*::*
@@ -28,4 +31,16 @@ type GroupPermissionJoin struct {
 	IsEnable     bool      `json:"isEnable"`
 	CreateAt     time.Time `json:"createAt"`
 	UpdateAt     time.Time `json:"updateAt"`
+}
+
+func NewPermission(db *sql.DB) *PermissionRepo {
+	return &PermissionRepo{db: db}
+}
+
+type PermissionRepo struct {
+	db *sql.DB
+}
+
+func (repo *PermissionRepo) GetAllByGroupId(groupId string) ([]Permission, error) {
+	return nil, nil
 }

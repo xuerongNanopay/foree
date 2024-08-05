@@ -35,7 +35,7 @@ type EmailPasswdRepo struct {
 	db *sql.DB
 }
 
-func (repo *EmailPasswdRepo) GetByEmail(email string) (*EmailPasswd, error) {
+func (repo *EmailPasswdRepo) GetUniqueByEmail(email string) (*EmailPasswd, error) {
 	return nil, nil
 }
 

@@ -42,6 +42,6 @@ func (repo *SessionRepo) delete(id string) error {
 	return nil
 }
 
-func (repo *SessionRepo) GetById(id string) (*Session, error) {
+func (repo *SessionRepo) GetUniqueById(id string) (*Session, error) {
 	return nil, nil
 }

@@ -89,7 +89,7 @@ func (repo *UserRepo) Insert(user User) (int64, error) {
 	return id, nil
 }
 
-func (repo *UserRepo) GetById(id int64) (*User, error) {
+func (repo *UserRepo) GetUniqueById(id int64) (*User, error) {
 	rows, err := repo.db.Query(SQLUserGetById, id)
 
 	if err != nil {

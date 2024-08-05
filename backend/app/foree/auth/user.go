@@ -12,7 +12,7 @@ func (us *UserService) GetUserPermissions(userId int64) ([]auth.Permission, erro
 }
 
 func (us *UserService) UpdateUserStatus(userId int64, status auth.UserStatus) error {
-	return us.UserRepo.UpdateUserStatus(userId, status)
+	return us.UserRepo.UpdateStatus(userId, status)
 }
 
 func (us *UserService) CreateNewUser() {
