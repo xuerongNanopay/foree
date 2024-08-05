@@ -5,6 +5,31 @@ import (
 	"time"
 )
 
+const (
+	SQLEmailPasswdGetUniqueByEmail = `
+		SELECT 
+			u.id, u.status, u.email, u.password, 
+			u.verify_code, u.code_verified_at,
+			u.avatar_url, u.create_at, u.update_at
+		FROM email_passwd as u 
+		WHERE u.email = ?
+	`
+	SQLEmailPasswdGetAll = `
+		SELECT 
+			u.id, u.status, u.email, u.password, 
+			u.verify_code, u.code_verified_at,
+			u.avatar_url, u.create_at, u.update_at
+		FROM email_passwd as u
+	`
+	SQLEmailPasswdInsert = `
+	INSERT INTO users
+	(	id, group, status, first_name, middle_name, 
+		last_name, age, dob, nationality, Address1, 
+		Address2, city, province, country, phone_number,
+		email
+	) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+)
+
 type EmailPasswdStatus string
 
 const (
@@ -33,6 +58,10 @@ func NewEmailPasswdRepo(db *sql.DB) *EmailPasswdRepo {
 
 type EmailPasswdRepo struct {
 	db *sql.DB
+}
+
+func (repo *EmailPasswdRepo) Insert(ep EmailPasswd) (*EmailPasswd, error) {
+	return nil, nil
 }
 
 func (repo *EmailPasswdRepo) GetUniqueByEmail(email string) (*EmailPasswd, error) {

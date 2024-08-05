@@ -7,7 +7,15 @@ import (
 )
 
 const (
-	SQLUserGetById = `
+	SQLUserGetAll = `
+		SELECT 
+			u.id, u.group, u.status, u.first_name, u.middle_name, 
+			u.last_name, u.age, u.dob, u.nationality, u.Address1, 
+			u.Address2, u.city, u.province, u.country, u.phone_number,
+			u.email, u.avatar_url, u.create_at, u.update_at
+		FROM users as u 
+	`
+	SQLUserGetUniqueById = `
 		SELECT 
 			u.id, u.group, u.status, u.first_name, u.middle_name, 
 			u.last_name, u.age, u.dob, u.nationality, u.Address1, 
@@ -18,11 +26,11 @@ const (
 	`
 	SQLUserInsert = `
 		INSERT INTO users
-		(	id, group, status, first_name, middle_name, 
+		(	group, status, first_name, middle_name, 
 			last_name, age, dob, nationality, Address1, 
 			Address2, city, province, country, phone_number,
 			email
-		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	SQLUserUpdateStatus = `
 		UPDATE user SET status = ? 
@@ -80,7 +88,24 @@ func (repo *UserRepo) UpdateStatus(id int64, status UserStatus) error {
 }
 
 func (repo *UserRepo) Insert(user User) (int64, error) {
-	result, err := repo.db.Exec(SQLUserInsert)
+	result, err := repo.db.Exec(
+		SQLUserInsert,
+		user.Group,
+		user.Status,
+		user.FirstName,
+		user.MiddleName,
+		user.LastName,
+		user.Age,
+		user.Dob,
+		user.Nationality,
+		user.Address1,
+		user.Address2,
+		user.City,
+		user.Province,
+		user.Country,
+		user.PhoneNumber,
+		user.Email,
+	)
 	if err != nil {
 		return 0, fmt.Errorf("Insert: %v", err)
 	}
@@ -92,7 +117,7 @@ func (repo *UserRepo) Insert(user User) (int64, error) {
 }
 
 func (repo *UserRepo) GetUniqueById(id int64) (*User, error) {
-	rows, err := repo.db.Query(SQLUserGetById, id)
+	rows, err := repo.db.Query(SQLUserGetUniqueById, id)
 
 	if err != nil {
 		return nil, fmt.Errorf("GetById: %v", err)
@@ -109,10 +134,35 @@ func (repo *UserRepo) GetUniqueById(id int64) (*User, error) {
 	}
 
 	if u.ID == 0 {
-		return nil, fmt.Errorf("GetUserByEmail: id `%v` not found", id)
+		return nil, fmt.Errorf("GetById: id `%v` not found", id)
 	}
 
 	return u, nil
+}
+
+func (repo *UserRepo) GetAll() ([]*User, error) {
+	rows, err := repo.db.Query(SQLUserGetAll)
+
+	if err != nil {
+		return nil, fmt.Errorf("GetAll: %v", err)
+	}
+	defer rows.Close()
+
+	var users []*User
+
+	for rows.Next() {
+		u, err := scanRowIntoUser(rows)
+		if err != nil {
+			return nil, fmt.Errorf("GetAll: %v", err)
+		}
+		users = append(users, u)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("GetAll: %v", err)
+	}
+
+	return users, nil
 }
 
 func scanRowIntoUser(rows *sql.Rows) (*User, error) {
