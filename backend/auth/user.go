@@ -69,23 +69,6 @@ type User struct {
 	// Occupation   string     `json:"occupation"`
 }
 
-// Move the service to app folder
-type UserService struct {
-	UserRepo *UserRepo
-}
-
-func (us *UserService) GetUserPermissions(userId int64) ([]Permission, error) {
-	return nil, nil
-}
-
-func (us *UserService) UpdateUserStatus(userId int64, status UserStatus) error {
-	return us.UserRepo.UpdateUserStatus(userId, status)
-}
-
-func (us *UserService) CreateNewUser() {
-
-}
-
 func NewUserRepo(db *sql.DB) *UserRepo {
 	return &UserRepo{db: db}
 }
