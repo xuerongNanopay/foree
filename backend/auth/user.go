@@ -13,7 +13,8 @@ const (
 			u.last_name, u.age, u.dob, u.nationality, u.Address1, 
 			u.Address2, u.city, u.province, u.country, u.phone_number,
 			u.email, u.avatar_url, u.create_at, u.update_at
-		FROM users as u WHERE u.id = ?
+		FROM users as u 
+		WHERE u.id = ?
 	`
 	SQLUserInsert = `
 		INSERT INTO users
@@ -24,7 +25,8 @@ const (
 		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	SQLUserUpdateStatus = `
-		UPDATE user SET status = ? WHERE id = ?
+		UPDATE user SET status = ? 
+		WHERE id = ?
 	`
 )
 

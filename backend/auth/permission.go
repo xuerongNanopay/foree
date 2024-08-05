@@ -5,6 +5,16 @@ import (
 	"time"
 )
 
+const (
+	SQLPermissionByGroupId = `
+		SELECT 
+			p.id
+		FROM group_permission as gp
+		INNER JOIN permission as p ON gp.permission_id=p.id
+		WHERE p.is_enable = true and pg.is_enable = true and pg.group_id = ?
+	`
+)
+
 // ReadOnly
 // Super: *::*::*
 // app::service::methods
