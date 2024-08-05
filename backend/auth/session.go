@@ -32,12 +32,12 @@ type SessionRepo struct {
 	mem map[string]*Session
 }
 
-func (repo *SessionRepo) insert(session *Session) (*Session, error) {
+func (repo *SessionRepo) Insert(session *Session) (*Session, error) {
 	// repo.mem
 	return nil, nil
 }
 
-func (repo *SessionRepo) delete(id string) error {
+func (repo *SessionRepo) Delete(id string) error {
 	// repo.mem
 	return nil
 }
