@@ -19,7 +19,7 @@ type EmailPasswdAccess struct {
 	Passowrd       string       `json:"-"`
 	VerifyCode     string       `json:"-"`
 	CodeVerifiedAt time.Time    `json:"codeVerifiedAt"`
-	CreateAt       time.Timer   `json:"createAt"`
-	UpdateAt       time.Timer   `json:"updateAt"`
+	CreateAt       time.Time    `json:"createAt"`
+	UpdateAt       time.Time    `json:"updateAt"`
 	UserId         uint64       `json:"userId"`
 }

@@ -12,6 +12,8 @@ type Session struct {
 	User        User         `json:"user"`
 	Permissions []Permission `json:"permission"`
 	UserAgent   string       `json:"userAgent"`
-	Ip          string       `json:"op"`
-	ExpireAt    time.Time
+	Ip          string       `json:"ip"`
+	ExpireAt    time.Time    `json:"expire_at"`
+	CreateAt    time.Time    `json:"createAt"`
+	UpdateAt    time.Time    `json:"updateAt"`
 }

@@ -63,8 +63,8 @@ type User struct {
 	PhoneNumber string     `json:"phoneNumber"`
 	Email       string     `json:"email"`
 	AvatarUrl   string     `json:"avatarUrl"`
-	CreateAt    time.Timer `json:"createAt"`
-	UpdateAt    time.Timer `json:"updateAt"`
+	CreateAt    time.Time  `json:"createAt"`
+	UpdateAt    time.Time  `json:"updateAt"`
 	// OccupationId int64      `json:"-"`
 	// Occupation   string     `json:"occupation"`
 }
