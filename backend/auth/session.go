@@ -3,7 +3,7 @@ package auth
 import "time"
 
 type SessionService interface {
-	HasPermission(permission string) (bool, error)
+	HasPermission(session Session, permission string) (bool, error)
 }
 
 type Session struct {
