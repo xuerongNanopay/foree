@@ -43,6 +43,10 @@ func (repo *EmailPasswdRepo) UpdateStatus(id int64, status EmailPasswdStatus) er
 	return nil
 }
 
+func (repo *EmailPasswdRepo) UpdatePassword(id int64, passwd string) error {
+	return nil
+}
+
 func (repo *EmailPasswdRepo) UpdateVerifyCode(id int64, newCode string) error {
 	return nil
 }
