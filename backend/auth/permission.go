@@ -2,6 +2,7 @@ package auth
 
 import "time"
 
+// ReadOnly
 // Super: *::*::*
 // app::service::methods
 type Group struct {

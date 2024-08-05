@@ -2,9 +2,10 @@ package auth
 
 import "time"
 
-type SessionService interface {
-	HasPermission(session Session, permission string) (bool, error)
-}
+// How do we store the session.
+// type SessionService interface {
+// 	HasPermission(session Session, permission string) (bool, error)
+// }
 
 type Session struct {
 	ID          uint64       `json:"id"`

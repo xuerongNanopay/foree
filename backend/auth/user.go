@@ -7,15 +7,7 @@ import (
 )
 
 const (
-	SQLGetUserByEmail = `
-		SELECT 
-			u.id, u.group, u.status, u.first_name, u.middle_name, 
-			u.last_name, u.age, u.dob, u.nationality, u.Address1, 
-			u.Address2, u.city, u.province, u.country, u.phone_number,
-			u.email, u.avatar_url, u.create_at, u.update_at
-		FROM users as u WHERE u.email = ?
-	`
-	SQLGetUserById = `
+	SQLUserGetById = `
 		SELECT 
 			u.id, u.group, u.status, u.first_name, u.middle_name, 
 			u.last_name, u.age, u.dob, u.nationality, u.Address1, 
@@ -23,7 +15,7 @@ const (
 			u.email, u.avatar_url, u.create_at, u.update_at
 		FROM users as u WHERE u.id = ?
 	`
-	SQLInsertUser = `
+	SQLUserInsert = `
 		INSERT INTO users
 		(	id, group, status, first_name, middle_name, 
 			last_name, age, dob, nationality, Address1, 
@@ -31,7 +23,7 @@ const (
 			email
 		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
 	`
-	SQLUpdateUserStatus = `
+	SQLUserUpdateStatus = `
 		UPDATE user SET status = ? WHERE id = ?
 	`
 )
@@ -77,31 +69,31 @@ type UserRepo struct {
 	db *sql.DB
 }
 
-func (repo *UserRepo) UpdateUserStatus(userId int64, status UserStatus) error {
-	_, err := repo.db.Exec(SQLUpdateUserStatus, status, userId)
+func (repo *UserRepo) UpdateStatus(id int64, status UserStatus) error {
+	_, err := repo.db.Exec(SQLUserUpdateStatus, status, id)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (repo *UserRepo) InsertUser(user User) (int64, error) {
-	result, err := repo.db.Exec(SQLInsertUser)
+func (repo *UserRepo) Insert(user User) (int64, error) {
+	result, err := repo.db.Exec(SQLUserInsert)
 	if err != nil {
-		return 0, fmt.Errorf("InsertUser: %v", err)
+		return 0, fmt.Errorf("Insert: %v", err)
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("InsertUser: %v", err)
+		return 0, fmt.Errorf("Insert: %v", err)
 	}
 	return id, nil
 }
 
-func (repo *UserRepo) GetUserById(id int64) (*User, error) {
-	rows, err := repo.db.Query(SQLGetUserById, id)
+func (repo *UserRepo) GetById(id int64) (*User, error) {
+	rows, err := repo.db.Query(SQLUserGetById, id)
 
 	if err != nil {
-		return nil, fmt.Errorf("GetUserById: %v", err)
+		return nil, fmt.Errorf("GetById: %v", err)
 	}
 
 	var u *User
@@ -109,35 +101,12 @@ func (repo *UserRepo) GetUserById(id int64) (*User, error) {
 	for rows.Next() {
 		u, err = scanRowIntoUser(rows)
 		if err != nil {
-			return nil, fmt.Errorf("GetUserById: %v", err)
+			return nil, fmt.Errorf("GetById: %v", err)
 		}
 	}
 
 	if u.ID == 0 {
 		return nil, fmt.Errorf("GetUserByEmail: id `%v` not found", id)
-	}
-
-	return u, nil
-}
-
-func (repo *UserRepo) GetUserByEmail(email string) (*User, error) {
-	rows, err := repo.db.Query(SQLGetUserByEmail, email)
-
-	if err != nil {
-		return nil, fmt.Errorf("GetUserByEmail: %v", err)
-	}
-
-	var u *User
-
-	for rows.Next() {
-		u, err = scanRowIntoUser(rows)
-		if err != nil {
-			return nil, fmt.Errorf("GetUserByEmail: %v", err)
-		}
-	}
-
-	if u.ID == 0 {
-		return nil, fmt.Errorf("GetUserByEmail: email `%v` not found", email)
 	}
 
 	return u, nil
