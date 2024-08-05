@@ -93,7 +93,52 @@ func (repo *EmailPasswdRepo) Insert(ep EmailPasswd) (int64, error) {
 }
 
 func (repo *EmailPasswdRepo) GetUniqueByEmail(email string) (*EmailPasswd, error) {
-	return nil, nil
+	rows, err := repo.db.Query(SQLEmailPasswdGetUniqueByEmail, email)
+
+	if err != nil {
+		return nil, fmt.Errorf("GetUniqueByEmail: %v", err)
+	}
+	defer rows.Close()
+
+	var ep *EmailPasswd
+
+	for rows.Next() {
+		ep, err = scanRowIntoEmailPasswd(rows)
+		if err != nil {
+			return nil, fmt.Errorf("GetUniqueByEmail: %v", err)
+		}
+	}
+
+	if ep.ID == 0 {
+		return nil, fmt.Errorf("GetUniqueByEmail: id `%v` not found", email)
+	}
+
+	return ep, nil
+}
+
+func (repo *EmailPasswdRepo) GetAllByEmail() ([]*EmailPasswd, error) {
+	rows, err := repo.db.Query(SQLEmailPasswdGetAll)
+
+	if err != nil {
+		return nil, fmt.Errorf("GetAll: %v", err)
+	}
+	defer rows.Close()
+
+	var eps []*EmailPasswd
+
+	for rows.Next() {
+		ep, err := scanRowIntoEmailPasswd(rows)
+		if err != nil {
+			return nil, fmt.Errorf("GetAll: %v", err)
+		}
+		eps = append(eps, ep)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("GetAll: %v", err)
+	}
+
+	return eps, nil
 }
 
 func (repo *EmailPasswdRepo) UpdateStatusByEmail(email string, status EmailPasswdStatus) error {
@@ -134,6 +179,24 @@ func (repo *EmailPasswdRepo) UpdateUserIdByEmail(email string, userId int64) err
 		return err
 	}
 	return nil
+}
+
+func scanRowIntoEmailPasswd(rows *sql.Rows) (*EmailPasswd, error) {
+	p := new(EmailPasswd)
+	err := rows.Scan(
+		&p.ID,
+		&p.Email,
+		&p.Passowrd,
+		&p.Status,
+		&p.VerifyCode,
+		&p.CodeVerifiedAt,
+		&p.CreateAt,
+		&p.UpdateAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
 }
 
 // TODO
