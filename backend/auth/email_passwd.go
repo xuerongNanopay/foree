@@ -6,28 +6,41 @@ import (
 )
 
 const (
+	SQLEmailPasswdInsert = `
+		INSERT INTO email_passwd
+		(	u.email, u.password, u.status, u.verify_code
+		) VALUES (?,?,?,?)
+	`
 	SQLEmailPasswdGetUniqueByEmail = `
 		SELECT 
-			u.id, u.status, u.email, u.password, 
+			u.id, u.email, u.password, u.status,
 			u.verify_code, u.code_verified_at,
-			u.avatar_url, u.create_at, u.update_at
+			u.create_at, u.update_at
 		FROM email_passwd as u 
 		WHERE u.email = ?
 	`
 	SQLEmailPasswdGetAll = `
 		SELECT 
-			u.id, u.status, u.email, u.password, 
+			u.id, u.email, u.password, u.status,
 			u.verify_code, u.code_verified_at,
 			u.avatar_url, u.create_at, u.update_at
 		FROM email_passwd as u
 	`
-	SQLEmailPasswdInsert = `
-	INSERT INTO users
-	(	id, group, status, first_name, middle_name, 
-		last_name, age, dob, nationality, Address1, 
-		Address2, city, province, country, phone_number,
-		email
-	) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+	SQLEmailPasswdUpdateStatusByEmail = `
+		UPDATE email_passwd SET status = ? WHERE email = ?
+	`
+	SQLEmailPasswdUpdatePasswdByEmail = `
+		UPDATE email_passwd SET password = ? WHERE email = ?
+	`
+	SQLEmailPasswdUpdateVerifyCodeByEmail = `
+		UPDATE email_passwd SET verify_code = ? WHERE email = ?
+	`
+	SQLEmailPasswdUpdateCodeVerifiedAtByEmail = `
+		UPDATE email_passwd SET code_verified_at = ? WHERE email = ?
+	`
+	SQLEmailPasswdUpdateUserIdByEmail = `
+		UPDATE email_passwd SET user_id = ? WHERE email = ?
+	`
 )
 
 type EmailPasswdStatus string
@@ -68,19 +81,23 @@ func (repo *EmailPasswdRepo) GetUniqueByEmail(email string) (*EmailPasswd, error
 	return nil, nil
 }
 
-func (repo *EmailPasswdRepo) UpdateStatus(id int64, status EmailPasswdStatus) error {
+func (repo *EmailPasswdRepo) UpdateStatusByEmail(email string, status EmailPasswdStatus) error {
 	return nil
 }
 
-func (repo *EmailPasswdRepo) UpdatePassword(id int64, passwd string) error {
+func (repo *EmailPasswdRepo) UpdatePasswdByEmail(email string, passwd string) error {
 	return nil
 }
 
-func (repo *EmailPasswdRepo) UpdateVerifyCode(id int64, newCode string) error {
+func (repo *EmailPasswdRepo) UpdateVerifyCodeByEmail(email string, newCode string) error {
 	return nil
 }
 
-func (repo *EmailPasswdRepo) UpdateUserId(id int64, userId int64) error {
+func (repo *EmailPasswdRepo) UpdateCodeVerifiedAtByEmail(email string, t time.Time) error {
+	return nil
+}
+
+func (repo *EmailPasswdRepo) UpdateUserIdByEmail(email string, userId int64) error {
 	return nil
 }
 

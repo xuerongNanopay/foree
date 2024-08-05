@@ -33,8 +33,7 @@ const (
 		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	SQLUserUpdateStatus = `
-		UPDATE user SET status = ? 
-		WHERE id = ?
+		UPDATE users SET status = ? WHERE id = ?
 	`
 )
 
