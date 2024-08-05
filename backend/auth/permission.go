@@ -48,7 +48,8 @@ func NewPermission(db *sql.DB) *PermissionRepo {
 }
 
 type PermissionRepo struct {
-	db *sql.DB
+	cache map[string][]Permission
+	db    *sql.DB
 }
 
 func (repo *PermissionRepo) GetAllByGroupId(groupId string) ([]Permission, error) {
