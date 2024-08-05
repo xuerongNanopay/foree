@@ -5,11 +5,11 @@ import "time"
 type AccessStatus string
 
 const (
-	ASStatusWaitingVerify AccessStatus = "WAITING_VERIFY"
-	ASStatusPassExpire    AccessStatus = "PASSWORD_EXPIRE"
-	ASStatusActive        AccessStatus = "ACTIVE"
-	ASStatusSuspend       AccessStatus = "SUSPEND"
-	ASStatusDisable       AccessStatus = "DISABLE"
+	AccessStatusWaitingVerify AccessStatus = "WAITING_VERIFY"
+	AccessStatusPassExpire    AccessStatus = "PASSWORD_EXPIRE"
+	AccessStatusActive        AccessStatus = "ACTIVE"
+	AccessStatusSuspend       AccessStatus = "SUSPEND"
+	AccessStatusDisable       AccessStatus = "DISABLE"
 )
 
 type EmailPasswdAccess struct {
