@@ -9,10 +9,37 @@ import (
 
 const (
 	SQLFeeGetAll = `
-	
+		SELECT
+			f.id, f.description, f.type, f.condition,
+			f.condition_amount, f.condition_currency,
+			f.fee_amount, f.fee_currency,
+			f.is_apply_in_condition_amount_only
+			f.is_enable, f.create_at, f.update_at
+		FROM fees as f
 	`
 	SQLFeeGetUniqueById = `
-	
+		SELECT
+			f.id, f.description, f.type, f.condition,
+			f.condition_amount, f.condition_currency,
+			f.fee_amount, f.fee_currency,
+			f.is_apply_in_condition_amount_only
+			f.is_enable, f.create_at, f.update_at
+		FROM fees as f
+		Where f.id=?
+	`
+	SQLFeeJointInsert = `
+		INSERT INTO fees
+		(
+			fee_id, description, amount, currency,
+			transaction_id, owner_id
+		) VALUES(?,?,?,?,?,?)
+	`
+	SQLFeeJointGetByTransactionId = `
+		SELECT
+			f.fee_id, f.description, f.amount, f.currency,
+			f.transaction_id, f.owner_id, f.create_at, f.update_at
+		FROM fee_joint as f
+		Where f.transaction_id=?
 	`
 )
 
@@ -45,14 +72,14 @@ type Fee struct {
 }
 
 type FeeJoint struct {
-	ID             int64
-	FeeId          string
-	FeeDescription string
-	Amt            types.AmountData
-	TransactionId  int64
-	OwnerId        int64
-	CreateAt       time.Time `json:"createAt"`
-	UpdateAt       time.Time `json:"updateAt"`
+	ID            int64
+	FeeId         string
+	Description   string
+	Amt           types.AmountData
+	TransactionId int64
+	OwnerId       int64
+	CreateAt      time.Time `json:"createAt"`
+	UpdateAt      time.Time `json:"updateAt"`
 }
 
 func NewFee(db *sql.DB) *FeeRepo {
