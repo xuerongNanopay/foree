@@ -89,3 +89,46 @@ func NewFee(db *sql.DB) *FeeRepo {
 type FeeRepo struct {
 	db *sql.DB
 }
+
+func scanRowIntoFee(rows *sql.Rows) (*Fee, error) {
+	u := new(Fee)
+	err := rows.Scan(
+		&u.ID,
+		&u.Description,
+		&u.Type,
+		&u.Condition,
+		&u.ConditionAmt.Amount,
+		&u.ConditionAmt.Curreny,
+		&u.FeeAmt.Amount,
+		&u.FeeAmt.Curreny,
+		&u.IsApplyInConditionAmtOnly,
+		&u.IsEnable,
+		&u.CreateAt,
+		&u.UpdateAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
+}
+
+func scanRowIntoFeeJoint(rows *sql.Rows) (*FeeJoint, error) {
+	u := new(FeeJoint)
+	err := rows.Scan(
+		&u.ID,
+		&u.FeeId,
+		&u.Description,
+		&u.Amt.Amount,
+		&u.Amt.Curreny,
+		&u.TransactionId,
+		&u.OwnerId,
+		&u.CreateAt,
+		&u.UpdateAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
+}
