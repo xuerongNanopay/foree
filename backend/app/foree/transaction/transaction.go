@@ -29,17 +29,24 @@ type ForeeTransaction struct {
 	UpdateAt        time.Time `json:"updateAt"`
 	OwnerId         int64
 
-	CI  *CITransaction
-	IDM *IDMTransaction
+	CI   *CITransaction
+	IDM  *IDMTransaction
+	COUT *NBPTransaction
 }
 
 type CITransaction struct {
+	ForeeTransactionId int64
+	OwnerId            int64
 }
 
 type IDMTransaction struct {
+	ForeeTransactionId int64
+	OwnerId            int64
 }
 
 type NBPTransaction struct {
+	ForeeTransactionId int64
+	OwnerId            int64
 }
 
 // type
@@ -55,8 +62,8 @@ type TransactionSummary struct {
 	Status      string
 	FXRate      string
 
-	Fees       []Fee
-	Promotions []types.Promotion
-	Total      types.AmountData
-	Created    time.Time
+	Fees []Fee
+	// Promotions []types.Promotion
+	Total   types.AmountData
+	Created time.Time
 }
