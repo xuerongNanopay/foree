@@ -1,9 +1,19 @@
 package transaction
 
 import (
+	"database/sql"
 	"time"
 
 	"xue.io/go-pay/app/foree/types"
+)
+
+const (
+	SQLFeeGetAll = `
+	
+	`
+	SQLFeeGetUniqueById = `
+	
+	`
 )
 
 type FeeType string
@@ -35,12 +45,20 @@ type Fee struct {
 }
 
 type FeeJoint struct {
-	ID                 int64
-	FeeId              string
-	FeeDescription     string
-	Amt                types.AmountData
-	ForeeTransactionId int64
-	OwnerId            int64
-	CreateAt           time.Time `json:"createAt"`
-	UpdateAt           time.Time `json:"updateAt"`
+	ID             int64
+	FeeId          string
+	FeeDescription string
+	Amt            types.AmountData
+	TransactionId  int64
+	OwnerId        int64
+	CreateAt       time.Time `json:"createAt"`
+	UpdateAt       time.Time `json:"updateAt"`
+}
+
+func NewFee(db *sql.DB) *FeeRepo {
+	return &FeeRepo{db: db}
+}
+
+type FeeRepo struct {
+	db *sql.DB
 }
