@@ -26,12 +26,12 @@ type ForeeTransaction struct {
 	DestAmt types.AmountData
 	Rate    types.RateDate
 	Status  string
+	Total   types.AmountData
 
-	FeeIDs       []int64
-	Fees         []FeeJoint
-	PromotionIds []int64
-	// Promotions   []types.Promotion
-	Total           types.AmountData
+	FeeIDs          []int64
+	Fees            []FeeJoint
+	PromotionIds    []int64
+	Promotions      []Promotion
 	IsCancelAllowed bool      `json:"isCancelAllowed"`
 	CreateAt        time.Time `json:"createAt"`
 	UpdateAt        time.Time `json:"updateAt"`
