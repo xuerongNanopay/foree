@@ -11,7 +11,7 @@ type IDMTransaction struct {
 	ID                   int64
 	Status               TxStatus
 	SrcInteracAccId      int64
-	SrcInteracAcc        *InteracCITransaction
+	SrcInteracAcc        *ScotiaInteracCITransaction
 	DescContactAccountId int64
 	DescContactAccount   *account.ForeeContactAccount
 	Amt                  types.AmountData

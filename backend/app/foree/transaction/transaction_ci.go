@@ -6,13 +6,13 @@ import (
 	"xue.io/go-pay/app/foree/types"
 )
 
-type InteracCITransaction struct {
+type ScotiaInteracCITransaction struct {
 	ID                  int64
 	Status              TxStatus
 	SrcInteracAccId     int64
-	SrcInteracAcc       *InteracCITransaction
+	SrcInteracAcc       *ScotiaInteracCITransaction
 	DescInteracAccId    int64
-	DescInteracAcc      *InteracCITransaction
+	DescInteracAcc      *ScotiaInteracCITransaction
 	Amt                 types.AmountData
 	ParentTransactionId int64
 	OwnerId             int64
