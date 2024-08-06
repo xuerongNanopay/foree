@@ -13,10 +13,11 @@ const (
 )
 
 type ForeeTransaction struct {
-	ID      string
+	ID      int64
 	SrcAmt  types.AmountData
 	DestAmt types.AmountData
 	Rate    types.RateDate
+	Status  string
 
 	FeeIDs       []int64
 	Fees         []FeeJoint
