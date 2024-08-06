@@ -1,6 +1,10 @@
 package foree_transaction
 
-import "xue.io/go-pay/app/foree/types"
+import (
+	"time"
+
+	"xue.io/go-pay/app/foree/types"
+)
 
 type FeeType string
 type FeeOperator string
@@ -26,12 +30,17 @@ type Fee struct {
 	FeeAmt                    types.AmountData
 	IsApplyInConditionAmtOnly bool
 	IsEnable                  bool
+	CreateAt                  time.Time `json:"createAt"`
+	UpdateAt                  time.Time `json:"updateAt"`
 }
 
 type FeeJoint struct {
-	ID            int64
-	Amt           types.AmountData
-	Description   string
-	TransactionId int64
-	OwnerId       int64
+	ID                 int64
+	FeeId              string
+	FeeDescription     string
+	Amt                types.AmountData
+	ForeeTransactionId int64
+	OwnerId            int64
+	CreateAt           time.Time `json:"createAt"`
+	UpdateAt           time.Time `json:"updateAt"`
 }

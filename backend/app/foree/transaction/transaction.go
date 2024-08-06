@@ -26,6 +26,7 @@ type ForeeTransaction struct {
 	IsCancelAllowed bool      `json:"isCancelAllowed"`
 	CreateAt        time.Time `json:"createAt"`
 	UpdateAt        time.Time `json:"updateAt"`
+	OwnerId         int64
 
 	CI  *CITransaction
 	IDM *IDMTransaction
