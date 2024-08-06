@@ -1,4 +1,9 @@
-package foree_account
+package account
 
-type NBPContactAccount struct {
+type ForeeContactAccount struct {
+	ID        int64
+	FirstName string
+	LastName  string
+	OwnerId   int64
+	Status    AccountStatus
 }

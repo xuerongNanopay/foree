@@ -1,4 +1,4 @@
-package foree_transaction
+package transaction
 
 import (
 	"time"

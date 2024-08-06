@@ -1,4 +1,4 @@
-package foree_transaction
+package transaction
 
 import (
 	"time"
@@ -6,18 +6,18 @@ import (
 	"xue.io/go-pay/app/foree/types"
 )
 
-type PromotionStatus string
+type RewardStatus string
 
 const (
-	PromotionStatusEnable  = "ENABLE"
-	PromotionStatusDisable = "DISABLE"
+	RewardStatusEnable  = "ENABLE"
+	RewardStatusDisable = "DISABLE"
 )
 
-type Promotion struct {
+type Reward struct {
 	ID                 string
 	Description        string
 	Amt                types.AmountData
-	Status             PromotionStatus
+	Status             RewardStatus
 	IsRedeemed         bool
 	OwnerId            int64
 	ForeeTransactionId int64

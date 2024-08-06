@@ -1,4 +1,4 @@
-package foree_account
+package account
 
 type AccountStatus string
 

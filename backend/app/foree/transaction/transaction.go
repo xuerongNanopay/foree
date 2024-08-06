@@ -1,8 +1,9 @@
-package foree_transaction
+package transaction
 
 import (
 	"time"
 
+	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/types"
 )
 
@@ -30,8 +31,8 @@ type ForeeTransaction struct {
 
 	FeeIDs          []int64
 	Fees            []FeeJoint
-	PromotionIds    []int64
-	Promotions      []Promotion
+	RewardIds       []int64
+	Rewards         []Reward
 	IsCancelAllowed bool      `json:"isCancelAllowed"`
 	CreateAt        time.Time `json:"createAt"`
 	UpdateAt        time.Time `json:"updateAt"`
@@ -43,18 +44,41 @@ type ForeeTransaction struct {
 }
 
 type InteracCITransaction struct {
-	ForeeTransactionId int64
-	OwnerId            int64
+	ID                  int64
+	Status              TxStatus
+	SrcInteracAccId     int64
+	SrcInteracAcc       *InteracCITransaction
+	DescInteracAccId    int64
+	DescInteracAcc      *InteracCITransaction
+	Amt                 types.AmountData
+	ParentTransactionId int64
+	OwnerId             int64
+	CreateAt            time.Time `json:"createAt"`
+	UpdateAt            time.Time `json:"updateAt"`
 }
 
 type IDMTransaction struct {
-	ForeeTransactionId int64
-	OwnerId            int64
+	ID                   int64
+	Status               TxStatus
+	SrcInteracAccId      int64
+	SrcInteracAcc        *InteracCITransaction
+	DescContactAccountId int64
+	DescContactAccount   *account.ForeeContactAccount
+	Amt                  types.AmountData
+	ParentTransactionId  int64
+	OwnerId              int64
+	CreateAt             time.Time `json:"createAt"`
+	UpdateAt             time.Time `json:"updateAt"`
 }
 
 type NBPCOTransaction struct {
-	ForeeTransactionId int64
-	OwnerId            int64
+	ID                   int64
+	Status               TxStatus
+	Amt                  types.AmountData
+	DescContactAccountId int64
+	DescContactAccount   *account.ForeeContactAccount
+	ParentTransactionId  int64
+	OwnerId              int64
 }
 
 // type
