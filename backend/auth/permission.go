@@ -2,7 +2,6 @@ package auth
 
 import (
 	"database/sql"
-	"fmt"
 	"strings"
 	"time"
 )
@@ -57,7 +56,7 @@ func (repo *PermissionRepo) GetAllByGroupId(groupId string) ([]*Permission, erro
 	rows, err := repo.db.Query(SQLPermissionByGroupId)
 
 	if err != nil {
-		return nil, fmt.Errorf("GetAllByGroupId: %v", err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -65,13 +64,13 @@ func (repo *PermissionRepo) GetAllByGroupId(groupId string) ([]*Permission, erro
 	for rows.Next() {
 		p, err := scanRowIntoPermission(rows)
 		if err != nil {
-			return nil, fmt.Errorf("GetAllByGroupId: %v", err)
+			return nil, err
 		}
 		ps = append(ps, p)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetAllByGroupId: %v", err)
+		return nil, err
 	}
 
 	return ps, nil

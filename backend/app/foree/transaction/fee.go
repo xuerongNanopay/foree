@@ -90,6 +90,30 @@ type FeeRepo struct {
 	db *sql.DB
 }
 
+func (repo *FeeRepo) GetFeeById(id int64) (*Fee, error) {
+	rows, err := repo.db.Query(SQLFeeGetUniqueById, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *Fee
+
+	for rows.Next() {
+		f, err = scanRowIntoFee(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == "" {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
 func scanRowIntoFee(rows *sql.Rows) (*Fee, error) {
 	u := new(Fee)
 	err := rows.Scan(

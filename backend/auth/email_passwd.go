@@ -2,7 +2,6 @@ package auth
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 )
 
@@ -83,11 +82,11 @@ func (repo *EmailPasswdRepo) Insert(ep EmailPasswd) (int64, error) {
 		ep.VerifyCode,
 	)
 	if err != nil {
-		return 0, fmt.Errorf("Insert: %v", err)
+		return 0, err
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("Insert: %v", err)
+		return 0, err
 	}
 	return id, nil
 }
@@ -96,7 +95,7 @@ func (repo *EmailPasswdRepo) GetUniqueByEmail(email string) (*EmailPasswd, error
 	rows, err := repo.db.Query(SQLEmailPasswdGetUniqueByEmail, email)
 
 	if err != nil {
-		return nil, fmt.Errorf("GetUniqueByEmail: %v", err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -105,12 +104,12 @@ func (repo *EmailPasswdRepo) GetUniqueByEmail(email string) (*EmailPasswd, error
 	for rows.Next() {
 		ep, err = scanRowIntoEmailPasswd(rows)
 		if err != nil {
-			return nil, fmt.Errorf("GetUniqueByEmail: %v", err)
+			return nil, err
 		}
 	}
 
 	if ep.ID == 0 {
-		return nil, fmt.Errorf("GetUniqueByEmail: id `%v` not found", email)
+		return nil, nil
 	}
 
 	return ep, nil
@@ -120,7 +119,7 @@ func (repo *EmailPasswdRepo) GetAllByEmail() ([]*EmailPasswd, error) {
 	rows, err := repo.db.Query(SQLEmailPasswdGetAll)
 
 	if err != nil {
-		return nil, fmt.Errorf("GetAll: %v", err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -129,13 +128,13 @@ func (repo *EmailPasswdRepo) GetAllByEmail() ([]*EmailPasswd, error) {
 	for rows.Next() {
 		ep, err := scanRowIntoEmailPasswd(rows)
 		if err != nil {
-			return nil, fmt.Errorf("GetAll: %v", err)
+			return nil, err
 		}
 		eps = append(eps, ep)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetAll: %v", err)
+		return nil, err
 	}
 
 	return eps, nil

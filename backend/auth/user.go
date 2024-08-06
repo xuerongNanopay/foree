@@ -2,7 +2,6 @@ package auth
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 )
 
@@ -106,11 +105,11 @@ func (repo *UserRepo) Insert(user User) (int64, error) {
 		user.Email,
 	)
 	if err != nil {
-		return 0, fmt.Errorf("Insert: %v", err)
+		return 0, err
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("Insert: %v", err)
+		return 0, err
 	}
 	return id, nil
 }
@@ -119,7 +118,7 @@ func (repo *UserRepo) GetUniqueById(id int64) (*User, error) {
 	rows, err := repo.db.Query(SQLUserGetUniqueById, id)
 
 	if err != nil {
-		return nil, fmt.Errorf("GetById: %v", err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -128,12 +127,12 @@ func (repo *UserRepo) GetUniqueById(id int64) (*User, error) {
 	for rows.Next() {
 		u, err = scanRowIntoUser(rows)
 		if err != nil {
-			return nil, fmt.Errorf("GetById: %v", err)
+			return nil, err
 		}
 	}
 
 	if u.ID == 0 {
-		return nil, fmt.Errorf("GetById: id `%v` not found", id)
+		return nil, nil
 	}
 
 	return u, nil
@@ -143,7 +142,7 @@ func (repo *UserRepo) GetAll() ([]*User, error) {
 	rows, err := repo.db.Query(SQLUserGetAll)
 
 	if err != nil {
-		return nil, fmt.Errorf("GetAll: %v", err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -152,13 +151,13 @@ func (repo *UserRepo) GetAll() ([]*User, error) {
 	for rows.Next() {
 		u, err := scanRowIntoUser(rows)
 		if err != nil {
-			return nil, fmt.Errorf("GetAll: %v", err)
+			return nil, err
 		}
 		users = append(users, u)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("GetAll: %v", err)
+		return nil, err
 	}
 
 	return users, nil

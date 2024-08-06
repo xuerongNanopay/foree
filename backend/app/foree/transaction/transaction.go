@@ -9,12 +9,12 @@ import (
 type TxStatus string
 
 const (
-	TxStatusInitial  TxStatus = "INITIAL"
-	TxStatusPending  TxStatus = "PENDING"
-	TxStatusSuspend  TxStatus = "Suspend"
-	TxStatusReject   TxStatus = "REJECT"
-	TxStatusCancel   TxStatus = "CANCEL"
-	TxStatusComplete TxStatus = "COMPLETE"
+	TxStatusInitial    TxStatus = "INITIAL"
+	TxStatusProcessing TxStatus = "PROCESSING"
+	TxStatusSuspend    TxStatus = "Suspend"
+	TxStatusReject     TxStatus = "REJECT"
+	TxStatusCancel     TxStatus = "CANCEL"
+	TxStatusComplete   TxStatus = "COMPLETE"
 	// TxStatusInitial TxStatus = "INITIAL"
 )
 
@@ -38,7 +38,7 @@ type ForeeTransaction struct {
 	SrcAmt         types.AmountData
 	DestAmt        types.AmountData
 	Rate           types.RateDate
-	Status         string
+	Status         TxStage
 	Total          types.AmountData
 	CurStage       TxStage
 	CurStageStatus string
