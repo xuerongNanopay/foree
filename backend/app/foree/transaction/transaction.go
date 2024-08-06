@@ -12,12 +12,23 @@ const (
 	TxStageCI TxStage = "CASH_IN"
 )
 
-type TxAmountData struct {
-	Amount  types.AmountData `json:"amount,omitempty"`
-	Curreny string           `json:"currency,omitempty"`
-}
-
 type ForeeTransaction struct {
+	ID      string
+	SrcAmt  types.AmountData
+	DestAmt types.AmountData
+	Rate    types.RateDate
+
+	FeeIDs       []int64
+	Fees         []FeeJoint
+	PromotionIds []int64
+	// Promotions   []types.Promotion
+	Total           types.AmountData
+	IsCancelAllowed bool      `json:"isCancelAllowed"`
+	CreateAt        time.Time `json:"createAt"`
+	UpdateAt        time.Time `json:"updateAt"`
+
+	CI  *CITransaction
+	IDM *IDMTransaction
 }
 
 type CITransaction struct {
@@ -29,24 +40,21 @@ type IDMTransaction struct {
 type NBPTransaction struct {
 }
 
-type Fee struct {
-	ID            string
-	TransactionId int64
-}
-
 // type
 // Src
 // Dest
 type TransactionSummary struct {
 	ID          string
 	Summary     string
-	SrcAmt      TxAmountData
-	DestAmt     TxAmountData
+	SrcAmt      types.AmountData
+	DestAmt     types.AmountData
 	CiIsoStatus string
 	Type        string
 	Status      string
 	FXRate      string
 
-	Total   TxAmountData
-	Created time.Time
+	Fees       []Fee
+	Promotions []types.Promotion
+	Total      types.AmountData
+	Created    time.Time
 }
