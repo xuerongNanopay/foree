@@ -10,6 +10,8 @@ import (
 type IDMTransaction struct {
 	ID                   int64
 	Status               TxStatus
+	Ip                   string `json:"ip"`
+	UserAgent            string `json:"userAgent"`
 	SrcInteracAccId      int64
 	SrcInteracAcc        *ScotiaInteracCITransaction
 	DescContactAccountId int64

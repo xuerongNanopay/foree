@@ -9,6 +9,8 @@ import (
 type ScotiaInteracCITransaction struct {
 	ID                  int64
 	Status              TxStatus
+	ScotialId           string
+	Url                 string
 	SrcInteracAccId     int64
 	SrcInteracAcc       *ScotiaInteracCITransaction
 	DescInteracAccId    int64
