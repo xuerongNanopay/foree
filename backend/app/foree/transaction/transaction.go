@@ -9,7 +9,12 @@ import (
 type TxStatus string
 
 const (
-	TxStatusInitial TxStatus = "INITIAL"
+	TxStatusInitial  TxStatus = "INITIAL"
+	TxStatusPending  TxStatus = "PENDING"
+	TxStatusSuspend  TxStatus = "Suspend"
+	TxStatusReject   TxStatus = "REJECT"
+	TxStatusCancel   TxStatus = "CANCEL"
+	TxStatusComplete TxStatus = "COMPLETE"
 	// TxStatusInitial TxStatus = "INITIAL"
 )
 
@@ -19,14 +24,24 @@ const (
 	TxTypeInteracToNBP TxType = "INTERAC-NBP"
 )
 
+type TxStage string
+
+const (
+	TxStageInteracCI TxStage = "INTERAC-CI"
+	TxStageIDM       TxStage = "Compliance-IDM"
+	TxStageNBPCI     TxStage = "INTERAC-CO"
+)
+
 type ForeeTransaction struct {
-	ID      int64
-	Type    string
-	SrcAmt  types.AmountData
-	DestAmt types.AmountData
-	Rate    types.RateDate
-	Status  string
-	Total   types.AmountData
+	ID             int64
+	Type           string
+	SrcAmt         types.AmountData
+	DestAmt        types.AmountData
+	Rate           types.RateDate
+	Status         string
+	Total          types.AmountData
+	CurStage       TxStage
+	CurStageStatus string
 
 	FeeIDs          []int64
 	Fees            []FeeJoint
