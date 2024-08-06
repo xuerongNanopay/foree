@@ -114,6 +114,30 @@ func (repo *FeeRepo) GetFeeById(id int64) (*Fee, error) {
 	return f, nil
 }
 
+func (repo *FeeRepo) GetAllFee(id int64) ([]*Fee, error) {
+	rows, err := repo.db.Query(SQLFeeGetAll)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	fees := make([]*Fee, 16)
+	for rows.Next() {
+		p, err := scanRowIntoFee(rows)
+		if err != nil {
+			return nil, err
+		}
+		fees = append(fees, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return fees, nil
+}
+
 func scanRowIntoFee(rows *sql.Rows) (*Fee, error) {
 	u := new(Fee)
 	err := rows.Scan(
