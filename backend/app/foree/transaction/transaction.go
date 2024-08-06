@@ -6,14 +6,22 @@ import (
 	"xue.io/go-pay/app/foree/types"
 )
 
-type TxStage string
+type TxStatus string
 
 const (
-	TxStageCI TxStage = "CASH_IN"
+	TxStatusInitial TxStatus = "INITIAL"
+	// TxStatusInitial TxStatus = "INITIAL"
+)
+
+type TxType string
+
+const (
+	TxTypeInteracToNBP TxType = "INTERAC-NBP"
 )
 
 type ForeeTransaction struct {
 	ID      int64
+	Type    string
 	SrcAmt  types.AmountData
 	DestAmt types.AmountData
 	Rate    types.RateDate
@@ -29,12 +37,12 @@ type ForeeTransaction struct {
 	UpdateAt        time.Time `json:"updateAt"`
 	OwnerId         int64
 
-	CI   *CITransaction
+	CI   *InteracCITransaction
 	IDM  *IDMTransaction
-	COUT *NBPTransaction
+	COUT *NBPCOTransaction
 }
 
-type CITransaction struct {
+type InteracCITransaction struct {
 	ForeeTransactionId int64
 	OwnerId            int64
 }
@@ -44,7 +52,7 @@ type IDMTransaction struct {
 	OwnerId            int64
 }
 
-type NBPTransaction struct {
+type NBPCOTransaction struct {
 	ForeeTransactionId int64
 	OwnerId            int64
 }
