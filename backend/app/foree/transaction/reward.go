@@ -28,7 +28,7 @@ const (
 			r.status, r.is_redeemed, r.owner_id, r.transaction_id,
 			r.expire_at, f.create_at, f.update_at
 		FROM rewards as r
-		Where r.transaction_id=?
+		Where r.transaction_id = ?
 	`
 	SQLRewardGetAllByOwnerId = `
 		SELECT
@@ -36,7 +36,7 @@ const (
 			r.status, r.is_redeemed, r.owner_id, r.transaction_id,
 			r.expire_at, f.create_at, f.update_at
 		FROM rewards as r
-		Where r.owner_id=?
+		Where r.owner_id = ?
 	`
 )
 

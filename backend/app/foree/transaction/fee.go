@@ -25,7 +25,7 @@ const (
 			f.is_apply_in_condition_amount_only
 			f.is_enable, f.create_at, f.update_at
 		FROM fees as f
-		Where f.id=?
+		Where f.id = ?
 	`
 	SQLFeeJointInsert = `
 		INSERT INTO fees
@@ -39,7 +39,7 @@ const (
 			f.fee_id, f.description, f.amount, f.currency,
 			f.transaction_id, f.owner_id, f.create_at, f.update_at
 		FROM fee_joint as f
-		Where f.transaction_id=?
+		Where f.transaction_id = ?
 	`
 )
 
