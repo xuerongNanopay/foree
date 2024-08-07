@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	SQLPermissionByGroupId = `
+	sQLPermissionByGroupId = `
 		SELECT 
 			p.id, p.description, p.is_enable
 		FROM group_permission as gp
@@ -53,7 +53,7 @@ type PermissionRepo struct {
 }
 
 func (repo *PermissionRepo) GetAllByGroupId(groupId string) ([]*Permission, error) {
-	rows, err := repo.db.Query(SQLPermissionByGroupId)
+	rows, err := repo.db.Query(sQLPermissionByGroupId)
 
 	if err != nil {
 		return nil, err

@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	SQLUserGetAll = `
+	sQLUserGetAll = `
 		SELECT 
 			u.id, u.group, u.status, u.first_name, u.middle_name, 
 			u.last_name, u.age, u.dob, u.nationality, u.Address1, 
@@ -14,7 +14,7 @@ const (
 			u.email, u.avatar_url, u.create_at, u.update_at
 		FROM users as u 
 	`
-	SQLUserGetUniqueById = `
+	sQLUserGetUniqueById = `
 		SELECT 
 			u.id, u.group, u.status, u.first_name, u.middle_name, 
 			u.last_name, u.age, u.dob, u.nationality, u.Address1, 
@@ -23,7 +23,7 @@ const (
 		FROM users as u 
 		WHERE u.id = ?
 	`
-	SQLUserInsert = `
+	sQLUserInsert = `
 		INSERT INTO users
 		(	group, status, first_name, middle_name, 
 			last_name, age, dob, nationality, Address1, 
@@ -31,7 +31,7 @@ const (
 			email
 		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
-	SQLUserUpdateStatus = `
+	sQLUserUpdateStatus = `
 		UPDATE users SET status = ? WHERE id = ?
 	`
 )
@@ -78,7 +78,7 @@ type UserRepo struct {
 }
 
 func (repo *UserRepo) UpdateStatus(id int64, status UserStatus) error {
-	_, err := repo.db.Exec(SQLUserUpdateStatus, status, id)
+	_, err := repo.db.Exec(sQLUserUpdateStatus, status, id)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func (repo *UserRepo) UpdateStatus(id int64, status UserStatus) error {
 
 func (repo *UserRepo) Insert(user User) (int64, error) {
 	result, err := repo.db.Exec(
-		SQLUserInsert,
+		sQLUserInsert,
 		user.Group,
 		user.Status,
 		user.FirstName,
@@ -115,7 +115,7 @@ func (repo *UserRepo) Insert(user User) (int64, error) {
 }
 
 func (repo *UserRepo) GetUniqueById(id int64) (*User, error) {
-	rows, err := repo.db.Query(SQLUserGetUniqueById, id)
+	rows, err := repo.db.Query(sQLUserGetUniqueById, id)
 
 	if err != nil {
 		return nil, err
@@ -139,7 +139,7 @@ func (repo *UserRepo) GetUniqueById(id int64) (*User, error) {
 }
 
 func (repo *UserRepo) GetAll() ([]*User, error) {
-	rows, err := repo.db.Query(SQLUserGetAll)
+	rows, err := repo.db.Query(sQLUserGetAll)
 
 	if err != nil {
 		return nil, err

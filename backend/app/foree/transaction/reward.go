@@ -8,21 +8,21 @@ import (
 )
 
 const (
-	SQLRewardInsert = `
+	sQLRewardInsert = `
 		INSERT INTO rewards
 		(
 			type, description, amount, currency,
 			status, is_redeemed, owner_id, transaction_id
 		) VALUES(?,?,?,?,?,?,?,?)
 	`
-	SQLRewardGetAll = `
+	sQLRewardGetAll = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.is_redeemed, r.owner_id, r.transaction_id,
 			r.expire_at, f.create_at, f.update_at
 		FROM rewards as r
 	`
-	SQLRewardGetAllByTransactionId = `
+	sQLRewardGetAllByTransactionId = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.is_redeemed, r.owner_id, r.transaction_id,
@@ -30,7 +30,7 @@ const (
 		FROM rewards as r
 		Where r.transaction_id = ?
 	`
-	SQLRewardGetAllByOwnerId = `
+	sQLRewardGetAllByOwnerId = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.is_redeemed, r.owner_id, r.transaction_id,
@@ -78,7 +78,7 @@ type RewardRepo struct {
 
 func (repo *FeeRepo) InsertReward(reward Reward) (int64, error) {
 	result, err := repo.db.Exec(
-		SQLRewardInsert,
+		sQLRewardInsert,
 		reward.Type,
 		reward.Description,
 		reward.Amt.Amount,
@@ -99,7 +99,7 @@ func (repo *FeeRepo) InsertReward(reward Reward) (int64, error) {
 }
 
 func (repo *FeeRepo) GetAllReward() ([]*Reward, error) {
-	rows, err := repo.db.Query(SQLRewardGetAll)
+	rows, err := repo.db.Query(sQLRewardGetAll)
 
 	if err != nil {
 		return nil, err
@@ -123,7 +123,7 @@ func (repo *FeeRepo) GetAllReward() ([]*Reward, error) {
 }
 
 func (repo *FeeRepo) GetAllRewardByTransactionId(transactionId int64) ([]*Reward, error) {
-	rows, err := repo.db.Query(SQLRewardGetAllByTransactionId, transactionId)
+	rows, err := repo.db.Query(sQLRewardGetAllByTransactionId, transactionId)
 
 	if err != nil {
 		return nil, err
@@ -147,7 +147,7 @@ func (repo *FeeRepo) GetAllRewardByTransactionId(transactionId int64) ([]*Reward
 }
 
 func (repo *FeeRepo) GetAllRewardByOwnerId(owenerId int64) ([]*Reward, error) {
-	rows, err := repo.db.Query(SQLRewardGetAllByOwnerId, owenerId)
+	rows, err := repo.db.Query(sQLRewardGetAllByOwnerId, owenerId)
 
 	if err != nil {
 		return nil, err

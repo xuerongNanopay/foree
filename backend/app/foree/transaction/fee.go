@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	SQLFeeGetAll = `
+	sQLFeeGetAll = `
 		SELECT
 			f.id, f.description, f.type, f.condition,
 			f.condition_amount, f.condition_currency,
@@ -17,7 +17,7 @@ const (
 			f.is_enable, f.create_at, f.update_at
 		FROM fees as f
 	`
-	SQLFeeGetUniqueById = `
+	sQLFeeGetUniqueById = `
 		SELECT
 			f.id, f.description, f.type, f.condition,
 			f.condition_amount, f.condition_currency,
@@ -27,14 +27,14 @@ const (
 		FROM fees as f
 		Where f.id = ?
 	`
-	SQLFeeJointInsert = `
+	sQLFeeJointInsert = `
 		INSERT INTO fees
 		(
 			fee_id, description, amount, currency,
 			transaction_id, owner_id
 		) VALUES(?,?,?,?,?,?)
 	`
-	SQLFeeJointGetByTransactionId = `
+	sQLFeeJointGetByTransactionId = `
 		SELECT
 			f.fee_id, f.description, f.amount, f.currency,
 			f.transaction_id, f.owner_id, f.create_at, f.update_at
@@ -91,7 +91,7 @@ type FeeRepo struct {
 }
 
 func (repo *FeeRepo) GetUniqueFeeById(id int64) (*Fee, error) {
-	rows, err := repo.db.Query(SQLFeeGetUniqueById, id)
+	rows, err := repo.db.Query(sQLFeeGetUniqueById, id)
 
 	if err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func (repo *FeeRepo) GetUniqueFeeById(id int64) (*Fee, error) {
 }
 
 func (repo *FeeRepo) GetAllFee() ([]*Fee, error) {
-	rows, err := repo.db.Query(SQLFeeGetAll)
+	rows, err := repo.db.Query(sQLFeeGetAll)
 
 	if err != nil {
 		return nil, err
@@ -140,7 +140,7 @@ func (repo *FeeRepo) GetAllFee() ([]*Fee, error) {
 
 func (repo *FeeRepo) InsertFeeJoint(feeJoint FeeJoint) (int64, error) {
 	result, err := repo.db.Exec(
-		SQLFeeJointInsert,
+		sQLFeeJointInsert,
 		feeJoint.FeeId,
 		feeJoint.Description,
 		feeJoint.Amt.Amount,
@@ -159,7 +159,7 @@ func (repo *FeeRepo) InsertFeeJoint(feeJoint FeeJoint) (int64, error) {
 }
 
 func (repo *FeeRepo) GetAllFeeJointbyTransactionId(transactionId int64) ([]*FeeJoint, error) {
-	rows, err := repo.db.Query(SQLFeeJointGetByTransactionId, transactionId)
+	rows, err := repo.db.Query(sQLFeeJointGetByTransactionId, transactionId)
 
 	if err != nil {
 		return nil, err
