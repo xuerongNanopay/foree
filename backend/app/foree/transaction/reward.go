@@ -98,6 +98,78 @@ func (repo *FeeRepo) InsertReward(reward Reward) (int64, error) {
 	return id, nil
 }
 
+func (repo *FeeRepo) GetAllReward() ([]*Reward, error) {
+	rows, err := repo.db.Query(SQLRewardGetAll)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	rewards := make([]*Reward, 16)
+	for rows.Next() {
+		p, err := scanRowIntoReward(rows)
+		if err != nil {
+			return nil, err
+		}
+		rewards = append(rewards, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return rewards, nil
+}
+
+func (repo *FeeRepo) GetAllRewardByTransactionId(transactionId int64) ([]*Reward, error) {
+	rows, err := repo.db.Query(SQLRewardGetAllByTransactionId, transactionId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	rewards := make([]*Reward, 16)
+	for rows.Next() {
+		p, err := scanRowIntoReward(rows)
+		if err != nil {
+			return nil, err
+		}
+		rewards = append(rewards, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return rewards, nil
+}
+
+func (repo *FeeRepo) GetAllRewardByOwnerId(owenerId int64) ([]*Reward, error) {
+	rows, err := repo.db.Query(SQLRewardGetAllByOwnerId, owenerId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	rewards := make([]*Reward, 16)
+	for rows.Next() {
+		p, err := scanRowIntoReward(rows)
+		if err != nil {
+			return nil, err
+		}
+		rewards = append(rewards, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return rewards, nil
+}
+
 func scanRowIntoReward(rows *sql.Rows) (*Reward, error) {
 	u := new(Reward)
 	err := rows.Scan(
