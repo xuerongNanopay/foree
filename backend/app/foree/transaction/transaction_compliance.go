@@ -22,3 +22,15 @@ type IDMTransaction struct {
 	CreateAt             time.Time `json:"createAt"`
 	UpdateAt             time.Time `json:"updateAt"`
 }
+
+// Large object.
+type IDMCompliance struct {
+	ID            int64
+	IDMTxId       int64
+	IDMStatusCode int
+	IDMResult     string
+	RequestJson   string
+	ResponseJson  string
+	CreateAt      time.Time `json:"createAt"`
+	UpdateAt      time.Time `json:"updateAt"`
+}
