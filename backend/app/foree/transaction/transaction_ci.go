@@ -40,7 +40,7 @@ const (
 	`
 )
 
-type ScotiaInteracCITx struct {
+type InteracCITx struct {
 	ID               int64
 	Status           TxStatus
 	APIReference     string
@@ -64,7 +64,7 @@ type InteracCIRepo struct {
 	db *sql.DB
 }
 
-func (repo *InteracCIRepo) InsertReferral(tx ScotiaInteracCITx) (int64, error) {
+func (repo *InteracCIRepo) InsertInteracCITx(tx InteracCITx) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLInteracCITxInsert,
 		tx.Status,
@@ -85,8 +85,8 @@ func (repo *InteracCIRepo) InsertReferral(tx ScotiaInteracCITx) (int64, error) {
 	return id, nil
 }
 
-func scanRowIntoScotiaInteracCITx(rows *sql.Rows) (*ScotiaInteracCITx, error) {
-	tx := new(ScotiaInteracCITx)
+func scanRowIntoInteracCITx(rows *sql.Rows) (*InteracCITx, error) {
+	tx := new(InteracCITx)
 	err := rows.Scan(
 		&tx.ID,
 		&tx.Status,
