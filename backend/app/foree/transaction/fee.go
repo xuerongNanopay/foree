@@ -158,6 +158,30 @@ func (repo *FeeRepo) InsertFeeJoint(feeJoint FeeJoint) (int64, error) {
 	return id, nil
 }
 
+func (repo *FeeRepo) GetAllFeeJoinbyTransactionId(transactionId int64) ([]*FeeJoint, error) {
+	rows, err := repo.db.Query(SQLFeeJointGetByTransactionId, transactionId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	feeJoints := make([]*FeeJoint, 16)
+	for rows.Next() {
+		p, err := scanRowIntoFeeJoint(rows)
+		if err != nil {
+			return nil, err
+		}
+		feeJoints = append(feeJoints, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return feeJoints, nil
+}
+
 func scanRowIntoFee(rows *sql.Rows) (*Fee, error) {
 	u := new(Fee)
 	err := rows.Scan(
