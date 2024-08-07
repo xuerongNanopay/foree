@@ -114,7 +114,7 @@ func (repo *FeeRepo) GetFeeById(id int64) (*Fee, error) {
 	return f, nil
 }
 
-func (repo *FeeRepo) GetAllFee(id int64) ([]*Fee, error) {
+func (repo *FeeRepo) GetAllFee() ([]*Fee, error) {
 	rows, err := repo.db.Query(SQLFeeGetAll)
 
 	if err != nil {
@@ -158,7 +158,7 @@ func (repo *FeeRepo) InsertFeeJoint(feeJoint FeeJoint) (int64, error) {
 	return id, nil
 }
 
-func (repo *FeeRepo) GetAllFeeJoinbyTransactionId(transactionId int64) ([]*FeeJoint, error) {
+func (repo *FeeRepo) GetAllFeeJointbyTransactionId(transactionId int64) ([]*FeeJoint, error) {
 	rows, err := repo.db.Query(SQLFeeJointGetByTransactionId, transactionId)
 
 	if err != nil {

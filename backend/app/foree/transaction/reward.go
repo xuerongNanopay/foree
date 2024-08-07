@@ -75,3 +75,48 @@ func NewRewardRepo(db *sql.DB) *RewardRepo {
 type RewardRepo struct {
 	db *sql.DB
 }
+
+func (repo *FeeRepo) InsertReward(reward Reward) (int64, error) {
+	result, err := repo.db.Exec(
+		SQLRewardInsert,
+		reward.Type,
+		reward.Description,
+		reward.Amt.Amount,
+		reward.Amt.Curreny,
+		reward.Status,
+		reward.IsRedeemed,
+		reward.OwnerId,
+		reward.TransactionId,
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func scanRowIntoReward(rows *sql.Rows) (*Reward, error) {
+	u := new(Reward)
+	err := rows.Scan(
+		&u.ID,
+		&u.Type,
+		&u.Description,
+		&u.Amt.Amount,
+		&u.Amt.Curreny,
+		&u.Status,
+		&u.IsRedeemed,
+		&u.OwnerId,
+		&u.TransactionId,
+		&u.ExpireAt,
+		&u.CreateAt,
+		&u.UpdateAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
+}
