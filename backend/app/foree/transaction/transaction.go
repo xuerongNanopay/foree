@@ -53,7 +53,7 @@ type ForeeTransaction struct {
 	OwnerId         int64
 
 	CI      *InteracCITx
-	IDM     *IDMTransaction
+	IDM     *IDMTx
 	COUT    *NBPCOTransaction
 	Summary *TransactionSummary
 	History *TransactionStatusHistory
