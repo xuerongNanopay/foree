@@ -31,6 +31,28 @@ const (
 		FROM idm_tx t
 		where t.parent_tx_id = ?
 	`
+	sQLIDMComplanceInsert = `
+		INSERT INTO idm_compliance
+		(
+			idm_tx_id, idm_http_status_code, idm_result, idm_request_json, idm_response_json
+		) VALUES(?,?,?,?,?)
+	`
+	sQLIDMComplanceGetUniqueById = `
+		SELECT 
+			c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
+			c.idm_request_json, c.idm_response_json,
+			c.create_at, c.update_at
+		FROM idm_tx c
+		where c.id = ?
+	`
+	sQLIDMComplanceGetUniqueByIDMTxId = `
+		SELECT 
+			c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
+			c.idm_request_json, c.idm_response_json,
+			c.create_at, c.update_at
+		FROM idm_tx c
+		where c.idm_tx_id = ?
+	`
 )
 
 type IDMTx struct {
