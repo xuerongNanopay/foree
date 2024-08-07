@@ -1,6 +1,7 @@
 package account
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -32,4 +33,12 @@ type ForeeContactAccount struct {
 	OwnerId               int64            `json:"owerId"`
 	CreateAt              time.Time        `json:"createAt"`
 	UpdateAt              time.Time        `json:"updateAt"`
+}
+
+func NeworeeContactAccountRepo(db *sql.DB) *ForeeContactAccountRepo {
+	return &ForeeContactAccountRepo{db: db}
+}
+
+type ForeeContactAccountRepo struct {
+	db *sql.DB
 }
