@@ -67,10 +67,40 @@ type ContactAccount struct {
 	UpdateAt              time.Time          `json:"updateAt"`
 }
 
-func NeworeeContactAccountRepo(db *sql.DB) *ContactAccountRepo {
+func NewContactAccountRepo(db *sql.DB) *ContactAccountRepo {
 	return &ContactAccountRepo{db: db}
 }
 
 type ContactAccountRepo struct {
 	db *sql.DB
+}
+
+func (repo *ContactAccountRepo) InsertContactAccount(acc ContactAccount) (int64, error) {
+	result, err := repo.db.Exec(
+		sQLContactAccountInsert,
+		acc.Status,
+		acc.Type,
+		acc.FirstName,
+		acc.MiddleName,
+		acc.LastName,
+		acc.Address1,
+		acc.Address2,
+		acc.City,
+		acc.Province,
+		acc.Country,
+		acc.PhoneNumber,
+		acc.InstitutionName,
+		acc.AccountHash,
+		acc.AccountHash,
+		acc.RelationshipToContact,
+		acc.OwnerId,
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
