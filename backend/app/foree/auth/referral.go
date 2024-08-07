@@ -22,8 +22,8 @@ type Referral struct {
 	ReferralType  ReferralType
 	ReferralValue string
 	Status        ReferralStatus
-	OwerId        string
-	RefereeId     string
+	ReferrerId    int64
+	ReferreeId    int64
 	IsRedeemed    bool
 	ExpireAt      time.Time `json:"expireAt"`
 	CreateAt      time.Time `json:"createAt"`
