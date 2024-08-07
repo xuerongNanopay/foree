@@ -27,6 +27,7 @@ type ForeeContactAccount struct {
 	PhoneNumber           string           `json:"phoneNumber"`
 	InstitutionName       string           `json:"institutionName"`
 	AccountNumber         string           `json:"accountNumber"`
+	AccountHash           string           `json:"accountHash"`
 	RelationshipToContact string           `json:"relationshipToContact"`
 	OwnerId               int64            `json:"owerId"`
 	CreateAt              time.Time        `json:"createAt"`

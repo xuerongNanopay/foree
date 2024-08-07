@@ -10,8 +10,9 @@ const (
 		INSERT INTO interac_accounts
 		(
 			first_name, middle_name, last_name,
-			email, owner_id, status
-		) VALUES(?,?,?,?,?,?)
+			address1, address2, city, province, country,
+			phone_number, email, owner_id, status
+		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	// sQLInteractAccountGetAll = `
 
@@ -19,31 +20,42 @@ const (
 	sQLInteractAccountGetUniqueByOwnerId = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
-			a.last_name, a.email, a.owner_id,
-			a.status, a.create_at, a.update_at
+			a.last_name, a.address1, a.address2, a.city, 
+			a.province, a.country, a.phone_number,
+			a.email, a.owner_id, a.status, 
+			a.create_at, a.update_at
 		FROM interac_accounts a
 		where a.owner_id = ?
 	`
 	sQLInteractAccountGetUniqueById = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
-			a.last_name, a.email, a.owner_id,
-			a.status, a.create_at, a.update_at
+			a.last_name, a.address1, a.address2, a.city, 
+			a.province, a.country, a.phone_number,
+			a.email, a.owner_id, a.status, 
+			a.create_at, a.update_at
 		FROM interac_accounts a
 		where a.id = ?
 	`
 )
 
 type InteracAccount struct {
-	ID         int64
-	FirstName  string
-	MiddleName string
-	LastName   string
-	Email      string
-	OwnerId    int64
-	Status     AccountStatus
-	CreateAt   time.Time `json:"createAt"`
-	UpdateAt   time.Time `json:"updateAt"`
+	ID          int64
+	FirstName   string
+	MiddleName  string
+	LastName    string
+	Address1    string `json:"address1"`
+	Address2    string `json:"address2"`
+	City        string `json:"city"`
+	Province    string `json:"province"`
+	Country     string `json:"country"`
+	PhoneNumber string `json:"phoneNumber"`
+	Email       string
+	AccountHash string `json:"accountHash"`
+	OwnerId     int64
+	Status      AccountStatus
+	CreateAt    time.Time `json:"createAt"`
+	UpdateAt    time.Time `json:"updateAt"`
 }
 
 func NewInteracAccountRepo(db *sql.DB) *InteracAccountRepo {
@@ -60,6 +72,12 @@ func (repo *InteracAccountRepo) InsertInteracAccount(acc InteracAccount) (int64,
 		acc.FirstName,
 		acc.MiddleName,
 		acc.LastName,
+		acc.Address1,
+		acc.Address2,
+		acc.City,
+		acc.Province,
+		acc.Country,
+		acc.PhoneNumber,
 		acc.Email,
 		acc.OwnerId,
 		acc.Status,
@@ -74,7 +92,31 @@ func (repo *InteracAccountRepo) InsertInteracAccount(acc InteracAccount) (int64,
 	return id, nil
 }
 
-func (repo *InteracAccountRepo) GetUniqueInteractAccountByOwnerId(ownerId int64) {
+func (repo *InteracAccountRepo) GetUniqueInteractAccountByOwnerId(ownerId int64) ([]*InteracAccount, error) {
+	rows, err := repo.db.Query(sQLInteractAccountGetUniqueByOwnerId, ownerId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	accounts := make([]*InteracAccount, 16)
+	for rows.Next() {
+		p, err := scanRowIntoInteracAccount(rows)
+		if err != nil {
+			return nil, err
+		}
+		accounts = append(accounts, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return accounts, nil
+}
+
+func (repo *InteracAccountRepo) GetUniqueInteractAccountById(id int64) {
 
 }
 
@@ -82,14 +124,18 @@ func scanRowIntoInteracAccount(rows *sql.Rows) (*InteracAccount, error) {
 	u := new(InteracAccount)
 	err := rows.Scan(
 		&u.ID,
-		&u.Code,
-		&u.ReferralType,
-		&u.ReferralValue,
+		&u.FirstName,
+		&u.MiddleName,
+		&u.LastName,
+		&u.Address1,
+		&u.Address2,
+		&u.City,
+		&u.Province,
+		&u.Country,
+		&u.PhoneNumber,
+		&u.Email,
+		&u.OwnerId,
 		&u.Status,
-		&u.ReferrerId,
-		&u.ReferreeId,
-		&u.IsRedeemed,
-		&u.ExpireAt,
 		&u.CreateAt,
 		&u.UpdateAt,
 	)
