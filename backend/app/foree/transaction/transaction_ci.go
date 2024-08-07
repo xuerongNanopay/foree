@@ -133,6 +133,14 @@ func (repo *InteracCIRepo) GetUniqueInteracCITxById(id int64) (*InteracCITx, err
 	return f, nil
 }
 
+func (repo *InteracCIRepo) UpdateInteracCITxById(tx InteracCITx) error {
+	_, err := repo.db.Exec(sQLInteracCITxUpdateById, tx.Status, tx.APIReference, tx.Url, tx.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func scanRowIntoInteracCITx(rows *sql.Rows) (*InteracCITx, error) {
 	tx := new(InteracCITx)
 	err := rows.Scan(
