@@ -15,6 +15,7 @@ const (
 
 type Reward struct {
 	ID                 string
+	Type               string
 	Description        string
 	Amt                types.AmountData
 	Status             RewardStatus
