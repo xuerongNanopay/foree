@@ -85,6 +85,54 @@ func (repo *InteracCIRepo) InsertInteracCITx(tx InteracCITx) (int64, error) {
 	return id, nil
 }
 
+func (repo *InteracCIRepo) GetUniqueInteracCITxByParentTxId(parentTxId int64) (*InteracCITx, error) {
+	rows, err := repo.db.Query(sQLInteracCITxGetUniqueByParentTxId, parentTxId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *InteracCITx
+
+	for rows.Next() {
+		f, err = scanRowIntoInteracCITx(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func (repo *InteracCIRepo) GetUniqueInteracCITxById(id int64) (*InteracCITx, error) {
+	rows, err := repo.db.Query(sQLInteracCITxGetUniqueById, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *InteracCITx
+
+	for rows.Next() {
+		f, err = scanRowIntoInteracCITx(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
 func scanRowIntoInteracCITx(rows *sql.Rows) (*InteracCITx, error) {
 	tx := new(InteracCITx)
 	err := rows.Scan(
