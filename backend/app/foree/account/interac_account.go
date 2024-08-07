@@ -92,7 +92,7 @@ func (repo *InteracAccountRepo) InsertInteracAccount(acc InteracAccount) (int64,
 	return id, nil
 }
 
-func (repo *InteracAccountRepo) GetUniqueInteractAccountByOwnerId(ownerId int64) ([]*InteracAccount, error) {
+func (repo *InteracAccountRepo) GetUniqueInteractAccountByOwnerId(ownerId int64) (*InteracAccount, error) {
 	rows, err := repo.db.Query(sQLInteractAccountGetUniqueByOwnerId, ownerId)
 
 	if err != nil {
@@ -100,24 +100,44 @@ func (repo *InteracAccountRepo) GetUniqueInteractAccountByOwnerId(ownerId int64)
 	}
 	defer rows.Close()
 
-	accounts := make([]*InteracAccount, 16)
+	var f *InteracAccount
+
 	for rows.Next() {
-		p, err := scanRowIntoInteracAccount(rows)
+		f, err = scanRowIntoInteracAccount(rows)
 		if err != nil {
 			return nil, err
 		}
-		accounts = append(accounts, p)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, err
+	if f.ID == 0 {
+		return nil, nil
 	}
 
-	return accounts, nil
+	return f, nil
 }
 
-func (repo *InteracAccountRepo) GetUniqueInteractAccountById(id int64) {
+func (repo *InteracAccountRepo) GetUniqueInteractAccountById(id int64) (*InteracAccount, error) {
+	rows, err := repo.db.Query(sQLInteractAccountGetUniqueById, id)
 
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *InteracAccount
+
+	for rows.Next() {
+		f, err = scanRowIntoInteracAccount(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
 }
 
 func scanRowIntoInteracAccount(rows *sql.Rows) (*InteracAccount, error) {
