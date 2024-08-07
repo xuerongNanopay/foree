@@ -90,7 +90,7 @@ type FeeRepo struct {
 	db *sql.DB
 }
 
-func (repo *FeeRepo) GetFeeById(id int64) (*Fee, error) {
+func (repo *FeeRepo) GetUniqueFeeById(id int64) (*Fee, error) {
 	rows, err := repo.db.Query(SQLFeeGetUniqueById, id)
 
 	if err != nil {

@@ -21,7 +21,7 @@ const (
 		FROM referrals r
 		where r.code = ?
 	`
-	SQLReferralGetByReferrerId = `
+	SQLReferralGetAllByReferrerId = `
 		SELECT 
 			r.id, r.code, r.referral_type, r.referral_value,
 			r.status, r.referrer_id, r.referree_id, r.referree_hash
@@ -29,7 +29,15 @@ const (
 		FROM referrals r
 		where r.referrer_id = ?
 	`
-	SQLReferralUpdateReferreeByCode = `
+	SQLReferralGetUniqueByReferreeHash = `
+		SELECT 
+			r.id, r.code, r.referral_type, r.referral_value,
+			r.status, r.referrer_id, r.referree_id, r.referree_hash
+			r.is_redeemed, r.expire_at, r.create_at, r.update_at
+		FROM referrals r
+		where r.referree_hash = ?
+	`
+	SQLReferralUpdateReferralByCode = `
 		UPDATE referrals SET referree_id = ?, referree_hash = ?  WHERE code = ?
 	`
 )
@@ -69,6 +77,78 @@ func NewReferralRepo(db *sql.DB) *ReferralRepo {
 
 type ReferralRepo struct {
 	db *sql.DB
+}
+
+func (repo *ReferralRepo) GetAllReferralByReferrerId(referrerId int64) ([]*Referral, error) {
+	rows, err := repo.db.Query(SQLReferralGetAllByReferrerId, referrerId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	referrals := make([]*Referral, 16)
+	for rows.Next() {
+		p, err := scanRowIntoReferral(rows)
+		if err != nil {
+			return nil, err
+		}
+		referrals = append(referrals, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return referrals, nil
+}
+
+func (repo *ReferralRepo) SQLReferralGetUniqueByCode(code string) (*Referral, error) {
+	rows, err := repo.db.Query(SQLReferralGetUniqueByCode, code)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *Referral
+
+	for rows.Next() {
+		f, err = scanRowIntoReferral(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func (repo *ReferralRepo) SQLReferralGetUniqueByReferreeHash(referreeHash string) (*Referral, error) {
+	rows, err := repo.db.Query(SQLReferralGetUniqueByReferreeHash, referreeHash)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *Referral
+
+	for rows.Next() {
+		f, err = scanRowIntoReferral(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
 }
 
 func scanRowIntoReferral(rows *sql.Rows) (*Referral, error) {
