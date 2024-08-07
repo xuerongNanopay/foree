@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"database/sql"
 	"time"
 
 	"xue.io/go-pay/app/foree/types"
@@ -20,4 +21,12 @@ type ScotiaInteracCITransaction struct {
 	OwnerId             int64
 	CreateAt            time.Time `json:"createAt"`
 	UpdateAt            time.Time `json:"updateAt"`
+}
+
+func NewSICITxRepo(db *sql.DB) *SICITxRepo {
+	return &SICITxRepo{db: db}
+}
+
+type SICITxRepo struct {
+	db *sql.DB
 }
