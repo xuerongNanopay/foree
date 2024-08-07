@@ -19,21 +19,23 @@ const (
 	sQLInteracCITxGetUniqueByParentTxId = `
 		SELECT 
 			t.id, t.status, t.src_interac_acc_id, t.dest_interac_acc_id,
-			t.amount, t.currency, t.parent_tx_id, t.owner_id
+			t.amount, t.currency, t.api_reference, t.url
+			t.parent_tx_id, t.owner_id, t.create_at, t.update_at
 		FROM interact_ci_tx t
 		where t.parent_tx_id = ?
 	`
 	sQLInteracCITxGetUniqueById = `
 		SELECT 
 			t.id, t.status, t.src_interac_acc_id, t.dest_interac_acc_id,
-			t.amount, t.currency, t.parent_tx_id, t.owner_id
+			t.amount, t.currency, t.api_reference, t.url
+			t.parent_tx_id, t.owner_id, t.create_at, t.update_at
 		FROM interact_ci_tx t
 		where t.id = ?
 	
 	`
 	sQLInteracCITxUpdateById = `
 		UPDATE interact_ci_tx SET 
-			status = ?, scotia_id = ?, url = ?
+			status = ?, api_reference = ?, url = ?
 		WHERE id = ?
 	`
 )
@@ -41,7 +43,7 @@ const (
 type ScotiaInteracCITx struct {
 	ID               int64
 	Status           TxStatus
-	ScotialId        string
+	APIReference     string
 	Url              string
 	SrcInteracAccId  int64
 	SrcInteracAcc    *account.InteracAccount
@@ -62,16 +64,16 @@ type InteracCIRepo struct {
 	db *sql.DB
 }
 
-func (repo *InteracCIRepo) InsertReferral(referal Referral) (int64, error) {
+func (repo *InteracCIRepo) InsertReferral(tx ScotiaInteracCITx) (int64, error) {
 	result, err := repo.db.Exec(
-		sQLReferralInsert,
-		referal.Code,
-		referal.ReferralType,
-		referal.ReferralValue,
-		referal.Status,
-		referal.ReferrerId,
-		referal.IsRedeemed,
-		referal.ExpireAt,
+		sQLInteracCITxInsert,
+		tx.Status,
+		tx.SrcInteracAccId,
+		tx.DestInteracAccId,
+		tx.Amt.Amount,
+		tx.Amt.Curreny,
+		tx.ParentTxId,
+		tx.OwnerId,
 	)
 	if err != nil {
 		return 0, err
@@ -81,4 +83,27 @@ func (repo *InteracCIRepo) InsertReferral(referal Referral) (int64, error) {
 		return 0, err
 	}
 	return id, nil
+}
+
+func scanRowIntoScotiaInteracCITx(rows *sql.Rows) (*ScotiaInteracCITx, error) {
+	tx := new(ScotiaInteracCITx)
+	err := rows.Scan(
+		&tx.ID,
+		&tx.Status,
+		&tx.SrcInteracAccId,
+		&tx.DestInteracAccId,
+		&tx.Amt.Amount,
+		&tx.Amt.Curreny,
+		&tx.APIReference,
+		&tx.Url,
+		&tx.ParentTxId,
+		&tx.OwnerId,
+		&tx.CreateAt,
+		&tx.UpdateAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return tx, nil
 }
