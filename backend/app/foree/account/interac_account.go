@@ -13,14 +13,24 @@ const (
 			email, owner_id, status
 		) VALUES(?,?,?,?,?,?)
 	`
-	sQLInteractAccountGetAll = `
-	
-	`
+	// sQLInteractAccountGetAll = `
+
+	// `
 	sQLInteractAccountGetUniqueByOwnerId = `
-	
+		SELECT 
+			a.id, a.first_name, a.middle_name,
+			a.last_name, a.email, a.owner_id,
+			a.status, a.create_at, a.update_at
+		FROM interac_accounts a
+		where a.owner_id = ?
 	`
 	sQLInteractAccountGetUniqueById = `
-	
+		SELECT 
+			a.id, a.first_name, a.middle_name,
+			a.last_name, a.email, a.owner_id,
+			a.status, a.create_at, a.update_at
+		FROM interac_accounts a
+		where a.id = ?
 	`
 )
 
@@ -44,7 +54,7 @@ type InteracAccountRepo struct {
 	db *sql.DB
 }
 
-func (repo *InteracAccountRepo) InsertReferral(acc InteracAccount) (int64, error) {
+func (repo *InteracAccountRepo) InsertInteracAccount(acc InteracAccount) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLInteracAccountInsert,
 		acc.FirstName,
@@ -62,4 +72,30 @@ func (repo *InteracAccountRepo) InsertReferral(acc InteracAccount) (int64, error
 		return 0, err
 	}
 	return id, nil
+}
+
+func (repo *InteracAccountRepo) GetUniqueInteractAccountByOwnerId(ownerId int64) {
+
+}
+
+func scanRowIntoInteracAccount(rows *sql.Rows) (*InteracAccount, error) {
+	u := new(InteracAccount)
+	err := rows.Scan(
+		&u.ID,
+		&u.Code,
+		&u.ReferralType,
+		&u.ReferralValue,
+		&u.Status,
+		&u.ReferrerId,
+		&u.ReferreeId,
+		&u.IsRedeemed,
+		&u.ExpireAt,
+		&u.CreateAt,
+		&u.UpdateAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }
