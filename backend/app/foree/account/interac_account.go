@@ -10,8 +10,9 @@ const (
 		INSERT INTO interac_accounts
 		(
 			first_name, middle_name, last_name,
-			address1, address2, city, province, country,
-			phone_number, email, owner_id, status
+			address, phone_number, email, 
+			institution_name, branch_number, account_number,
+			owner_id, status
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	// sQLInteractAccountGetAll = `
@@ -20,9 +21,9 @@ const (
 	sQLInteractAccountGetUniqueByOwnerId = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
-			a.last_name, a.address1, a.address2, a.city, 
-			a.province, a.country, a.phone_number,
-			a.email, a.owner_id, a.status, 
+			a.last_name, a.address, a.phone_number, a.email, 
+			a.institution_name, a.branch_number, a.account_number,
+			a.owner_id, a.status, 
 			a.create_at, a.update_at
 		FROM interac_accounts a
 		where a.owner_id = ?
@@ -30,9 +31,9 @@ const (
 	sQLInteractAccountGetUniqueById = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
-			a.last_name, a.address1, a.address2, a.city, 
-			a.province, a.country, a.phone_number,
-			a.email, a.owner_id, a.status, 
+			a.last_name, a.address, a.phone_number, a.email, 
+			a.institution_name, a.branch_number, a.account_number,
+			a.owner_id, a.status, 
 			a.create_at, a.update_at
 		FROM interac_accounts a
 		where a.id = ?
@@ -40,22 +41,21 @@ const (
 )
 
 type InteracAccount struct {
-	ID          int64
-	FirstName   string
-	MiddleName  string
-	LastName    string
-	Address1    string `json:"address1"`
-	Address2    string `json:"address2"`
-	City        string `json:"city"`
-	Province    string `json:"province"`
-	Country     string `json:"country"`
-	PhoneNumber string `json:"phoneNumber"`
-	Email       string
-	AccountHash string `json:"accountHash"`
-	OwnerId     int64
-	Status      AccountStatus
-	CreateAt    time.Time `json:"createAt"`
-	UpdateAt    time.Time `json:"updateAt"`
+	ID              int64
+	FirstName       string
+	MiddleName      string
+	LastName        string
+	Address         string `json:"address"`
+	PhoneNumber     string `json:"phoneNumber"`
+	Email           string
+	InstitutionName string `json:"institutionName"`
+	BranchNumber    string `json:"branchNumber"`
+	AccountNumber   string `json:"accountNumber"`
+	AccountHash     string `json:"accountHash"`
+	OwnerId         int64
+	Status          AccountStatus
+	CreateAt        time.Time `json:"createAt"`
+	UpdateAt        time.Time `json:"updateAt"`
 }
 
 func NewInteracAccountRepo(db *sql.DB) *InteracAccountRepo {
@@ -72,13 +72,12 @@ func (repo *InteracAccountRepo) InsertInteracAccount(acc InteracAccount) (int64,
 		acc.FirstName,
 		acc.MiddleName,
 		acc.LastName,
-		acc.Address1,
-		acc.Address2,
-		acc.City,
-		acc.Province,
-		acc.Country,
+		acc.Address,
 		acc.PhoneNumber,
 		acc.Email,
+		acc.InstitutionName,
+		acc.BranchNumber,
+		acc.AccountNumber,
 		acc.OwnerId,
 		acc.Status,
 	)
@@ -147,13 +146,12 @@ func scanRowIntoInteracAccount(rows *sql.Rows) (*InteracAccount, error) {
 		&u.FirstName,
 		&u.MiddleName,
 		&u.LastName,
-		&u.Address1,
-		&u.Address2,
-		&u.City,
-		&u.Province,
-		&u.Country,
+		&u.Address,
 		&u.PhoneNumber,
 		&u.Email,
+		&u.InstitutionName,
+		&u.BranchNumber,
+		&u.AccountNumber,
 		&u.OwnerId,
 		&u.Status,
 		&u.CreateAt,

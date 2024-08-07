@@ -11,15 +11,15 @@ const (
 		(
 			status, type, first_name, middle_name,
 			last_name, address1, address2, city, province,
-			country, phone_number, institution_name, account_number,
+			country, phone_number, institution_name, branch_number, account_number,
 			account_hash, relationship_to_contact, owner_id
-		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	sQLContactAccountGetAllByOwnerId = `
 		SELECT 
 			a.id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
-			a.country, a.phone_number, a.institution_name, a.account_number,
+			a.country, a.phone_number, a.institution_name, a.branch_number, a.account_number,
 			a.account_hash, a.relationship_to_contact, a.owner_id
 			a.create_at, a.update_at
 		FROM contact_accounts a
@@ -29,7 +29,7 @@ const (
 		SELECT 
 			a.id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
-			a.country, a.phone_number, a.institution_name, a.account_number,
+			a.country, a.phone_number, a.institution_name, a.branch_number, a.account_number,
 			a.account_hash, a.relationship_to_contact, a.owner_id
 			a.create_at, a.update_at
 		FROM contact_accounts a
@@ -59,6 +59,7 @@ type ContactAccount struct {
 	Country               string             `json:"country"`
 	PhoneNumber           string             `json:"phoneNumber"`
 	InstitutionName       string             `json:"institutionName"`
+	BranchNumber          string             `json:"branchNumber"`
 	AccountNumber         string             `json:"accountNumber"`
 	AccountHash           string             `json:"accountHash"`
 	RelationshipToContact string             `json:"relationshipToContact"`
@@ -90,7 +91,8 @@ func (repo *ContactAccountRepo) InsertContactAccount(acc ContactAccount) (int64,
 		acc.Country,
 		acc.PhoneNumber,
 		acc.InstitutionName,
-		acc.AccountHash,
+		acc.BranchNumber,
+		acc.AccountNumber,
 		acc.AccountHash,
 		acc.RelationshipToContact,
 		acc.OwnerId,
@@ -169,6 +171,7 @@ func scanRowIntoContactAccount(rows *sql.Rows) (*ContactAccount, error) {
 		&u.Country,
 		&u.PhoneNumber,
 		&u.InstitutionName,
+		&u.BranchNumber,
 		&u.AccountNumber,
 		&u.AccountHash,
 		&u.RelationshipToContact,

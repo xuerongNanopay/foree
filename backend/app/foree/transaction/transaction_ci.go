@@ -7,6 +7,24 @@ import (
 	"xue.io/go-pay/app/foree/types"
 )
 
+const (
+	sQLInteracCITxInsert = `
+		INSERT INTO interact_ci_tx
+		(
+			status, src_interac_acc_id, desc_interac_acc_
+		) VALUES()
+	`
+	sQLInteracCITxGetUniqueByParentTxId = `
+	
+	`
+	sQLInteracCITxGetUniqueById = `
+	
+	`
+	sQLInteracCITxUpdateById = `
+	
+	`
+)
+
 type ScotiaInteracCITransaction struct {
 	ID                  int64
 	Status              TxStatus
@@ -23,10 +41,10 @@ type ScotiaInteracCITransaction struct {
 	UpdateAt            time.Time `json:"updateAt"`
 }
 
-func NewSICITxRepo(db *sql.DB) *SICITxRepo {
-	return &SICITxRepo{db: db}
+func NewInteracCIRepo(db *sql.DB) *InteracCIRepo {
+	return &InteracCIRepo{db: db}
 }
 
-type SICITxRepo struct {
+type InteracCIRepo struct {
 	db *sql.DB
 }
