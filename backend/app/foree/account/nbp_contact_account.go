@@ -15,7 +15,7 @@ const (
 			account_hash, relationship_to_contact, owner_id
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
-	sQLContactAccountGetByOwnerId = `
+	sQLContactAccountGetAllByOwnerId = `
 		SELECT 
 			a.id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
@@ -103,4 +103,82 @@ func (repo *ContactAccountRepo) InsertContactAccount(acc ContactAccount) (int64,
 		return 0, err
 	}
 	return id, nil
+}
+
+func (repo *ContactAccountRepo) GetUniqueContactAccountById(id int64) (*ContactAccount, error) {
+	rows, err := repo.db.Query(sQLContactAccountGetUniqueById, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *ContactAccount
+
+	for rows.Next() {
+		f, err = scanRowIntoContactAccount(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func (repo *ContactAccountRepo) GetAllContactAccountByOwnerId(ownerId int64) ([]*ContactAccount, error) {
+	rows, err := repo.db.Query(sQLContactAccountGetAllByOwnerId, ownerId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	accounts := make([]*ContactAccount, 16)
+	for rows.Next() {
+		p, err := scanRowIntoContactAccount(rows)
+		if err != nil {
+			return nil, err
+		}
+		accounts = append(accounts, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return accounts, nil
+}
+
+func scanRowIntoContactAccount(rows *sql.Rows) (*ContactAccount, error) {
+	u := new(ContactAccount)
+	err := rows.Scan(
+		&u.ID,
+		&u.Status,
+		&u.Type,
+		&u.FirstName,
+		&u.MiddleName,
+		&u.LastName,
+		&u.Address1,
+		&u.Address2,
+		&u.City,
+		&u.Province,
+		&u.Country,
+		&u.PhoneNumber,
+		&u.InstitutionName,
+		&u.AccountNumber,
+		&u.AccountHash,
+		&u.RelationshipToContact,
+		&u.OwnerId,
+		&u.CreateAt,
+		&u.UpdateAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }
