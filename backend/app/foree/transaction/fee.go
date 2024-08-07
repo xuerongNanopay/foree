@@ -90,6 +90,14 @@ type FeeRepo struct {
 	db *sql.DB
 }
 
+func NewFeeJointRepo(db *sql.DB) *FeeJointRepo {
+	return &FeeJointRepo{db: db}
+}
+
+type FeeJointRepo struct {
+	db *sql.DB
+}
+
 func (repo *FeeRepo) GetUniqueFeeById(id int64) (*Fee, error) {
 	rows, err := repo.db.Query(sQLFeeGetUniqueById, id)
 
@@ -138,7 +146,7 @@ func (repo *FeeRepo) GetAllFee() ([]*Fee, error) {
 	return fees, nil
 }
 
-func (repo *FeeRepo) InsertFeeJoint(feeJoint FeeJoint) (int64, error) {
+func (repo *FeeJointRepo) InsertFeeJoint(feeJoint FeeJoint) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLFeeJointInsert,
 		feeJoint.FeeId,
@@ -158,7 +166,7 @@ func (repo *FeeRepo) InsertFeeJoint(feeJoint FeeJoint) (int64, error) {
 	return id, nil
 }
 
-func (repo *FeeRepo) GetAllFeeJointbyTransactionId(transactionId int64) ([]*FeeJoint, error) {
+func (repo *FeeJointRepo) GetAllFeeJointbyTransactionId(transactionId int64) ([]*FeeJoint, error) {
 	rows, err := repo.db.Query(sQLFeeJointGetByTransactionId, transactionId)
 
 	if err != nil {
