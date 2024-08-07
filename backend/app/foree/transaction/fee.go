@@ -82,7 +82,7 @@ type FeeJoint struct {
 	UpdateAt      time.Time `json:"updateAt"`
 }
 
-func NewFee(db *sql.DB) *FeeRepo {
+func NewFeeRepo(db *sql.DB) *FeeRepo {
 	return &FeeRepo{db: db}
 }
 
