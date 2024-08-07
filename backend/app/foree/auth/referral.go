@@ -6,14 +6,14 @@ import (
 )
 
 const (
-	SQLReferralInsert = `
+	sQLReferralInsert = `
 		INSERT INTO referrals
 		(
 			code, referral_type, referral_value,
 			status, referrer_id, is_redeemed, expire_at
 		) VALUES(?,?,?,?,?,?,?)
 	`
-	SQLReferralGetUniqueByCode = `
+	sQLReferralGetUniqueByCode = `
 		SELECT 
 			r.id, r.code, r.referral_type, r.referral_value,
 			r.status, r.referrer_id, r.referree_id, r.referree_hash
@@ -21,7 +21,7 @@ const (
 		FROM referrals r
 		where r.code = ?
 	`
-	SQLReferralGetAllByReferrerId = `
+	sQLReferralGetAllByReferrerId = `
 		SELECT 
 			r.id, r.code, r.referral_type, r.referral_value,
 			r.status, r.referrer_id, r.referree_id, r.referree_hash
@@ -29,7 +29,7 @@ const (
 		FROM referrals r
 		where r.referrer_id = ?
 	`
-	SQLReferralGetUniqueByReferreeHash = `
+	sQLReferralGetUniqueByReferreeHash = `
 		SELECT 
 			r.id, r.code, r.referral_type, r.referral_value,
 			r.status, r.referrer_id, r.referree_id, r.referree_hash
@@ -37,7 +37,7 @@ const (
 		FROM referrals r
 		where r.referree_hash = ?
 	`
-	SQLReferralUpdateReferralByCode = `
+	sQLReferralUpdateReferralByCode = `
 		UPDATE referrals SET referree_id = ?, referree_hash = ?  WHERE code = ?
 	`
 )
@@ -79,8 +79,37 @@ type ReferralRepo struct {
 	db *sql.DB
 }
 
+func (repo *ReferralRepo) InsertReferral(referal Referral) (int64, error) {
+	result, err := repo.db.Exec(
+		sQLReferralInsert,
+		referal.Code,
+		referal.ReferralType,
+		referal.ReferralValue,
+		referal.Status,
+		referal.ReferrerId,
+		referal.IsRedeemed,
+		referal.ExpireAt,
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func (repo *ReferralRepo) UpdateReferralByCode(refereeId string, referreeHash string, code string) error {
+	_, err := repo.db.Exec(sQLReferralUpdateReferralByCode, refereeId, referreeHash, code)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (repo *ReferralRepo) GetAllReferralByReferrerId(referrerId int64) ([]*Referral, error) {
-	rows, err := repo.db.Query(SQLReferralGetAllByReferrerId, referrerId)
+	rows, err := repo.db.Query(sQLReferralGetAllByReferrerId, referrerId)
 
 	if err != nil {
 		return nil, err
@@ -103,8 +132,8 @@ func (repo *ReferralRepo) GetAllReferralByReferrerId(referrerId int64) ([]*Refer
 	return referrals, nil
 }
 
-func (repo *ReferralRepo) SQLReferralGetUniqueByCode(code string) (*Referral, error) {
-	rows, err := repo.db.Query(SQLReferralGetUniqueByCode, code)
+func (repo *ReferralRepo) GetUniqueReferralByCode(code string) (*Referral, error) {
+	rows, err := repo.db.Query(sQLReferralGetUniqueByCode, code)
 
 	if err != nil {
 		return nil, err
@@ -127,8 +156,8 @@ func (repo *ReferralRepo) SQLReferralGetUniqueByCode(code string) (*Referral, er
 	return f, nil
 }
 
-func (repo *ReferralRepo) SQLReferralGetUniqueByReferreeHash(referreeHash string) (*Referral, error) {
-	rows, err := repo.db.Query(SQLReferralGetUniqueByReferreeHash, referreeHash)
+func (repo *ReferralRepo) GetUniqueReferralByReferreeHash(referreeHash string) (*Referral, error) {
+	rows, err := repo.db.Query(sQLReferralGetUniqueByReferreeHash, referreeHash)
 
 	if err != nil {
 		return nil, err
