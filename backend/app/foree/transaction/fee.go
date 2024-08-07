@@ -138,6 +138,26 @@ func (repo *FeeRepo) GetAllFee(id int64) ([]*Fee, error) {
 	return fees, nil
 }
 
+func (repo *FeeRepo) InsertFeeJoint(feeJoint FeeJoint) (int64, error) {
+	result, err := repo.db.Exec(
+		SQLFeeJointInsert,
+		feeJoint.FeeId,
+		feeJoint.Description,
+		feeJoint.Amt.Amount,
+		feeJoint.Amt.Curreny,
+		feeJoint.TransactionId,
+		feeJoint.OwnerId,
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
 func scanRowIntoFee(rows *sql.Rows) (*Fee, error) {
 	u := new(Fee)
 	err := rows.Scan(
