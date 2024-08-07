@@ -8,19 +8,19 @@ import (
 )
 
 type IDMTransaction struct {
-	ID                   int64
-	Status               TxStatus
-	Ip                   string `json:"ip"`
-	UserAgent            string `json:"userAgent"`
-	SrcInteracAccId      int64
-	SrcInteracAcc        *ScotiaInteracCITransaction
-	DescContactAccountId int64
-	DescContactAccount   *account.ContactAccount
-	Amt                  types.AmountData
-	ParentTxId           int64
-	OwnerId              int64
-	CreateAt             time.Time `json:"createAt"`
-	UpdateAt             time.Time `json:"updateAt"`
+	ID               int64
+	Status           TxStatus
+	Ip               string `json:"ip"`
+	UserAgent        string `json:"userAgent"`
+	SrcInteracAccId  int64
+	SrcInteracAcc    *account.InteracAccount
+	DescContactAccId int64
+	DescContactAcc   *account.ContactAccount
+	Amt              types.AmountData
+	ParentTxId       int64
+	OwnerId          int64
+	CreateAt         time.Time `json:"createAt"`
+	UpdateAt         time.Time `json:"updateAt"`
 }
 
 // Large object.

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"time"
 
+	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/types"
 )
 
@@ -37,15 +38,15 @@ const (
 	`
 )
 
-type ScotiaInteracCITransaction struct {
+type ScotiaInteracCITx struct {
 	ID               int64
 	Status           TxStatus
 	ScotialId        string
 	Url              string
 	SrcInteracAccId  int64
-	SrcInteracAcc    *ScotiaInteracCITransaction
+	SrcInteracAcc    *account.InteracAccount
 	DestInteracAccId int64
-	DestInteracAcc   *ScotiaInteracCITransaction
+	DestInteracAcc   *account.InteracAccount
 	Amt              types.AmountData
 	ParentTxId       int64
 	OwnerId          int64
@@ -59,4 +60,25 @@ func NewInteracCIRepo(db *sql.DB) *InteracCIRepo {
 
 type InteracCIRepo struct {
 	db *sql.DB
+}
+
+func (repo *InteracCIRepo) InsertReferral(referal Referral) (int64, error) {
+	result, err := repo.db.Exec(
+		sQLReferralInsert,
+		referal.Code,
+		referal.ReferralType,
+		referal.ReferralValue,
+		referal.Status,
+		referal.ReferrerId,
+		referal.IsRedeemed,
+		referal.ExpireAt,
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }

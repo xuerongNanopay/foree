@@ -52,7 +52,7 @@ type ForeeTransaction struct {
 	UpdateAt        time.Time `json:"updateAt"`
 	OwnerId         int64
 
-	CI      *ScotiaInteracCITransaction
+	CI      *ScotiaInteracCITx
 	IDM     *IDMTransaction
 	COUT    *NBPCOTransaction
 	Summary *TransactionSummary

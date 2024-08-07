@@ -8,13 +8,13 @@ import (
 )
 
 type NBPCOTransaction struct {
-	ID                   int64
-	Status               TxStatus
-	Amt                  types.AmountData
-	DescContactAccountId int64
-	DescContactAccount   *account.ContactAccount
-	ParentTxId           int64
-	OwnerId              int64
-	CreateAt             time.Time `json:"createAt"`
-	UpdateAt             time.Time `json:"updateAt"`
+	ID               int64
+	Status           TxStatus
+	Amt              types.AmountData
+	DescContactAccId int64
+	DescContactAcc   *account.ContactAccount
+	ParentTxId       int64
+	OwnerId          int64
+	CreateAt         time.Time `json:"createAt"`
+	UpdateAt         time.Time `json:"updateAt"`
 }
