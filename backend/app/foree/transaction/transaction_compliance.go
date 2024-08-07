@@ -17,7 +17,7 @@ type IDMTransaction struct {
 	DescContactAccountId int64
 	DescContactAccount   *account.ContactAccount
 	Amt                  types.AmountData
-	ParentTransactionId  int64
+	ParentTxId           int64
 	OwnerId              int64
 	CreateAt             time.Time `json:"createAt"`
 	UpdateAt             time.Time `json:"updateAt"`

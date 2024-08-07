@@ -13,7 +13,7 @@ type NBPCOTransaction struct {
 	Amt                  types.AmountData
 	DescContactAccountId int64
 	DescContactAccount   *account.ContactAccount
-	ParentTransactionId  int64
+	ParentTxId           int64
 	OwnerId              int64
 	CreateAt             time.Time `json:"createAt"`
 	UpdateAt             time.Time `json:"updateAt"`
