@@ -18,4 +18,10 @@ package foree_auth
 // }
 
 type AuthService struct {
+	//getSeesion
+	//Login
+	//SignUp
+	//Logout
+	//authorize
+	//Create User
 }
