@@ -12,7 +12,7 @@ const (
 			stage, status, extra_info, parent_tx_id, owner_id
 		) VALUES(?,?,?,?,?)
 	`
-	sQLTxHisterGetAllByParentTxId = `
+	sQLTxHistoryGetAllByParentTxId = `
 		SELECT
 			h.id, h.stage, h.status, h.extra_info,
 			h.parent_tx_id, h.owner_id
@@ -59,7 +59,7 @@ func (repo *TxHistoryRepo) InserTxHistory(h TxHistory) (int64, error) {
 }
 
 func (repo *TxHistoryRepo) GetAllTxHistoryByTransactionId(parentTxId int64) ([]*TxHistory, error) {
-	rows, err := repo.db.Query(sQLTxHisterGetAllByParentTxId, parentTxId)
+	rows, err := repo.db.Query(sQLTxHistoryGetAllByParentTxId, parentTxId)
 
 	if err != nil {
 		return nil, err
