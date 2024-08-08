@@ -8,12 +8,13 @@ type TxSummary struct {
 	Type            string    `json:"type"`
 	Status          string    `json:"status"`
 	Rate            string    `json:"rate"`
-	SrcId           int64     `json:"srcId"`
-	DescId          int64     `json:"descId"`
-	SrcAmt          string    `json:"srcAmt"`
-	DescAmt         string    `json:"descAmt"`
+	SrcAmount       string    `json:"srcAmount"`
+	SrcCurrency     string    `json:"srcCurrency"`
+	DestAmount      string    `json:"destAmount"`
+	DestCurrency    string    `json:"desCurrency"`
 	IsCancelAllowed bool      `json:"isCancelAllowed"`
+	ParentTxId      int64     `json:"parentTxd"`
+	OwnerId         int64     `json:"owerId"`
 	CreateAt        time.Time `json:"createAt"`
-	ParentTxId      int64
-	OwnerId         int64
+	UpdateAt        time.Time `json:"updateAt"`
 }
