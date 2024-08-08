@@ -7,18 +7,18 @@ import (
 
 const (
 	sQLTxHistoryInsert = `
-		INSERT INTO tx_history
-		(
-			stage, status, extra_info, parent_tx_id, owner_id
-		) VALUES(?,?,?,?,?)
-	`
+        INSERT INTO tx_history
+        (
+            stage, status, extra_info, parent_tx_id, owner_id
+        ) VALUES(?,?,?,?,?)
+    `
 	sQLTxHistoryGetAllByParentTxId = `
-		SELECT
-			h.id, h.stage, h.status, h.extra_info,
-			h.parent_tx_id, h.owner_id, h.create_at
-		FROM tx_history h
-		where h.parent_tx_id = ?
-	`
+        SELECT
+            h.id, h.stage, h.status, h.extra_info,
+            h.parent_tx_id, h.owner_id, h.create_at
+        FROM tx_history h
+        where h.parent_tx_id = ?
+    `
 )
 
 type TxHistory struct {

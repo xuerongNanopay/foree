@@ -7,52 +7,52 @@ import (
 
 const (
 	sQLIDMTxInsert = `
-		INSERT INTO idm_tx
-		(
-			status, ip, user_agent, parent_tx_id, owner_id
-		) VALUES(?,?,?,?,?)
-	`
+        INSERT INTO idm_tx
+        (
+            status, ip, user_agent, parent_tx_id, owner_id
+        ) VALUES(?,?,?,?,?)
+    `
 	sQLIDMTxUpdateById = `
-		UPDATE idm_tx SET 
-			status = ?, api_reference = ?, t.idm_result = ?
-		WHERE id = ?
-	`
+        UPDATE idm_tx SET 
+            status = ?, api_reference = ?, t.idm_result = ?
+        WHERE id = ?
+    `
 	sQLIDMTxGetUniqueById = `
-		SELECT 
-			t.id, t.status, t.ip, t.user_agent, t.api_reference, t.idm_result
-			t.parent_tx_id, t.owner_id, t.create_at, t.update_at
-		FROM idm_tx t
-		where t.id = ?
-	`
+        SELECT 
+            t.id, t.status, t.ip, t.user_agent, t.api_reference, t.idm_result
+            t.parent_tx_id, t.owner_id, t.create_at, t.update_at
+        FROM idm_tx t
+        where t.id = ?
+    `
 	sQLIDMTxGetUniqueByParentTxId = `
-		SELECT 
-			t.id, t.status, t.ip, t.user_agent, t.api_reference, t.idm_result
-			t.parent_tx_id, t.owner_id, t.create_at, t.update_at
-		FROM idm_tx t
-		where t.parent_tx_id = ?
-	`
+        SELECT 
+            t.id, t.status, t.ip, t.user_agent, t.api_reference, t.idm_result
+            t.parent_tx_id, t.owner_id, t.create_at, t.update_at
+        FROM idm_tx t
+        where t.parent_tx_id = ?
+    `
 	sQLIDMComplianceInsert = `
-		INSERT INTO idm_compliance
-		(
-			idm_tx_id, idm_http_status_code, idm_result, request_json, response_json
-		) VALUES(?,?,?,?,?)
-	`
+        INSERT INTO idm_compliance
+        (
+            idm_tx_id, idm_http_status_code, idm_result, request_json, response_json
+        ) VALUES(?,?,?,?,?)
+    `
 	sQLIDMComplianceGetUniqueById = `
-		SELECT 
-			c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
-			c.request_json, c.response_json,
-			c.create_at, c.update_at
-		FROM idm_tx c
-		where c.id = ?
-	`
+        SELECT 
+            c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
+            c.request_json, c.response_json,
+            c.create_at, c.update_at
+        FROM idm_tx c
+        where c.id = ?
+    `
 	sQLIDMComplianceGetUniqueByIDMTxId = `
-		SELECT 
-			c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
-			c.request_json, c.response_json,
-			c.create_at, c.update_at
-		FROM idm_tx c
-		where c.idm_tx_id = ?
-	`
+        SELECT 
+            c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
+            c.request_json, c.response_json,
+            c.create_at, c.update_at
+        FROM idm_tx c
+        where c.idm_tx_id = ?
+    `
 )
 
 type IDMTx struct {

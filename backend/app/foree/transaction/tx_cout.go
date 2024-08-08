@@ -10,34 +10,34 @@ import (
 
 const (
 	sQLNBPCOTxInsert = `
-		INSERT INTO nbp_co_tx
-		(
-			status, amount, currency,  dest_contact_acc_id
-			parent_tx_id, owner_id
-		) VALUES(?,?,?,?,?,?)
-	`
+        INSERT INTO nbp_co_tx
+        (
+            status, amount, currency,  dest_contact_acc_id
+            parent_tx_id, owner_id
+        ) VALUES(?,?,?,?,?,?)
+    `
 	sQLNBPCOTxUpdateById = `
-		UPDATE nbp_co_tx SET 
-			status = ?
-		WHERE id = ?
-	`
+        UPDATE nbp_co_tx SET 
+            status = ?
+        WHERE id = ?
+    `
 	sQLNBPCOTxGetUniqueById = `
-		SELECT 
-			t.id, t.status, t.amount, t.currency,
-			t.dest_contact_acc_id, t.parent_tx_id, t.owner_id,
-			t.create_at, t.update_at
-		FROM nbp_co_tx t
-		where t.id = ?
+        SELECT 
+            t.id, t.status, t.amount, t.currency,
+            t.dest_contact_acc_id, t.parent_tx_id, t.owner_id,
+            t.create_at, t.update_at
+        FROM nbp_co_tx t
+        where t.id = ?
 
-	`
+    `
 	sQLNBPCOTxGetUniqueByParentTxId = `
-		SELECT 
-			t.id, t.status, t.amount, t.currency,
-			t.dest_contact_acc_id, t.parent_tx_id, t.owner_id,
-			t.create_at, t.update_at
-		FROM nbp_co_tx t
-		where t.parent_tx_id = ?
-	`
+        SELECT 
+            t.id, t.status, t.amount, t.currency,
+            t.dest_contact_acc_id, t.parent_tx_id, t.owner_id,
+            t.create_at, t.update_at
+        FROM nbp_co_tx t
+        where t.parent_tx_id = ?
+    `
 )
 
 type NBPCOTx struct {

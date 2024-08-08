@@ -10,34 +10,34 @@ import (
 
 const (
 	sQLInteracCITxInsert = `
-		INSERT INTO interact_ci_tx
-		(
-			status, src_interac_acc_id, dest_interac_acc_id,
-			amount, currency, parent_tx_id, owner_id
-		) VALUES(?,?,?,?,?,?,?)
-	`
+        INSERT INTO interact_ci_tx
+        (
+            status, src_interac_acc_id, dest_interac_acc_id,
+            amount, currency, parent_tx_id, owner_id
+        ) VALUES(?,?,?,?,?,?,?)
+    `
 	sQLInteracCITxGetUniqueById = `
-	SELECT 
-		t.id, t.status, t.src_interac_acc_id, t.dest_interac_acc_id,
-		t.amount, t.currency, t.api_reference, t.url
-		t.parent_tx_id, t.owner_id, t.create_at, t.update_at
-	FROM interact_ci_tx t
-	where t.id = ?
+        SELECT 
+            t.id, t.status, t.src_interac_acc_id, t.dest_interac_acc_id,
+            t.amount, t.currency, t.api_reference, t.url
+            t.parent_tx_id, t.owner_id, t.create_at, t.update_at
+        FROM interact_ci_tx t
+        where t.id = ?
 
-`
+    `
 	sQLInteracCITxGetUniqueByParentTxId = `
-		SELECT 
-			t.id, t.status, t.src_interac_acc_id, t.dest_interac_acc_id,
-			t.amount, t.currency, t.api_reference, t.url
-			t.parent_tx_id, t.owner_id, t.create_at, t.update_at
-		FROM interact_ci_tx t
-		where t.parent_tx_id = ?
-	`
+        SELECT 
+            t.id, t.status, t.src_interac_acc_id, t.dest_interac_acc_id,
+            t.amount, t.currency, t.api_reference, t.url
+            t.parent_tx_id, t.owner_id, t.create_at, t.update_at
+        FROM interact_ci_tx t
+        where t.parent_tx_id = ?
+    `
 	sQLInteracCITxUpdateById = `
-		UPDATE interact_ci_tx SET 
-			status = ?, api_reference = ?, url = ?
-		WHERE id = ?
-	`
+        UPDATE interact_ci_tx SET 
+            status = ?, api_reference = ?, url = ?
+        WHERE id = ?
+    `
 )
 
 type InteracCITx struct {
