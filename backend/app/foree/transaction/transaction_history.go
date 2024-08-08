@@ -58,6 +58,30 @@ func (repo *TxHistoryRepo) InserTxHistory(h TxHistory) (int64, error) {
 	return id, nil
 }
 
+func (repo *TxHistoryRepo) GetAllTxHistoryByTransactionId(parentTxId int64) ([]*TxHistory, error) {
+	rows, err := repo.db.Query(sQLTxHisterGetAllByParentTxId, parentTxId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	hist := make([]*TxHistory, 16)
+	for rows.Next() {
+		p, err := scanRowIntoTxHistory(rows)
+		if err != nil {
+			return nil, err
+		}
+		hist = append(hist, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return hist, nil
+}
+
 func scanRowIntoTxHistory(rows *sql.Rows) (*TxHistory, error) {
 	tx := new(TxHistory)
 	err := rows.Scan(
