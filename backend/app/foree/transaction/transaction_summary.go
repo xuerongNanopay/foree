@@ -2,7 +2,7 @@ package transaction
 
 import "time"
 
-type TransactionSummary struct {
+type TxSummary struct {
 	ID              int64     `json:"id"`
 	Summary         string    `json:"sumary"`
 	Type            string    `json:"type"`

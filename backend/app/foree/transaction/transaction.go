@@ -52,9 +52,10 @@ type ForeeTx struct {
 	UpdateAt        time.Time `json:"updateAt"`
 	OwnerId         int64
 
-	CI      *InteracCITx
-	IDM     *IDMTx
-	COUT    *NBPCOTx
-	Summary *TransactionSummary
-	History []*TxHistory
+	CI       *InteracCITx
+	IDM      *IDMTx
+	COUT     *NBPCOTx
+	Summary  *TxSummary
+	RefundTx *ForeeRefundTx
+	History  []*TxHistory
 }
