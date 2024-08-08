@@ -31,24 +31,24 @@ const (
 		FROM idm_tx t
 		where t.parent_tx_id = ?
 	`
-	sQLIDMComplanceInsert = `
+	sQLIDMComplianceInsert = `
 		INSERT INTO idm_compliance
 		(
-			idm_tx_id, idm_http_status_code, idm_result, idm_request_json, idm_response_json
+			idm_tx_id, idm_http_status_code, idm_result, request_json, response_json
 		) VALUES(?,?,?,?,?)
 	`
-	sQLIDMComplanceGetUniqueById = `
+	sQLIDMComplianceGetUniqueById = `
 		SELECT 
 			c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
-			c.idm_request_json, c.idm_response_json,
+			c.request_json, c.response_json,
 			c.create_at, c.update_at
 		FROM idm_tx c
 		where c.id = ?
 	`
-	sQLIDMComplanceGetUniqueByIDMTxId = `
+	sQLIDMComplianceGetUniqueByIDMTxId = `
 		SELECT 
 			c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
-			c.idm_request_json, c.idm_response_json,
+			c.request_json, c.response_json,
 			c.create_at, c.update_at
 		FROM idm_tx c
 		where c.idm_tx_id = ?
@@ -88,14 +88,6 @@ type IdmTxRepo struct {
 	db *sql.DB
 }
 
-func NewIDMComplianceRepo(db *sql.DB) *IDMComplianceRepo {
-	return &IDMComplianceRepo{db: db}
-}
-
-type IDMComplianceRepo struct {
-	db *sql.DB
-}
-
 func (repo *IdmTxRepo) InsertIDMTx(tx IDMTx) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLIDMTxInsert,
@@ -123,7 +115,7 @@ func (repo *IdmTxRepo) UpdateIDMTxById(tx IDMTx) error {
 	return nil
 }
 
-func (repo *IdmTxRepo) GetUniqueInteracCITxById(id int64) (*IDMTx, error) {
+func (repo *IdmTxRepo) GetUniqueIDMTxById(id int64) (*IDMTx, error) {
 	rows, err := repo.db.Query(sQLIDMTxGetUniqueById, id)
 
 	if err != nil {
@@ -147,7 +139,7 @@ func (repo *IdmTxRepo) GetUniqueInteracCITxById(id int64) (*IDMTx, error) {
 	return f, nil
 }
 
-func (repo *IdmTxRepo) GetUniqueInteracCITxByParentTxId(parentTxId int64) (*IDMTx, error) {
+func (repo *IdmTxRepo) GetUniqueIDMTxByParentTxId(parentTxId int64) (*IDMTx, error) {
 	rows, err := repo.db.Query(sQLIDMTxGetUniqueByParentTxId, parentTxId)
 
 	if err != nil {
@@ -189,4 +181,98 @@ func scanRowIntoIDMTx(rows *sql.Rows) (*IDMTx, error) {
 	}
 
 	return tx, nil
+}
+
+func NewIDMComplianceRepo(db *sql.DB) *IDMComplianceRepo {
+	return &IDMComplianceRepo{db: db}
+}
+
+type IDMComplianceRepo struct {
+	db *sql.DB
+}
+
+func (repo *IDMComplianceRepo) InsertIDMComplance(c IDMCompliance) (int64, error) {
+	result, err := repo.db.Exec(
+		sQLIDMComplianceInsert,
+		c.IDMTxId,
+		c.IDMHttpStatusCode,
+		c.IDMResult,
+		c.RequestJson,
+		c.ResponseJson,
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func (repo *IDMComplianceRepo) GetUniqueIDMComplianceById(id int64) (*IDMCompliance, error) {
+	rows, err := repo.db.Query(sQLIDMComplianceGetUniqueById, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *IDMCompliance
+
+	for rows.Next() {
+		f, err = scanRowIntoIDMCompliance(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func (repo *IDMComplianceRepo) GetUniqueIDMComplianceByIDMTxId(idmTxId int64) (*IDMCompliance, error) {
+	rows, err := repo.db.Query(sQLIDMComplianceGetUniqueByIDMTxId, idmTxId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *IDMCompliance
+
+	for rows.Next() {
+		f, err = scanRowIntoIDMCompliance(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func scanRowIntoIDMCompliance(rows *sql.Rows) (*IDMCompliance, error) {
+	c := new(IDMCompliance)
+	err := rows.Scan(
+		&c.ID,
+		&c.IDMTxId,
+		&c.IDMHttpStatusCode,
+		&c.IDMResult,
+		&c.RequestJson,
+		&c.ResponseJson,
+		&c.CreateAt,
+		&c.UpdateAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
 }
