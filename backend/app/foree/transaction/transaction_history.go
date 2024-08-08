@@ -39,6 +39,25 @@ type TxHistoryRepo struct {
 	db *sql.DB
 }
 
+func (repo *TxHistoryRepo) InserTxHistory(h TxHistory) (int64, error) {
+	result, err := repo.db.Exec(
+		sQLTxHistoryInsert,
+		h.Stage,
+		h.Stage,
+		h.ExtraInfo,
+		h.ParentTxId,
+		h.OwnerId,
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
 func scanRowIntoTxHistory(rows *sql.Rows) (*TxHistory, error) {
 	tx := new(TxHistory)
 	err := rows.Scan(
