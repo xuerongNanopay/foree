@@ -56,15 +56,15 @@ type InteracCITx struct {
 	UpdateAt         time.Time `json:"updateAt"`
 }
 
-func NewInteracCIRepo(db *sql.DB) *InteracCIRepo {
-	return &InteracCIRepo{db: db}
+func NewInteracCITxRepo(db *sql.DB) *InteracCITxRepo {
+	return &InteracCITxRepo{db: db}
 }
 
-type InteracCIRepo struct {
+type InteracCITxRepo struct {
 	db *sql.DB
 }
 
-func (repo *InteracCIRepo) InsertInteracCITx(tx InteracCITx) (int64, error) {
+func (repo *InteracCITxRepo) InsertInteracCITx(tx InteracCITx) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLInteracCITxInsert,
 		tx.Status,
@@ -85,7 +85,7 @@ func (repo *InteracCIRepo) InsertInteracCITx(tx InteracCITx) (int64, error) {
 	return id, nil
 }
 
-func (repo *InteracCIRepo) UpdateInteracCITxById(tx InteracCITx) error {
+func (repo *InteracCITxRepo) UpdateInteracCITxById(tx InteracCITx) error {
 	_, err := repo.db.Exec(sQLInteracCITxUpdateById, tx.Status, tx.APIReference, tx.Url, tx.ID)
 	if err != nil {
 		return err
@@ -93,7 +93,7 @@ func (repo *InteracCIRepo) UpdateInteracCITxById(tx InteracCITx) error {
 	return nil
 }
 
-func (repo *InteracCIRepo) GetUniqueInteracCITxByParentTxId(parentTxId int64) (*InteracCITx, error) {
+func (repo *InteracCITxRepo) GetUniqueInteracCITxByParentTxId(parentTxId int64) (*InteracCITx, error) {
 	rows, err := repo.db.Query(sQLInteracCITxGetUniqueByParentTxId, parentTxId)
 
 	if err != nil {
@@ -117,7 +117,7 @@ func (repo *InteracCIRepo) GetUniqueInteracCITxByParentTxId(parentTxId int64) (*
 	return f, nil
 }
 
-func (repo *InteracCIRepo) GetUniqueInteracCITxById(id int64) (*InteracCITx, error) {
+func (repo *InteracCITxRepo) GetUniqueInteracCITxById(id int64) (*InteracCITx, error) {
 	rows, err := repo.db.Query(sQLInteracCITxGetUniqueById, id)
 
 	if err != nil {
