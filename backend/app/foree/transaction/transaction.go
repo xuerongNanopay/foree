@@ -32,7 +32,7 @@ const (
 	TxStageNBPCI     TxStage = "INTERAC-CO"
 )
 
-type ForeeTransaction struct {
+type ForeeTx struct {
 	ID             int64
 	Type           string
 	SrcAmt         types.AmountData
