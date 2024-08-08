@@ -5,14 +5,28 @@ import (
 	"time"
 )
 
-const ()
+const (
+	sQLTxHistoryInsert = `
+		INSERT INTO tx_history
+		(
+			stage, status, extra_info, parent_tx_id, owner_id
+		) VALUES(?,?,?,?,?)
+	`
+	sQLTxHisterGetAllByParentTxId = `
+		SELECT
+			h.id, h.stage, h.status, h.extra_info,
+			h.parent_tx_id, h.owner_id
+		FROM tx_history h
+		where h.parent_tx_id = ?
+	`
+)
 
 type TxHistory struct {
 	ID         int64
-	ParentTxId int64
 	Stage      TxStage
 	Status     TxStatus
 	ExtraInfo  string
+	ParentTxId int64
 	OwnerId    int64
 	CreateAt   time.Time `json:"createAt"`
 }
@@ -29,10 +43,10 @@ func scanRowIntoTxHistory(rows *sql.Rows) (*TxHistory, error) {
 	tx := new(TxHistory)
 	err := rows.Scan(
 		&tx.ID,
-		&tx.ParentTxId,
 		&tx.Stage,
 		&tx.Status,
 		&tx.ExtraInfo,
+		&tx.ParentTxId,
 		&tx.OwnerId,
 		&tx.CreateAt,
 	)

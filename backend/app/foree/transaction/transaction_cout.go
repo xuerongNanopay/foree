@@ -22,14 +22,14 @@ const (
 		WHERE id = ?
 	`
 	sQLNBPCOTxGetUniqueById = `
-	SELECT 
-		t.id, t.status, t.amount, t.currency,
-		t.dest_contact_acc_id, t.parent_tx_id, t.owner_id,
-		t.create_at, t.update_at
-	FROM nbp_co_tx t
-	where t.id = ?
+		SELECT 
+			t.id, t.status, t.amount, t.currency,
+			t.dest_contact_acc_id, t.parent_tx_id, t.owner_id,
+			t.create_at, t.update_at
+		FROM nbp_co_tx t
+		where t.id = ?
 
-`
+	`
 	sQLNBPCOTxGetUniqueByParentTxId = `
 		SELECT 
 			t.id, t.status, t.amount, t.currency,
