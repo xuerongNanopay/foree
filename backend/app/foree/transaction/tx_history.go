@@ -15,7 +15,7 @@ const (
 	sQLTxHistoryGetAllByParentTxId = `
 		SELECT
 			h.id, h.stage, h.status, h.extra_info,
-			h.parent_tx_id, h.owner_id
+			h.parent_tx_id, h.owner_id, h.create_at
 		FROM tx_history h
 		where h.parent_tx_id = ?
 	`

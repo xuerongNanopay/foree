@@ -8,18 +8,19 @@ import (
 )
 
 const (
-	sQLTxLimitGet = `
+	sQLTxLimitGetUniqueById = `
 		SELECT
-			h.id, h.stage, h.status, h.extra_info,
-			h.parent_tx_id, h.owner_id
-		FROM tx_history h
-		where h.parent_tx_id = ?
+			l.id, l.amount, l.currency,
+			l.is_min_limit, l.is_enable,
+			l.create_at, l.update_at
+		FROM tx_limit l
+		where l.id = ?
 	`
 )
 
 type TxLimit struct {
 	ID         string
-	Amt        types.Amount
+	Amt        types.AmountData
 	IsMinLimit bool
 	IsEnable   bool
 	CreateAt   time.Time `json:"createAt"`
@@ -34,20 +35,44 @@ type TxLimitRepo struct {
 	db *sql.DB
 }
 
-func scanRowIntoTxLimit(rows *sql.Rows) (*TxHistory, error) {
-	tx := new(TxHistory)
+func (repo *InteracCITxRepo) GetUniqueTxLimitById(id int64) (*TxLimit, error) {
+	rows, err := repo.db.Query(sQLInteracCITxGetUniqueById, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *TxLimit
+
+	for rows.Next() {
+		f, err = scanRowIntoTxLimit(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == "" {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func scanRowIntoTxLimit(rows *sql.Rows) (*TxLimit, error) {
+	l := new(TxLimit)
 	err := rows.Scan(
-		&tx.ID,
-		&tx.Stage,
-		&tx.Status,
-		&tx.ExtraInfo,
-		&tx.ParentTxId,
-		&tx.OwnerId,
-		&tx.CreateAt,
+		&l.ID,
+		&l.Amt.Amount,
+		&l.Amt.Curreny,
+		&l.IsMinLimit,
+		&l.IsEnable,
+		&l.CreateAt,
+		&l.UpdateAt,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	return tx, nil
+	return l, nil
 }
