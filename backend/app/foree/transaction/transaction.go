@@ -54,7 +54,7 @@ type ForeeTransaction struct {
 
 	CI      *InteracCITx
 	IDM     *IDMTx
-	COUT    *NBPCOTransaction
+	COUT    *NBPCOTx
 	Summary *TransactionSummary
 	History *TransactionStatusHistory
 }
