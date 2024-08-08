@@ -36,7 +36,7 @@ type TxLimitRepo struct {
 }
 
 func (repo *InteracCITxRepo) GetUniqueTxLimitById(id int64) (*TxLimit, error) {
-	rows, err := repo.db.Query(sQLInteracCITxGetUniqueById, id)
+	rows, err := repo.db.Query(sQLTxLimitGetUniqueById, id)
 
 	if err != nil {
 		return nil, err
