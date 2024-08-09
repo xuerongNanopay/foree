@@ -13,10 +13,30 @@ const (
 		(
 			type, status, rate,
 			src_amount, src_currency, dest_amount, dest_currency
+			total_fee_amount, total_fee_currency, total_reward_amount, total_reward_currency,
 			total_amount, total_currency, cur_stage, cur_stage_status,
-			transaction_purpose, conclusion, is_cancel_allowed, owner_id
-		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+			transaction_purpose, conclusion, owner_id
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
+	sQLForeeTxInsertGetById = `
+	    UPDATE foree_tx SET 
+			status = ?, cur_stage = ?, cur_stage_status = ?, conclusion = ?
+        WHERE id = ?
+	`
+	sQLForeeTxUpdateById = `
+	    SELECT 
+            t.id, t.type, t.status, t.rate
+            t.src_amount, t.src_currency, 
+            t.dest_amount, t.dest_currency,
+			t.total_fee_amount, t.total_fee_currency, 
+            t.total_reward_amount, t.total_reward_currency, 
+            t.total_amount, t.total_currency,
+			t.cur_stage, t.cur_stage_status, t.transaction_purpose, t.conclusion,
+            t.owner_id, t.create_at, t.update_at
+        FROM foree_tx t
+        where t.id = ?
+	`
+	//TODO: support get alls?
 )
 
 type TxStatus string
@@ -53,12 +73,13 @@ type ForeeTx struct {
 	Rate               types.Amount     `json:"Rate"`
 	SrcAmt             types.AmountData `json:"srcAmt"`
 	DestAmt            types.AmountData `json:"destAmt"`
-	Total              types.AmountData `json:"total"`
+	TotalFeeAmt        types.AmountData `json:"totalFeeAmt"`
+	TotalRewardAmt     types.AmountData `json:"totalRewardAmt"`
+	TotalAmt           types.AmountData `json:"totalAmt"`
 	CurStage           TxStage          `json:"curStage"`
 	CurStageStatus     string           `json:"curStageStatus"`
 	TransactionPurpose string           `json:"transactionPurpose"`
 	Conclusion         string           `json:"conclusion"`
-	IsCancelAllowed    bool             `json:"isCancelAllowed"`
 	OwnerId            int64            `json:"ownerId"`
 	CreateAt           time.Time        `json:"createAt"`
 	UpdateAt           time.Time        `json:"updateAt"`
@@ -81,4 +102,36 @@ func NewForeeTxRepo(db *sql.DB) *ForeeTxRepo {
 
 type ForeeTxRepo struct {
 	db *sql.DB
+}
+
+func scanRowIntoForeeTx(rows *sql.Rows) (*ForeeTx, error) {
+	tx := new(ForeeTx)
+	err := rows.Scan(
+		&tx.ID,
+		&tx.Type,
+		&tx.Status,
+		&tx.Rate,
+		&tx.SrcAmt.Amount,
+		&tx.SrcAmt.Curreny,
+		&tx.DestAmt.Amount,
+		&tx.DestAmt.Curreny,
+		&tx.TotalFeeAmt.Amount,
+		&tx.TotalFeeAmt.Curreny,
+		&tx.TotalRewardAmt.Amount,
+		&tx.TotalRewardAmt.Curreny,
+		&tx.TotalAmt.Amount,
+		&tx.TotalAmt.Curreny,
+		&tx.CurStage,
+		&tx.CurStageStatus,
+		&tx.TransactionPurpose,
+		&tx.Conclusion,
+		&tx.OwnerId,
+		&tx.CreateAt,
+		&tx.UpdateAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return tx, nil
 }
