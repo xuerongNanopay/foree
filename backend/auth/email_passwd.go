@@ -26,20 +26,10 @@ const (
 			u.avatar_url, u.create_at, u.update_at
 		FROM email_passwd as u
 	`
-	sQLEmailPasswdUpdateStatusByEmail = `
-		UPDATE email_passwd SET status = ? WHERE email = ?
-	`
-	sQLEmailPasswdUpdatePasswdByEmail = `
-		UPDATE email_passwd SET password = ? WHERE email = ?
-	`
-	sQLEmailPasswdUpdateVerifyCodeByEmail = `
-		UPDATE email_passwd SET verify_code = ? WHERE email = ?
-	`
-	sQLEmailPasswdUpdateCodeVerifiedAtByEmail = `
-		UPDATE email_passwd SET code_verified_at = ? WHERE email = ?
-	`
-	sQLEmailPasswdUpdateUserIdByEmail = `
-		UPDATE email_passwd SET user_id = ? WHERE email = ?
+	sQLEmailPasswdUpdateByEmail = `
+		UPDATE email_passwd SET 
+			status = ?, password = ?, verify_code = ?, code_verified_at = ?, user_id = ?
+		WHERE email = ?
 	`
 )
 
@@ -73,7 +63,7 @@ type EmailPasswdRepo struct {
 	db *sql.DB
 }
 
-func (repo *EmailPasswdRepo) Insert(ep EmailPasswd) (int64, error) {
+func (repo *EmailPasswdRepo) InsertEmailPasswd(ep EmailPasswd) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLEmailPasswdInsert,
 		ep.Email,
@@ -91,7 +81,7 @@ func (repo *EmailPasswdRepo) Insert(ep EmailPasswd) (int64, error) {
 	return id, nil
 }
 
-func (repo *EmailPasswdRepo) GetUniqueByEmail(email string) (*EmailPasswd, error) {
+func (repo *EmailPasswdRepo) GetUniqueEmailPasswdByEmail(email string) (*EmailPasswd, error) {
 	rows, err := repo.db.Query(sQLEmailPasswdGetUniqueByEmail, email)
 
 	if err != nil {
@@ -115,7 +105,7 @@ func (repo *EmailPasswdRepo) GetUniqueByEmail(email string) (*EmailPasswd, error
 	return ep, nil
 }
 
-func (repo *EmailPasswdRepo) GetAllByEmail() ([]*EmailPasswd, error) {
+func (repo *EmailPasswdRepo) GetAllEmailPasswdByEmail() ([]*EmailPasswd, error) {
 	rows, err := repo.db.Query(sQLEmailPasswdGetAll)
 
 	if err != nil {
@@ -140,40 +130,8 @@ func (repo *EmailPasswdRepo) GetAllByEmail() ([]*EmailPasswd, error) {
 	return eps, nil
 }
 
-func (repo *EmailPasswdRepo) UpdateStatusByEmail(email string, status EmailPasswdStatus) error {
-	_, err := repo.db.Exec(sQLEmailPasswdUpdateStatusByEmail, status, email)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo *EmailPasswdRepo) UpdatePasswdByEmail(email string, passwd string) error {
-	_, err := repo.db.Exec(sQLEmailPasswdUpdatePasswdByEmail, passwd, email)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo *EmailPasswdRepo) UpdateVerifyCodeByEmail(email string, newCode string) error {
-	_, err := repo.db.Exec(sQLEmailPasswdUpdateVerifyCodeByEmail, newCode, email)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo *EmailPasswdRepo) UpdateCodeVerifiedAtByEmail(email string, t time.Time) error {
-	_, err := repo.db.Exec(sQLEmailPasswdUpdateCodeVerifiedAtByEmail, t, email)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo *EmailPasswdRepo) UpdateUserIdByEmail(email string, userId int64) error {
-	_, err := repo.db.Exec(sQLEmailPasswdUpdateUserIdByEmail, userId, email)
+func (repo *EmailPasswdRepo) UpdateEmailPasswdByEmail(ep EmailPasswd) error {
+	_, err := repo.db.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passowrd, ep.VerifyCode, ep.CodeVerifiedAt, ep.UserId, ep.Email)
 	if err != nil {
 		return err
 	}
