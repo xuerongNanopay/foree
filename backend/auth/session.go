@@ -37,7 +37,7 @@ type SessionRepo struct {
 	// db *sql.DB
 
 	mem    map[string]*Session
-	rwLock *sync.RWMutex
+	rwLock sync.RWMutex
 }
 
 func (repo *SessionRepo) Insert(session *Session) (string, error) {

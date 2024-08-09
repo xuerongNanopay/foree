@@ -2,6 +2,8 @@ package transaction
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -20,43 +22,81 @@ type TxQuote struct {
 	CreateAt time.Time `json:"createAt"`
 }
 
-func NewTxQuoteRepo() *TxQuoteRepo {
-	return &TxQuoteRepo{}
+// set to 1024
+func NewTxQuoteRepo(expire, maxBucketSize int) *TxQuoteRepo {
+	return &TxQuoteRepo{
+		mems: [2]map[string]*TxQuote{
+			make(map[string]*TxQuote, maxBucketSize),
+			make(map[string]*TxQuote, maxBucketSize),
+		},
+		cur:            0,
+		expireInMinute: expire,
+		maxBucketSize:  maxBucketSize,
+	}
 }
 
+// Improve to avoid memory leaking
+// Still have performance issue
 type TxQuoteRepo struct {
-	mem1   map[string]*TxQuote
-	mem2   map[string]*TxQuote
-	curMem map[string]*TxQuote
-	rwLock *sync.RWMutex
+	mems           [2]map[string]*TxQuote
+	cur            int
+	maxBucketSize  int
+	expireInMinute int
+	rwLock         sync.RWMutex
 }
 
 func (repo *TxQuoteRepo) InsertTxQuote(tx *TxQuote) (string, error) {
-	tx.ID = generateTxQuoteId(tx.OwerId)
 	tx.CreateAt = time.Now()
+	tx.ExpireAt = time.Now().Add(time.Duration(time.Minute * time.Duration(repo.expireInMinute)))
 	repo.rwLock.Lock()
 	defer repo.rwLock.Unlock()
-	repo.curMem[tx.ID] = tx
+	tx.ID = generateTxQuoteId(repo.cur)
+	if len(repo.mems[repo.cur%2]) > repo.maxBucketSize {
+		go repo.purge(repo.cur)
+		repo.cur += 1
+	}
+	repo.mems[repo.cur%2][tx.ID] = tx
 	return tx.ID, nil
 }
 
-func (repo *TxQuoteRepo) Delete(id string) {
-
-	repo.rwLock.Lock()
-	defer repo.rwLock.Unlock()
-	delete(repo.curMem, id)
+func (repo *TxQuoteRepo) purge(bucketIdx int) {
+	//Sleep 2 * Expiry, make sure all quote in the bucket are expiry.
+	time.Sleep(2 * time.Minute * time.Duration(repo.expireInMinute))
+	//TODO: Log
+	//Clear all quote by just replace with new map
+	repo.mems[bucketIdx%2] = make(map[string]*TxQuote, repo.maxBucketSize)
 }
 
+// func (repo *TxQuoteRepo) Delete(id string) {
+
+// 	repo.rwLock.Lock()
+// 	defer repo.rwLock.Unlock()
+// 	delete(repo.mems, id)
+// }
+
 func (repo *TxQuoteRepo) GetUniqueById(id string) *TxQuote {
+	idx, err := parseBucketId(id)
+	if err != nil {
+		return nil
+	}
 	repo.rwLock.RLock()
 	defer repo.rwLock.RUnlock()
-	s, ok := repo.curMem[id]
+	s, ok := repo.mems[idx%2][id]
 	if !ok {
 		return nil
 	}
 	return s
 }
 
-func generateTxQuoteId(id int64) string {
-	return fmt.Sprintf("%09d-%s", id, uuid.New().String())
+func generateTxQuoteId(bucketId int) string {
+	return fmt.Sprintf("%08d-%s", bucketId, uuid.New().String())
+}
+
+func parseBucketId(quoteId string) (int, error) {
+	s := strings.Split(quoteId, "-")
+	i, err := strconv.Atoi(s[0])
+	if err != nil {
+		return 0, err
+	}
+	return i, nil
 }
