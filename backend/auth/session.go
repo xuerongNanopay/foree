@@ -1,8 +1,9 @@
 package auth
 
 import (
-	"database/sql"
 	"fmt"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -26,47 +27,113 @@ type Session struct {
 	CreateAt       time.Time    `json:"createAt"`
 }
 
-func NewSessionRepo(db *sql.DB) *SessionRepo {
-	return &SessionRepo{mem: make(map[string]*Session, 1024)}
+// Assume one bucket can last 12 hours with maxBucketSize == 1024
+// expire: 12hours
+func NewSessionRepo() *SessionRepo {
+	return &SessionRepo{
+		mems: [6]map[string]*Session{
+			make(map[string]*Session, 1024/4),
+			make(map[string]*Session, 1024/4),
+			make(map[string]*Session, 1024/4),
+			make(map[string]*Session, 1024/4),
+			make(map[string]*Session, 1024/4),
+			make(map[string]*Session, 1024/4),
+		},
+		cur:            0,
+		expireInHour:   12,
+		numberOfBucket: 6,
+		maxBucketSize:  1024,
+	}
 }
 
-// TODO: Thread Safe.
-// TODO: Improve
-// TODO: use bucket to distribution in to different map.
+// Still have performance issue
 type SessionRepo struct {
 	// db *sql.DB
-
-	mem    map[string]*Session
-	rwLock sync.RWMutex
+	cur            int
+	maxBucketSize  int
+	expireInHour   int
+	numberOfBucket int
+	mems           [6]map[string]*Session
+	lock           sync.Mutex
 }
 
 func (repo *SessionRepo) Insert(session *Session) (string, error) {
-	session.ID = generateSessionId(0)
+	session.CreateAt = time.Now()
+	session.LatestActiveAt = time.Now()
+	session.ExpireAt = time.Now().Add(time.Duration(time.Hour * time.Duration(repo.expireInHour)))
 
-	repo.rwLock.Lock()
-	defer repo.rwLock.Unlock()
-	repo.mem[session.ID] = session
+	repo.lock.Lock()
+	defer repo.lock.Unlock()
+
+	session.ID = generateSessionId(repo.cur)
+	if len(repo.mems[repo.cur%repo.numberOfBucket]) > repo.maxBucketSize {
+		go repo.purge(repo.cur)
+		repo.cur += 1
+		if len(repo.mems[repo.cur%repo.numberOfBucket]) != 0 {
+			return "", fmt.Errorf("sesson pool is full")
+		}
+	}
+	repo.mems[repo.cur%repo.numberOfBucket][session.ID] = session
 	return session.ID, nil
 }
 
-func (repo *SessionRepo) Delete(id string) {
+func (repo *SessionRepo) purge(bucketIdx int) {
+	//Sleep 2 * Expiry, make sure all quote in the bucket are expiry.
+	time.Sleep(time.Hour * time.Duration(repo.expireInHour/2))
+	//TODO: Log
+	//Clear all quote by just replace with new map
+	repo.lock.Lock()
+	defer repo.lock.Unlock()
+	repo.mems[bucketIdx%repo.numberOfBucket] = make(map[string]*Session, repo.maxBucketSize/4)
+}
 
-	repo.rwLock.Lock()
-	defer repo.rwLock.Unlock()
-	delete(repo.mem, id)
+func (repo *SessionRepo) Delete(id string) {
+	idx, err := parseBucketId(id)
+	if err != nil {
+		return
+	}
+	repo.lock.Lock()
+	defer repo.lock.Unlock()
+	delete(repo.mems[idx%repo.numberOfBucket], id)
 }
 
 func (repo *SessionRepo) GetUniqueById(id string) *Session {
-	repo.rwLock.RLock()
-	defer repo.rwLock.RUnlock()
-	s, ok := repo.mem[id]
+	idx, err := parseBucketId(id)
+	if err != nil {
+		return nil
+	}
+	mem := repo.mems[idx%repo.numberOfBucket]
+	if mem == nil {
+		return nil
+	}
+
+	s, ok := mem[id]
 	if !ok {
 		return nil
 	}
-	s.LatestActiveAt = time.Now()
+	now := time.Now()
+	// 1 hours
+	if now.Unix()-s.LatestActiveAt.Unix() > 3600 {
+		go repo.Delete(id)
+		return nil
+	}
+	if now.Unix() > s.ExpireAt.Unix() {
+		go repo.Delete(id)
+		return nil
+	}
+	s.LatestActiveAt = now
 	return s
 }
 
 func generateSessionId(bucketId int) string {
 	return fmt.Sprintf("%06d-%s", bucketId, uuid.New().String())
+}
+
+func parseBucketId(sessionId string) (int, error) {
+	s := strings.Split(sessionId, "-")
+	i, err := strconv.Atoi(s[0])
+	if err != nil {
+		return 0, err
+	}
+	return i, nil
 }

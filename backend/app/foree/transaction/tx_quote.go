@@ -22,7 +22,7 @@ type TxQuote struct {
 	CreateAt time.Time `json:"createAt"`
 }
 
-// set to 1024
+// set to 512
 func NewTxQuoteRepo(expire, maxBucketSize int) *TxQuoteRepo {
 	return &TxQuoteRepo{
 		mems: [2]map[string]*TxQuote{
@@ -35,7 +35,6 @@ func NewTxQuoteRepo(expire, maxBucketSize int) *TxQuoteRepo {
 	}
 }
 
-// Improve to avoid memory leaking
 // Still have performance issue
 type TxQuoteRepo struct {
 	mems           [2]map[string]*TxQuote
@@ -61,18 +60,21 @@ func (repo *TxQuoteRepo) InsertTxQuote(tx *TxQuote) (string, error) {
 
 func (repo *TxQuoteRepo) purge(bucketIdx int) {
 	//Sleep 2 * Expiry, make sure all quote in the bucket are expiry.
-	time.Sleep(2 * time.Minute * time.Duration(repo.expireInMinute))
+	time.Sleep(time.Minute * time.Duration(repo.expireInMinute))
 	//TODO: Log
 	//Clear all quote by just replace with new map
 	repo.mems[bucketIdx%2] = make(map[string]*TxQuote, repo.maxBucketSize)
 }
 
-// func (repo *TxQuoteRepo) Delete(id string) {
-
-// 	repo.rwLock.Lock()
-// 	defer repo.rwLock.Unlock()
-// 	delete(repo.mems, id)
-// }
+func (repo *TxQuoteRepo) Delete(id string) {
+	idx, err := parseBucketId(id)
+	if err != nil {
+		return
+	}
+	repo.rwLock.Lock()
+	defer repo.rwLock.Unlock()
+	delete(repo.mems[idx%2], id)
+}
 
 func (repo *TxQuoteRepo) GetUniqueById(id string) *TxQuote {
 	idx, err := parseBucketId(id)
