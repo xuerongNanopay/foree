@@ -18,6 +18,11 @@ const (
             is_cancel_allowed, parent_tx_id, owner_id
         ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `
+	sQLTxSummarypdateById = `
+        UPDATE tx_summary SET 
+            summary = ?, status = ?, is_cancel_allowed = ? 
+        WHERE id = ?
+    `
 	sQLTxSummaryGetUniqueById = `
         SELECT 
             t.id, t.summary, t.type, t.status, t.rate
@@ -31,6 +36,19 @@ const (
         FROM tx_summary t
         where t.id = ?
     `
+	sQLTxSummaryGetUniqueByParentTxId = `
+    SELECT 
+        t.id, t.summary, t.type, t.status, t.rate
+        t.src_acc_summary, t.src_amount, t.src_currency, 
+        t.dest_acc_summary, t.dest_amount, t.dest_currency,
+        t.total_amount, t.total_currency,
+        t.fee_amount, t.fee_currency, 
+        t.reward_amount, t.reward_currency, 
+        t.is_cancel_allowed, t.parent_tx_id, t.owner_id, 
+        t.create_at, t.update_at
+    FROM tx_summary t
+    where t.ParentTxId = ?
+`
 )
 
 type TxSummary struct {
