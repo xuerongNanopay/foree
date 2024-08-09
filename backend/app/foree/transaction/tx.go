@@ -18,7 +18,7 @@ const (
 			transaction_purpose, conclusion, owner_id
 		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
-	sQLForeeTxInsertGetById = `
+	sQLForeeTxUpdateGetById = `
 	    UPDATE foree_tx SET 
 			status = ?, cur_stage = ?, cur_stage_status = ?, conclusion = ?
         WHERE id = ?
@@ -102,6 +102,46 @@ func NewForeeTxRepo(db *sql.DB) *ForeeTxRepo {
 
 type ForeeTxRepo struct {
 	db *sql.DB
+}
+
+func (repo *ForeeTxRepo) InsertForeeTx(tx ForeeTx) (int64, error) {
+	result, err := repo.db.Exec(
+		sQLForeeTxInsert,
+		tx.Type,
+		tx.Status,
+		tx.Rate,
+		tx.SrcAmt.Amount,
+		tx.SrcAmt.Curreny,
+		tx.DestAmt.Amount,
+		tx.DestAmt.Curreny,
+		tx.TotalFeeAmt.Amount,
+		tx.TotalFeeAmt.Curreny,
+		tx.TotalRewardAmt.Amount,
+		tx.TotalRewardAmt.Curreny,
+		tx.TotalAmt.Amount,
+		tx.TotalAmt.Curreny,
+		tx.CurStage,
+		tx.CurStageStatus,
+		tx.TransactionPurpose,
+		tx.Conclusion,
+		tx.OwnerId,
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func (repo *ForeeTxRepo) UpdateTxSummaryById(tx ForeeTx) error {
+	_, err := repo.db.Exec(sQLForeeTxUpdateGetById, tx.Status, tx.CurStage, tx.CurStageStatus, tx.ID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func scanRowIntoForeeTx(rows *sql.Rows) (*ForeeTx, error) {
