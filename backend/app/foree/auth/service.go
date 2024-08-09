@@ -1,4 +1,4 @@
-package foree_auth
+package auth
 
 import "xue.io/go-pay/auth"
 
@@ -8,6 +8,10 @@ type AuthService struct {
 	emailPasswordRepo      *auth.EmailPasswdRepo
 	permissionRepo         *auth.PermissionRepo
 	emailPasswdRecoverRepo *auth.EmailPasswdRecoverRepo
+}
+
+func (a *AuthService) signUp() {
+
 }
 
 //getSeesion

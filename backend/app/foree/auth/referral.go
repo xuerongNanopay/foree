@@ -1,4 +1,4 @@
-package foree_auth
+package auth
 
 import (
 	"database/sql"
