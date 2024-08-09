@@ -46,7 +46,7 @@ const (
 )
 
 type User struct {
-	ID          uint64     `json:"id"`
+	ID          int64      `json:"id"`
 	Group       string     `json:"group"`
 	Status      UserStatus `json:"status"`
 	FirstName   string     `json:"firstName"`

@@ -11,7 +11,7 @@ func TestHTTPResponseMarshar(t *testing.T) {
 	}
 
 	t.Run("HTTPResponse should marshal correctly", func(t *testing.T) {
-		test1 := `{"statusCode":200,"message":"success","data":{"Bar":"AAAA"}}`
+		test1 := `{"statusCode":200,"message":"success","data":{"Bar":"AAAA"},"error":null}`
 		foo := &Foo{
 			Bar: "AAAA",
 		}

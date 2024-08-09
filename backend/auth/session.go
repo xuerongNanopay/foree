@@ -18,7 +18,7 @@ import (
 type Session struct {
 	ID             string       `json:"id"`
 	UserId         uint64       `json:"userId"`
-	User           User         `json:"user"`
+	User           *User        `json:"user"`
 	Permissions    []Permission `json:"permission"`
 	UserAgent      string       `json:"userAgent"`
 	Ip             string       `json:"ip"`
