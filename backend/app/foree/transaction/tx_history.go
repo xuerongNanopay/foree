@@ -22,12 +22,12 @@ const (
 )
 
 type TxHistory struct {
-	ID         int64
-	Stage      TxStage
-	Status     TxStatus
-	ExtraInfo  string
-	ParentTxId int64
-	OwnerId    int64
+	ID         int64     `json:"id"`
+	Stage      TxStage   `json:"stage"`
+	Status     TxStatus  `json:"status"`
+	ExtraInfo  string    `json:"extraInfo"`
+	ParentTxId int64     `json:"parentTxId"`
+	OwnerId    int64     `json:"ownerId"`
 	CreateAt   time.Time `json:"createAt"`
 }
 

@@ -12,16 +12,17 @@ import (
 // )
 
 type ForeeRefundTx struct {
-	ParentTxId         int64
-	OwnerId            int64
-	RefundType         string
-	Status             string
-	IsRefunded         bool
-	RefundAt           time.Time
-	RefundInteracAccId int64
-	RefundInteracAcc   *account.InteracAccount
-	CreateAt           time.Time `json:"createAt"`
-	UpdateAt           time.Time `json:"updateAt"`
+	ID                 int64                   `json:"id"`
+	ParentTxId         int64                   `json:"parentTxId"`
+	OwnerId            int64                   `json:"ownerId"`
+	RefundType         string                  `json:"refundType"`
+	Status             string                  `json:"status"`
+	IsRefunded         bool                    `json:"isRefunded"`
+	RefundAt           time.Time               `json:"refundAt"`
+	RefundInteracAccId int64                   `json:"refundInteracAccId"`
+	RefundInteracAcc   *account.InteracAccount `json:"refundInteracAcc"`
+	CreateAt           time.Time               `json:"createAt"`
+	UpdateAt           time.Time               `json:"updateAt"`
 }
 
 // func NewForeeRefundTxRepo(db *sql.DB) *ForeeRefundTxRepo {

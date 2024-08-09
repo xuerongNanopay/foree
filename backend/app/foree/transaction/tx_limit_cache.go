@@ -35,12 +35,12 @@ const (
 // We down need to do the range query over transaction table to aggregate current usage.
 // Identity format {anyUniqueId}_YYYY_MM_DD
 type TxLimitCache struct {
-	ID       int64
-	Identity string
-	UsedAmt  types.AmountData
-	MaxAmt   types.AmountData
-	CreateAt time.Time `json:"createAt"`
-	UpdateAt time.Time `json:"updateAt"`
+	ID       int64            `json:"id"`
+	Identity string           `json:"identity"`
+	UsedAmt  types.AmountData `json:"usedAmt"`
+	MaxAmt   types.AmountData `json:"maxAmt"`
+	CreateAt time.Time        `json:"createAt"`
+	UpdateAt time.Time        `json:"updateAt"`
 }
 
 func NewTxLimitCacheRepo(db *sql.DB) *TxLimitCacheRepo {

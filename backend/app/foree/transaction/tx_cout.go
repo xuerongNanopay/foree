@@ -41,15 +41,15 @@ const (
 )
 
 type NBPCOTx struct {
-	ID               int64
-	Status           TxStatus
-	Amt              types.AmountData
-	DestContactAccId int64
-	DestContactAcc   *account.ContactAccount
-	ParentTxId       int64
-	OwnerId          int64
-	CreateAt         time.Time `json:"createAt"`
-	UpdateAt         time.Time `json:"updateAt"`
+	ID               int64                   `json:"id"`
+	Status           TxStatus                `json:"status"`
+	Amt              types.AmountData        `json:"amt"`
+	DestContactAccId int64                   `json:"destContactAccId"`
+	DestContactAcc   *account.ContactAccount `json:"destContactAcc"`
+	ParentTxId       int64                   `json:"parentTxId"`
+	OwnerId          int64                   `json:"OwnerId"`
+	CreateAt         time.Time               `json:"createAt"`
+	UpdateAt         time.Time               `json:"updateAt"`
 }
 
 func NewNBPCOTxRepo(db *sql.DB) *NBPCOTxRepo {

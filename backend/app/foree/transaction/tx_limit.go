@@ -19,12 +19,12 @@ const (
 )
 
 type TxLimit struct {
-	ID         string
-	Amt        types.AmountData
-	IsMinLimit bool
-	IsEnable   bool
-	CreateAt   time.Time `json:"createAt"`
-	UpdateAt   time.Time `json:"updateAt"`
+	ID         string           `json:"id"`
+	Amt        types.AmountData `json:"amt"`
+	IsMinLimit bool             `json:"isMinLimit"`
+	IsEnable   bool             `json:"isEnable"`
+	CreateAt   time.Time        `json:"createAt"`
+	UpdateAt   time.Time        `json:"updateAt"`
 }
 
 func NewTxLimitRepo(db *sql.DB) *TxLimitRepo {

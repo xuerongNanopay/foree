@@ -59,27 +59,27 @@ const (
 )
 
 type Fee struct {
-	ID                        string
-	Description               string
-	Type                      FeeType
-	Condition                 FeeOperator
-	ConditionAmt              types.AmountData
-	FeeAmt                    types.AmountData
-	IsApplyInConditionAmtOnly bool
-	IsEnable                  bool
-	CreateAt                  time.Time `json:"createAt"`
-	UpdateAt                  time.Time `json:"updateAt"`
+	ID                        string           `json:"id"`
+	Description               string           `json:"description"`
+	Type                      FeeType          `json:"type"`
+	Condition                 FeeOperator      `json:"condition"`
+	ConditionAmt              types.AmountData `json:"conditionAmt"`
+	FeeAmt                    types.AmountData `json:"feeAmt"`
+	IsApplyInConditionAmtOnly bool             `json:"isApplyInConditionAmtOnly"`
+	IsEnable                  bool             `json:"isEnable"`
+	CreateAt                  time.Time        `json:"createAt"`
+	UpdateAt                  time.Time        `json:"updateAt"`
 }
 
 type FeeJoint struct {
-	ID            int64
-	FeeId         string
-	Description   string
-	Amt           types.AmountData
-	TransactionId int64
-	OwnerId       int64
-	CreateAt      time.Time `json:"createAt"`
-	UpdateAt      time.Time `json:"updateAt"`
+	ID            int64            `json:"id"`
+	FeeId         string           `json:"feeId"`
+	Description   string           `json:"description"`
+	Amt           types.AmountData `json:"amt"`
+	TransactionId int64            `json:"transactionId"`
+	OwnerId       int64            `json:"ownerId"`
+	CreateAt      time.Time        `json:"createAt"`
+	UpdateAt      time.Time        `json:"updateAt"`
 }
 
 func NewFeeRepo(db *sql.DB) *FeeRepo {

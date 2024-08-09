@@ -8,8 +8,8 @@ import (
 )
 
 type Rate struct {
-	SrcAmt  types.AmountData
-	DestAmt types.AmountData
+	SrcAmt  types.AmountData `json:"srcAmt"`
+	DestAmt types.AmountData `json:"destAmt"`
 }
 
 func (r *Rate) ToSummary() string {

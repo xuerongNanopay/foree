@@ -55,17 +55,17 @@ const (
 )
 
 type Reward struct {
-	ID            string
-	Type          string
-	Description   string
-	Amt           types.AmountData
-	Status        RewardStatus
-	IsRedeemed    bool
-	OwnerId       int64
-	TransactionId int64
-	ExpireAt      time.Time `json:"expireAt"`
-	CreateAt      time.Time `json:"createAt"`
-	UpdateAt      time.Time `json:"updateAt"`
+	ID            string           `json:"id"`
+	Type          string           `json:"type"`
+	Description   string           `json:"description"`
+	Amt           types.AmountData `json:"amt"`
+	Status        RewardStatus     `json:"status"`
+	IsRedeemed    bool             `json:"isRedeemed"`
+	OwnerId       int64            `json:"ownerId"`
+	TransactionId int64            `json:"transactionId"`
+	ExpireAt      time.Time        `json:"expireAt"`
+	CreateAt      time.Time        `json:"createAt"`
+	UpdateAt      time.Time        `json:"updateAt"`
 }
 
 func NewRewardRepo(db *sql.DB) *RewardRepo {

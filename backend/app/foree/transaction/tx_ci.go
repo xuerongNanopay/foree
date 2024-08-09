@@ -41,19 +41,19 @@ const (
 )
 
 type InteracCITx struct {
-	ID               int64
-	Status           TxStatus
-	APIReference     string
-	Url              string
-	SrcInteracAccId  int64
-	SrcInteracAcc    *account.InteracAccount
-	DestInteracAccId int64
-	DestInteracAcc   *account.InteracAccount
-	Amt              types.AmountData
-	ParentTxId       int64
-	OwnerId          int64
-	CreateAt         time.Time `json:"createAt"`
-	UpdateAt         time.Time `json:"updateAt"`
+	ID               int64                   `json:"id"`
+	Status           TxStatus                `json:"status"`
+	APIReference     string                  `json:"apiReference"`
+	Url              string                  `json:"url"`
+	SrcInteracAccId  int64                   `json:"srcInteracAccId"`
+	SrcInteracAcc    *account.InteracAccount `json:"srcInteracAcc"`
+	DestInteracAccId int64                   `json:"destInteracAccId"`
+	DestInteracAcc   *account.InteracAccount `json:"DestInteracAcc"`
+	Amt              types.AmountData        `json:"Amt"`
+	ParentTxId       int64                   `json:"parentTxId"`
+	OwnerId          int64                   `json:"OwnerId"`
+	CreateAt         time.Time               `json:"createAt"`
+	UpdateAt         time.Time               `json:"updateAt"`
 }
 
 func NewInteracCITxRepo(db *sql.DB) *InteracCITxRepo {

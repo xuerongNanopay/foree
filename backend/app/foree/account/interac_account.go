@@ -41,21 +41,21 @@ const (
 )
 
 type InteracAccount struct {
-	ID              int64
-	FirstName       string
-	MiddleName      string
-	LastName        string
-	Address         string `json:"address"`
-	PhoneNumber     string `json:"phoneNumber"`
-	Email           string
-	InstitutionName string `json:"institutionName"`
-	BranchNumber    string `json:"branchNumber"`
-	AccountNumber   string `json:"accountNumber"`
-	AccountHash     string `json:"accountHash"`
-	OwnerId         int64
-	Status          AccountStatus
-	CreateAt        time.Time `json:"createAt"`
-	UpdateAt        time.Time `json:"updateAt"`
+	ID              int64         `json:"id"`
+	FirstName       string        `json:"firstName"`
+	MiddleName      string        `json:"middleName"`
+	LastName        string        `json:"lastName"`
+	Address         string        `json:"address"`
+	PhoneNumber     string        `json:"phoneNumber"`
+	Email           string        `json:"email"`
+	InstitutionName string        `json:"institutionName"`
+	BranchNumber    string        `json:"branchNumber"`
+	AccountNumber   string        `json:"accountNumber"`
+	AccountHash     string        `json:"accountHash"`
+	OwnerId         int64         `json:"ownerId"`
+	Status          AccountStatus `json:"status"`
+	CreateAt        time.Time     `json:"createAt"`
+	UpdateAt        time.Time     `json:"updateAt"`
 }
 
 func NewInteracAccountRepo(db *sql.DB) *InteracAccountRepo {
