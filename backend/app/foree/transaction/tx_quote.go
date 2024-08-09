@@ -60,7 +60,7 @@ func (repo *TxQuoteRepo) InsertTxQuote(tx *TxQuote) (string, error) {
 
 func (repo *TxQuoteRepo) purge(bucketIdx int) {
 	//Sleep 2 * Expiry, make sure all quote in the bucket are expiry.
-	time.Sleep(time.Minute * time.Duration(repo.expireInMinute))
+	time.Sleep(time.Minute*time.Duration(repo.expireInMinute) + time.Minute)
 	//TODO: Log
 	//Clear all quote by just replace with new map
 	repo.mems[bucketIdx%2] = make(map[string]*TxQuote, repo.maxBucketSize)
