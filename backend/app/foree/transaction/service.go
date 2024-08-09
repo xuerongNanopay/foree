@@ -15,3 +15,4 @@ type TransactionService struct {
 //6. hardCancelTransaction
 //7. create foreee refund transaction
 //8. process refund transaction
+//9. Quote in memory.
