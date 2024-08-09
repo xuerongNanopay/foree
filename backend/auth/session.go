@@ -28,6 +28,7 @@ type Session struct {
 }
 
 // 13 buckets, 1024 sesson of each bucket, and 12 hours session expiry
+// It should be able to support at least 10000 sessions in 12 hours
 func NewDefaultSessionRepo() *SessionRepo {
 	// If you don't have active in 3 hours, the session will expire.
 	return NewSessionRepo(12, 3, 13, 1024)
