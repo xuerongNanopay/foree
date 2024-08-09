@@ -14,8 +14,8 @@ const (
 			type, status, rate,
 			src_amount, src_currency, dest_amount, dest_currency
 			total_amount, total_currency, cur_stage, cur_stage_status,
-			conclusion, is_cancel_allowed, owner_id
-		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+			transaction_purpose, conclusion, is_cancel_allowed, owner_id
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 )
 
@@ -47,20 +47,21 @@ const (
 
 // Only Support INITIAL, PROCESSING, CANCEL, COMPLETE.
 type ForeeTx struct {
-	ID              int64
-	Type            string
-	Status          TxStage
-	Rate            float64
-	SrcAmt          types.AmountData
-	DestAmt         types.AmountData
-	Total           types.AmountData
-	CurStage        TxStage
-	CurStageStatus  string
-	Conclusion      string
-	IsCancelAllowed bool `json:"isCancelAllowed"`
-	OwnerId         int64
-	CreateAt        time.Time `json:"createAt"`
-	UpdateAt        time.Time `json:"updateAt"`
+	ID                 int64
+	Type               string
+	Status             TxStage
+	Rate               float64
+	SrcAmt             types.AmountData
+	DestAmt            types.AmountData
+	Total              types.AmountData
+	CurStage           TxStage
+	CurStageStatus     string
+	TransactionPurpose string
+	Conclusion         string
+	IsCancelAllowed    bool `json:"isCancelAllowed"`
+	OwnerId            int64
+	CreateAt           time.Time `json:"createAt"`
+	UpdateAt           time.Time `json:"updateAt"`
 
 	FeeIDs    []int64
 	Fees      []FeeJoint
