@@ -7,12 +7,12 @@ import (
 )
 
 const (
-	sQLPermissionByGroupId = `
+	sQLPermissionByGroupName = `
 		SELECT 
-			p.id, p.description, p.is_enable
-		FROM group_permission as gp
-		INNER JOIN permission as p ON gp.permission_id=p.id
-		WHERE p.is_enable = true and pg.is_enable = true and pg.group_id = ?
+			p.name, p.description
+		FROM permissions as p
+		INNER JOIN group_permission_joint as gpt ON p.name = gpt.permission_name
+		WHERE gpt.is_enable = true and gpt.group_name = ?
 	`
 )
 
@@ -20,28 +20,26 @@ const (
 // Super: *::*::*
 // app::service::methods
 type Group struct {
-	ID          string       `json:"id"`
+	Name        string       `json:"name"`
 	Description string       `json:"description"`
-	IsEnable    bool         `json:"isEnable"`
 	CreateAt    time.Time    `json:"createAt"`
 	UpdateAt    time.Time    `json:"updateAt"`
 	Permissions []Permission `json:"permissions"`
 }
 
 type Permission struct {
-	ID          string    `json:"id"`
+	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	IsEnable    bool      `json:"isEnable"`
 	CreateAt    time.Time `json:"createAt"`
 	UpdateAt    time.Time `json:"updateAt"`
 }
 
-type GroupPermissionJoin struct {
-	GroupID      string    `json:"groupId"`
-	PermissionID string    `json:"permissionId"`
-	IsEnable     bool      `json:"isEnable"`
-	CreateAt     time.Time `json:"createAt"`
-	UpdateAt     time.Time `json:"updateAt"`
+type GroupPermissionJoint struct {
+	GroupName      string    `json:"groupName"`
+	PermissionName string    `json:"permissionName"`
+	IsEnable       bool      `json:"isEnable"`
+	CreateAt       time.Time `json:"createAt"`
+	UpdateAt       time.Time `json:"updateAt"`
 }
 
 func NewPermission(db *sql.DB) *PermissionRepo {
@@ -52,8 +50,8 @@ type PermissionRepo struct {
 	db *sql.DB
 }
 
-func (repo *PermissionRepo) GetAllByGroupId(groupId string) ([]*Permission, error) {
-	rows, err := repo.db.Query(sQLPermissionByGroupId)
+func (repo *PermissionRepo) GetAllPermissionByGroupName(groupName string) ([]*Permission, error) {
+	rows, err := repo.db.Query(sQLPermissionByGroupName)
 
 	if err != nil {
 		return nil, err
@@ -79,9 +77,8 @@ func (repo *PermissionRepo) GetAllByGroupId(groupId string) ([]*Permission, erro
 func scanRowIntoPermission(rows *sql.Rows) (*Permission, error) {
 	p := new(Permission)
 	err := rows.Scan(
-		&p.ID,
+		&p.Name,
 		&p.Description,
-		&p.IsEnable,
 	)
 	if err != nil {
 		return nil, err

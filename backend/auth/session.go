@@ -62,7 +62,7 @@ type SessionRepo struct {
 	lock           sync.Mutex
 }
 
-func (repo *SessionRepo) Insert(session *Session) (string, error) {
+func (repo *SessionRepo) InsertSession(session *Session) (string, error) {
 	session.CreateAt = time.Now()
 	session.LatestActiveAt = time.Now()
 	session.ExpireAt = time.Now().Add(time.Duration(time.Hour * time.Duration(repo.expireInHour)))
@@ -102,7 +102,7 @@ func (repo *SessionRepo) Delete(id string) {
 	delete(repo.mems[idx%repo.numberOfBucket], id)
 }
 
-func (repo *SessionRepo) GetUniqueById(id string) *Session {
+func (repo *SessionRepo) GetSessionUniqueById(id string) *Session {
 	idx, err := parseBucketId(id)
 	if err != nil {
 		return nil
