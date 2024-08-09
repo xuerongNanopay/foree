@@ -21,10 +21,9 @@ type Session struct {
 	Permissions    []Permission `json:"permission"`
 	UserAgent      string       `json:"userAgent"`
 	Ip             string       `json:"ip"`
-	LatestActiveAt time.Time    `json:"latest_active_at"`
-	ExpireAt       time.Time    `json:"expire_at"`
+	LatestActiveAt time.Time    `json:"latestActiveAt"`
+	ExpireAt       time.Time    `json:"expireAt"`
 	CreateAt       time.Time    `json:"createAt"`
-	UpdateAt       time.Time    `json:"updateAt"`
 }
 
 func NewSessionRepo(db *sql.DB) *SessionRepo {
@@ -33,20 +32,21 @@ func NewSessionRepo(db *sql.DB) *SessionRepo {
 
 // TODO: Thread Safe.
 // TODO: Improve
+// TODO: use bucket to distribution in to different map.
 type SessionRepo struct {
 	// db *sql.DB
+
 	mem    map[string]*Session
 	rwLock *sync.RWMutex
 }
 
-func (repo *SessionRepo) Insert(session *Session) (*Session, error) {
-	sessionId := fmt.Sprintf("%v::%v", session.UserId, uuid.New().String())
-	session.ID = sessionId
+func (repo *SessionRepo) Insert(session *Session) (string, error) {
+	session.ID = generateSessionId(0)
 
 	repo.rwLock.Lock()
 	defer repo.rwLock.Unlock()
-	repo.mem[sessionId] = session
-	return nil, nil
+	repo.mem[session.ID] = session
+	return session.ID, nil
 }
 
 func (repo *SessionRepo) Delete(id string) {
@@ -63,5 +63,10 @@ func (repo *SessionRepo) GetUniqueById(id string) *Session {
 	if !ok {
 		return nil
 	}
+	s.LatestActiveAt = time.Now()
 	return s
+}
+
+func generateSessionId(bucketId int) string {
+	return fmt.Sprintf("%06d-%s", bucketId, uuid.New().String())
 }
