@@ -7,6 +7,18 @@ import (
 	"xue.io/go-pay/app/foree/types"
 )
 
+const (
+	sQLForeeTxInsert = `
+		INSERT INTO foree_tx
+		(
+			type, status, rate,
+			src_amount, src_currency, dest_amount, dest_currency
+			total_amount, total_currency, cur_stage, cur_stage_status,
+			conclusion, is_cancel_allowed, owner_id
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+	`
+)
+
 type TxStatus string
 
 const (
@@ -33,34 +45,33 @@ const (
 	TxStageNBPCI     TxStage = "INTERAC-CO"
 )
 
-// Only Support PROCESSING, CANCEL, COMPLETE.
+// Only Support INITIAL, PROCESSING, CANCEL, COMPLETE.
 type ForeeTx struct {
-	ID             int64
-	Type           string
-	SrcAmt         types.AmountData
-	DestAmt        types.AmountData
-	Rate           types.RateDate
-	Status         TxStage
-	Total          types.AmountData
-	CurStage       TxStage
-	CurStageStatus string
-	Conclusion     string
-
-	FeeIDs          []int64
-	Fees            []FeeJoint
-	RewardIds       []int64
-	Rewards         []Reward
-	IsCancelAllowed bool      `json:"isCancelAllowed"`
+	ID              int64
+	Type            string
+	Status          TxStage
+	Rate            float64
+	SrcAmt          types.AmountData
+	DestAmt         types.AmountData
+	Total           types.AmountData
+	CurStage        TxStage
+	CurStageStatus  string
+	Conclusion      string
+	IsCancelAllowed bool `json:"isCancelAllowed"`
+	OwnerId         int64
 	CreateAt        time.Time `json:"createAt"`
 	UpdateAt        time.Time `json:"updateAt"`
-	OwnerId         int64
 
-	CI       *InteracCITx
-	IDM      *IDMTx
-	COUT     *NBPCOTx
-	Summary  *TxSummary
-	RefundTx *ForeeRefundTx
-	History  []*TxHistory
+	FeeIDs    []int64
+	Fees      []FeeJoint
+	RewardIds []int64
+	Rewards   []Reward
+	CI        *InteracCITx
+	IDM       *IDMTx
+	COUT      *NBPCOTx
+	Summary   *TxSummary
+	RefundTx  *ForeeRefundTx
+	History   []*TxHistory
 }
 
 func NewForeeTxRepo(db *sql.DB) *ForeeTxRepo {
