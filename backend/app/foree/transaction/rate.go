@@ -77,7 +77,7 @@ func (repo *ForeeTxRepo) UpdateRateById(r Rate) error {
 	return nil
 }
 
-func (repo *ForeeTxRepo) GetUniqueRateByIdentity(id int64) (*Rate, error) {
+func (repo *ForeeTxRepo) GetUniqueRateById(id string) (*Rate, error) {
 	rows, err := repo.db.Query(sQLRateGetUniqueById, id)
 
 	if err != nil {
