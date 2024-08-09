@@ -42,6 +42,7 @@ type ForeeTx struct {
 	Total          types.AmountData
 	CurStage       TxStage
 	CurStageStatus string
+	Conclusion     string
 
 	FeeIDs          []int64
 	Fees            []FeeJoint

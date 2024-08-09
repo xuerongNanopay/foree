@@ -18,7 +18,7 @@ const (
             is_cancel_allowed, parent_tx_id, owner_id
         ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `
-	sQLTxSummarypdateById = `
+	sQLTxSummaryUpdateById = `
         UPDATE tx_summary SET 
             summary = ?, status = ?, is_cancel_allowed = ? 
         WHERE id = ?
@@ -37,18 +37,32 @@ const (
         where t.id = ?
     `
 	sQLTxSummaryGetUniqueByParentTxId = `
-    SELECT 
-        t.id, t.summary, t.type, t.status, t.rate
-        t.src_acc_summary, t.src_amount, t.src_currency, 
-        t.dest_acc_summary, t.dest_amount, t.dest_currency,
-        t.total_amount, t.total_currency,
-        t.fee_amount, t.fee_currency, 
-        t.reward_amount, t.reward_currency, 
-        t.is_cancel_allowed, t.parent_tx_id, t.owner_id, 
-        t.create_at, t.update_at
-    FROM tx_summary t
-    where t.ParentTxId = ?
-`
+        SELECT 
+            t.id, t.summary, t.type, t.status, t.rate
+            t.src_acc_summary, t.src_amount, t.src_currency, 
+            t.dest_acc_summary, t.dest_amount, t.dest_currency,
+            t.total_amount, t.total_currency,
+            t.fee_amount, t.fee_currency, 
+            t.reward_amount, t.reward_currency, 
+            t.is_cancel_allowed, t.parent_tx_id, t.owner_id, 
+            t.create_at, t.update_at
+        FROM tx_summary t
+        where t.ParentTxId = ?
+    `
+	// TODO: Provide more flexible query.
+	// sQLTxSummaryGetUniqueByParentTxId = `
+	//     SELECT
+	//         t.id, t.summary, t.type, t.status, t.rate
+	//         t.src_acc_summary, t.src_amount, t.src_currency,
+	//         t.dest_acc_summary, t.dest_amount, t.dest_currency,
+	//         t.total_amount, t.total_currency,
+	//         t.fee_amount, t.fee_currency,
+	//         t.reward_amount, t.reward_currency,
+	//         t.is_cancel_allowed, t.parent_tx_id, t.owner_id,
+	//         t.create_at, t.update_at
+	//     FROM tx_summary t
+	//     where t.ParentTxId = ?
+	// `
 )
 
 type TxSummary struct {
@@ -82,6 +96,39 @@ func NewTxSummaryRepo(db *sql.DB) *TxSummaryRepo {
 
 type TxSummaryRepo struct {
 	db *sql.DB
+}
+
+func (repo *TxSummaryRepo) InsertTxSummary(tx TxSummary) (int64, error) {
+	result, err := repo.db.Exec(
+		sQLTxSummaryInsert,
+		tx.Summary,
+		tx.Type,
+		tx.Status,
+		tx.Rate,
+		tx.SrcAccSummary,
+		tx.SrcAmount,
+		tx.SrcCurrency,
+		tx.DestAccSummary,
+		tx.DestAmount,
+		tx.DestCurrency,
+		tx.TotalAmount,
+		tx.TotalCurrency,
+		tx.FeeAmount,
+		tx.FeeCurrency,
+		tx.RewardAmount,
+		tx.RewardCurrency,
+		tx.IsCancelAllowed,
+		tx.ParentTxId,
+		tx.OwnerId,
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func scanRowIntoTxSummary(rows *sql.Rows) (*TxSummary, error) {
