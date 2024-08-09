@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const numberOfBucket = 6
+
 // How do we store the session. // Redis?
 // type SessionService interface {
 // 	HasPermission(session Session, permission string) (bool, error)
@@ -30,8 +32,11 @@ type Session struct {
 // Assume one bucket can last 12 hours with maxBucketSize == 1024
 // expire: 12hours
 func NewSessionRepo() *SessionRepo {
+	expireInHour := 12
+	maxBucketSize := 1024
+
 	return &SessionRepo{
-		mems: [6]map[string]*Session{
+		mems: [numberOfBucket]map[string]*Session{
 			make(map[string]*Session, 1024/4),
 			make(map[string]*Session, 1024/4),
 			make(map[string]*Session, 1024/4),
@@ -40,9 +45,9 @@ func NewSessionRepo() *SessionRepo {
 			make(map[string]*Session, 1024/4),
 		},
 		cur:            0,
-		expireInHour:   12,
-		numberOfBucket: 6,
-		maxBucketSize:  1024,
+		expireInHour:   expireInHour,
+		numberOfBucket: numberOfBucket,
+		maxBucketSize:  maxBucketSize,
 	}
 }
 
@@ -53,7 +58,7 @@ type SessionRepo struct {
 	maxBucketSize  int
 	expireInHour   int
 	numberOfBucket int
-	mems           [6]map[string]*Session
+	mems           [numberOfBucket]map[string]*Session
 	lock           sync.Mutex
 }
 
