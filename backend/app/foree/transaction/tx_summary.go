@@ -141,6 +141,54 @@ func (repo *TxSummaryRepo) UpdateTxSummaryById(tx TxSummary) error {
 	return nil
 }
 
+func (repo *InteracCITxRepo) GetUniqueTxSummaryById(id int64) (*TxSummary, error) {
+	rows, err := repo.db.Query(sQLTxSummaryGetUniqueById, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *TxSummary
+
+	for rows.Next() {
+		f, err = scanRowIntoTxSummary(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func (repo *InteracCITxRepo) GetUniqueTxSummaryByParentTxId(parentTxId int64) (*TxSummary, error) {
+	rows, err := repo.db.Query(sQLTxSummaryGetUniqueByParentTxId, parentTxId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *TxSummary
+
+	for rows.Next() {
+		f, err = scanRowIntoTxSummary(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
 func scanRowIntoTxSummary(rows *sql.Rows) (*TxSummary, error) {
 	tx := new(TxSummary)
 	err := rows.Scan(
