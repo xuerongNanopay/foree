@@ -31,6 +31,7 @@ type UserDTO struct {
 	FirstName   string    `json:"firstName"`
 	MiddleName  string    `json:"middleName"`
 	LastName    string    `json:"lastName"`
+	Status      string    `json:"status"`
 	Age         int       `json:"age"`
 	Dob         time.Time `json:"dob"`
 	Nationality string    `json:"nationality"`
@@ -53,6 +54,7 @@ func NewUserDTO(user *auth.User) *UserDTO {
 		FirstName:  user.FirstName,
 		MiddleName: user.MiddleName,
 		LastName:   user.LastName,
+		Status:     string(user.Status),
 		AvatarUrl:  user.AvatarUrl,
 	}
 }
