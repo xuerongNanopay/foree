@@ -18,12 +18,12 @@ const (
 			transaction_purpose, conclusion, owner_id
 		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
-	sQLForeeTxUpdateGetById = `
+	sQLForeeTxUpdateById = `
 	    UPDATE foree_tx SET 
 			status = ?, cur_stage = ?, cur_stage_status = ?, conclusion = ?
         WHERE id = ?
 	`
-	sQLForeeTxUpdateById = `
+	sQLForeeTxGetById = `
 	    SELECT 
             t.id, t.type, t.status, t.rate
             t.src_amount, t.src_currency, 
@@ -136,12 +136,36 @@ func (repo *ForeeTxRepo) InsertForeeTx(tx ForeeTx) (int64, error) {
 	return id, nil
 }
 
-func (repo *ForeeTxRepo) UpdateTxSummaryById(tx ForeeTx) error {
-	_, err := repo.db.Exec(sQLForeeTxUpdateGetById, tx.Status, tx.CurStage, tx.CurStageStatus, tx.ID)
+func (repo *ForeeTxRepo) UpdateForeeTxById(tx ForeeTx) error {
+	_, err := repo.db.Exec(sQLForeeTxUpdateById, tx.Status, tx.CurStage, tx.CurStageStatus, tx.ID)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (repo *ForeeTxRepo) GetUniqueForeeTxById(id int64) (*ForeeTx, error) {
+	rows, err := repo.db.Query(sQLForeeTxGetById, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *ForeeTx
+
+	for rows.Next() {
+		f, err = scanRowIntoForeeTx(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
 }
 
 func scanRowIntoForeeTx(rows *sql.Rows) (*ForeeTx, error) {
