@@ -12,10 +12,10 @@ const (
 	TxStatusInitial    TxStatus = "INITIAL"
 	TxStatusProcessing TxStatus = "PROCESSING"
 	TxStatusSuspend    TxStatus = "Suspend"
+	TxStatusSent       TxStatus = "Sent"
 	TxStatusReject     TxStatus = "REJECT"
 	TxStatusCancel     TxStatus = "CANCEL"
 	TxStatusComplete   TxStatus = "COMPLETE"
-	// TxStatusInitial TxStatus = "INITIAL"
 )
 
 type TxType string
@@ -32,6 +32,7 @@ const (
 	TxStageNBPCI     TxStage = "INTERAC-CO"
 )
 
+// Only Support PROCESSING, CANCEL, COMPLETE.
 type ForeeTx struct {
 	ID             int64
 	Type           string
