@@ -15,7 +15,7 @@ const (
 		SELECT 
 			u.id, u.email, u.password, u.status,
 			u.verify_code, u.code_verified_at,
-			u.create_at, u.update_at
+			u.user_id, u.create_at, u.update_at
 		FROM email_passwd as u 
 		WHERE u.email = ?
 	`
@@ -23,7 +23,7 @@ const (
 		SELECT 
 			u.id, u.email, u.password, u.status,
 			u.verify_code, u.code_verified_at,
-			u.avatar_url, u.create_at, u.update_at
+			u.user_id, u.create_at, u.update_at
 		FROM email_passwd as u
 	`
 	sQLEmailPasswdUpdateByEmail = `
@@ -50,9 +50,9 @@ type EmailPasswd struct {
 	Passowrd       string            `json:"-"`
 	VerifyCode     string            `json:"-"`
 	CodeVerifiedAt time.Time         `json:"codeVerifiedAt"`
+	UserId         int64             `json:"userId"`
 	CreateAt       time.Time         `json:"createAt"`
 	UpdateAt       time.Time         `json:"updateAt"`
-	UserId         int64             `json:"userId"`
 }
 
 func NewEmailPasswdRepo(db *sql.DB) *EmailPasswdRepo {
@@ -147,6 +147,7 @@ func scanRowIntoEmailPasswd(rows *sql.Rows) (*EmailPasswd, error) {
 		&p.Status,
 		&p.VerifyCode,
 		&p.CodeVerifiedAt,
+		&p.UserId,
 		&p.CreateAt,
 		&p.UpdateAt,
 	)
