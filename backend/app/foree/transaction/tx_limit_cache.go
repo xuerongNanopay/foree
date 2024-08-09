@@ -16,6 +16,11 @@ const (
 			max_amount, max_currency
 		) VALUES (?,?,?,?,?)
 	`
+	sQLTxLimitCacheUpdateByIdentity = `
+        UPDATE tx_limit_cache SET 
+            used_amount = ?
+        WHERE identity = ?
+	`
 	sQLTxLimitCacheGetUniqueByIdentity = `
 		SELECT
 			t.id, t.identity, t.used_amount, t.used_currency,
@@ -63,6 +68,38 @@ func (repo *TxLimitCacheRepo) InsertTxLimitCache(tx TxLimitCache) (int64, error)
 		return 0, err
 	}
 	return id, nil
+}
+
+func (repo *TxLimitCacheRepo) UpdateTxLimitCacheById(tx TxLimitCache) error {
+	_, err := repo.db.Exec(sQLTxLimitCacheUpdateByIdentity, tx.UsedAmt.Amount, tx.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *TxLimitCacheRepo) GetUniqueTxLimitCacheByIdentity(id int64) (*TxLimitCache, error) {
+	rows, err := repo.db.Query(sQLTxLimitCacheGetUniqueByIdentity, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *TxLimitCache
+
+	for rows.Next() {
+		f, err = scanRowIntoTxLimitCache(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
 }
 
 func scanRowIntoTxLimitCache(rows *sql.Rows) (*TxLimitCache, error) {
