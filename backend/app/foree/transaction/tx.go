@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"database/sql"
 	"time"
 
 	"xue.io/go-pay/app/foree/types"
@@ -60,4 +61,12 @@ type ForeeTx struct {
 	Summary  *TxSummary
 	RefundTx *ForeeRefundTx
 	History  []*TxHistory
+}
+
+func NewForeeTxRepo(db *sql.DB) *ForeeTxRepo {
+	return &ForeeTxRepo{db: db}
+}
+
+type ForeeTxRepo struct {
+	db *sql.DB
 }
