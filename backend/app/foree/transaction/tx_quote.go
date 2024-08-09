@@ -25,9 +25,9 @@ func NewTxQuoteRepo() *TxQuoteRepo {
 }
 
 type TxQuoteRepo struct {
-	mem map[string]*TxQuote
-	// mem2    map[string]*TxQuote
-
+	mem1   map[string]*TxQuote
+	mem2   map[string]*TxQuote
+	curMem map[string]*TxQuote
 	rwLock *sync.RWMutex
 }
 
@@ -36,7 +36,7 @@ func (repo *TxQuoteRepo) InsertTxQuote(tx *TxQuote) (string, error) {
 	tx.CreateAt = time.Now()
 	repo.rwLock.Lock()
 	defer repo.rwLock.Unlock()
-	repo.mem[tx.ID] = tx
+	repo.curMem[tx.ID] = tx
 	return tx.ID, nil
 }
 
@@ -44,13 +44,13 @@ func (repo *TxQuoteRepo) Delete(id string) {
 
 	repo.rwLock.Lock()
 	defer repo.rwLock.Unlock()
-	delete(repo.mem, id)
+	delete(repo.curMem, id)
 }
 
 func (repo *TxQuoteRepo) GetUniqueById(id string) *TxQuote {
 	repo.rwLock.RLock()
 	defer repo.rwLock.RUnlock()
-	s, ok := repo.mem[id]
+	s, ok := repo.curMem[id]
 	if !ok {
 		return nil
 	}
