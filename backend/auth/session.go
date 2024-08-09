@@ -10,8 +10,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const numberOfBucket = 6
-
 // How do we store the session. // Redis?
 // type SessionService interface {
 // 	HasPermission(session Session, permission string) (bool, error)
@@ -29,22 +27,22 @@ type Session struct {
 	CreateAt       time.Time    `json:"createAt"`
 }
 
-// Assume one bucket can last 12 hours with maxBucketSize == 1024
-// expire: 12hours
-func NewSessionRepo() *SessionRepo {
-	expireInHour := 12
-	maxBucketSize := 1024
+// 13 buckets, 1024 sesson of each bucket, and 12 hours session expiry
+func NewDefaultSessionRepo() *SessionRepo {
+	// If you don't have active in 4 hours, the session will expire.
+	return NewSessionRepo(12, 4, 13, 1024)
+}
 
+func NewSessionRepo(expireInHour, activeInHour, numberOfBucket, maxBucketSize int) *SessionRepo {
+
+	mems := []map[string]*Session{}
+	for i := 0; i < maxBucketSize; i++ {
+		mems = append(mems, make(map[string]*Session, maxBucketSize/4))
+	}
 	return &SessionRepo{
-		mems: [numberOfBucket]map[string]*Session{
-			make(map[string]*Session, 1024/4),
-			make(map[string]*Session, 1024/4),
-			make(map[string]*Session, 1024/4),
-			make(map[string]*Session, 1024/4),
-			make(map[string]*Session, 1024/4),
-			make(map[string]*Session, 1024/4),
-		},
+		mems:           mems,
 		cur:            0,
+		activeInHour:   activeInHour,
 		expireInHour:   expireInHour,
 		numberOfBucket: numberOfBucket,
 		maxBucketSize:  maxBucketSize,
@@ -57,8 +55,9 @@ type SessionRepo struct {
 	cur            int
 	maxBucketSize  int
 	expireInHour   int
+	activeInHour   int
 	numberOfBucket int
-	mems           [numberOfBucket]map[string]*Session
+	mems           []map[string]*Session
 	lock           sync.Mutex
 }
 
@@ -117,8 +116,8 @@ func (repo *SessionRepo) GetUniqueById(id string) *Session {
 		return nil
 	}
 	now := time.Now()
-	// 1 hours
-	if now.Unix()-s.LatestActiveAt.Unix() > 3600 {
+
+	if now.Unix()-s.LatestActiveAt.Unix() > int64(repo.activeInHour*3600) {
 		go repo.Delete(id)
 		return nil
 	}
