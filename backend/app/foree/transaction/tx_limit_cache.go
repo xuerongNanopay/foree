@@ -78,8 +78,8 @@ func (repo *TxLimitCacheRepo) UpdateTxLimitCacheById(tx TxLimitCache) error {
 	return nil
 }
 
-func (repo *TxLimitCacheRepo) GetUniqueTxLimitCacheByIdentity(id int64) (*TxLimitCache, error) {
-	rows, err := repo.db.Query(sQLTxLimitCacheGetUniqueByIdentity, id)
+func (repo *TxLimitCacheRepo) GetUniqueTxLimitCacheByIdentity(identity string) (*TxLimitCache, error) {
+	rows, err := repo.db.Query(sQLTxLimitCacheGetUniqueByIdentity, identity)
 
 	if err != nil {
 		return nil, err

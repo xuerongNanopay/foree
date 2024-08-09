@@ -27,6 +27,10 @@ type TxLimit struct {
 	UpdateAt   time.Time        `json:"updateAt"`
 }
 
+func (l *TxLimit) IsViolateLimit(amt types.AmountData) bool {
+	return false
+}
+
 func NewTxLimitRepo(db *sql.DB) *TxLimitRepo {
 	return &TxLimitRepo{db: db}
 }
