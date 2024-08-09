@@ -50,7 +50,7 @@ const (
         where t.ParentTxId = ?
     `
 	// TODO: Provide more flexible query.
-	// sQLTxSummaryGetUniqueByParentTxId = `
+	// sQLTxSummaryQueryByOwnerId = `
 	//     SELECT
 	//         t.id, t.summary, t.type, t.status, t.rate
 	//         t.src_acc_summary, t.src_amount, t.src_currency,
@@ -61,7 +61,9 @@ const (
 	//         t.is_cancel_allowed, t.parent_tx_id, t.owner_id,
 	//         t.create_at, t.update_at
 	//     FROM tx_summary t
-	//     where t.ParentTxId = ?
+	//     where t.owner_id = ?
+	//     ORDER BY create_at ?
+	//     LIMIT ? OFFSET ?
 	// `
 )
 
@@ -129,6 +131,14 @@ func (repo *TxSummaryRepo) InsertTxSummary(tx TxSummary) (int64, error) {
 		return 0, err
 	}
 	return id, nil
+}
+
+func (repo *TxSummaryRepo) UpdateTxSummaryById(tx TxSummary) error {
+	_, err := repo.db.Exec(sQLTxSummaryUpdateById, tx.Summary, tx.Status, tx.IsCancelAllowed, tx.ID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func scanRowIntoTxSummary(rows *sql.Rows) (*TxSummary, error) {
