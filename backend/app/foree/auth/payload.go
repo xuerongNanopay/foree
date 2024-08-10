@@ -69,19 +69,21 @@ type ForgetPasswordUpdateReq struct {
 }
 
 type CreateUserReq struct {
-	FirstName   string    `json:"firstName" validate:"required"`
-	MiddleName  string    `json:"middleName"`
-	LastName    string    `json:"lastName" validate:"required"`
-	Age         int       `json:"age" validate:"gte=19,lte=130"`
-	Dob         ForeeDate `json:"dob"`
-	Nationality string    `json:"nationality" validate:"required"`
-	Address1    string    `json:"address1" validate:"required"`
-	Address2    string    `json:"address2"`
-	City        string    `json:"city" validate:"required"`
-	Province    string    `json:"province" validate:"required"`
-	Country     string    `json:"country" validate:"required"`
-	PhoneNumber string    `json:"phoneNumber" validate:"required"`
-	AvatarUrl   string    `json:"avatarUrl"`
+	FirstName           string    `json:"firstName" validate:"required"`
+	MiddleName          string    `json:"middleName"`
+	LastName            string    `json:"lastName" validate:"required"`
+	Age                 int       `json:"age" validate:"gte=19,lte=130"`
+	Dob                 ForeeDate `json:"dob"`
+	Nationality         string    `json:"nationality" validate:"required"`
+	Address1            string    `json:"address1" validate:"required"`
+	Address2            string    `json:"address2"`
+	City                string    `json:"city" validate:"required"`
+	Province            string    `json:"province" validate:"required"`
+	Country             string    `json:"country" validate:"required"`
+	PhoneNumber         string    `json:"phoneNumber" validate:"required"`
+	IdentificationType  string    `json:"identificationType" validate:"required"`
+	IdentificationValue string    `json:"identificationValue" validate:"required"`
+	AvatarUrl           string    `json:"avatarUrl"`
 }
 
 // TODO: trim name, and use allowText
