@@ -152,16 +152,22 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*aut
 	return session, nil
 }
 
+func (a *AuthService) ResendVerifyCode(ctx context.Context, session SessionReq) transport.ForeeError {
+	// Check Allow to VerifyEmail
+	_, err := a.allowVerifyEmail(session.SessionId)
+	if err != nil {
+		return err
+	}
+	//TODO: send email. by goroutine
+	return nil
+}
+
 func (a *AuthService) CreateUser(ctx context.Context) (*auth.Session, transport.ForeeError) {
 	return nil, nil
 }
 
 func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, transport.ForeeError) {
 	return nil, nil
-}
-
-func (a *AuthService) ResendVerifyCode(ctx context.Context, session SessionReq) {
-
 }
 
 func (a *AuthService) ForgetPassword(ctx context.Context, email string) {
