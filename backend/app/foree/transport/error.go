@@ -81,12 +81,14 @@ func (b *BadRequestError) AddDetails(errors ...string) *BadRequestError {
 type RequireAction string
 
 const (
+	RequireActionToMain      RequireAction = "TO_MAIN"
 	RequireActionLogin       RequireAction = "LOGIN"
 	RequireActionVerifyEmail RequireAction = "VERIFY_EMAIL"
 	RequireActionCreateUser  RequireAction = "CREATE_USER"
 )
 
 const (
+	PreconditionRequireMsgToMain      string = "Please navigate to main menu."
 	PreconditionRequireMsgLogin       string = "Please login."
 	PreconditionRequireMsgVerifyEmail string = "Please verify your email."
 	PreconditionRequireMsgCreateUser  string = "Please fullfill your information."
