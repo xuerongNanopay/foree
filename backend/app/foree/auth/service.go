@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"context"
+
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/auth"
 )
@@ -15,7 +17,7 @@ type AuthService struct {
 
 // Any error should return 503
 
-func (a *AuthService) SignUp(req SignUpReq) (*auth.Session, transport.ForeeError) {
+func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session, transport.ForeeError) {
 	// Check if email already exists.
 	oldEmail, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
 	if err != nil {
@@ -83,7 +85,7 @@ func (a *AuthService) SignUp(req SignUpReq) (*auth.Session, transport.ForeeError
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	//TODO: send email.
+	//TODO: send email. by goroutine
 
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	if session == nil {
@@ -92,31 +94,31 @@ func (a *AuthService) SignUp(req SignUpReq) (*auth.Session, transport.ForeeError
 	return session, nil
 }
 
-func (a *AuthService) VerifyEmail(session *auth.Session, req VerifyEmailReq) (*auth.Session, transport.ForeeError) {
+func (a *AuthService) VerifyEmail(ctx context.Context, sessionID string, req VerifyEmailReq) (*auth.Session, transport.ForeeError) {
 	return nil, nil
 }
 
-func (a *AuthService) Login() (*auth.Session, transport.ForeeError) {
-	return nil, nil
+func (a *AuthService) Login(ctx context.Context) (string, transport.ForeeError) {
+	return "", nil
 }
 
-func (a *AuthService) CreateUser() (*auth.Session, transport.ForeeError) {
-	return nil, nil
+func (a *AuthService) CreateUser(ctx context.Context) (string, transport.ForeeError) {
+	return "", nil
 }
 
-func (a *AuthService) ResendVerifyCode() {
-
-}
-
-func (a *AuthService) ForgetPassword(email string) {
+func (a *AuthService) ResendVerifyCode(ctx context.Context) {
 
 }
 
-func (a *AuthService) ForgetPasswordUpdate(code, newPassword string) {
+func (a *AuthService) ForgetPassword(ctx context.Context, email string) {
 
 }
 
-func (a *AuthService) Logout(sessionId string) transport.ForeeError {
+func (a *AuthService) ForgetPasswordUpdate(ctx context.Context, code, newPassword string) {
+
+}
+
+func (a *AuthService) Logout(ctx context.Context, sessionId string) transport.ForeeError {
 	a.sessionRepo.Delete(sessionId)
 	return transport.NewPreconditionRequireError(
 		transport.PreconditionRequireMsgLogin,
@@ -124,12 +126,8 @@ func (a *AuthService) Logout(sessionId string) transport.ForeeError {
 	)
 }
 
-func (a *AuthService) GetUser() {
+func (a *AuthService) GetUser(ctx context.Context, essionId string) {
 
-}
-
-func (a *AuthService) GetSession(sessionId string) *auth.Session {
-	return nil
 }
 
 func (a *AuthService) Authorize(sessionId string, permission string) transport.ForeeError {
