@@ -31,8 +31,13 @@ const (
 			email
 		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
-	sQLUserUpdateStatus = `
-		UPDATE users SET status = ? WHERE id = ?
+	sQLUserUpdateById = `
+		UPDATE users SET 
+			status = ?, first_name = ?, middle_name = ?, 
+			last_name = ?, age = ?, dob = ?, nationality = ?, Address1 = ?, 
+			Address2 = ?, city = ?, province = ?, country = ?, phone_number = ?,
+			email = ?
+		WHERE id = ?
 	`
 )
 
@@ -77,15 +82,32 @@ type UserRepo struct {
 	db *sql.DB
 }
 
-func (repo *UserRepo) UpdateStatus(id int64, status UserStatus) error {
-	_, err := repo.db.Exec(sQLUserUpdateStatus, status, id)
+func (repo *UserRepo) UpdateUserById(u User) error {
+	_, err := repo.db.Exec(
+		sQLUserUpdateById,
+		u.Status,
+		u.FirstName,
+		u.MiddleName,
+		u.LastName,
+		u.Age,
+		u.Dob,
+		u.Nationality,
+		u.Address1,
+		u.Address2,
+		u.City,
+		u.Province,
+		u.Country,
+		u.PhoneNumber,
+		u.Email,
+		u.ID,
+	)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (repo *UserRepo) Insert(user User) (int64, error) {
+func (repo *UserRepo) InsertUser(user User) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLUserInsert,
 		user.Group,
@@ -114,7 +136,7 @@ func (repo *UserRepo) Insert(user User) (int64, error) {
 	return id, nil
 }
 
-func (repo *UserRepo) GetUniqueById(id int64) (*User, error) {
+func (repo *UserRepo) GetUniqueUserById(id int64) (*User, error) {
 	rows, err := repo.db.Query(sQLUserGetUniqueById, id)
 
 	if err != nil {
@@ -138,7 +160,7 @@ func (repo *UserRepo) GetUniqueById(id int64) (*User, error) {
 	return u, nil
 }
 
-func (repo *UserRepo) GetAll() ([]*User, error) {
+func (repo *UserRepo) GetAllUser() ([]*User, error) {
 	rows, err := repo.db.Query(sQLUserGetAll)
 
 	if err != nil {
