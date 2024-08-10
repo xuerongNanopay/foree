@@ -133,3 +133,8 @@ func (a *AuthService) GetSession(sessionId string) *auth.Session {
 func (a *AuthService) Authorize(session auth.Session, permission string) bool {
 	return false
 }
+
+func (a *AuthService) VerifySession(sessionId string) error {
+	session := a.sessionRepo.GetSessionUniqueById(sessionId)
+	return verifySession(session)
+}
