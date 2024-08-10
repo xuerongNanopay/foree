@@ -49,7 +49,7 @@ func (a *AuthService) ResendVerifyCode() {
 
 }
 
-func (a *AuthService) VerifyEmail(session *auth.Session) {
+func (a *AuthService) VerifyEmail(session *auth.Session, req VerifyEmailReq) {
 
 }
 
@@ -65,8 +65,8 @@ func (a *AuthService) Login() {
 
 }
 
-func (a *AuthService) Logout(sessionId string) {
-
+func (a *AuthService) Logout(session *auth.Session) {
+	a.sessionRepo.Delete(session.ID)
 }
 
 func (a *AuthService) CreateUser() {

@@ -6,6 +6,5 @@ type SignUpReq struct {
 }
 
 type VerifyEmailReq struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Code string `json:"code"`
 }
