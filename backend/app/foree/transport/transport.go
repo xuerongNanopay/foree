@@ -15,12 +15,15 @@ import (
 // 201 Created
 // 400 Bad Request: Mainly used in form submit.
 // 401 Unauthorized: client need get new token or re-login.
+// 412 Precondition Failed
+//
 // 403 Forbidden: The client does not have access rights to the content
 // 503 Service Unavailable
 
 type HTTPResponse struct {
 	StatusCode int      `json:"statusCode"`
 	Message    string   `json:"message"`
+	EPStatus   string   `json:"epStatus"`
 	User       *UserDTO `json:"user"`
 	Data       any      `json:"data"`
 	Error      any      `json:"error"`

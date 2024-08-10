@@ -2,6 +2,8 @@ package auth
 
 import (
 	"database/sql"
+	"fmt"
+	"math/rand"
 	"time"
 )
 
@@ -11,6 +13,14 @@ const (
 		(	u.email, u.password, u.status, u.verify_code
 		) VALUES (?,?,?,?)
 	`
+	sQLEmailPasswdGetUniqueById = `
+	SELECT 
+		u.id, u.email, u.password, u.status,
+		u.verify_code, u.code_verified_at,
+		u.user_id, u.create_at, u.update_at
+	FROM email_passwd as u 
+	WHERE u.id = ?
+`
 	sQLEmailPasswdGetUniqueByEmail = `
 		SELECT 
 			u.id, u.email, u.password, u.status,
@@ -105,6 +115,30 @@ func (repo *EmailPasswdRepo) GetUniqueEmailPasswdByEmail(email string) (*EmailPa
 	return ep, nil
 }
 
+func (repo *EmailPasswdRepo) GetUniqueEmailPasswdById(id int64) (*EmailPasswd, error) {
+	rows, err := repo.db.Query(sQLEmailPasswdGetUniqueById, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ep *EmailPasswd
+
+	for rows.Next() {
+		ep, err = scanRowIntoEmailPasswd(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if ep.ID == 0 {
+		return nil, nil
+	}
+
+	return ep, nil
+}
+
 func (repo *EmailPasswdRepo) GetAllEmailPasswdByEmail() ([]*EmailPasswd, error) {
 	rows, err := repo.db.Query(sQLEmailPasswdGetAll)
 
@@ -155,6 +189,11 @@ func scanRowIntoEmailPasswd(rows *sql.Rows) (*EmailPasswd, error) {
 		return nil, err
 	}
 	return p, nil
+}
+
+func GenerateVerifyCode() string {
+	r := rand.Intn(1000000)
+	return fmt.Sprintf("%06d", r)
 }
 
 // TODO
