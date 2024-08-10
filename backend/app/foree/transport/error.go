@@ -67,3 +67,24 @@ func (b *BadRequestError) AddDetails(errors ...string) *BadRequestError {
 	}
 	return b
 }
+
+type RequireAction string
+
+const (
+	RequireActionVerifyEmail RequireAction = "VERIFY_EMAIL"
+	RequireActionCreateUser  RequireAction = "CREATE_USER"
+)
+
+type PreconditionRequireError struct {
+	StatusCode int           `json:"statusCode"`
+	Message    string        `json:"message"`
+	Require    RequireAction `json:"require"`
+}
+
+func NewPreconditionRequireError(message string, require RequireAction) *PreconditionRequireError {
+	return &PreconditionRequireError{
+		StatusCode: http.StatusPreconditionRequired,
+		Message:    message,
+		Require:    require,
+	}
+}
