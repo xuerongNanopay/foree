@@ -118,8 +118,12 @@ func (a *AuthService) ForgetPasswordUpdate(code, newPassword string) {
 
 }
 
-func (a *AuthService) Logout(session *auth.Session) {
-	a.sessionRepo.Delete(session.ID)
+func (a *AuthService) Logout(sessionId string) error {
+	a.sessionRepo.Delete(sessionId)
+	return transport.NewPreconditionRequireError(
+		transport.PreconditionRequireMsgLogin,
+		transport.RequireActionLogin,
+	)
 }
 
 func (a *AuthService) GetUser() {
