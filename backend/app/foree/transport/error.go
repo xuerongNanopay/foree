@@ -50,11 +50,7 @@ type ErrorDetail struct {
 }
 
 func (b *BadRequestError) Error() string {
-	s, err := json.Marshal(b)
-	if err != nil {
-		return fmt.Sprintf("%v", s)
-	}
-	return string(s)
+	return serializeError(b)
 }
 
 func (b *BadRequestError) AddDetails(errors ...string) *BadRequestError {
@@ -71,8 +67,15 @@ func (b *BadRequestError) AddDetails(errors ...string) *BadRequestError {
 type RequireAction string
 
 const (
+	RequireActionLogin       RequireAction = "LOGIN"
 	RequireActionVerifyEmail RequireAction = "VERIFY_EMAIL"
 	RequireActionCreateUser  RequireAction = "CREATE_USER"
+)
+
+const (
+	PreconditionRequireMsgLogin       string = "Please login."
+	PreconditionRequireMsgVerifyEmail string = "Please verify your email."
+	PreconditionRequireMsgCreateUser  string = "Please fullfill your information."
 )
 
 type PreconditionRequireError struct {
@@ -87,4 +90,16 @@ func NewPreconditionRequireError(message string, require RequireAction) *Precond
 		Message:    message,
 		Require:    require,
 	}
+}
+
+func (b *PreconditionRequireError) Error() string {
+	return serializeError(b)
+}
+
+func serializeError(e any) string {
+	s, err := json.Marshal(e)
+	if err != nil {
+		return fmt.Sprintf("%v", e)
+	}
+	return string(s)
 }
