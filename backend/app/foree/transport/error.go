@@ -9,6 +9,8 @@ import (
 
 type Severity string
 
+const FormErrorSignUpMsg = "Invaild Signup Request"
+
 const (
 	SeverityInfo  Severity = "INFO"
 	SeverityWarn  Severity = "WARN"

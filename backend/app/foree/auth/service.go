@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 
+	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/auth"
 )
 
@@ -23,15 +24,43 @@ func (a *AuthService) SignUp(req SignUpReq) (*auth.Session, error) {
 		return nil, err
 	}
 
+	if oldEmail != nil {
+		return nil, transport.NewFormError(transport.FormErrorSignUpMsg, "email", "Duplicate email")
+	}
+
+	// Hashing password.
 	hashedPassowrd, err := auth.HashPassword(req.Password)
 	if err != nil {
 		return nil, err
 	}
+
+	// Create User
+	userId, err := a.userRepo.InsertUser(auth.User{
+		Status: auth.UserStatusInitial,
+		Email:  req.Email,
+		Group:  UserGroup,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := a.userRepo.GetUniqueUserById(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, fmt.Errorf("unable to get user with id: `%v`", userId)
+	}
+
+	// Create EmailPasswd
 	id, err := a.emailPasswordRepo.InsertEmailPasswd(auth.EmailPasswd{
 		Email:      req.Email,
 		Passowrd:   hashedPassowrd,
 		Status:     auth.EPStatusWaitingVerify,
 		VerifyCode: auth.GenerateVerifyCode(),
+		UserId:     user.ID,
 	})
 
 	if err != nil {
@@ -44,18 +73,21 @@ func (a *AuthService) SignUp(req SignUpReq) (*auth.Session, error) {
 		return nil, err
 	}
 
-	session := &auth.Session{
-		EmailPasswd: ep,
+	if ep == nil {
+		return nil, fmt.Errorf("unable to get EmailPasswd with id: `%v`", id)
 	}
 
-	sessionId, err := a.sessionRepo.InsertSession(session)
+	sessionId, err := a.sessionRepo.InsertSession(&auth.Session{
+		UserId:      user.ID,
+		EmailPasswd: ep,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	//TODO: send email.
 
-	session = a.sessionRepo.GetSessionUniqueById(sessionId)
+	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	if session == nil {
 		return nil, fmt.Errorf("sesson `%s` not found", sessionId)
 	}

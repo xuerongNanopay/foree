@@ -6,6 +6,7 @@ import (
 	"xue.io/go-pay/auth"
 )
 
+// See: https://www.bugsnag.com/blog/go-errors/ for error stacktrace
 // Define generic format for HTTP transfermation.
 // StatusCode should follow standard http status code
 // see: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status

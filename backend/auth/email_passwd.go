@@ -10,7 +10,7 @@ import (
 const (
 	sQLEmailPasswdInsert = `
 		INSERT INTO email_passwd
-		(	u.email, u.password, u.status, u.verify_code
+		(	u.email, u.password, u.status, u.verify_code, u.user_id
 		) VALUES (?,?,?,?)
 	`
 	sQLEmailPasswdGetUniqueById = `
@@ -38,7 +38,7 @@ const (
 	`
 	sQLEmailPasswdUpdateByEmail = `
 		UPDATE email_passwd SET 
-			status = ?, password = ?, verify_code = ?, code_verified_at = ?, user_id = ?
+			status = ?, password = ?, verify_code = ?, code_verified_at = ?
 		WHERE email = ?
 	`
 )
@@ -80,6 +80,7 @@ func (repo *EmailPasswdRepo) InsertEmailPasswd(ep EmailPasswd) (int64, error) {
 		ep.Passowrd,
 		ep.Status,
 		ep.VerifyCode,
+		ep.UserId,
 	)
 	if err != nil {
 		return 0, err
@@ -165,7 +166,7 @@ func (repo *EmailPasswdRepo) GetAllEmailPasswdByEmail() ([]*EmailPasswd, error) 
 }
 
 func (repo *EmailPasswdRepo) UpdateEmailPasswdByEmail(ep EmailPasswd) error {
-	_, err := repo.db.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passowrd, ep.VerifyCode, ep.CodeVerifiedAt, ep.UserId, ep.Email)
+	_, err := repo.db.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passowrd, ep.VerifyCode, ep.CodeVerifiedAt, ep.Email)
 	if err != nil {
 		return err
 	}
