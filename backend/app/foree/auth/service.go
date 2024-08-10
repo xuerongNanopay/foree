@@ -15,7 +15,14 @@ type AuthService struct {
 }
 
 // Any error should return 503
+
 func (a *AuthService) SignUp(req SignUpReq) (*auth.Session, error) {
+	// Check if email already exists.
+	oldEmail, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
+	if err != nil {
+		return nil, err
+	}
+
 	hashedPassowrd, err := auth.HashPassword(req.Password)
 	if err != nil {
 		return nil, err
