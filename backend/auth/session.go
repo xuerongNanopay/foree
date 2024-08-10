@@ -52,6 +52,7 @@ func NewSessionRepo(expireInHour, activeInHour, numberOfBucket, maxBucketSize in
 }
 
 // Still have performance issue. TOOD: use atomic instead of lock
+// TODO: persist difference use go-routine.
 type SessionRepo struct {
 	// db *sql.DB
 	cur            int
