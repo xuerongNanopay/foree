@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+type ForeeError interface {
+	GetStatusCode() int
+	GetMessage() string
+	Error() string
+}
+
 type Severity string
 
 const FormErrorSignUpMsg = "Invaild Signup Request"
@@ -47,6 +53,14 @@ type ErrorDetail struct {
 	Severity Severity `json:"dseverity"`
 	Field    string   `json:"field"`
 	Message  string   `json:"message"`
+}
+
+func (b *BadRequestError) GetStatusCode() int {
+	return b.StatusCode
+}
+
+func (b *BadRequestError) GetMessage() string {
+	return b.Message
 }
 
 func (b *BadRequestError) Error() string {
@@ -92,6 +106,14 @@ func NewPreconditionRequireError(message string, require RequireAction) *Precond
 	}
 }
 
+func (b *PreconditionRequireError) GetStatusCode() int {
+	return b.StatusCode
+}
+
+func (b *PreconditionRequireError) GetMessage() string {
+	return b.Message
+}
+
 func (b *PreconditionRequireError) Error() string {
 	return serializeError(b)
 }
@@ -102,4 +124,64 @@ func serializeError(e any) string {
 		return fmt.Sprintf("%v", e)
 	}
 	return string(s)
+}
+
+// 403 Forbidden
+type ForbiddenError struct {
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+}
+
+func NewForbiddenError(requirePermission string) *ForbiddenError {
+	return &ForbiddenError{
+		StatusCode: http.StatusForbidden,
+		Message:    fmt.Sprintf("No `%v` permission.", requirePermission),
+	}
+}
+
+func (b *ForbiddenError) GetStatusCode() int {
+	return b.StatusCode
+}
+
+func (b *ForbiddenError) GetMessage() string {
+	return b.Message
+}
+
+func (b *ForbiddenError) Error() string {
+	return serializeError(b)
+}
+
+// 500 Internal Server Error
+type InteralServerError struct {
+	StatusCode    int    `json:"statusCode"`
+	Message       string `json:"message"`
+	OriginalError error  `json:"-"`
+}
+
+func (b *InteralServerError) GetStatusCode() int {
+	return b.StatusCode
+}
+
+func (b *InteralServerError) GetMessage() string {
+	return b.Message
+}
+
+func (b *InteralServerError) Error() string {
+	return serializeError(b)
+}
+
+func WrapInteralServerError(e error) *InteralServerError {
+	return &InteralServerError{
+		StatusCode:    http.StatusInternalServerError,
+		Message:       "Internal Server Error",
+		OriginalError: e,
+	}
+}
+
+func NewInteralServerError(format string, a ...any) *InteralServerError {
+	return &InteralServerError{
+		StatusCode:    http.StatusInternalServerError,
+		Message:       "Internal Server Error",
+		OriginalError: fmt.Errorf("unable to get user with id: `%v`", a),
+	}
 }

@@ -5,7 +5,7 @@ import (
 	"xue.io/go-pay/auth"
 )
 
-func verifySession(session *auth.Session) error {
+func verifySession(session *auth.Session) transport.ForeeError {
 	if session == nil || session.EmailPasswd == nil {
 		return transport.NewPreconditionRequireError(
 			transport.PreconditionRequireMsgLogin,

@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"fmt"
-
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/auth"
 )
@@ -17,11 +15,11 @@ type AuthService struct {
 
 // Any error should return 503
 
-func (a *AuthService) SignUp(req SignUpReq) (*auth.Session, error) {
+func (a *AuthService) SignUp(req SignUpReq) (*auth.Session, transport.ForeeError) {
 	// Check if email already exists.
 	oldEmail, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
 	if err != nil {
-		return nil, err
+		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if oldEmail != nil {
@@ -31,7 +29,7 @@ func (a *AuthService) SignUp(req SignUpReq) (*auth.Session, error) {
 	// Hashing password.
 	hashedPassowrd, err := auth.HashPassword(req.Password)
 	if err != nil {
-		return nil, err
+		return nil, transport.WrapInteralServerError(err)
 	}
 
 	// Create User
@@ -42,16 +40,16 @@ func (a *AuthService) SignUp(req SignUpReq) (*auth.Session, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, transport.WrapInteralServerError(err)
 	}
 
 	user, err := a.userRepo.GetUniqueUserById(userId)
 	if err != nil {
-		return nil, err
+		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if user == nil {
-		return nil, fmt.Errorf("unable to get user with id: `%v`", userId)
+		return nil, transport.NewInteralServerError("unable to get user with id: `%v`", userId)
 	}
 
 	// Create EmailPasswd
@@ -64,17 +62,17 @@ func (a *AuthService) SignUp(req SignUpReq) (*auth.Session, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, transport.WrapInteralServerError(err)
 	}
 
 	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdById(id)
 
 	if err != nil {
-		return nil, err
+		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if ep == nil {
-		return nil, fmt.Errorf("unable to get EmailPasswd with id: `%v`", id)
+		return nil, transport.NewInteralServerError("unable to get EmailPasswd with id: `%v`", id)
 	}
 
 	sessionId, err := a.sessionRepo.InsertSession(auth.Session{
@@ -82,27 +80,27 @@ func (a *AuthService) SignUp(req SignUpReq) (*auth.Session, error) {
 		EmailPasswd: ep,
 	})
 	if err != nil {
-		return nil, err
+		return nil, transport.WrapInteralServerError(err)
 	}
 
 	//TODO: send email.
 
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	if session == nil {
-		return nil, fmt.Errorf("sesson `%s` not found", sessionId)
+		return nil, transport.NewInteralServerError("sesson `%s` not found", sessionId)
 	}
 	return session, nil
 }
 
-func (a *AuthService) VerifyEmail(session *auth.Session, req VerifyEmailReq) (*auth.Session, error) {
+func (a *AuthService) VerifyEmail(session *auth.Session, req VerifyEmailReq) (*auth.Session, transport.ForeeError) {
 	return nil, nil
 }
 
-func (a *AuthService) Login() (*auth.Session, error) {
+func (a *AuthService) Login() (*auth.Session, transport.ForeeError) {
 	return nil, nil
 }
 
-func (a *AuthService) CreateUser() (*auth.Session, error) {
+func (a *AuthService) CreateUser() (*auth.Session, transport.ForeeError) {
 	return nil, nil
 }
 
@@ -118,7 +116,7 @@ func (a *AuthService) ForgetPasswordUpdate(code, newPassword string) {
 
 }
 
-func (a *AuthService) Logout(sessionId string) error {
+func (a *AuthService) Logout(sessionId string) transport.ForeeError {
 	a.sessionRepo.Delete(sessionId)
 	return transport.NewPreconditionRequireError(
 		transport.PreconditionRequireMsgLogin,
@@ -134,17 +132,22 @@ func (a *AuthService) GetSession(sessionId string) *auth.Session {
 	return nil
 }
 
-func (a *AuthService) Authorize(sessionId string, permission string) error {
+func (a *AuthService) Authorize(sessionId string, permission string) transport.ForeeError {
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	err := verifySession(session)
 	if err != nil {
 		return err
 	}
-	//TODO: permission check
-	return nil
+	for _, p := range session.Permissions {
+		ok := auth.IsPermissionGrand(permission, p.Name)
+		if ok {
+			return nil
+		}
+	}
+	return transport.NewForbiddenError(permission)
 }
 
-func (a *AuthService) VerifySession(sessionId string) error {
+func (a *AuthService) VerifySession(sessionId string) transport.ForeeError {
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	return verifySession(session)
 }
