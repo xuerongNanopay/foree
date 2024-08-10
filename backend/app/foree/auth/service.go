@@ -130,8 +130,14 @@ func (a *AuthService) GetSession(sessionId string) *auth.Session {
 	return nil
 }
 
-func (a *AuthService) Authorize(session auth.Session, permission string) bool {
-	return false
+func (a *AuthService) Authorize(sessionId string, permission string) error {
+	session := a.sessionRepo.GetSessionUniqueById(sessionId)
+	err := verifySession(session)
+	if err != nil {
+		return err
+	}
+	//TODO: permission check
+	return nil
 }
 
 func (a *AuthService) VerifySession(sessionId string) error {
