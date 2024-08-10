@@ -77,7 +77,7 @@ func (a *AuthService) SignUp(req SignUpReq) (*auth.Session, error) {
 		return nil, fmt.Errorf("unable to get EmailPasswd with id: `%v`", id)
 	}
 
-	sessionId, err := a.sessionRepo.InsertSession(&auth.Session{
+	sessionId, err := a.sessionRepo.InsertSession(auth.Session{
 		UserId:      user.ID,
 		EmailPasswd: ep,
 	})

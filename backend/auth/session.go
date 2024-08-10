@@ -63,7 +63,7 @@ type SessionRepo struct {
 	lock           sync.Mutex
 }
 
-func (repo *SessionRepo) InsertSession(session *Session) (string, error) {
+func (repo *SessionRepo) InsertSession(session Session) (string, error) {
 	session.CreateAt = time.Now()
 	session.LatestActiveAt = time.Now()
 	session.ExpireAt = time.Now().Add(time.Duration(time.Hour * time.Duration(repo.expireInHour)))
@@ -79,8 +79,23 @@ func (repo *SessionRepo) InsertSession(session *Session) (string, error) {
 			return "", fmt.Errorf("sesson pool is full")
 		}
 	}
-	repo.mems[repo.cur%repo.numberOfBucket][session.ID] = session
+	repo.mems[repo.cur%repo.numberOfBucket][session.ID] = &session
 	return session.ID, nil
+}
+
+func (repo *SessionRepo) UpdateSession(session Session) (*Session, error) {
+	session.LatestActiveAt = time.Now()
+	idx, err := parseBucketId(session.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	repo.lock.Lock()
+	defer repo.lock.Unlock()
+
+	repo.mems[idx%repo.numberOfBucket][session.ID] = &session
+
+	return repo.mems[idx%repo.numberOfBucket][session.ID], nil
 }
 
 func (repo *SessionRepo) purge(bucketIdx int) {
