@@ -26,6 +26,11 @@ type ForeeDate struct {
 	time.Time
 }
 
+type ForeeRequest interface {
+	TrimSpace()
+	Validate() *transport.BadRequestError
+}
+
 func (d *ForeeDate) MarshalJSON() ([]byte, error) {
 	t := time.Time(d.Time)
 	s := t.Format(time.DateOnly)
@@ -42,14 +47,35 @@ func (d *ForeeDate) UnmarshalJSON(b []byte) (err error) {
 	return
 }
 
+type SessionReq struct {
+	SessionId string
+}
+
 type SignUpReq struct {
-	Email        string `json:"email"`
-	Password     string `json:"password"`
+	Email        string `json:"email" validate:"required,email"`
+	Password     string `json:"password" validate:"required"`
 	ReferralCode string `json:"referralCode"`
 }
 
-type SessionReq struct {
-	SessionId string `json:"sessionId"`
+func (q *SignUpReq) TrimSpace() {
+	q.Email = strings.TrimSpace(q.Email)
+	q.Password = strings.TrimSpace(q.Password)
+}
+
+func (q *SignUpReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
+	ret := transport.NewFormError("Invalid sign up request")
+	if err := validate.Struct(q); err != nil {
+		errors := err.(validator.ValidationErrors)
+		for _, e := range errors {
+			ret.AddDetails(e.Field(), e.Error())
+		}
+	}
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
 }
 
 type VerifyEmailReq struct {
@@ -57,10 +83,51 @@ type VerifyEmailReq struct {
 	Code string `json:"code"`
 }
 
+func (q *VerifyEmailReq) TrimSpace() {
+	q.Code = strings.TrimSpace(q.Code)
+}
+
+func (q *VerifyEmailReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
+	ret := transport.NewFormError("Invalid verify email request")
+	if err := validate.Struct(q); err != nil {
+		errors := err.(validator.ValidationErrors)
+		for _, e := range errors {
+			ret.AddDetails(e.Field(), e.Error())
+		}
+	}
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
+}
+
 type LoginReq struct {
 	SessionReq
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8,max=12"`
+}
+
+func (q *LoginReq) TrimSpace() {
+	q.Email = strings.TrimSpace(q.Email)
+	q.Password = strings.TrimSpace(q.Password)
+}
+
+func (q *LoginReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
+	ret := transport.NewFormError("Invalid Login In request")
+	if err := validate.Struct(q); err != nil {
+		errors := err.(validator.ValidationErrors)
+		for _, e := range errors {
+			ret.AddDetails(e.Field(), e.Error())
+		}
+	}
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
 }
 
 type ForgetPasswordUpdateReq struct {
@@ -86,17 +153,34 @@ type CreateUserReq struct {
 	AvatarUrl           string    `json:"avatarUrl"`
 }
 
+func (q *CreateUserReq) TrimSpace() {
+	q.FirstName = strings.TrimSpace(q.FirstName)
+	q.MiddleName = strings.TrimSpace(q.MiddleName)
+	q.LastName = strings.TrimSpace(q.LastName)
+	q.Nationality = strings.TrimSpace(q.Nationality)
+	q.Address1 = strings.TrimSpace(q.Address1)
+	q.Address2 = strings.TrimSpace(q.Address2)
+	q.City = strings.TrimSpace(q.City)
+	q.Province = strings.TrimSpace(q.Province)
+	q.Country = strings.TrimSpace(q.Country)
+	q.PhoneNumber = strings.TrimSpace(q.PhoneNumber)
+	q.IdentificationType = strings.TrimSpace(q.IdentificationType)
+	q.IdentificationValue = strings.TrimSpace(q.IdentificationValue)
+	q.AvatarUrl = strings.TrimSpace(q.AvatarUrl)
+}
+
 // TODO: trim name, and use allowText
 func (q *CreateUserReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
 	ret := transport.NewFormError("Invalid user creation request")
 	if err := validate.Struct(q); err != nil {
 		errors := err.(validator.ValidationErrors)
-		ret = transport.NewFormError("Invalid user creation request")
 		for _, e := range errors {
 			ret.AddDetails(e.Field(), e.Error())
 		}
 	}
 
+	// Age
 	age := q.Dob.Time.Unix() / int64(Second_In_Year)
 
 	if age < 19 || age > 120 {
@@ -105,6 +189,7 @@ func (q *CreateUserReq) Validate() *transport.BadRequestError {
 
 	q.Age = int(age)
 
+	// Country/Region
 	if q.Country != "CA" {
 		ret.AddDetails("country", fmt.Sprintf("invalid country `%v`", q.Country))
 	}
@@ -114,16 +199,17 @@ func (q *CreateUserReq) Validate() *transport.BadRequestError {
 		ret.AddDetails("province", fmt.Sprintf("invalid province `%v`", q.Province))
 	}
 
-	if len(ret.Details) > 0 {
-		return ret
-	}
-
+	// Phone number
 	phoneNumber := phoneNumberReplayer.Replace(q.PhoneNumber)
 	ok, _ = regexp.MatchString(NineDigitReg, phoneNumber)
 	if !ok {
 		ret.AddDetails("phoneNumber", fmt.Sprintf("invalid phone number `%v`", q.PhoneNumber))
 	}
 	q.PhoneNumber = phoneNumber
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
 
 	return nil
 }

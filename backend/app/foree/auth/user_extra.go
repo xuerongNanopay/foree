@@ -18,12 +18,12 @@ const (
 		WHERE id = ?
 	`
 	sQLUserIdentificationGetAllByUserId = `
-	SELECT 
-		u.id, u.status, u.type, u.value, u.owner_id,
-		u.create_at, u.update_at
-	FROM user_identifications as u 
-	WHERE u.owner_id = ?
-`
+		SELECT 
+			u.id, u.status, u.type, u.value, u.owner_id,
+			u.create_at, u.update_at
+		FROM user_identifications as u 
+		WHERE u.owner_id = ?
+	`
 )
 
 type UserIdentificationStatus string
