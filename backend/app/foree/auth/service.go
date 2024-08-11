@@ -218,6 +218,7 @@ func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transpor
 	return session, nil
 }
 
+// TODO: create default contact account.
 func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.Session, transport.ForeeError) {
 	// Check allow to create user
 	session, err := a.allowCreateUser(req.SessionId)
