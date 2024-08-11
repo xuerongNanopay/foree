@@ -6,6 +6,22 @@ import (
 )
 
 const (
+	sQLUserInsert = `
+		INSERT INTO users
+		(	group, status, first_name, middle_name, 
+			last_name, age, dob, nationality, Address1, 
+			Address2, city, province, country, phone_number,
+			email
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+	`
+	sQLUserUpdateById = `
+		UPDATE users SET 
+			status = ?, first_name = ?, middle_name = ?, 
+			last_name = ?, age = ?, dob = ?, nationality = ?, Address1 = ?, 
+			Address2 = ?, city = ?, province = ?, country = ?, phone_number = ?,
+			email = ?
+		WHERE id = ?
+	`
 	sQLUserGetAll = `
 		SELECT 
 			u.id, u.group, u.status, u.first_name, u.middle_name, 
@@ -22,22 +38,6 @@ const (
 			u.email, u.avatar_url, u.create_at, u.update_at
 		FROM users as u 
 		WHERE u.id = ?
-	`
-	sQLUserInsert = `
-		INSERT INTO users
-		(	group, status, first_name, middle_name, 
-			last_name, age, dob, nationality, Address1, 
-			Address2, city, province, country, phone_number,
-			email
-		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-	`
-	sQLUserUpdateById = `
-		UPDATE users SET 
-			status = ?, first_name = ?, middle_name = ?, 
-			last_name = ?, age = ?, dob = ?, nationality = ?, Address1 = ?, 
-			Address2 = ?, city = ?, province = ?, country = ?, phone_number = ?,
-			email = ?
-		WHERE id = ?
 	`
 )
 
