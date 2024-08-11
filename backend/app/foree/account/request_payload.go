@@ -19,3 +19,8 @@ type CreateNewContactReq struct {
 	BankName              string             `json:"bankName"`
 	AccountNoOrIBAN       string             `json:"accountNoOrIBAN"`
 }
+
+type DeleteContactReq struct {
+	transport.SessionReq
+	ContactId int `json:"contactId" validate:"required,gte=0"`
+}
