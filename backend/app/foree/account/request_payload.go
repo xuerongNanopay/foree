@@ -15,6 +15,7 @@ type DefaultInteracReq struct {
 	Address     string `json:"address"`
 	PhoneNumber string `json:"phoneNumber"`
 	Email       string `json:"email"`
+	OwnerId     int64  `json:"ownerId"`
 }
 
 func generateInteracAddressFromUser(user *auth.User) string {
@@ -34,6 +35,7 @@ func NewDefaultInteracReqFromSession(session auth.Session) *DefaultInteracReq {
 		Address:     session.User.FirstName,
 		PhoneNumber: generateInteracAddressFromUser(session.User),
 		Email:       session.User.Email,
+		OwnerId:     session.User.ID,
 	}
 }
 
