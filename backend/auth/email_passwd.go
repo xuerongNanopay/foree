@@ -13,6 +13,11 @@ const (
 		(	u.email, u.password, u.status, u.verify_code, u.user_id
 		) VALUES (?,?,?,?)
 	`
+	sQLEmailPasswdUpdateByEmail = `
+		UPDATE email_passwd SET 
+			status = ?, password = ?, verify_code = ?, code_verified_at = ?
+		WHERE email = ?
+	`
 	sQLEmailPasswdGetUniqueById = `
 	SELECT 
 		u.id, u.email, u.password, u.status,
@@ -35,11 +40,6 @@ const (
 			u.verify_code, u.code_verified_at,
 			u.user_id, u.create_at, u.update_at
 		FROM email_passwd as u
-	`
-	sQLEmailPasswdUpdateByEmail = `
-		UPDATE email_passwd SET 
-			status = ?, password = ?, verify_code = ?, code_verified_at = ?
-		WHERE email = ?
 	`
 )
 

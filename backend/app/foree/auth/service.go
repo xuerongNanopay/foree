@@ -362,12 +362,33 @@ func (a *AuthService) Logout(ctx context.Context, session SessionReq) transport.
 	)
 }
 
-func (a *AuthService) GetUser(ctx context.Context, session SessionReq) {
+func (a *AuthService) GetUser(ctx context.Context, req SessionReq) (*UserDTO, transport.ForeeError) {
+	session, sErr := a.VerifySession(ctx, req.SessionId)
+	if sErr != nil {
+		return nil, sErr
+	}
 
+	return NewUserDTO(session.User), nil
 }
 
-func (a *AuthService) ChangePasswd(ctx context.Context, session SessionReq) {
+func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) transport.ForeeError {
+	session, err := a.VerifySession(ctx, req.SessionId)
+	if err != nil {
+		return err
+	}
 
+	hashed, hErr := auth.HashPassword(req.Password)
+	if hErr != nil {
+		return transport.WrapInteralServerError(hErr)
+	}
+	ep := *session.EmailPasswd
+	ep.Passowrd = hashed
+	//TODO: log
+	updateErr := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ep)
+	if hErr != nil {
+		return transport.WrapInteralServerError(updateErr)
+	}
+	return nil
 }
 
 func (a *AuthService) Authorize(ctx context.Context, sessionId string, permission string) (*auth.Session, transport.ForeeError) {

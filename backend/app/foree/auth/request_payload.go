@@ -78,6 +78,31 @@ func (q *SignUpReq) Validate() *transport.BadRequestError {
 	return nil
 }
 
+type ChangePasswdReq struct {
+	SessionReq
+	Password string `json:"password" validate:"required,min=8,max=12"`
+}
+
+func (q *ChangePasswdReq) TrimSpace() {
+	q.Password = strings.TrimSpace(q.Password)
+}
+
+func (q *ChangePasswdReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
+	ret := transport.NewFormError("Invalid verify email request")
+	if err := validate.Struct(q); err != nil {
+		errors := err.(validator.ValidationErrors)
+		for _, e := range errors {
+			ret.AddDetails(e.Field(), e.Error())
+		}
+	}
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
+}
+
 type VerifyEmailReq struct {
 	SessionReq
 	Code string `json:"code"`
