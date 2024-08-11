@@ -29,3 +29,12 @@ type ContactAccountDetailDTO struct {
 	BankName              string             `json:"bankName"`
 	AccountNoOrIBAN       string             `json:"accountNoOrIBAN"`
 }
+
+type InteracAccountSummaryDTO struct {
+	ID         int64         `json:"id"`
+	Status     AccountStatus `json:"status"`
+	FirstName  string        `json:"firstName"`
+	MiddleName string        `json:"middleName"`
+	LastName   string        `json:"lastName"`
+	Email      string        `json:"email"`
+}
