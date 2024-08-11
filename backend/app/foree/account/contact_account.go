@@ -15,6 +15,11 @@ const (
 			account_hash, relationship_to_contact, owner_id
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
+	sQLContactAccountUpdateById = `
+		UPDATE contact_accounts SET 
+			status = ?
+		WHERE id = ?
+	`
 	sQLContactAccountGetUniqueById = `
 		SELECT 
 			a.id, a.status, a.type, a.first_name, a.middle_name,
@@ -107,6 +112,18 @@ func (repo *ContactAccountRepo) InsertContactAccount(acc ContactAccount) (int64,
 		return 0, err
 	}
 	return id, nil
+}
+
+func (repo *ContactAccountRepo) UpdateContactAccountById(acc ContactAccount) error {
+	_, err := repo.db.Exec(
+		sQLContactAccountUpdateById,
+		acc.Status,
+		acc.ID,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (repo *ContactAccountRepo) GetUniqueContactAccountById(id int64) (*ContactAccount, error) {
