@@ -15,7 +15,7 @@ const (
 			account_hash, relationship_to_contact, owner_id
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
-	sQLContactAccountGetAllByOwnerId = `
+	sQLContactAccountGetUniqueById = `
 		SELECT 
 			a.id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
@@ -25,7 +25,7 @@ const (
 		FROM contact_accounts a
 		where a.owner_id = ? AND a.status != DELETE
 	`
-	sQLContactAccountGetUniqueById = `
+	sQLContactAccountGetAllByOwnerId = `
 		SELECT 
 			a.id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
