@@ -26,7 +26,7 @@ const (
 			a.owner_id, a.status, 
 			a.create_at, a.update_at
 		FROM interac_accounts a
-		where a.owner_id = ?
+		where a.owner_id = ? AND a.status != DELETE
 	`
 	sQLInteractAccountGetUniqueById = `
 		SELECT 
@@ -36,7 +36,7 @@ const (
 			a.owner_id, a.status, 
 			a.create_at, a.update_at
 		FROM interac_accounts a
-		where a.id = ?
+		where a.id = ? AND a.status != DELETE
 	`
 )
 
