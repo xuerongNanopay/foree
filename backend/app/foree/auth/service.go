@@ -81,6 +81,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 
 	sessionId, err := a.sessionRepo.InsertSession(auth.Session{
 		UserId:      user.ID,
+		User:        user,
 		EmailPasswd: ep,
 	})
 	if err != nil {
@@ -122,7 +123,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*aut
 	}
 
 	if session.EmailPasswd.VerifyCode != req.Code {
-		return nil, transport.NewFormError("Invalid VerifyEmail Requst", "verify code", "Not equal")
+		return nil, transport.NewFormError("Invalid VerifyEmail Requst", "verify code", "Do not match")
 	}
 
 	// VerifyEmail and update EmailPasswd.
@@ -281,7 +282,68 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 }
 
 func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, transport.ForeeError) {
-	return nil, nil
+	// Delete previous token if exists.
+	a.sessionRepo.Delete(req.SessionId)
+
+	// Verify email and password
+	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+	if ep == nil {
+		return nil, transport.NewFormError("Invaild Signup Request", "email", "Invalid email")
+	}
+
+	ok := auth.ComparePasswords(req.Password, []byte(ep.Passowrd))
+	if !ok {
+		return nil, transport.NewFormError("Invaild Signup Request", "password", "Invalid password")
+	}
+
+	// Load user(user must exist, but not necessary to be active)
+	user, err := a.userRepo.GetUniqueUserById(ep.UserId)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+	if user == nil {
+		return nil, transport.NewInteralServerError("User `%v` do not exists", ep.UserId)
+	}
+
+	// Load permissions
+	pers, pErr := a.permissionRepo.GetAllPermissionByGroupName(user.Group)
+	if pErr != nil {
+		return nil, transport.WrapInteralServerError(pErr)
+	}
+
+	// Load Ip and User agent, and create session
+	newSession := auth.Session{
+		User:        user,
+		UserId:      user.ID,
+		EmailPasswd: ep,
+		Permissions: pers,
+	}
+
+	ip, ok := ctx.Value("ip").(string)
+	if ok {
+		newSession.Ip = ip
+	}
+
+	userAgent, ok := ctx.Value("userAgent").(string)
+	if ok {
+		newSession.UserAgent = userAgent
+	}
+
+	sessionId, err := a.sessionRepo.InsertSession(newSession)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	//TODO: send email. by goroutine
+
+	session := a.sessionRepo.GetSessionUniqueById(sessionId)
+	if session == nil {
+		return nil, transport.NewInteralServerError("sesson `%s` not found", sessionId)
+	}
+	return session, nil
 }
 
 // func (a *AuthService) ForgetPassword(ctx context.Context, email string) {
@@ -323,7 +385,7 @@ func (a *AuthService) Authorize(ctx context.Context, sessionId string, permissio
 	return nil, transport.NewForbiddenError(permission)
 }
 
-func (a *AuthService) VerifySession(sctx context.Context, sessionId string) (*auth.Session, transport.ForeeError) {
+func (a *AuthService) VerifySession(ctx context.Context, sessionId string) (*auth.Session, transport.ForeeError) {
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	err := verifySession(session)
 	if err != nil {
