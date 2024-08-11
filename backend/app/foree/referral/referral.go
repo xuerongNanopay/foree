@@ -1,12 +1,159 @@
 package referral
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
+
+type ReferralType string
+
+const (
+	ReferralTypeEmail ReferralType = "EMAIL"
+)
+
+const (
+	sQLReferralInsert = `
+		INSERT INTO referral
+		(	
+			referral_type, referral_code, referrer_id, referree_id
+		) VALUES (?,?,?,?)
+	`
+	sQLReferralUpdateByReferralCode = `
+		UPDATE referral SET 
+			referree_id = ?, accept_at = ?
+		WHERE referral_code = ?
+	`
+	sQLReferralGetUniqueByReferralCode = `
+		SELECT 
+			r.id, r.referral_type, r.referral_code, 
+			r.referrer_id, r.referree_id, r.accept_at
+			r.create_at, r.update_at
+		FROM referral as r
+		WHERE r.referral_code = ?
+	`
+	sQLReferralGetUniqueByReferreeId = `
+		SELECT 
+			r.id, r.referral_type, r.referral_code, 
+			r.referrer_id, r.referree_id, r.accept_at
+			r.create_at, r.update_at
+		FROM referral as r
+		WHERE r.referree_id = ?
+	`
+)
 
 type Referral struct {
-	ID           int64     `json:"id"`
-	ReferralCode string    `json:"referralCode"`
-	ReferrerId   int64     `json:"referrerId"`
-	ReferreeId   int64     `json:"referreeId"`
-	CreateAt     time.Time `json:"createAt"`
-	UpdateAt     time.Time `json:"updateAt"`
+	ID           int64        `json:"id"`
+	ReferralType ReferralType `json:"referralType"`
+	ReferralCode string       `json:"referralCode"`
+	ReferrerId   int64        `json:"referrerId"`
+	ReferreeId   int64        `json:"referreeId"`
+	AcceptAt     time.Time    `json:"acceptAt"`
+	CreateAt     time.Time    `json:"createAt"`
+	UpdateAt     time.Time    `json:"updateAt"`
+}
+
+func NewReferralRepo(db *sql.DB) *ReferralRepo {
+	return &ReferralRepo{db: db}
+}
+
+type ReferralRepo struct {
+	db *sql.DB
+}
+
+func (repo *ReferralRepo) InsertReferral(r Referral) (int64, error) {
+	result, err := repo.db.Exec(
+		sQLReferralInsert,
+		r.ReferralType,
+		r.ReferralCode,
+		r.ReferrerId,
+		r.ReferreeId,
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func (repo *ReferralRepo) UpdateReferralByReferralCode(r Referral) error {
+	_, err := repo.db.Exec(
+		sQLReferralUpdateByReferralCode,
+		r.ReferreeId,
+		r.AcceptAt,
+		r.ID,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *ReferralRepo) GetUniqueReferralByReferralCode(referralCode string) (*Referral, error) {
+	rows, err := repo.db.Query(sQLReferralGetUniqueByReferralCode, referralCode)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *Referral
+
+	for rows.Next() {
+		f, err = scanRowIntoReferral(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func (repo *ReferralRepo) GetUniqueReferralByReferreeId(referreeId string) (*Referral, error) {
+	rows, err := repo.db.Query(sQLReferralGetUniqueByReferreeId, referreeId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *Referral
+
+	for rows.Next() {
+		f, err = scanRowIntoReferral(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func scanRowIntoReferral(rows *sql.Rows) (*Referral, error) {
+	u := new(Referral)
+	err := rows.Scan(
+		&u.ID,
+		&u.ReferralType,
+		&u.ReferralCode,
+		&u.ReferrerId,
+		&u.ReferreeId,
+		&u.AcceptAt,
+		&u.CreateAt,
+		&u.UpdateAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }
