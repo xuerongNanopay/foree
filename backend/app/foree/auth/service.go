@@ -223,6 +223,19 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 		return nil, err
 	}
 
+	// Create identification(Store Identification first)
+	identification := UserIdentification{
+		Status:  IdentificationStatusApproved,
+		Type:    IdentificationType(req.IdentificationType),
+		Value:   req.IdentificationValue,
+		OwnerId: session.User.ID,
+	}
+
+	_, ier := a.userIdentificationRepo.InsertUserIdentification(identification)
+	if ier != nil {
+		return nil, transport.WrapInteralServerError(ier)
+	}
+
 	// Create a new user by updating essential fields.
 	newUser := *session.User
 	newUser.FirstName = req.FirstName
@@ -247,19 +260,6 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	user, er := a.userRepo.GetUniqueUserById(newUser.ID)
 	if er != nil {
 		return nil, transport.WrapInteralServerError(er)
-	}
-
-	// Create identification
-	identification := UserIdentification{
-		Status:  IdentificationStatusApproved,
-		Type:    IdentificationType(req.IdentificationType),
-		Value:   req.IdentificationValue,
-		OwnerId: user.ID,
-	}
-
-	_, ier := a.userIdentificationRepo.InsertUserIdentification(identification)
-	if ier != nil {
-		return nil, transport.WrapInteralServerError(ier)
 	}
 
 	// Get Permission.
