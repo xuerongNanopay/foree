@@ -11,6 +11,19 @@ type ContactAccountSummaryDTO struct {
 	AccountNoOrIBAN string             `json:"accountNoOrIBAN"`
 }
 
+func NewContactAccountSummaryDTO(account *ContactAccount) *ContactAccountSummaryDTO {
+	return &ContactAccountSummaryDTO{
+		ID:              account.ID,
+		Status:          account.Status,
+		FirstName:       account.FirstName,
+		MiddleName:      account.MiddleName,
+		LastName:        account.LastName,
+		TransferMethod:  account.Type,
+		BankName:        account.InstitutionName,
+		AccountNoOrIBAN: account.BranchNumber,
+	}
+}
+
 type ContactAccountDetailDTO struct {
 	ID                    int64              `json:"id"`
 	Status                AccountStatus      `json:"status"`
@@ -28,6 +41,27 @@ type ContactAccountDetailDTO struct {
 	TransferMethod        ContactAccountType `json:"transferMethod"`
 	BankName              string             `json:"bankName"`
 	AccountNoOrIBAN       string             `json:"accountNoOrIBAN"`
+}
+
+func NewContactAccountDetailDTO(account *ContactAccount) *ContactAccountDetailDTO {
+	return &ContactAccountDetailDTO{
+		ID:                    account.ID,
+		Status:                account.Status,
+		FirstName:             account.FirstName,
+		MiddleName:            account.MiddleName,
+		LastName:              account.LastName,
+		Address1:              account.Address1,
+		Address2:              account.Address2,
+		City:                  account.City,
+		Province:              account.Province,
+		Country:               account.Country,
+		PostalCode:            account.PostalCode,
+		PhoneNumber:           account.PhoneNumber,
+		RelationshipToContact: account.RelationshipToContact,
+		TransferMethod:        account.Type,
+		BankName:              account.InstitutionName,
+		AccountNoOrIBAN:       account.BranchNumber,
+	}
 }
 
 type InteracAccountSummaryDTO struct {

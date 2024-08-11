@@ -11,7 +11,7 @@ const (
 		(
 			status, type, first_name, middle_name,
 			last_name, address1, address2, city, province,
-			country, phone_number, institution_name, branch_number, account_number,
+			country, postal_code, phone_number, institution_name, branch_number, account_number,
 			account_hash, relationship_to_contact, owner_id
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
@@ -19,7 +19,7 @@ const (
 		SELECT 
 			a.id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
-			a.country, a.phone_number, a.institution_name, a.branch_number, a.account_number,
+			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
 			a.account_hash, a.relationship_to_contact, a.owner_id
 			a.create_at, a.update_at
 		FROM contact_accounts a
@@ -29,7 +29,7 @@ const (
 		SELECT 
 			a.id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
-			a.country, a.phone_number, a.institution_name, a.branch_number, a.account_number,
+			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
 			a.account_hash, a.relationship_to_contact, a.owner_id
 			a.create_at, a.update_at
 		FROM contact_accounts a
@@ -57,6 +57,7 @@ type ContactAccount struct {
 	City                  string             `json:"city"`
 	Province              string             `json:"province"`
 	Country               string             `json:"country"`
+	PostalCode            string             `json:"postalCode"`
 	PhoneNumber           string             `json:"phoneNumber"`
 	InstitutionName       string             `json:"institutionName"`
 	BranchNumber          string             `json:"branchNumber"`
@@ -89,6 +90,7 @@ func (repo *ContactAccountRepo) InsertContactAccount(acc ContactAccount) (int64,
 		acc.City,
 		acc.Province,
 		acc.Country,
+		acc.PostalCode,
 		acc.PhoneNumber,
 		acc.InstitutionName,
 		acc.BranchNumber,
@@ -169,6 +171,7 @@ func scanRowIntoContactAccount(rows *sql.Rows) (*ContactAccount, error) {
 		&u.City,
 		&u.Province,
 		&u.Country,
+		&u.PostalCode,
 		&u.PhoneNumber,
 		&u.InstitutionName,
 		&u.BranchNumber,
