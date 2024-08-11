@@ -189,7 +189,53 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req SessionReq) tran
 	return nil
 }
 
-func (a *AuthService) CreateUser(ctx context.Context) (*auth.Session, transport.ForeeError) {
+func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transport.ForeeError) {
+	session := a.sessionRepo.GetSessionUniqueById(sessionId)
+	if session == nil || session.EmailPasswd == nil {
+		return nil, transport.NewPreconditionRequireError(
+			transport.PreconditionRequireMsgLogin,
+			transport.RequireActionLogin,
+		)
+	}
+
+	if session.EmailPasswd.Status == auth.EPStatusWaitingVerify {
+		return nil, transport.NewPreconditionRequireError(
+			transport.PreconditionRequireMsgVerifyEmail,
+			transport.RequireActionVerifyEmail,
+		)
+	}
+
+	if session.User != nil && session.User.Status == auth.UserStatusInitial {
+		return nil, transport.NewPreconditionRequireError(
+			transport.PreconditionRequireMsgToMain,
+			transport.RequireActionToMain,
+		)
+	}
+
+	return session, nil
+}
+
+func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.Session, transport.ForeeError) {
+	// Check allow to create user
+	session, err := a.allowVerifyEmail(req.SessionId)
+	if err != nil {
+		return nil, err
+	}
+
+	newUser := *session.User
+	newUser.FirstName = req.FirstName
+	newUser.MiddleName = req.MiddleName
+	newUser.LastName = req.LastName
+	newUser.Age = req.Age
+	newUser.Dob = req.Dob.Time
+	newUser.Nationality = req.Nationality
+	newUser.Address1 = req.Address1
+	newUser.Address2 = req.Address2
+	newUser.City = req.City
+	newUser.Province = req.Province
+	newUser.Country = req.Country
+	newUser.PhoneNumber = req.PhoneNumber
+
 	return nil, nil
 }
 
@@ -197,13 +243,13 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 	return nil, nil
 }
 
-func (a *AuthService) ForgetPassword(ctx context.Context, email string) {
+// func (a *AuthService) ForgetPassword(ctx context.Context, email string) {
 
-}
+// }
 
-func (a *AuthService) ForgetPasswordUpdate(ctx context.Context, req ForgetPasswordUpdateReq) {
+// func (a *AuthService) ForgetPasswordUpdate(ctx context.Context, req ForgetPasswordUpdateReq) {
 
-}
+// }
 
 func (a *AuthService) Logout(ctx context.Context, session SessionReq) transport.ForeeError {
 	a.sessionRepo.Delete(session.SessionId)
@@ -214,6 +260,10 @@ func (a *AuthService) Logout(ctx context.Context, session SessionReq) transport.
 }
 
 func (a *AuthService) GetUser(ctx context.Context, session SessionReq) {
+
+}
+
+func (a *AuthService) ChangePasswd(ctx context.Context, session SessionReq) {
 
 }
 

@@ -136,6 +136,7 @@ type ForgetPasswordUpdateReq struct {
 }
 
 type CreateUserReq struct {
+	SessionReq
 	FirstName           string    `json:"firstName" validate:"required"`
 	MiddleName          string    `json:"middleName"`
 	LastName            string    `json:"lastName" validate:"required"`
@@ -206,6 +207,12 @@ func (q *CreateUserReq) Validate() *transport.BadRequestError {
 		ret.AddDetails("phoneNumber", fmt.Sprintf("invalid phone number `%v`", q.PhoneNumber))
 	}
 	q.PhoneNumber = phoneNumber
+
+	// Identification type
+	_, ok = allowIdentificationTypes[IdentificationType(q.IdentificationType)]
+	if !ok {
+		ret.AddDetails("identificationType", fmt.Sprintf("invalid identificationType `%v`", q.IdentificationType))
+	}
 
 	if len(ret.Details) > 0 {
 		return ret

@@ -34,14 +34,30 @@ const (
 	IdentificationStatusDisable      UserIdentificationStatus = "Disable"
 )
 
+type IdentificationType string
+
+const (
+	IDTypePassport      = "PASSPORT"
+	IDTypeDriverLicense = "DRIVER_LICENSE"
+	IDTypeProvincalId   = "PROVINCIAL_ID"
+	IDTypeNationId      = "NATIONAL_ID"
+)
+
+var allowIdentificationTypes = map[IdentificationType]bool{
+	IDTypePassport:      true,
+	IDTypeDriverLicense: true,
+	IDTypeProvincalId:   true,
+	IDTypeNationId:      true,
+}
+
 type UserIdentification struct {
-	ID       int64     `json:"id"`
-	Status   string    `json:"status"`
-	Type     string    `json:"type"`
-	Value    string    `json:"value"`
-	OwnerId  int64     `json:"ownerId"`
-	CreateAt time.Time `json:"createAt"`
-	UpdateAt time.Time `json:"updateAt"`
+	ID       int64                    `json:"id"`
+	Status   UserIdentificationStatus `json:"status"`
+	Type     IdentificationType       `json:"type"`
+	Value    string                   `json:"value"`
+	OwnerId  int64                    `json:"ownerId"`
+	CreateAt time.Time                `json:"createAt"`
+	UpdateAt time.Time                `json:"updateAt"`
 }
 
 func NewUserIdentificationRepo(db *sql.DB) *UserIdentificationRepo {
