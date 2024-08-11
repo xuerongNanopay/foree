@@ -7,4 +7,5 @@ const (
 	AccountStatusActive  = "ACTIVE"
 	AccountStatusSuspend = "SUSPEND"
 	AccountStatusDisable = "DISABLE"
+	AccountStatusDelete  = "DELETE"
 )

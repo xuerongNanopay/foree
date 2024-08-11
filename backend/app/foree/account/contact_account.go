@@ -23,7 +23,7 @@ const (
 			a.account_hash, a.relationship_to_contact, a.owner_id
 			a.create_at, a.update_at
 		FROM contact_accounts a
-		where a.owner_id = ?
+		where a.owner_id = ? AND a.status != DELETE
 	`
 	sQLContactAccountGetUniqueById = `
 		SELECT 
@@ -33,7 +33,7 @@ const (
 			a.account_hash, a.relationship_to_contact, a.owner_id
 			a.create_at, a.update_at
 		FROM contact_accounts a
-		where a.owner_id = ?
+		where a.owner_id = ? AND a.status != DELETE
 	`
 )
 
