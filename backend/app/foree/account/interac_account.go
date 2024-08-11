@@ -15,9 +15,6 @@ const (
 			owner_id, status
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
 	`
-	// sQLInteractAccountGetAll = `
-
-	// `
 	sQLInteractAccountGetUniqueByOwnerId = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
