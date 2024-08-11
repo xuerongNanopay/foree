@@ -26,7 +26,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 	}
 
 	if oldEmail != nil {
-		return nil, transport.NewFormError(transport.FormErrorSignUpMsg, "email", "Duplicate email")
+		return nil, transport.NewFormError("Invaild Signup Request", "email", "Duplicate email")
 	}
 
 	// Hashing password.
@@ -152,13 +152,40 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*aut
 	return session, nil
 }
 
-func (a *AuthService) ResendVerifyCode(ctx context.Context, session SessionReq) transport.ForeeError {
+func (a *AuthService) ResendVerifyCode(ctx context.Context, req SessionReq) transport.ForeeError {
 	// Check Allow to VerifyEmail
-	_, err := a.allowVerifyEmail(session.SessionId)
+	session, err := a.allowVerifyEmail(req.SessionId)
 	if err != nil {
 		return err
 	}
+
+	// Change VerifyCode
+	newEP := *session.EmailPasswd
+	newEP.VerifyCode = auth.GenerateVerifyCode()
+
+	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(newEP)
+	if e != nil {
+		return transport.WrapInteralServerError(e)
+	}
+
+	ep, e := a.emailPasswordRepo.GetUniqueEmailPasswdById(newEP.ID)
+	if e != nil {
+		return transport.WrapInteralServerError(e)
+	}
+	if ep == nil {
+		return transport.NewInteralServerError("unable to get EmailPasswd with id: `%v`", newEP.ID)
+	}
+
 	//TODO: send email. by goroutine
+
+	// Update session
+	newSession := *session
+	newSession.EmailPasswd = ep
+
+	_, e = a.sessionRepo.UpdateSession(newSession)
+	if e != nil {
+		return transport.WrapInteralServerError(e)
+	}
 	return nil
 }
 
