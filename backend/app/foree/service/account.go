@@ -17,7 +17,7 @@ type AccountService struct {
 // The method is only used by CreateUser func
 // So the permission check is already in there.
 // We don't need permission check here.
-func (a *AccountService) CreateDefaultInteracAccount(ctx context.Context, req account.DefaultInteracReq) transport.ForeeError {
+func (a *AccountService) CreateDefaultInteracAccount(ctx context.Context, req DefaultInteracReq) transport.ForeeError {
 	acc := account.InteracAccount{
 		FirstName:   req.FirstName,
 		MiddleName:  req.MiddleName,
