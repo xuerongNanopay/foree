@@ -10,15 +10,15 @@ const (
 		INSERT INTO users
 		(	group, status, first_name, middle_name, 
 			last_name, age, dob, nationality, Address1, 
-			Address2, city, province, country, phone_number,
+			Address2, city, province, country, postal_code, phone_number,
 			email
-		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	sQLUserUpdateById = `
 		UPDATE users SET 
 			status = ?, first_name = ?, middle_name = ?, 
 			last_name = ?, age = ?, dob = ?, nationality = ?, Address1 = ?, 
-			Address2 = ?, city = ?, province = ?, country = ?, phone_number = ?,
+			Address2 = ?, city = ?, province = ?, country = ?, postal_code = ?, phone_number = ?,
 			email = ?
 		WHERE id = ?
 	`
@@ -26,7 +26,7 @@ const (
 		SELECT 
 			u.id, u.group, u.status, u.first_name, u.middle_name, 
 			u.last_name, u.age, u.dob, u.nationality, u.Address1, 
-			u.Address2, u.city, u.province, u.country, u.phone_number,
+			u.Address2, u.city, u.province, u.country, u.postal_code, u.phone_number,
 			u.email, u.avatar_url, u.create_at, u.update_at
 		FROM users as u 
 	`
@@ -34,7 +34,7 @@ const (
 		SELECT 
 			u.id, u.group, u.status, u.first_name, u.middle_name, 
 			u.last_name, u.age, u.dob, u.nationality, u.Address1, 
-			u.Address2, u.city, u.province, u.country, u.phone_number,
+			u.Address2, u.city, u.province, u.country, u.postal_code, u.phone_number,
 			u.email, u.avatar_url, u.create_at, u.update_at
 		FROM users as u 
 		WHERE u.id = ?
@@ -65,6 +65,7 @@ type User struct {
 	City        string     `json:"city"`
 	Province    string     `json:"province"`
 	Country     string     `json:"country"`
+	PostalCode  string     `json:"postalCode"`
 	PhoneNumber string     `json:"phoneNumber"`
 	Email       string     `json:"email"`
 	AvatarUrl   string     `json:"avatarUrl"`
@@ -97,6 +98,7 @@ func (repo *UserRepo) UpdateUserById(u User) error {
 		u.City,
 		u.Province,
 		u.Country,
+		u.PostalCode,
 		u.PhoneNumber,
 		u.Email,
 		u.ID,
@@ -123,6 +125,7 @@ func (repo *UserRepo) InsertUser(user User) (int64, error) {
 		user.City,
 		user.Province,
 		user.Country,
+		user.PostalCode,
 		user.PhoneNumber,
 		user.Email,
 	)
@@ -202,6 +205,7 @@ func scanRowIntoUser(rows *sql.Rows) (*User, error) {
 		&u.City,
 		&u.Province,
 		&u.Country,
+		&u.PostalCode,
 		&u.PhoneNumber,
 		&u.Email,
 		&u.AvatarUrl,

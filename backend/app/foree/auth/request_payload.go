@@ -26,11 +26,6 @@ type ForeeDate struct {
 	time.Time
 }
 
-type ForeeRequest interface {
-	TrimSpace()
-	Validate() *transport.BadRequestError
-}
-
 func (d *ForeeDate) MarshalJSON() ([]byte, error) {
 	t := time.Time(d.Time)
 	s := t.Format(time.DateOnly)
@@ -45,10 +40,6 @@ func (d *ForeeDate) UnmarshalJSON(b []byte) (err error) {
 	}
 	d.Time, err = time.Parse(time.DateOnly, s)
 	return
-}
-
-type SessionReq struct {
-	SessionId string
 }
 
 type SignUpReq struct {
@@ -79,7 +70,7 @@ func (q *SignUpReq) Validate() *transport.BadRequestError {
 }
 
 type ChangePasswdReq struct {
-	SessionReq
+	transport.SessionReq
 	Password string `json:"password" validate:"required,min=8,max=12"`
 }
 
@@ -104,7 +95,7 @@ func (q *ChangePasswdReq) Validate() *transport.BadRequestError {
 }
 
 type VerifyEmailReq struct {
-	SessionReq
+	transport.SessionReq
 	Code string `json:"code"`
 }
 
@@ -129,7 +120,7 @@ func (q *VerifyEmailReq) Validate() *transport.BadRequestError {
 }
 
 type LoginReq struct {
-	SessionReq
+	transport.SessionReq
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=8,max=12"`
 }
@@ -161,7 +152,7 @@ type ForgetPasswordUpdateReq struct {
 }
 
 type CreateUserReq struct {
-	SessionReq
+	transport.SessionReq
 	FirstName           string    `json:"firstName" validate:"required"`
 	MiddleName          string    `json:"middleName"`
 	LastName            string    `json:"lastName" validate:"required"`
@@ -173,6 +164,7 @@ type CreateUserReq struct {
 	City                string    `json:"city" validate:"required"`
 	Province            string    `json:"province" validate:"required"`
 	Country             string    `json:"country" validate:"required"`
+	PostalCode          string    `json:"postalCode" validate:"required"`
 	PhoneNumber         string    `json:"phoneNumber" validate:"required"`
 	IdentificationType  string    `json:"identificationType" validate:"required"`
 	IdentificationValue string    `json:"identificationValue" validate:"required"`
@@ -189,6 +181,7 @@ func (q *CreateUserReq) TrimSpace() {
 	q.City = strings.TrimSpace(q.City)
 	q.Province = strings.TrimSpace(q.Province)
 	q.Country = strings.TrimSpace(q.Country)
+	q.PostalCode = strings.TrimSpace(q.PostalCode)
 	q.PhoneNumber = strings.TrimSpace(q.PhoneNumber)
 	q.IdentificationType = strings.TrimSpace(q.IdentificationType)
 	q.IdentificationValue = strings.TrimSpace(q.IdentificationValue)
@@ -224,6 +217,8 @@ func (q *CreateUserReq) Validate() *transport.BadRequestError {
 	if !ok {
 		ret.AddDetails("province", fmt.Sprintf("invalid province `%v`", q.Province))
 	}
+
+	//TODO: Postal Code
 
 	// Phone number
 	phoneNumber := phoneNumberReplayer.Replace(q.PhoneNumber)

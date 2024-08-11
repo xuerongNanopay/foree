@@ -1,11 +1,5 @@
 package transport
 
-import (
-	"time"
-
-	"xue.io/go-pay/auth"
-)
-
 // See: https://www.bugsnag.com/blog/go-errors/ for error stacktrace
 // Define generic format for HTTP transfermation.
 // StatusCode should follow standard http status code
@@ -22,43 +16,17 @@ import (
 // 503 Service Unavailable
 
 type HTTPResponse struct {
-	StatusCode int      `json:"statusCode"`
-	Message    string   `json:"message"`
-	EPStatus   string   `json:"epStatus"`
-	User       *UserDTO `json:"user"`
-	Data       any      `json:"data"`
-	Error      any      `json:"error"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Data       any    `json:"data"`
+	Error      any    `json:"error"`
 }
 
-type UserDTO struct {
-	ID          int64     `json:"id"`
-	FirstName   string    `json:"firstName"`
-	MiddleName  string    `json:"middleName"`
-	LastName    string    `json:"lastName"`
-	Status      string    `json:"status"`
-	Age         int       `json:"age"`
-	Dob         time.Time `json:"dob"`
-	Nationality string    `json:"nationality"`
-	Address1    string    `json:"address1"`
-	Address2    string    `json:"address2"`
-	City        string    `json:"city"`
-	Province    string    `json:"province"`
-	Country     string    `json:"country"`
-	PhoneNumber string    `json:"phoneNumber"`
-	Email       string    `json:"email"`
-	AvatarUrl   string    `json:"avatarUrl"`
+type ForeeRequest interface {
+	TrimSpace()
+	Validate() *BadRequestError
 }
 
-func NewUserDTO(user *auth.User) *UserDTO {
-	if user == nil {
-		return nil
-	}
-	return &UserDTO{
-		ID:         user.ID,
-		FirstName:  user.FirstName,
-		MiddleName: user.MiddleName,
-		LastName:   user.LastName,
-		Status:     string(user.Status),
-		AvatarUrl:  user.AvatarUrl,
-	}
+type SessionReq struct {
+	SessionId string
 }

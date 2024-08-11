@@ -155,7 +155,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*aut
 	return session, nil
 }
 
-func (a *AuthService) ResendVerifyCode(ctx context.Context, req SessionReq) transport.ForeeError {
+func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.SessionReq) transport.ForeeError {
 	// Check Allow to VerifyEmail
 	session, err := a.allowVerifyEmail(req.SessionId)
 	if err != nil {
@@ -251,6 +251,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	newUser.City = req.City
 	newUser.Province = req.Province
 	newUser.Country = req.Country
+	newUser.PostalCode = req.PostalCode
 	newUser.PhoneNumber = req.PhoneNumber
 
 	updateErr := a.userRepo.UpdateUserById(newUser)
@@ -355,7 +356,7 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 
 // }
 
-func (a *AuthService) Logout(ctx context.Context, session SessionReq) transport.ForeeError {
+func (a *AuthService) Logout(ctx context.Context, session transport.SessionReq) transport.ForeeError {
 	a.sessionRepo.Delete(session.SessionId)
 	return transport.NewPreconditionRequireError(
 		transport.PreconditionRequireMsgLogin,
@@ -363,7 +364,7 @@ func (a *AuthService) Logout(ctx context.Context, session SessionReq) transport.
 	)
 }
 
-func (a *AuthService) GetUser(ctx context.Context, req SessionReq) (*UserDTO, transport.ForeeError) {
+func (a *AuthService) GetUser(ctx context.Context, req transport.SessionReq) (*UserDTO, transport.ForeeError) {
 	session, sErr := a.VerifySession(ctx, req.SessionId)
 	if sErr != nil {
 		return nil, sErr

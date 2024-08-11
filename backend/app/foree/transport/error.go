@@ -76,6 +76,15 @@ func (b *BadRequestError) AddDetails(errors ...string) *BadRequestError {
 	return b
 }
 
+func (b *BadRequestError) AddDetailWithSeverity(severity Severity, field, message string) *BadRequestError {
+	b.Details = append(b.Details, ErrorDetail{
+		Severity: severity,
+		Field:    field,
+		Message:  message,
+	})
+	return b
+}
+
 type RequireAction string
 
 const (
