@@ -88,6 +88,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 		return nil, transport.WrapInteralServerError(err)
 	}
 
+	//TODO: Update referral
 	//TODO: send email. by goroutine
 
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
