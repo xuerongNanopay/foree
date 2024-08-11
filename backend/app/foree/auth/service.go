@@ -13,8 +13,8 @@ type AuthService struct {
 	userRepo               *auth.UserRepo
 	emailPasswordRepo      *auth.EmailPasswdRepo
 	permissionRepo         *auth.PermissionRepo
-	emailPasswdRecoverRepo *auth.EmailPasswdRecoverRepo
 	userIdentificationRepo *UserIdentificationRepo
+	// emailPasswdRecoverRepo *auth.EmailPasswdRecoverRepo
 }
 
 // Any error should return 503
@@ -220,7 +220,7 @@ func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transpor
 
 func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.Session, transport.ForeeError) {
 	// Check allow to create user
-	session, err := a.allowVerifyEmail(req.SessionId)
+	session, err := a.allowCreateUser(req.SessionId)
 	if err != nil {
 		return nil, err
 	}
@@ -387,7 +387,7 @@ func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) tra
 	ep.Passowrd = hashed
 	//TODO: log
 	updateErr := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ep)
-	if hErr != nil {
+	if updateErr != nil {
 		return transport.WrapInteralServerError(updateErr)
 	}
 	return nil
