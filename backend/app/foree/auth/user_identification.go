@@ -43,7 +43,7 @@ const (
 	IDTypeNationId      = "NATIONAL_ID"
 )
 
-var allowIdentificationTypes = map[IdentificationType]bool{
+var AllowIdentificationTypes = map[IdentificationType]bool{
 	IDTypePassport:      true,
 	IDTypeDriverLicense: true,
 	IDTypeProvincalId:   true,

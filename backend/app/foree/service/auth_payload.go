@@ -1,4 +1,4 @@
-package auth
+package service
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"xue.io/go-pay/app/foree/auth"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/constant"
 )
@@ -229,7 +230,7 @@ func (q *CreateUserReq) Validate() *transport.BadRequestError {
 	q.PhoneNumber = phoneNumber
 
 	// Identification type
-	_, ok = AllowIdentificationTypes[IdentificationType(q.IdentificationType)]
+	_, ok = auth.AllowIdentificationTypes[auth.IdentificationType(q.IdentificationType)]
 	if !ok {
 		ret.AddDetails("identificationType", fmt.Sprintf("invalid identificationType `%v`", q.IdentificationType))
 	}
@@ -241,6 +242,4 @@ func (q *CreateUserReq) Validate() *transport.BadRequestError {
 	return nil
 }
 
-// func allowText(input string) bool {
-
-// }
+// --------------- Response ------------------
