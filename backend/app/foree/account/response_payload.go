@@ -72,3 +72,14 @@ type InteracAccountSummaryDTO struct {
 	LastName   string        `json:"lastName"`
 	Email      string        `json:"email"`
 }
+
+func NewInteracAccountSummaryDTO(account *InteracAccount) *InteracAccountSummaryDTO {
+	return &InteracAccountSummaryDTO{
+		ID:         account.ID,
+		Status:     account.Status,
+		FirstName:  account.FirstName,
+		MiddleName: account.MiddleName,
+		LastName:   account.LastName,
+		Email:      account.Email,
+	}
+}
