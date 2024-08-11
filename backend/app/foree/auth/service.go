@@ -14,6 +14,7 @@ type AuthService struct {
 	emailPasswordRepo      *auth.EmailPasswdRepo
 	permissionRepo         *auth.PermissionRepo
 	emailPasswdRecoverRepo *auth.EmailPasswdRecoverRepo
+	userIdentificationRepo *UserIdentificationRepo
 }
 
 // Any error should return 503
@@ -222,6 +223,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 		return nil, err
 	}
 
+	// Create a new user by updating essential fields.
 	newUser := *session.User
 	newUser.FirstName = req.FirstName
 	newUser.MiddleName = req.MiddleName
@@ -236,7 +238,46 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	newUser.Country = req.Country
 	newUser.PhoneNumber = req.PhoneNumber
 
-	return nil, nil
+	updateErr := a.userRepo.UpdateUserById(newUser)
+
+	if updateErr != nil {
+		return nil, transport.WrapInteralServerError(updateErr)
+	}
+
+	user, er := a.userRepo.GetUniqueUserById(newUser.ID)
+	if er != nil {
+		return nil, transport.WrapInteralServerError(er)
+	}
+
+	// Create identification
+	identification := UserIdentification{
+		Status:  IdentificationStatusApproved,
+		Type:    IdentificationType(req.IdentificationType),
+		Value:   req.IdentificationValue,
+		OwnerId: user.ID,
+	}
+
+	_, ier := a.userIdentificationRepo.InsertUserIdentification(identification)
+	if ier != nil {
+		return nil, transport.WrapInteralServerError(ier)
+	}
+
+	// Get Permission.
+	pers, pErr := a.permissionRepo.GetAllPermissionByGroupName(user.Group)
+	if pErr != nil {
+		return nil, transport.WrapInteralServerError(pErr)
+	}
+
+	// Update session.
+	newSession := *session
+	newSession.User = user
+	newSession.Permissions = pers
+	_, sessionErr := a.sessionRepo.UpdateSession(newSession)
+	if sessionErr != nil {
+		return nil, transport.WrapInteralServerError(sessionErr)
+	}
+
+	return &newSession, nil
 }
 
 func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, transport.ForeeError) {
