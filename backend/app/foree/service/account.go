@@ -34,3 +34,26 @@ func (a *AccountService) CreateDefaultInteracAccount(ctx context.Context, req De
 
 	return nil
 }
+
+func (a *AccountService) DeleteAccount(ctx context.Context, req DeleteContactReq) transport.ForeeError {
+	session, err := a.authService.Authorize(ctx, req.SessionId, ACCOUNT_DELETE)
+	if err != nil {
+		return err
+	}
+	acc, derr := a.contactRepo.GetUniqueContactAccountById(session.User.ID, req.ContactId)
+	if derr != nil {
+		return transport.WrapInteralServerError(derr)
+	}
+
+	if acc == nil {
+		return transport.NewFormError("Invaild contact deletion", "contactId", "Invalid contactId")
+	}
+
+	newAcc := *acc
+	newAcc.Status = account.AccountStatusDelete
+	derr = a.contactRepo.UpdateContactAccountById(newAcc)
+	if derr != nil {
+		return transport.WrapInteralServerError(derr)
+	}
+	return nil
+}

@@ -29,7 +29,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 	}
 
 	if oldEmail != nil {
-		return nil, transport.NewFormError("Invaild Signup Request", "email", "Duplicate email")
+		return nil, transport.NewFormError("Invaild signup", "email", "Duplicate email")
 	}
 
 	// Hashing password.
@@ -297,12 +297,12 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if ep == nil {
-		return nil, transport.NewFormError("Invaild Signup Request", "email", "Invalid email")
+		return nil, transport.NewFormError("Invaild signup", "email", "Invalid email")
 	}
 
 	ok := auth.ComparePasswords(req.Password, []byte(ep.Passowrd))
 	if !ok {
-		return nil, transport.NewFormError("Invaild Signup Request", "password", "Invalid password")
+		return nil, transport.NewFormError("Invaild signup", "password", "Invalid password")
 	}
 
 	// Load user(user must exist, but not necessary to be active)

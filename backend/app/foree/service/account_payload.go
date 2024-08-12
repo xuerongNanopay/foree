@@ -116,7 +116,26 @@ func (q *CreateNewContactReq) Validate() *transport.BadRequestError {
 
 type DeleteContactReq struct {
 	transport.SessionReq
-	ContactId int `json:"contactId" validate:"required,gte=0"`
+	ContactId int64 `json:"contactId" validate:"required,gte=0"`
+}
+
+func (q *DeleteContactReq) TrimSpace() {
+}
+
+func (q *DeleteContactReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
+	ret := transport.NewFormError("Invalid verify email request")
+	if err := validate.Struct(q); err != nil {
+		errors := err.(validator.ValidationErrors)
+		for _, e := range errors {
+			ret.AddDetails(e.Field(), e.Error())
+		}
+	}
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
 }
 
 // ----------   Response --------------
