@@ -42,7 +42,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 	userId, err := a.userRepo.InsertUser(auth.User{
 		Status: auth.UserStatusInitial,
 		Email:  req.Email,
-		Group:  fAuth.UserGroup,
+		Group:  UserGroup,
 	})
 
 	if err != nil {
