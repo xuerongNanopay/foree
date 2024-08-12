@@ -120,3 +120,7 @@ func (a *AccountService) GetContact(ctx context.Context, req GetContactReq) (*Co
 
 	return NewContactAccountDetailDTO(acc), nil
 }
+
+func (a *AccountService) queryContact(ctx context.Context, req QueryContactReq) ([]*ContactAccountSummaryDTO, transport.ForeeError) {
+	return nil, nil
+}
