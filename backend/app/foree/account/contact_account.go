@@ -42,6 +42,7 @@ const (
 			a.latest_acitvity_at, a.create_at, a.update_at
 		FROM contact_accounts a
 		where a.owner_id = ? AND a.status != DELETE
+		ORDER BY a.latest_acitvity_at DESC
 	`
 	sQLContactAccountQueryByOwnerId = `
 		SELECT 
