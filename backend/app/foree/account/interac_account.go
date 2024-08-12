@@ -15,6 +15,11 @@ const (
 			owner_id, status
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
 	`
+	sQLInteracAccountUpdateById = `
+		UPDATE interac_accounts SET 
+			status = ?, latest_acitvity_at = ?
+		WHERE id = ? AND a.owner_id = ?
+	`
 	sQLInteractAccountGetAllByOwnerId = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
@@ -38,21 +43,22 @@ const (
 )
 
 type InteracAccount struct {
-	ID              int64         `json:"id"`
-	FirstName       string        `json:"firstName"`
-	MiddleName      string        `json:"middleName"`
-	LastName        string        `json:"lastName"`
-	Address         string        `json:"address"`
-	PhoneNumber     string        `json:"phoneNumber"`
-	Email           string        `json:"email"`
-	InstitutionName string        `json:"institutionName"`
-	BranchNumber    string        `json:"branchNumber"`
-	AccountNumber   string        `json:"accountNumber"`
-	AccountHash     string        `json:"accountHash"`
-	OwnerId         int64         `json:"ownerId"`
-	Status          AccountStatus `json:"status"`
-	CreateAt        time.Time     `json:"createAt"`
-	UpdateAt        time.Time     `json:"updateAt"`
+	ID               int64         `json:"id"`
+	FirstName        string        `json:"firstName"`
+	MiddleName       string        `json:"middleName"`
+	LastName         string        `json:"lastName"`
+	Address          string        `json:"address"`
+	PhoneNumber      string        `json:"phoneNumber"`
+	Email            string        `json:"email"`
+	InstitutionName  string        `json:"institutionName"`
+	BranchNumber     string        `json:"branchNumber"`
+	AccountNumber    string        `json:"accountNumber"`
+	AccountHash      string        `json:"accountHash"`
+	OwnerId          int64         `json:"ownerId"`
+	Status           AccountStatus `json:"status"`
+	LatestActivityAt time.Time     `json:"latestActivityAt"`
+	CreateAt         time.Time     `json:"createAt"`
+	UpdateAt         time.Time     `json:"updateAt"`
 }
 
 func NewInteracAccountRepo(db *sql.DB) *InteracAccountRepo {
@@ -88,6 +94,20 @@ func (repo *InteracAccountRepo) InsertInteracAccount(acc InteracAccount) (int64,
 	return id, nil
 }
 
+func (repo *ContactAccountRepo) UpdateInteracAccountById(acc InteracAccount) error {
+	_, err := repo.db.Exec(
+		sQLContactAccountUpdateById,
+		acc.Status,
+		acc.LatestActivityAt,
+		acc.OwnerId,
+		acc.ID,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (repo *InteracAccountRepo) GetAllInteractAccountByOwnerId(ownerId int64) ([]*InteracAccount, error) {
 	rows, err := repo.db.Query(sQLInteractAccountGetAllByOwnerId, ownerId)
 
@@ -98,7 +118,7 @@ func (repo *InteracAccountRepo) GetAllInteractAccountByOwnerId(ownerId int64) ([
 
 	accounts := make([]*InteracAccount, 16)
 	for rows.Next() {
-		p, err := scanRowIntoContactAccount(rows)
+		p, err := scanRowIntoInteracAccount(rows)
 		if err != nil {
 			return nil, err
 		}
