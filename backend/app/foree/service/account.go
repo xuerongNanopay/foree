@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/transport"
@@ -19,14 +20,15 @@ type AccountService struct {
 // We don't need permission check here.
 func (a *AccountService) CreateDefaultInteracAccount(ctx context.Context, req DefaultInteracReq) transport.ForeeError {
 	acc := account.InteracAccount{
-		FirstName:   req.FirstName,
-		MiddleName:  req.MiddleName,
-		LastName:    req.LastName,
-		Address:     req.Address,
-		PhoneNumber: req.PhoneNumber,
-		Email:       req.Email,
-		OwnerId:     req.OwnerId,
-		Status:      account.AccountStatusActive,
+		FirstName:        req.FirstName,
+		MiddleName:       req.MiddleName,
+		LastName:         req.LastName,
+		Address:          req.Address,
+		PhoneNumber:      req.PhoneNumber,
+		Email:            req.Email,
+		OwnerId:          req.OwnerId,
+		Status:           account.AccountStatusActive,
+		LatestActivityAt: time.Now(),
 	}
 	_, err := a.interacRepo.InsertInteracAccount(acc)
 	if err != nil {
@@ -59,6 +61,7 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 		AccountNumber:         req.AccountNoOrIBAN,
 		RelationshipToContact: req.RelationshipToContact,
 		OwnerId:               session.User.ID,
+		LatestActivityAt:      time.Now(),
 	}
 
 	newAcc.HashMyself()
@@ -101,6 +104,28 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 		return transport.WrapInteralServerError(derr)
 	}
 	return nil
+}
+
+// This method mainly run in goruntine. We don't care if it work so much.
+func (a *AccountService) refreshLatestActivityAt(userId, contactId int64) {
+	acc, derr := a.contactRepo.GetUniqueContactAccountById(userId, contactId)
+	if derr != nil {
+		//TODO: log error
+		return
+	}
+
+	if acc == nil {
+		//TODO: log error
+		return
+	}
+
+	newAcc := *acc
+	newAcc.LatestActivityAt = time.Now()
+	derr = a.contactRepo.UpdateContactAccountById(newAcc)
+	if derr != nil {
+		//TODO: log error
+		return
+	}
 }
 
 func (a *AccountService) GetContact(ctx context.Context, req GetContactReq) (*ContactAccountDetailDTO, transport.ForeeError) {

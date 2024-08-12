@@ -9,16 +9,26 @@ const (
 	sQLInteracAccountInsert = `
 		INSERT INTO interac_accounts
 		(
-			first_name, middle_name, last_name,
+			status, first_name, middle_name, last_name,
 			address, phone_number, email, 
 			institution_name, branch_number, account_number,
-			owner_id, status
-		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
+			owner_id, latest_acitvity_at
+		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	sQLInteracAccountUpdateById = `
 		UPDATE interac_accounts SET 
 			status = ?, latest_acitvity_at = ?
 		WHERE id = ? AND a.owner_id = ?
+	`
+	sQLInteractAccountGetUniqueById = `
+		SELECT 
+			a.id, a.first_name, a.middle_name,
+			a.last_name, a.address, a.phone_number, a.email, 
+			a.institution_name, a.branch_number, a.account_number,
+			a.owner_id, a.status, 
+			a.latest_acitvity_at, a.create_at, a.update_at
+		FROM interac_accounts a
+		where a.owner_id = ? AND a.id = ? AND a.status != DELETE
 	`
 	sQLInteractAccountGetAllByOwnerId = `
 		SELECT 
@@ -29,16 +39,7 @@ const (
 			a.create_at, a.update_at
 		FROM interac_accounts a
 		where a.owner_id = ? AND a.status != DELETE
-	`
-	sQLInteractAccountGetUniqueById = `
-		SELECT 
-			a.id, a.first_name, a.middle_name,
-			a.last_name, a.address, a.phone_number, a.email, 
-			a.institution_name, a.branch_number, a.account_number,
-			a.owner_id, a.status, 
-			a.create_at, a.update_at
-		FROM interac_accounts a
-		where a.owner_id = ? AND a.id = ? AND a.status != DELETE
+		ORDER BY a.latest_acitvity_at DESC
 	`
 )
 
@@ -72,6 +73,7 @@ type InteracAccountRepo struct {
 func (repo *InteracAccountRepo) InsertInteracAccount(acc InteracAccount) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLInteracAccountInsert,
+		acc.Status,
 		acc.FirstName,
 		acc.MiddleName,
 		acc.LastName,
@@ -82,7 +84,7 @@ func (repo *InteracAccountRepo) InsertInteracAccount(acc InteracAccount) (int64,
 		acc.BranchNumber,
 		acc.AccountNumber,
 		acc.OwnerId,
-		acc.Status,
+		acc.LatestActivityAt,
 	)
 	if err != nil {
 		return 0, err
@@ -171,6 +173,7 @@ func scanRowIntoInteracAccount(rows *sql.Rows) (*InteracAccount, error) {
 		&u.AccountNumber,
 		&u.OwnerId,
 		&u.Status,
+		&u.LatestActivityAt,
 		&u.CreateAt,
 		&u.UpdateAt,
 	)

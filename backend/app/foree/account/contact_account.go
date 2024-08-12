@@ -15,8 +15,8 @@ const (
 			hash_id, status, type, first_name, middle_name,
 			last_name, address1, address2, city, province,
 			country, postal_code, phone_number, institution_name, branch_number, account_number,
-			account_hash, relationship_to_contact, owner_id
-		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+			account_hash, relationship_to_contact, owner_id, latest_acitvity_at
+		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	sQLContactAccountUpdateById = `
 		UPDATE contact_accounts SET 
@@ -141,6 +141,7 @@ func (repo *ContactAccountRepo) InsertContactAccount(acc ContactAccount) (int64,
 		acc.AccountHash,
 		acc.RelationshipToContact,
 		acc.OwnerId,
+		acc.LatestActivityAt,
 	)
 	if err != nil {
 		return 0, err
