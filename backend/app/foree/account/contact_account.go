@@ -18,7 +18,7 @@ const (
 	sQLContactAccountUpdateById = `
 		UPDATE contact_accounts SET 
 			status = ?
-		WHERE id = ?
+		WHERE id = ? AND a.owner_id = ?
 	`
 	sQLContactAccountGetUniqueById = `
 		SELECT 
@@ -28,7 +28,7 @@ const (
 			a.account_hash, a.relationship_to_contact, a.owner_id
 			a.create_at, a.update_at
 		FROM contact_accounts a
-		where a.owner_id = ? AND a.status != DELETE
+		where a.owner_id = ? AND a.id = ? AND a.status != DELETE
 	`
 	sQLContactAccountGetAllByOwnerId = `
 		SELECT 
@@ -118,6 +118,7 @@ func (repo *ContactAccountRepo) UpdateContactAccountById(acc ContactAccount) err
 	_, err := repo.db.Exec(
 		sQLContactAccountUpdateById,
 		acc.Status,
+		acc.OwnerId,
 		acc.ID,
 	)
 	if err != nil {
@@ -126,8 +127,8 @@ func (repo *ContactAccountRepo) UpdateContactAccountById(acc ContactAccount) err
 	return nil
 }
 
-func (repo *ContactAccountRepo) GetUniqueContactAccountById(id int64) (*ContactAccount, error) {
-	rows, err := repo.db.Query(sQLContactAccountGetUniqueById, id)
+func (repo *ContactAccountRepo) GetUniqueContactAccountById(ownerid, id int64) (*ContactAccount, error) {
+	rows, err := repo.db.Query(sQLContactAccountGetUniqueById, ownerid, id)
 
 	if err != nil {
 		return nil, err

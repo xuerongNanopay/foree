@@ -33,7 +33,7 @@ const (
 			a.owner_id, a.status, 
 			a.create_at, a.update_at
 		FROM interac_accounts a
-		where a.id = ? AND a.status != DELETE
+		where a.owner_id = ? AND a.id = ? AND a.status != DELETE
 	`
 )
 
@@ -112,8 +112,8 @@ func (repo *InteracAccountRepo) GetUniqueInteractAccountByOwnerId(ownerId int64)
 	return f, nil
 }
 
-func (repo *InteracAccountRepo) GetUniqueInteractAccountById(id int64) (*InteracAccount, error) {
-	rows, err := repo.db.Query(sQLInteractAccountGetUniqueById, id)
+func (repo *InteracAccountRepo) GetUniqueInteractAccountById(ownerId, id int64) (*InteracAccount, error) {
+	rows, err := repo.db.Query(sQLInteractAccountGetUniqueById, ownerId, id)
 
 	if err != nil {
 		return nil, err
