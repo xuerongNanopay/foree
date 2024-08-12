@@ -34,7 +34,7 @@ const (
             t.is_cancel_allowed, t.parent_tx_id, t.owner_id, 
             t.create_at, t.update_at
         FROM tx_summary t
-        where t.id = ?
+        where t.owner_id = ? and t.id = ?
     `
 	sQLTxSummaryGetUniqueByParentTxId = `
         SELECT 
@@ -49,7 +49,7 @@ const (
         FROM tx_summary t
         where t.ParentTxId = ?
     `
-	// TODO: Provide more flexible query.
+	// TODO: Provide more flexible query
 	// sQLTxSummaryQueryByOwnerId = `
 	//     SELECT
 	//         t.id, t.summary, t.type, t.status, t.rate
@@ -141,8 +141,8 @@ func (repo *TxSummaryRepo) UpdateTxSummaryById(tx TxSummary) error {
 	return nil
 }
 
-func (repo *InteracCITxRepo) GetUniqueTxSummaryById(id int64) (*TxSummary, error) {
-	rows, err := repo.db.Query(sQLTxSummaryGetUniqueById, id)
+func (repo *InteracCITxRepo) GetUniqueTxSummaryById(userId, id int64) (*TxSummary, error) {
+	rows, err := repo.db.Query(sQLTxSummaryGetUniqueById, userId, id)
 
 	if err != nil {
 		return nil, err
