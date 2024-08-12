@@ -43,13 +43,6 @@ const (
 	IDTypeNationId      = "NATIONAL_ID"
 )
 
-var AllowIdentificationTypes = map[IdentificationType]bool{
-	IDTypePassport:      true,
-	IDTypeDriverLicense: true,
-	IDTypeProvincalId:   true,
-	IDTypeNationId:      true,
-}
-
 type UserIdentification struct {
 	ID       int64                    `json:"id"`
 	Status   UserIdentificationStatus `json:"status"`

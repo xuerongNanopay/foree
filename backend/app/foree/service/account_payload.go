@@ -2,7 +2,9 @@ package service
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/go-playground/validator/v10"
 	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/auth"
@@ -56,6 +58,33 @@ type CreateNewContactReq struct {
 	TransferMethod        account.ContactAccountType `json:"transferMethod"`
 	BankName              string                     `json:"bankName"`
 	AccountNoOrIBAN       string                     `json:"accountNoOrIBAN"`
+}
+
+func (q *CreateNewContactReq) TrimSpace() {
+	q.FirstName = strings.TrimSpace(q.FirstName)
+	q.MiddleName = strings.TrimSpace(q.MiddleName)
+	q.LastName = strings.TrimSpace(q.LastName)
+	q.FirstName = strings.TrimSpace(q.FirstName)
+	q.FirstName = strings.TrimSpace(q.FirstName)
+	q.FirstName = strings.TrimSpace(q.FirstName)
+	q.FirstName = strings.TrimSpace(q.FirstName)
+	q.FirstName = strings.TrimSpace(q.FirstName)
+}
+
+func (q *CreateNewContactReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
+	ret := transport.NewFormError("Invalid verify email request")
+	if err := validate.Struct(q); err != nil {
+		errors := err.(validator.ValidationErrors)
+		for _, e := range errors {
+			ret.AddDetails(e.Field(), e.Error())
+		}
+	}
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
 }
 
 type DeleteContactReq struct {

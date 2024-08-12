@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 	fAuth "xue.io/go-pay/app/foree/auth"
@@ -12,37 +11,6 @@ import (
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
 )
-
-// 3600 * 24 * 365 *19
-const Second_In_Year = 31536000
-
-// letters, spaces, number and extended latin
-const NameReg = `^[a-zA-Z_0-9\u00C0-\u017F][a-zA-Z_0-9\u00C0-\u017F\s]*$`
-const NineDigitReg = `^\\d{9}$`
-
-var phoneNumberReplayer = strings.NewReplacer(" ", "", "(", "", ")", "", "-", "", "+", "")
-var validate = validator.New()
-
-// TODO: testing
-type ForeeDate struct {
-	time.Time
-}
-
-func (d *ForeeDate) MarshalJSON() ([]byte, error) {
-	t := time.Time(d.Time)
-	s := t.Format(time.DateOnly)
-	return []byte("\"" + s + "\""), nil
-}
-
-func (d *ForeeDate) UnmarshalJSON(b []byte) (err error) {
-	s := strings.Trim(string(b), "\"")
-	if s == "null" {
-		d.Time = time.Time{}
-		return
-	}
-	d.Time, err = time.Parse(time.DateOnly, s)
-	return
-}
 
 type SignUpReq struct {
 	Email        string `json:"email" validate:"required,email"`
@@ -231,7 +199,7 @@ func (q *CreateUserReq) Validate() *transport.BadRequestError {
 	q.PhoneNumber = phoneNumber
 
 	// Identification type
-	_, ok = fAuth.AllowIdentificationTypes[fAuth.IdentificationType(q.IdentificationType)]
+	_, ok = allowIdentificationTypes[fAuth.IdentificationType(q.IdentificationType)]
 	if !ok {
 		ret.AddDetails("identificationType", fmt.Sprintf("invalid identificationType `%v`", q.IdentificationType))
 	}
