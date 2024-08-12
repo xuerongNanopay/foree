@@ -1,7 +1,10 @@
 package account
 
 import (
+	"crypto/md5"
 	"database/sql"
+	"encoding/hex"
+	"fmt"
 	"time"
 )
 
@@ -72,6 +75,25 @@ type ContactAccount struct {
 	OwnerId               int64              `json:"owerId"`
 	CreateAt              time.Time          `json:"createAt"`
 	UpdateAt              time.Time          `json:"updateAt"`
+}
+
+func (c *ContactAccount) HashMyself() {
+	s := fmt.Sprintf(
+		"%s%s%s%s%s%s%s%s%s%s%s",
+		c.FirstName,
+		c.MiddleName,
+		c.LastName,
+		c.Address1,
+		c.Address2,
+		c.City,
+		c.Province,
+		c.Country,
+		c.InstitutionName,
+		c.BranchNumber,
+		c.AccountNumber,
+	)
+	hash := md5.Sum([]byte(s))
+	c.AccountHash = hex.EncodeToString(hash[:])
 }
 
 func NewContactAccountRepo(db *sql.DB) *ContactAccountRepo {
