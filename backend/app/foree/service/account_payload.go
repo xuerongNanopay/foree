@@ -42,7 +42,7 @@ func NewDefaultInteracReqFromSession(session *auth.Session) *DefaultInteracReq {
 	}
 }
 
-type CreateNewContactReq struct {
+type CreateContactReq struct {
 	transport.SessionReq
 	FirstName             string `json:"firstName" validate:"required"`
 	MiddleName            string `json:"middleName"`
@@ -60,7 +60,7 @@ type CreateNewContactReq struct {
 	AccountNoOrIBAN       string `json:"accountNoOrIBAN"`
 }
 
-func (q *CreateNewContactReq) TrimSpace() {
+func (q *CreateContactReq) TrimSpace() {
 	q.FirstName = strings.TrimSpace(q.FirstName)
 	q.MiddleName = strings.TrimSpace(q.MiddleName)
 	q.LastName = strings.TrimSpace(q.LastName)
@@ -77,9 +77,9 @@ func (q *CreateNewContactReq) TrimSpace() {
 	q.AccountNoOrIBAN = strings.TrimSpace(q.AccountNoOrIBAN)
 }
 
-func (q *CreateNewContactReq) Validate() *transport.BadRequestError {
+func (q *CreateContactReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := transport.NewFormError("Invalid verify email request")
+	ret := transport.NewFormError("Invalid create contact request")
 	if err := validate.Struct(q); err != nil {
 		errors := err.(validator.ValidationErrors)
 		for _, e := range errors {
@@ -124,7 +124,7 @@ func (q *DeleteContactReq) TrimSpace() {
 
 func (q *DeleteContactReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := transport.NewFormError("Invalid verify email request")
+	ret := transport.NewFormError("Invalid delete contact request")
 	if err := validate.Struct(q); err != nil {
 		errors := err.(validator.ValidationErrors)
 		for _, e := range errors {
@@ -148,7 +148,32 @@ func (q *GetContactReq) TrimSpace() {
 
 func (q *GetContactReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := transport.NewFormError("Invalid verify email request")
+	ret := transport.NewFormError("Invalid get contact request")
+	if err := validate.Struct(q); err != nil {
+		errors := err.(validator.ValidationErrors)
+		for _, e := range errors {
+			ret.AddDetails(e.Field(), e.Error())
+		}
+	}
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
+}
+
+type QueryContactReq struct {
+	transport.SessionReq
+	Offset int `json:"offset" validate:"required,gte=0"`
+	Limit  int `json:"limit" validate:"required,gte=0"`
+}
+
+func (q *QueryContactReq) TrimSpace() {
+}
+
+func (q *QueryContactReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
+	ret := transport.NewFormError("Invalid query contact request")
 	if err := validate.Struct(q); err != nil {
 		errors := err.(validator.ValidationErrors)
 		for _, e := range errors {

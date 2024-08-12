@@ -50,7 +50,7 @@ func (q *ChangePasswdReq) TrimSpace() {
 
 func (q *ChangePasswdReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := transport.NewFormError("Invalid verify email request")
+	ret := transport.NewFormError("Invalid change password request")
 	if err := validate.Struct(q); err != nil {
 		errors := err.(validator.ValidationErrors)
 		for _, e := range errors {
