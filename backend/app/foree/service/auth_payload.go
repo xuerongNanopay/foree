@@ -9,7 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	fAuth "xue.io/go-pay/app/foree/auth"
 	"xue.io/go-pay/app/foree/transport"
-	gAuth "xue.io/go-pay/auth"
+	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
 )
 
@@ -253,7 +253,7 @@ type UserDTO struct {
 	AvatarUrl  string `json:"avatarUrl"`
 }
 
-func NewUserDTO(user *gAuth.User) *UserDTO {
+func NewUserDTO(user *auth.User) *UserDTO {
 	return &UserDTO{
 		FirstName:  user.FirstName,
 		MiddleName: user.MiddleName,

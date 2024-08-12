@@ -4,12 +4,11 @@ import (
 	"context"
 
 	"xue.io/go-pay/app/foree/account"
-	"xue.io/go-pay/app/foree/auth"
 	"xue.io/go-pay/app/foree/transport"
 )
 
 type AccountService struct {
-	authService *auth.AuthService
+	authService *AuthService
 	contactRepo *account.ContactAccountRepo
 	interacRepo *account.InteracAccountRepo
 }

@@ -1,9 +1,10 @@
-package auth
+package service
 
 import (
 	"context"
 	"time"
 
+	fAuth "xue.io/go-pay/app/foree/auth"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/auth"
 )
@@ -13,7 +14,7 @@ type AuthService struct {
 	userRepo               *auth.UserRepo
 	emailPasswordRepo      *auth.EmailPasswdRepo
 	permissionRepo         *auth.PermissionRepo
-	userIdentificationRepo *UserIdentificationRepo
+	userIdentificationRepo *fAuth.UserIdentificationRepo
 	// emailPasswdRecoverRepo *auth.EmailPasswdRecoverRepo
 }
 
@@ -40,7 +41,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 	userId, err := a.userRepo.InsertUser(auth.User{
 		Status: auth.UserStatusInitial,
 		Email:  req.Email,
-		Group:  UserGroup,
+		Group:  fAuth.UserGroup,
 	})
 
 	if err != nil {
@@ -227,9 +228,9 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	}
 
 	// Create identification(Store Identification first)
-	identification := UserIdentification{
-		Status:  IdentificationStatusApproved,
-		Type:    IdentificationType(req.IdentificationType),
+	identification := fAuth.UserIdentification{
+		Status:  fAuth.IdentificationStatusApproved,
+		Type:    fAuth.IdentificationType(req.IdentificationType),
 		Value:   req.IdentificationValue,
 		OwnerId: session.User.ID,
 	}
@@ -416,4 +417,26 @@ func (a *AuthService) VerifySession(ctx context.Context, sessionId string) (*aut
 		return nil, err
 	}
 	return session, nil
+}
+
+func verifySession(session *auth.Session) transport.ForeeError {
+	if session == nil || session.EmailPasswd == nil {
+		return transport.NewPreconditionRequireError(
+			transport.PreconditionRequireMsgLogin,
+			transport.RequireActionLogin,
+		)
+	}
+	if session.EmailPasswd.Status == auth.EPStatusWaitingVerify {
+		return transport.NewPreconditionRequireError(
+			transport.PreconditionRequireMsgVerifyEmail,
+			transport.RequireActionVerifyEmail,
+		)
+	}
+	if session.User == nil || session.User.Status == auth.UserStatusInitial {
+		return transport.NewPreconditionRequireError(
+			transport.PreconditionRequireMsgCreateUser,
+			transport.RequireActionCreateUser,
+		)
+	}
+	return nil
 }
