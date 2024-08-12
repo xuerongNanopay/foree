@@ -43,6 +43,17 @@ const (
 		FROM contact_accounts a
 		where a.owner_id = ? AND a.status != DELETE
 	`
+	sQLContactAccountQueryByOwnerId = `
+		SELECT 
+			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
+			a.last_name, a.address1, a.address2, a.city, a.province,
+			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
+			a.account_hash, a.relationship_to_contact, a.owner_id
+			a.latest_acitvity_at, a.create_at, a.update_at
+		FROM contact_accounts a
+		where a.owner_id = ? AND a.status != DELETE
+		LIMIT ? OFFSET ?
+	`
 )
 
 type ContactAccountType string
