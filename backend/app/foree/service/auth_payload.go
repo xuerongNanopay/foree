@@ -7,8 +7,9 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"xue.io/go-pay/app/foree/auth"
+	fAuth "xue.io/go-pay/app/foree/auth"
 	"xue.io/go-pay/app/foree/transport"
+	gAuth "xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
 )
 
@@ -230,7 +231,7 @@ func (q *CreateUserReq) Validate() *transport.BadRequestError {
 	q.PhoneNumber = phoneNumber
 
 	// Identification type
-	_, ok = auth.AllowIdentificationTypes[auth.IdentificationType(q.IdentificationType)]
+	_, ok = fAuth.AllowIdentificationTypes[fAuth.IdentificationType(q.IdentificationType)]
 	if !ok {
 		ret.AddDetails("identificationType", fmt.Sprintf("invalid identificationType `%v`", q.IdentificationType))
 	}
@@ -252,7 +253,7 @@ type UserDTO struct {
 	AvatarUrl  string `json:"avatarUrl"`
 }
 
-func NewUserDTO(user *auth.User) *UserDTO {
+func NewUserDTO(user *gAuth.User) *UserDTO {
 	return &UserDTO{
 		FirstName:  user.FirstName,
 		MiddleName: user.MiddleName,
