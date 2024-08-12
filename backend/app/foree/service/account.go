@@ -107,7 +107,7 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 }
 
 // This method mainly run in goruntine. We don't care if it work so much.
-func (a *AccountService) refreshLatestActivityAt(userId, contactId int64) {
+func (a *AccountService) refreshContactLatestActivityAt(userId, contactId int64) {
 	acc, derr := a.contactRepo.GetUniqueContactAccountById(userId, contactId)
 	if derr != nil {
 		//TODO: log error
@@ -164,7 +164,7 @@ func (a *AccountService) GetAllContacts(ctx context.Context, req transport.Sessi
 	return ret, nil
 }
 
-func (a *AccountService) QueryContact(ctx context.Context, req QueryContactReq) ([]*ContactAccountSummaryDTO, transport.ForeeError) {
+func (a *AccountService) QueryContacts(ctx context.Context, req QueryContactReq) ([]*ContactAccountSummaryDTO, transport.ForeeError) {
 	session, err := a.authService.Authorize(ctx, req.SessionId, ACCOUNT_QUERY)
 	if err != nil {
 		return nil, err
