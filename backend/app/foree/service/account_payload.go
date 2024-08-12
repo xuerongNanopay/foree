@@ -44,31 +44,37 @@ func NewDefaultInteracReqFromSession(session *auth.Session) *DefaultInteracReq {
 
 type CreateNewContactReq struct {
 	transport.SessionReq
-	FirstName             string                     `json:"firstName" validate:"required"`
-	MiddleName            string                     `json:"middleName"`
-	LastName              string                     `json:"lastName" validate:"required"`
-	Address1              string                     `json:"address1" validate:"required"`
-	Address2              string                     `json:"address2"`
-	City                  string                     `json:"city" validate:"required"`
-	Province              string                     `json:"province" validate:"required"`
-	Country               string                     `json:"country" validate:"required"`
-	PostalCode            string                     `json:"postalCode"`
-	PhoneNumber           string                     `json:"phoneNumber"`
-	RelationshipToContact string                     `json:"relationshipToContact"`
-	TransferMethod        account.ContactAccountType `json:"transferMethod"`
-	BankName              string                     `json:"bankName"`
-	AccountNoOrIBAN       string                     `json:"accountNoOrIBAN"`
+	FirstName             string `json:"firstName" validate:"required"`
+	MiddleName            string `json:"middleName"`
+	LastName              string `json:"lastName" validate:"required"`
+	Address1              string `json:"address1" validate:"required"`
+	Address2              string `json:"address2"`
+	City                  string `json:"city" validate:"required"`
+	Province              string `json:"province" validate:"required"`
+	Country               string `json:"country" validate:"required"`
+	PostalCode            string `json:"postalCode"`
+	PhoneNumber           string `json:"phoneNumber"`
+	RelationshipToContact string `json:"relationshipToContact"`
+	TransferMethod        string `json:"transferMethod"`
+	BankName              string `json:"bankName"`
+	AccountNoOrIBAN       string `json:"accountNoOrIBAN"`
 }
 
 func (q *CreateNewContactReq) TrimSpace() {
 	q.FirstName = strings.TrimSpace(q.FirstName)
 	q.MiddleName = strings.TrimSpace(q.MiddleName)
 	q.LastName = strings.TrimSpace(q.LastName)
-	q.FirstName = strings.TrimSpace(q.FirstName)
-	q.FirstName = strings.TrimSpace(q.FirstName)
-	q.FirstName = strings.TrimSpace(q.FirstName)
-	q.FirstName = strings.TrimSpace(q.FirstName)
-	q.FirstName = strings.TrimSpace(q.FirstName)
+	q.Address1 = strings.TrimSpace(q.Address1)
+	q.Address2 = strings.TrimSpace(q.Address2)
+	q.City = strings.TrimSpace(q.City)
+	q.Province = strings.TrimSpace(q.Province)
+	q.Country = strings.TrimSpace(q.Country)
+	q.PostalCode = strings.TrimSpace(q.PostalCode)
+	q.PhoneNumber = strings.TrimSpace(q.PhoneNumber)
+	q.RelationshipToContact = strings.TrimSpace(q.RelationshipToContact)
+	q.TransferMethod = strings.TrimSpace(q.TransferMethod)
+	q.BankName = strings.TrimSpace(q.BankName)
+	q.AccountNoOrIBAN = strings.TrimSpace(q.AccountNoOrIBAN)
 }
 
 func (q *CreateNewContactReq) Validate() *transport.BadRequestError {
@@ -78,6 +84,27 @@ func (q *CreateNewContactReq) Validate() *transport.BadRequestError {
 		errors := err.(validator.ValidationErrors)
 		for _, e := range errors {
 			ret.AddDetails(e.Field(), e.Error())
+		}
+	}
+
+	// Check relationship
+	_, ok := allowRelationshipToContactTypes[q.RelationshipToContact]
+	if !ok {
+		ret.AddDetails("relationshipToContact", fmt.Sprintf("invalid relationshipToContact `%v`", q.RelationshipToContact))
+	}
+
+	// Check transferMethod
+	_, ok = allowContactAccountType[account.ContactAccountType(q.TransferMethod)]
+	if !ok {
+		ret.AddDetails("transferMethod", fmt.Sprintf("invalid transferMethod `%v`", q.TransferMethod))
+	}
+
+	if account.ContactAccountType(q.TransferMethod) != account.ContactAccountTypeCash {
+		if q.BankName == "" {
+			ret.AddDetails("bankName", fmt.Sprintf("invalid bankName `%v`", q.BankName))
+		}
+		if q.AccountNoOrIBAN == "" {
+			ret.AddDetails("accountNoOrIBAN", fmt.Sprintf("invalid accountNoOrIBAN `%v`", q.AccountNoOrIBAN))
 		}
 	}
 

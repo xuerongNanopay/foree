@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/auth"
 )
 
@@ -24,4 +25,18 @@ var allowIdentificationTypes = map[auth.IdentificationType]bool{
 	auth.IDTypeDriverLicense: true,
 	auth.IDTypeProvincalId:   true,
 	auth.IDTypeNationId:      true,
+}
+
+var allowRelationshipToContactTypes = map[string]bool{
+	"Extended Family":  true,
+	"Friend":           true,
+	"Immediate Family": true,
+	"Other":            true,
+	"Self":             true,
+}
+
+var allowContactAccountType = map[account.ContactAccountType]bool{
+	account.ContactAccountTypeCash:               true,
+	account.ContactAccountTypeAccountTransfers:   true,
+	account.ContactAccountTypeThirdPartyPayments: true,
 }
