@@ -25,7 +25,7 @@ func generateInteracAddressFromUser(user *auth.User) string {
 	}
 	return fmt.Sprintf("%s,%s,%s,%s,%s,%s", user.Address1, user.Address2, user.City, user.Province, user.PostalCode, user.Country)
 }
-func NewDefaultInteracReqFromSession(session auth.Session) *DefaultInteracReq {
+func NewDefaultInteracReqFromSession(session *auth.Session) *DefaultInteracReq {
 	return &DefaultInteracReq{
 		SessionReq: transport.SessionReq{
 			SessionId: session.ID,

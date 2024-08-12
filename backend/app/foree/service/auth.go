@@ -15,6 +15,7 @@ type AuthService struct {
 	emailPasswordRepo      *auth.EmailPasswdRepo
 	permissionRepo         *auth.PermissionRepo
 	userIdentificationRepo *fAuth.UserIdentificationRepo
+	accountService         *AccountService
 	// emailPasswdRecoverRepo *auth.EmailPasswdRecoverRepo
 }
 
@@ -219,7 +220,6 @@ func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transpor
 	return session, nil
 }
 
-// TODO: create default contact account.
 func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.Session, transport.ForeeError) {
 	// Check allow to create user
 	session, err := a.allowCreateUser(req.SessionId)
@@ -277,12 +277,14 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	newSession := *session
 	newSession.User = user
 	newSession.Permissions = pers
-	_, sessionErr := a.sessionRepo.UpdateSession(newSession)
+	updateSession, sessionErr := a.sessionRepo.UpdateSession(newSession)
 	if sessionErr != nil {
 		return nil, transport.WrapInteralServerError(sessionErr)
 	}
 
-	return &newSession, nil
+	// Create default Interac Account for the user.
+	a.accountService.CreateDefaultInteracAccount(ctx, *NewDefaultInteracReqFromSession(updateSession))
+	return updateSession, nil
 }
 
 func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, transport.ForeeError) {
