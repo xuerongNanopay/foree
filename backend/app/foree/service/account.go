@@ -139,10 +139,19 @@ func (a *AccountService) GetAllContacts(ctx context.Context, req transport.Sessi
 	return ret, nil
 }
 
-// func (a *AccountService) queryContact(ctx context.Context, req QueryContactReq) ([]*ContactAccountSummaryDTO, transport.ForeeError) {
-// 	session, err := a.authService.Authorize(ctx, req.SessionId, ACCOUNT_QUERY)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (a *AccountService) QueryContact(ctx context.Context, req QueryContactReq) ([]*ContactAccountSummaryDTO, transport.ForeeError) {
+	session, err := a.authService.Authorize(ctx, req.SessionId, ACCOUNT_QUERY)
+	if err != nil {
+		return nil, err
+	}
+	accs, derr := a.contactRepo.QueryContactAccountByOwnerId(session.User.ID, req.Limit, req.Offset)
+	if derr != nil {
+		return nil, transport.WrapInteralServerError(derr)
+	}
+	ret := make([]*ContactAccountSummaryDTO, len(accs))
+	for _, v := range accs {
+		ret = append(ret, NewContactAccountSummaryDTO(v))
+	}
 
-// }
+	return ret, nil
+}

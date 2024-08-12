@@ -213,6 +213,30 @@ func (repo *ContactAccountRepo) GetAllContactAccountByOwnerId(ownerId int64) ([]
 	return accounts, nil
 }
 
+func (repo *ContactAccountRepo) QueryContactAccountByOwnerId(ownerId int64, limit, offset int) ([]*ContactAccount, error) {
+	rows, err := repo.db.Query(sQLContactAccountQueryByOwnerId, ownerId, limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	accounts := make([]*ContactAccount, 16)
+	for rows.Next() {
+		p, err := scanRowIntoContactAccount(rows)
+		if err != nil {
+			return nil, err
+		}
+		accounts = append(accounts, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return accounts, nil
+}
+
 func scanRowIntoContactAccount(rows *sql.Rows) (*ContactAccount, error) {
 	u := new(ContactAccount)
 	err := rows.Scan(
