@@ -12,7 +12,7 @@ const (
 	sQLContactAccountInsert = `
 		INSERT INTO contact_accounts
 		(
-			status, type, first_name, middle_name,
+			hash_id, status, type, first_name, middle_name,
 			last_name, address1, address2, city, province,
 			country, postal_code, phone_number, institution_name, branch_number, account_number,
 			account_hash, relationship_to_contact, owner_id
@@ -20,26 +20,26 @@ const (
 	`
 	sQLContactAccountUpdateById = `
 		UPDATE contact_accounts SET 
-			status = ?
+			status = ?, latest_acitvity_at = ?
 		WHERE id = ? AND a.owner_id = ?
 	`
 	sQLContactAccountGetUniqueById = `
 		SELECT 
-			a.id, a.status, a.type, a.first_name, a.middle_name,
+			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
 			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
 			a.account_hash, a.relationship_to_contact, a.owner_id
-			a.create_at, a.update_at
+			a.latest_acitvity_at, a.create_at, a.update_at
 		FROM contact_accounts a
 		where a.owner_id = ? AND a.id = ? AND a.status != DELETE
 	`
 	sQLContactAccountGetAllByOwnerId = `
 		SELECT 
-			a.id, a.status, a.type, a.first_name, a.middle_name,
+			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
 			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
 			a.account_hash, a.relationship_to_contact, a.owner_id
-			a.create_at, a.update_at
+			a.latest_acitvity_at, a.create_at, a.update_at
 		FROM contact_accounts a
 		where a.owner_id = ? AND a.status != DELETE
 	`
@@ -53,8 +53,10 @@ const (
 	ContactAccountTypeThirdPartyPayments ContactAccountType = "THIRD_PARTY_PAYMENTS"
 )
 
+// TODO: improve security by using hashId.
 type ContactAccount struct {
 	ID                    int64              `json:"id"`
+	HashId                string             `json:"hashId"`
 	Status                AccountStatus      `json:"status"`
 	Type                  ContactAccountType `json:"type"`
 	FirstName             string             `json:"firstName"`
@@ -73,6 +75,7 @@ type ContactAccount struct {
 	AccountHash           string             `json:"accountHash"`
 	RelationshipToContact string             `json:"relationshipToContact"`
 	OwnerId               int64              `json:"owerId"`
+	LatestActivityAt      time.Time          `json:"latestActivityAt"`
 	CreateAt              time.Time          `json:"createAt"`
 	UpdateAt              time.Time          `json:"updateAt"`
 }
@@ -107,6 +110,7 @@ type ContactAccountRepo struct {
 func (repo *ContactAccountRepo) InsertContactAccount(acc ContactAccount) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLContactAccountInsert,
+		acc.HashId,
 		acc.Status,
 		acc.Type,
 		acc.FirstName,
@@ -140,6 +144,7 @@ func (repo *ContactAccountRepo) UpdateContactAccountById(acc ContactAccount) err
 	_, err := repo.db.Exec(
 		sQLContactAccountUpdateById,
 		acc.Status,
+		acc.LatestActivityAt,
 		acc.OwnerId,
 		acc.ID,
 	)
@@ -201,6 +206,7 @@ func scanRowIntoContactAccount(rows *sql.Rows) (*ContactAccount, error) {
 	u := new(ContactAccount)
 	err := rows.Scan(
 		&u.ID,
+		&u.HashId,
 		&u.Status,
 		&u.Type,
 		&u.FirstName,
@@ -219,6 +225,7 @@ func scanRowIntoContactAccount(rows *sql.Rows) (*ContactAccount, error) {
 		&u.AccountHash,
 		&u.RelationshipToContact,
 		&u.OwnerId,
+		&u.LatestActivityAt,
 		&u.CreateAt,
 		&u.UpdateAt,
 	)

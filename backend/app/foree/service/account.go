@@ -122,5 +122,8 @@ func (a *AccountService) GetContact(ctx context.Context, req GetContactReq) (*Co
 }
 
 func (a *AccountService) queryContact(ctx context.Context, req QueryContactReq) ([]*ContactAccountSummaryDTO, transport.ForeeError) {
-	return nil, nil
+	session, err := a.authService.Authorize(ctx, req.SessionId, ACCOUNT_QUERY)
+	if err != nil {
+		return nil, err
+	}
 }
