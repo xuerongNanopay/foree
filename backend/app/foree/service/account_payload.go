@@ -92,9 +92,7 @@ func (q *DeleteContactReq) TrimSpace() {
 
 func (q *DeleteContactReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := validateStruct(q, "Invalid delete contact request")
-
-	if len(ret.Details) > 0 {
+	if ret := validateStruct(q, "Invalid delete contact request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -110,9 +108,7 @@ func (q *GetContactReq) TrimSpace() {
 
 func (q *GetContactReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := validateStruct(q, "Invalid get contact request")
-
-	if len(ret.Details) > 0 {
+	if ret := validateStruct(q, "Invalid get contact request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -129,9 +125,8 @@ func (q *QueryContactReq) TrimSpace() {
 
 func (q *QueryContactReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := validateStruct(q, "Invalid query contact request")
 
-	if len(ret.Details) > 0 {
+	if ret := validateStruct(q, "Invalid query contact request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil

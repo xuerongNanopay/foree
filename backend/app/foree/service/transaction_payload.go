@@ -45,6 +45,14 @@ func (q *ConfirmQuoteReq) TrimSpace() {
 	q.QuoteId = strings.TrimSpace(q.QuoteId)
 }
 
+func (q *ConfirmQuoteReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
+	if ret := validateStruct(q, "Invalid confirm quote request"); len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
+}
+
 type GetTransactionReq struct {
 }
 
