@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-playground/validator/v10"
 	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/auth"
@@ -54,13 +53,7 @@ func (q *CreateContactReq) TrimSpace() {
 
 func (q *CreateContactReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := transport.NewFormError("Invalid create contact request")
-	if err := validate.Struct(q); err != nil {
-		errors := err.(validator.ValidationErrors)
-		for _, e := range errors {
-			ret.AddDetails(e.Field(), e.Error())
-		}
-	}
+	ret := validateStruct(q, "Invalid create contact request")
 
 	// Check relationship
 	_, ok := allowRelationshipToContactTypes[q.RelationshipToContact]
@@ -99,13 +92,7 @@ func (q *DeleteContactReq) TrimSpace() {
 
 func (q *DeleteContactReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := transport.NewFormError("Invalid delete contact request")
-	if err := validate.Struct(q); err != nil {
-		errors := err.(validator.ValidationErrors)
-		for _, e := range errors {
-			ret.AddDetails(e.Field(), e.Error())
-		}
-	}
+	ret := validateStruct(q, "Invalid delete contact request")
 
 	if len(ret.Details) > 0 {
 		return ret
@@ -123,13 +110,7 @@ func (q *GetContactReq) TrimSpace() {
 
 func (q *GetContactReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := transport.NewFormError("Invalid get contact request")
-	if err := validate.Struct(q); err != nil {
-		errors := err.(validator.ValidationErrors)
-		for _, e := range errors {
-			ret.AddDetails(e.Field(), e.Error())
-		}
-	}
+	ret := validateStruct(q, "Invalid get contact request")
 
 	if len(ret.Details) > 0 {
 		return ret
@@ -148,13 +129,7 @@ func (q *QueryContactReq) TrimSpace() {
 
 func (q *QueryContactReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := transport.NewFormError("Invalid query contact request")
-	if err := validate.Struct(q); err != nil {
-		errors := err.(validator.ValidationErrors)
-		for _, e := range errors {
-			ret.AddDetails(e.Field(), e.Error())
-		}
-	}
+	ret := validateStruct(q, "Invalid query contact request")
 
 	if len(ret.Details) > 0 {
 		return ret

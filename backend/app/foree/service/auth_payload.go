@@ -25,13 +25,7 @@ func (q *SignUpReq) TrimSpace() {
 
 func (q *SignUpReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := transport.NewFormError("Invalid sign up request")
-	if err := validate.Struct(q); err != nil {
-		errors := err.(validator.ValidationErrors)
-		for _, e := range errors {
-			ret.AddDetails(e.Field(), e.Error())
-		}
-	}
+	ret := validateStruct(q, "Invalid sign up request")
 
 	if len(ret.Details) > 0 {
 		return ret
@@ -75,13 +69,7 @@ func (q *VerifyEmailReq) TrimSpace() {
 
 func (q *VerifyEmailReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := transport.NewFormError("Invalid verify email request")
-	if err := validate.Struct(q); err != nil {
-		errors := err.(validator.ValidationErrors)
-		for _, e := range errors {
-			ret.AddDetails(e.Field(), e.Error())
-		}
-	}
+	ret := validateStruct(q, "Invalid verify email request")
 
 	if len(ret.Details) > 0 {
 		return ret
@@ -102,13 +90,7 @@ func (q *LoginReq) TrimSpace() {
 
 func (q *LoginReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := transport.NewFormError("Invalid Login In request")
-	if err := validate.Struct(q); err != nil {
-		errors := err.(validator.ValidationErrors)
-		for _, e := range errors {
-			ret.AddDetails(e.Field(), e.Error())
-		}
-	}
+	ret := validateStruct(q, "Invalid Login In request")
 
 	if len(ret.Details) > 0 {
 		return ret
@@ -161,13 +143,7 @@ func (q *CreateUserReq) TrimSpace() {
 // TODO: trim name, and use allowText
 func (q *CreateUserReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := transport.NewFormError("Invalid user creation request")
-	if err := validate.Struct(q); err != nil {
-		errors := err.(validator.ValidationErrors)
-		for _, e := range errors {
-			ret.AddDetails(e.Field(), e.Error())
-		}
-	}
+	ret := validateStruct(q, "Invalid user creation request")
 
 	// Age
 	age := q.Dob.Time.Unix() / int64(Second_In_Year)

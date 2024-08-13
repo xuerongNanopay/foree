@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-playground/validator/v10"
 	"xue.io/go-pay/app/foree/transport"
 )
 
@@ -22,13 +21,7 @@ func (q *FreeQuoteReq) TrimSpace() {
 
 func (q *FreeQuoteReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	ret := transport.NewFormError("Invalid free quote request")
-	if err := validate.Struct(q); err != nil {
-		errors := err.(validator.ValidationErrors)
-		for _, e := range errors {
-			ret.AddDetails(e.Field(), e.Error())
-		}
-	}
+	ret := validateStruct(q, "Invalid free quote request")
 
 	if q.SrcAmount <= 0 && q.DestAmount <= 0 {
 		ret.AddDetails("srcAmount", fmt.Sprintf("invalid srcAmount `%v`", q.SrcAmount))
@@ -45,6 +38,11 @@ type QuoteTransactionReq struct {
 }
 
 type ConfirmQuoteReq struct {
+	QuoteId string `json:"quoteId" validate:"required"`
+}
+
+func (q *ConfirmQuoteReq) TrimSpace() {
+	q.QuoteId = strings.TrimSpace(q.QuoteId)
 }
 
 type GetTransactionReq struct {
