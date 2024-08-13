@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"xue.io/go-pay/app/foree/account"
 	fAuth "xue.io/go-pay/app/foree/auth"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/auth"
@@ -16,6 +17,7 @@ type AuthService struct {
 	permissionRepo         *auth.PermissionRepo
 	userIdentificationRepo *fAuth.UserIdentificationRepo
 	accountService         *AccountService
+	interacRepo            *account.InteracAccountRepo
 	// emailPasswdRecoverRepo *auth.EmailPasswdRecoverRepo
 }
 
@@ -283,7 +285,21 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	}
 
 	// Create default Interac Account for the user.
-	a.accountService.CreateDefaultInteracAccount(ctx, *NewDefaultInteracReqFromSession(updateSession))
+	acc := account.InteracAccount{
+		FirstName:        session.User.FirstName,
+		MiddleName:       session.User.MiddleName,
+		LastName:         session.User.LastName,
+		Address:          generateInteracAddressFromUser(session.User),
+		PhoneNumber:      session.User.PhoneNumber,
+		Email:            session.User.Email,
+		OwnerId:          session.User.ID,
+		Status:           account.AccountStatusActive,
+		LatestActivityAt: time.Now(),
+	}
+	_, derr := a.interacRepo.InsertInteracAccount(acc)
+	if derr != nil {
+		return nil, transport.WrapInteralServerError(derr)
+	}
 	return updateSession, nil
 }
 
