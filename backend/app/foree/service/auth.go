@@ -16,7 +16,6 @@ type AuthService struct {
 	emailPasswordRepo      *auth.EmailPasswdRepo
 	permissionRepo         *auth.PermissionRepo
 	userIdentificationRepo *fAuth.UserIdentificationRepo
-	accountService         *AccountService
 	interacRepo            *account.InteracAccountRepo
 	// emailPasswdRecoverRepo *auth.EmailPasswdRecoverRepo
 }
