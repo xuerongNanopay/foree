@@ -32,7 +32,7 @@ const (
     `
 	sQLTxSummaryUpdateById = `
         UPDATE tx_summary SET 
-            summary = ?, status = ?, is_cancel_allowed = ? 
+            status = ?, is_cancel_allowed = ? 
         WHERE id = ?
     `
 	sQLTxSummaryGetUniqueById = `
@@ -61,22 +61,36 @@ const (
         FROM tx_summary t
         where t.ParentTxId = ?
     `
-	// TODO: Provide more flexible query
-	// sQLTxSummaryQueryByOwnerId = `
-	//     SELECT
-	//         t.id, t.summary, t.type, t.status, t.rate
-	//         t.src_acc_summary, t.src_amount, t.src_currency,
-	//         t.dest_acc_summary, t.dest_amount, t.dest_currency,
-	//         t.total_amount, t.total_currency,
-	//         t.fee_amount, t.fee_currency,
-	//         t.reward_amount, t.reward_currency,
-	//         t.is_cancel_allowed, t.parent_tx_id, t.owner_id,
-	//         t.create_at, t.update_at
-	//     FROM tx_summary t
-	//     where t.owner_id = ?
-	//     ORDER BY create_at ?
-	//     LIMIT ? OFFSET ?
-	// `
+	sQLTxSummaryGetAllByOwnerId = `
+	    SELECT
+	        t.id, t.summary, t.type, t.status, t.rate
+	        t.src_acc_summary, t.src_amount, t.src_currency,
+	        t.dest_acc_summary, t.dest_amount, t.dest_currency,
+	        t.total_amount, t.total_currency,
+	        t.fee_amount, t.fee_currency,
+	        t.reward_amount, t.reward_currency,
+	        t.is_cancel_allowed, t.parent_tx_id, t.owner_id,
+	        t.create_at, t.update_at
+	    FROM tx_summary t
+	    where t.owner_id = ?
+	    ORDER BY t.create_at DESC
+	    LIMIT ? OFFSET ?
+	`
+	sQLTxSummaryQueryByOwnerId = `
+	    SELECT
+	        t.id, t.summary, t.type, t.status, t.rate
+	        t.src_acc_summary, t.src_amount, t.src_currency,
+	        t.dest_acc_summary, t.dest_amount, t.dest_currency,
+	        t.total_amount, t.total_currency,
+	        t.fee_amount, t.fee_currency,
+	        t.reward_amount, t.reward_currency,
+	        t.is_cancel_allowed, t.parent_tx_id, t.owner_id,
+	        t.create_at, t.update_at
+	    FROM tx_summary t
+	    where t.owner_id = ? AND t.status = ?
+	    ORDER BY t.create_at DESC
+	    LIMIT ? OFFSET ?
+	`
 )
 
 type TxSummary struct {
@@ -146,14 +160,14 @@ func (repo *TxSummaryRepo) InsertTxSummary(tx TxSummary) (int64, error) {
 }
 
 func (repo *TxSummaryRepo) UpdateTxSummaryById(tx TxSummary) error {
-	_, err := repo.db.Exec(sQLTxSummaryUpdateById, tx.Summary, tx.Status, tx.IsCancelAllowed, tx.ID)
+	_, err := repo.db.Exec(sQLTxSummaryUpdateById, tx.Status, tx.IsCancelAllowed, tx.ID)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (repo *InteracCITxRepo) GetUniqueTxSummaryById(userId, id int64) (*TxSummary, error) {
+func (repo *TxSummaryRepo) GetUniqueTxSummaryById(userId, id int64) (*TxSummary, error) {
 	rows, err := repo.db.Query(sQLTxSummaryGetUniqueById, userId, id)
 
 	if err != nil {
@@ -177,7 +191,7 @@ func (repo *InteracCITxRepo) GetUniqueTxSummaryById(userId, id int64) (*TxSummar
 	return f, nil
 }
 
-func (repo *InteracCITxRepo) GetUniqueTxSummaryByParentTxId(parentTxId int64) (*TxSummary, error) {
+func (repo *TxSummaryRepo) GetUniqueTxSummaryByParentTxId(parentTxId int64) (*TxSummary, error) {
 	rows, err := repo.db.Query(sQLTxSummaryGetUniqueByParentTxId, parentTxId)
 
 	if err != nil {
@@ -199,6 +213,54 @@ func (repo *InteracCITxRepo) GetUniqueTxSummaryByParentTxId(parentTxId int64) (*
 	}
 
 	return f, nil
+}
+
+func (repo *TxSummaryRepo) GetAllTxSummaryByOwnerId(ownerId int64, limit, offset int) ([]*TxSummary, error) {
+	rows, err := repo.db.Query(sQLTxSummaryGetAllByOwnerId, ownerId, limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	accounts := make([]*TxSummary, 16)
+	for rows.Next() {
+		p, err := scanRowIntoTxSummary(rows)
+		if err != nil {
+			return nil, err
+		}
+		accounts = append(accounts, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return accounts, nil
+}
+
+func (repo *TxSummaryRepo) QueryTxSummaryByOwnerId(ownerId int64, status string, limit, offset int) ([]*TxSummary, error) {
+	rows, err := repo.db.Query(sQLTxSummaryQueryByOwnerId, ownerId, status, limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	accounts := make([]*TxSummary, 16)
+	for rows.Next() {
+		p, err := scanRowIntoTxSummary(rows)
+		if err != nil {
+			return nil, err
+		}
+		accounts = append(accounts, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return accounts, nil
 }
 
 func scanRowIntoTxSummary(rows *sql.Rows) (*TxSummary, error) {
