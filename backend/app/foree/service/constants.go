@@ -40,3 +40,13 @@ var allowContactAccountType = map[account.ContactAccountType]bool{
 	account.ContactAccountTypeAccountTransfers:   true,
 	account.ContactAccountTypeThirdPartyPayments: true,
 }
+
+var allowTransactionsStatus = map[string]bool{
+	"Await Payment": true,
+	"Pending":       true,
+	"In Progress":   true,
+	"Completed":     true,
+	"Canceled":      true,
+	"Refunding":     true,
+	"Refunded":      true,
+}

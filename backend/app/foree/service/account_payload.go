@@ -100,7 +100,7 @@ func (q *DeleteContactReq) Validate() *transport.BadRequestError {
 
 type GetContactReq struct {
 	transport.SessionReq
-	ContactId int64 `json:"contactId" validate:"required,gte=0"`
+	ContactId int64 `json:"contactId" validate:"required,gt=0"`
 }
 
 func (q *GetContactReq) TrimSpace() {
@@ -117,7 +117,7 @@ func (q *GetContactReq) Validate() *transport.BadRequestError {
 type QueryContactReq struct {
 	transport.SessionReq
 	Offset int `json:"offset" validate:"required,gte=0"`
-	Limit  int `json:"limit" validate:"required,gte=0"`
+	Limit  int `json:"limit" validate:"required,gt=0"`
 }
 
 func (q *QueryContactReq) TrimSpace() {

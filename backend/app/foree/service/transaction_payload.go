@@ -83,15 +83,81 @@ func (q *ConfirmQuoteReq) Validate() *transport.BadRequestError {
 
 type GetTransactionReq struct {
 	transport.SessionReq
+	TransactionId int64 `json:"transactionId" validate:"required,gt=0"`
+}
+
+func (q *GetTransactionReq) TrimSpace() {
+}
+
+func (q *GetTransactionReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
+	if ret := validateStruct(q, "Invalid get transaction request"); len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
 }
 
 type QueryTransactionReq struct {
 	transport.SessionReq
+	Status string `json:""`
+	Offset int    `json:"offset" validate:"required,gte=0"`
+	Limit  int    `json:"limit" validate:"required,gt=0"`
+}
+
+func (q *QueryTransactionReq) TrimSpace() {
+}
+
+func (q *QueryTransactionReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
+
+	ret := validateStruct(q, "Invalid query transaction request")
+
+	// Check status
+	_, ok := allowTransactionsStatus[q.Status]
+	if !ok {
+		ret.AddDetails("status", fmt.Sprintf("invalid status `%v`", q.Status))
+	}
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
 }
 
 type CancelTransactionReq struct {
 	transport.SessionReq
+	TransactionId int64 `json:"transactionId" validate:"required,gt=0"`
+}
+
+func (q *CancelTransactionReq) TrimSpace() {
+}
+
+func (q *CancelTransactionReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
+	if ret := validateStruct(q, "Invalid cancel transaction request"); len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
 }
 
 type GetRateReq struct {
+	SrcCurrency  string `json:"srcCurrency" validate:"eq=CAD"`
+	DestCurrency string `json:"DestCurrency" validate:"eq=PKR"`
 }
+
+func (q *GetRateReq) TrimSpace() {
+	q.SrcCurrency = strings.TrimSpace(q.SrcCurrency)
+	q.DestCurrency = strings.TrimSpace(q.DestCurrency)
+}
+
+func (q *GetRateReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
+	ret := validateStruct(q, "Invalid free quote request")
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
+}
+
+// ----------   Response --------------
