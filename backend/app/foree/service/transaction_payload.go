@@ -3,7 +3,9 @@ package service
 import (
 	"fmt"
 	"strings"
+	"time"
 
+	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/transport"
 )
 
@@ -161,3 +163,74 @@ func (q *GetRateReq) Validate() *transport.BadRequestError {
 }
 
 // ----------   Response --------------
+type TxSummaryDTO struct {
+	ID              int64     `json:"id"`
+	Summary         string    `json:"sumary"`
+	Type            string    `json:"type"`
+	Status          string    `json:"status"`
+	Rate            string    `json:"rate"`
+	TotalAmount     string    `json:"totalAmount"`
+	TotalCurrency   string    `json:"totalCurrency"`
+	IsCancelAllowed bool      `json:"isCancelAllowed"`
+	CreateAt        time.Time `json:"createAt"`
+}
+
+func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
+	return &TxSummaryDTO{
+		ID:              tx.ID,
+		Summary:         tx.Summary,
+		Type:            tx.Type,
+		Status:          tx.Status,
+		Rate:            tx.Rate,
+		TotalAmount:     tx.Rate,
+		TotalCurrency:   tx.TotalCurrency,
+		IsCancelAllowed: tx.IsCancelAllowed,
+		CreateAt:        tx.CreateAt,
+	}
+}
+
+type TxSummaryDetailDTO struct {
+	ID              int64     `json:"id"`
+	Summary         string    `json:"sumary"`
+	Type            string    `json:"type"`
+	Status          string    `json:"status"`
+	Rate            string    `json:"rate"`
+	SrcAccSummary   string    `json:"srcAccSummary"`
+	SrcAmount       string    `json:"srcAmount"`
+	SrcCurrency     string    `json:"srcCurrency"`
+	DestAccSummary  string    `json:"destAccSummary"`
+	DestAmount      string    `json:"destAmount"`
+	DestCurrency    string    `json:"destCurrency"`
+	TotalAmount     string    `json:"totalAmount"`
+	TotalCurrency   string    `json:"totalCurrency"`
+	FeeAmount       string    `json:"feeAmount"`
+	FeeCurrency     string    `json:"feeCurrency"`
+	RewardAmount    string    `json:"rewardAmount"`
+	RewardCurrency  string    `json:"rewardCurrency"`
+	IsCancelAllowed bool      `json:"isCancelAllowed"`
+	CreateAt        time.Time `json:"createAt"`
+}
+
+func NewTxSummaryDetailDTO(tx *transaction.TxSummary) *TxSummaryDetailDTO {
+	return &TxSummaryDetailDTO{
+		ID:              tx.ID,
+		Summary:         tx.Summary,
+		Type:            tx.Type,
+		Status:          tx.Status,
+		Rate:            tx.Rate,
+		SrcAccSummary:   tx.SrcAccSummary,
+		SrcAmount:       tx.SrcAmount,
+		SrcCurrency:     tx.SrcCurrency,
+		DestAccSummary:  tx.DestAccSummary,
+		DestAmount:      tx.DestAmount,
+		DestCurrency:    tx.DestCurrency,
+		TotalAmount:     tx.TotalAmount,
+		TotalCurrency:   tx.TotalCurrency,
+		FeeAmount:       tx.FeeAmount,
+		FeeCurrency:     tx.FeeCurrency,
+		RewardAmount:    tx.RewardAmount,
+		RewardCurrency:  tx.RewardCurrency,
+		IsCancelAllowed: tx.IsCancelAllowed,
+		CreateAt:        tx.CreateAt,
+	}
+}
