@@ -1,8 +1,9 @@
 package service
 
 const (
-	ACCOUNT_CREATE = "foree::account::create"
-	ACCOUNT_DELETE = "foree::account::delete"
-	ACCOUNT_GET    = "foree::account::get"
-	ACCOUNT_QUERY  = "foree::account::query"
+	Contact_CREATE   = "foree::contact::create"
+	Contact_DELETE   = "foree::contact::delete"
+	Contact_GET      = "foree::contact::get"
+	Contact_QUERY    = "foree::contact::query"
+	PermInteracQuery = "foree::interac::query"
 )

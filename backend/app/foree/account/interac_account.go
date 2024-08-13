@@ -20,7 +20,7 @@ const (
 			status = ?, latest_acitvity_at = ?
 		WHERE id = ? AND a.owner_id = ?
 	`
-	sQLInteractAccountGetUniqueById = `
+	sQLInteracAccountGetUniqueById = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
 			a.last_name, a.address, a.phone_number, a.email, 
@@ -30,7 +30,7 @@ const (
 		FROM interac_accounts a
 		where a.owner_id = ? AND a.id = ? AND a.status != DELETE
 	`
-	sQLInteractAccountGetAllByOwnerId = `
+	sQLInteracAccountGetAllByOwnerId = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
 			a.last_name, a.address, a.phone_number, a.email, 
@@ -110,8 +110,8 @@ func (repo *ContactAccountRepo) UpdateInteracAccountById(acc InteracAccount) err
 	return nil
 }
 
-func (repo *InteracAccountRepo) GetAllInteractAccountByOwnerId(ownerId int64) ([]*InteracAccount, error) {
-	rows, err := repo.db.Query(sQLInteractAccountGetAllByOwnerId, ownerId)
+func (repo *InteracAccountRepo) GetAllInteracAccountByOwnerId(ownerId int64) ([]*InteracAccount, error) {
+	rows, err := repo.db.Query(sQLInteracAccountGetAllByOwnerId, ownerId)
 
 	if err != nil {
 		return nil, err
@@ -134,8 +134,8 @@ func (repo *InteracAccountRepo) GetAllInteractAccountByOwnerId(ownerId int64) ([
 	return accounts, nil
 }
 
-func (repo *InteracAccountRepo) GetUniqueInteractAccountById(ownerId, id int64) (*InteracAccount, error) {
-	rows, err := repo.db.Query(sQLInteractAccountGetUniqueById, ownerId, id)
+func (repo *InteracAccountRepo) GetUniqueInteracAccountById(ownerId, id int64) (*InteracAccount, error) {
+	rows, err := repo.db.Query(sQLInteracAccountGetUniqueById, ownerId, id)
 
 	if err != nil {
 		return nil, err

@@ -39,7 +39,7 @@ func (a *AccountService) CreateDefaultInteracAccount(ctx context.Context, req De
 }
 
 func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq) (*ContactAccountDetailDTO, transport.ForeeError) {
-	session, err := a.authService.Authorize(ctx, req.SessionId, ACCOUNT_CREATE)
+	session, err := a.authService.Authorize(ctx, req.SessionId, Contact_CREATE)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 }
 
 func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq) transport.ForeeError {
-	session, err := a.authService.Authorize(ctx, req.SessionId, ACCOUNT_DELETE)
+	session, err := a.authService.Authorize(ctx, req.SessionId, Contact_DELETE)
 	if err != nil {
 		return err
 	}
@@ -106,30 +106,8 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 	return nil
 }
 
-// This method mainly run in goruntine. We don't care if it work so much.
-func (a *AccountService) refreshContactLatestActivityAt(userId, contactId int64) {
-	acc, derr := a.contactRepo.GetUniqueContactAccountById(userId, contactId)
-	if derr != nil {
-		//TODO: log error
-		return
-	}
-
-	if acc == nil {
-		//TODO: log error
-		return
-	}
-
-	newAcc := *acc
-	newAcc.LatestActivityAt = time.Now()
-	derr = a.contactRepo.UpdateContactAccountById(newAcc)
-	if derr != nil {
-		//TODO: log error
-		return
-	}
-}
-
 func (a *AccountService) GetContact(ctx context.Context, req GetContactReq) (*ContactAccountDetailDTO, transport.ForeeError) {
-	session, err := a.authService.Authorize(ctx, req.SessionId, ACCOUNT_GET)
+	session, err := a.authService.Authorize(ctx, req.SessionId, Contact_GET)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +125,7 @@ func (a *AccountService) GetContact(ctx context.Context, req GetContactReq) (*Co
 }
 
 func (a *AccountService) GetAllContacts(ctx context.Context, req transport.SessionReq) ([]*ContactAccountSummaryDTO, transport.ForeeError) {
-	session, err := a.authService.Authorize(ctx, req.SessionId, ACCOUNT_GET)
+	session, err := a.authService.Authorize(ctx, req.SessionId, Contact_QUERY)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +143,7 @@ func (a *AccountService) GetAllContacts(ctx context.Context, req transport.Sessi
 }
 
 func (a *AccountService) QueryContacts(ctx context.Context, req QueryContactReq) ([]*ContactAccountSummaryDTO, transport.ForeeError) {
-	session, err := a.authService.Authorize(ctx, req.SessionId, ACCOUNT_QUERY)
+	session, err := a.authService.Authorize(ctx, req.SessionId, Contact_QUERY)
 	if err != nil {
 		return nil, err
 	}
@@ -176,6 +154,24 @@ func (a *AccountService) QueryContacts(ctx context.Context, req QueryContactReq)
 	ret := make([]*ContactAccountSummaryDTO, len(accs))
 	for _, v := range accs {
 		ret = append(ret, NewContactAccountSummaryDTO(v))
+	}
+
+	return ret, nil
+}
+
+func (a *AccountService) GetAllInteracs(ctx context.Context, req transport.SessionReq) ([]*InteracAccountSummaryDTO, transport.ForeeError) {
+	session, err := a.authService.Authorize(ctx, req.SessionId, PermInteracQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	accs, derr := a.interacRepo.GetAllInteracAccountByOwnerId(session.User.ID)
+	if derr != nil {
+		return nil, transport.WrapInteralServerError(derr)
+	}
+	ret := make([]*InteracAccountSummaryDTO, len(accs))
+	for _, v := range accs {
+		ret = append(ret, NewInteracAccountSummaryDTO(v))
 	}
 
 	return ret, nil

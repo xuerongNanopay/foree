@@ -167,6 +167,20 @@ func (repo *ContactAccountRepo) UpdateContactAccountById(acc ContactAccount) err
 	return nil
 }
 
+func (repo *ContactAccountRepo) RefreshContactLatestActivityAt(acc ContactAccount) error {
+	_, err := repo.db.Exec(
+		sQLContactAccountUpdateById,
+		acc.Status,
+		time.Now(),
+		acc.OwnerId,
+		acc.ID,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (repo *ContactAccountRepo) GetUniqueContactAccountById(ownerid, id int64) (*ContactAccount, error) {
 	rows, err := repo.db.Query(sQLContactAccountGetUniqueById, ownerid, id)
 
