@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/auth"
+	"xue.io/go-pay/app/foree/transaction"
 )
 
 const UserGroup = "foree-person"
@@ -42,11 +43,11 @@ var allowContactAccountType = map[account.ContactAccountType]bool{
 }
 
 var allowTransactionsStatus = map[string]bool{
-	"Await Payment": true,
-	"Pending":       true,
-	"In Progress":   true,
-	"Completed":     true,
-	"Canceled":      true,
-	"Refunding":     true,
-	"Refunded":      true,
+	string(transaction.TxSummaryStatusActionRequire): true,
+	string(transaction.TxSummaryStatusAwaitPayment):  true,
+	string(transaction.TxSummaryStatusInProgress):    true,
+	string(transaction.TxSummaryStatusCompleted):     true,
+	string(transaction.TxSummaryStatusCancelled):     true,
+	string(transaction.TxSummaryStatusRefunding):     true,
+	string(transaction.TxSummaryStatusRefunded):      true,
 }

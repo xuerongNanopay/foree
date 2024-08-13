@@ -5,6 +5,18 @@ import (
 	"time"
 )
 
+type TxSummaryStatus string
+
+const (
+	TxSummaryStatusActionRequire TxSummaryStatus = "Action Require"
+	TxSummaryStatusAwaitPayment  TxSummaryStatus = "Await Payment"
+	TxSummaryStatusInProgress    TxSummaryStatus = "In Progress"
+	TxSummaryStatusCompleted     TxSummaryStatus = "Completed"
+	TxSummaryStatusCancelled     TxSummaryStatus = "Cancelled"
+	TxSummaryStatusRefunding     TxSummaryStatus = "Refunding"
+	TxSummaryStatusRefunded      TxSummaryStatus = "Refunded"
+)
+
 const (
 	sQLTxSummaryInsert = `
         INSERT INTO tx_summary
