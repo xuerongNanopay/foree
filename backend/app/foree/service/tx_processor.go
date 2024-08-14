@@ -78,7 +78,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 		tx.CurStageStatus = transaction.TxStatusInitial
 		return &tx, nil
 	}
-	if tx.Status == transaction.TxStatusComplete || tx.Status == transaction.TxStatusCancel || tx.Status == transaction.TxStatusReject {
+	if tx.Status == transaction.TxStatusCompleted || tx.Status == transaction.TxStatusCancelled || tx.Status == transaction.TxStatusRejected {
 		//TODO: log warn.
 		return &tx, nil
 	}
@@ -91,11 +91,11 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			//Set to Send
 		case transaction.TxStatusSent:
 			//Check status from scotia API.
-		case transaction.TxStatusComplete:
+		case transaction.TxStatusCompleted:
 			//Move to next stage
-		case transaction.TxStatusReject:
+		case transaction.TxStatusRejected:
 			//Set to reject
-		case transaction.TxStatusCancel:
+		case transaction.TxStatusCancelled:
 			// set to cancel
 		default:
 			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", tx.ID, tx.CurStageStatus, tx.CurStage)
@@ -105,14 +105,14 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 		case transaction.TxStatusInitial:
 			//TODO: call send IDMAPI
 			//Set to Send
-		case transaction.TxStatusComplete:
+		case transaction.TxStatusCompleted:
 			//Move to next stage
 			tx.CurStage = transaction.TxStageNBPCI
 			tx.CurStageStatus = transaction.TxStatusInitial
 			return &tx, nil
-		case transaction.TxStatusReject:
+		case transaction.TxStatusRejected:
 			//TODO: refund
-			tx.Status = transaction.TxStatusReject
+			tx.Status = transaction.TxStatusRejected
 			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
 				return nil, err
@@ -130,25 +130,25 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			//TODO: call send NBP API
 		case transaction.TxStatusSent:
 			//Check status from scotia API.
-		case transaction.TxStatusComplete:
-			tx.Status = transaction.TxStatusComplete
+		case transaction.TxStatusCompleted:
+			tx.Status = transaction.TxStatusCompleted
 			tx.Conclusion = fmt.Sprintf("Complete at %s.", time_util.NowInToronto().Format(time.RFC3339))
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
 				return nil, err
 			}
 			return &tx, nil
 			// set tx sum to complete
-		case transaction.TxStatusReject:
+		case transaction.TxStatusRejected:
 			//TODO: refund
-			tx.Status = transaction.TxStatusReject
+			tx.Status = transaction.TxStatusRejected
 			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
 				return nil, err
 			}
 			return &tx, nil
-		case transaction.TxStatusCancel:
+		case transaction.TxStatusCancelled:
 			//TODO: refund
-			tx.Status = transaction.TxStatusCancel
+			tx.Status = transaction.TxStatusCancelled
 			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
 				return nil, err

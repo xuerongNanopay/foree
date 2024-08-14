@@ -47,9 +47,10 @@ const (
 	TxStatusProcessing TxStatus = "PROCESSING"
 	TxStatusSuspend    TxStatus = "SUSPEND"
 	TxStatusSent       TxStatus = "SENT"
-	TxStatusReject     TxStatus = "REJECT"
-	TxStatusCancel     TxStatus = "CANCEL"
-	TxStatusComplete   TxStatus = "COMPLETE"
+	TxStatusRejected   TxStatus = "REJECTED"
+	TxStatusCancelled  TxStatus = "CANCELLED"
+	TxStatusCompleted  TxStatus = "COMPLETED"
+	TxStatusClosed     TxStatus = "CLOSED"
 )
 
 type TxType string
