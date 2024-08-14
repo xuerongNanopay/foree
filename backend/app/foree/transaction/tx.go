@@ -69,7 +69,7 @@ const (
 type ForeeTx struct {
 	ID                 int64            `json:"id"`
 	Type               string           `json:"type"`
-	Status             TxStage          `json:"status"`
+	Status             TxStatus         `json:"status"`
 	Rate               types.Amount     `json:"Rate"`
 	SrcAmt             types.AmountData `json:"srcAmt"`
 	DestAmt            types.AmountData `json:"destAmt"`

@@ -1,6 +1,10 @@
 package service
 
-import "xue.io/go-pay/app/foree/transaction"
+import (
+	"xue.io/go-pay/app/foree/account"
+	"xue.io/go-pay/app/foree/transaction"
+	"xue.io/go-pay/auth"
+)
 
 // It is the internal service for transaction process.
 
@@ -13,4 +17,19 @@ type TxProcessor struct {
 	txLimitRepo      *transaction.TxLimitRepo
 	txLimitCacheRepo *transaction.TxLimitCacheRepo
 	foreeTxRepo      *transaction.ForeeTxRepo
+	userRepo         *auth.UserRepo
+	contactRepo      *account.ContactAccountRepo
+	interacRepo      *account.InteracAccountRepo
+}
+
+func (p *TxProcessor) CreateTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	return nil, nil
+}
+
+func (p *TxProcessor) LoadTx(id int64) (*transaction.ForeeTx, error) {
+	return nil, nil
+}
+
+func (p *TxProcessor) ProcessTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	return nil, nil
 }
