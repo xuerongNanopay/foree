@@ -99,6 +99,26 @@ func (q *GetTransactionReq) Validate() *transport.BadRequestError {
 	return nil
 }
 
+type GetAllTransactionReq struct {
+	transport.SessionReq
+	Offset int `json:"offset" validate:"required,gte=0"`
+	Limit  int `json:"limit" validate:"required,gt=0"`
+}
+
+func (q *GetAllTransactionReq) TrimSpace() {
+}
+
+func (q *GetAllTransactionReq) Validate() *transport.BadRequestError {
+	q.TrimSpace()
+
+	ret := validateStruct(q, "Invalid get transactions request")
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
+}
+
 type QueryTransactionReq struct {
 	transport.SessionReq
 	Status string `json:""`
