@@ -44,8 +44,8 @@ type TxStatus string
 const (
 	TxStatusInitial    TxStatus = "INITIAL"
 	TxStatusProcessing TxStatus = "PROCESSING"
-	TxStatusSuspend    TxStatus = "Suspend"
-	TxStatusSent       TxStatus = "Sent"
+	TxStatusSuspend    TxStatus = "SUSPEND"
+	TxStatusSent       TxStatus = "SENT"
 	TxStatusReject     TxStatus = "REJECT"
 	TxStatusCancel     TxStatus = "CANCEL"
 	TxStatusComplete   TxStatus = "COMPLETE"
