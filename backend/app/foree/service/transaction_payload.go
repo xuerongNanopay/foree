@@ -163,6 +163,20 @@ func (q *GetRateReq) Validate() *transport.BadRequestError {
 }
 
 // ----------   Response --------------
+type RateDTO struct {
+	SrcCurrency  string
+	DestCurrency string
+	amt          float64
+}
+
+func NewRateDTO(r *transaction.Rate) *RateDTO {
+	return &RateDTO{
+		SrcCurrency:  r.SrcAmt.Curreny,
+		DestCurrency: r.DestAmt.Curreny,
+		amt:          r.GetForwardRate(),
+	}
+}
+
 type TxSummaryDTO struct {
 	ID              int64     `json:"id"`
 	Summary         string    `json:"sumary"`
