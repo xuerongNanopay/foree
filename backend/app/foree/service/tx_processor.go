@@ -4,7 +4,7 @@ import "xue.io/go-pay/app/foree/transaction"
 
 // It is the internal service for transaction process.
 
-type TxProcesser struct {
+type TxProcessor struct {
 	interacTxRepo    *transaction.InteracCITxRepo
 	npbTxRepo        *transaction.NBPCOTxRepo
 	idmTxRepo        *transaction.IdmTxRepo
