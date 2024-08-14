@@ -107,10 +107,20 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			//Set to Send
 		case transaction.TxStatusComplete:
 			//Move to next stage
+			tx.CurStage = transaction.TxStageNBPCI
+			tx.CurStageStatus = transaction.TxStatusInitial
+			return &tx, nil
 		case transaction.TxStatusReject:
-			//Set to reject
+			//TODO: refund
+			tx.Status = transaction.TxStatusReject
+			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
+			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
+				return nil, err
+			}
+			return &tx, nil
 		case transaction.TxStatusSuspend:
 			//Wait to approve
+			//Log warn?
 		default:
 			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", tx.ID, tx.CurStageStatus, tx.CurStage)
 		}
