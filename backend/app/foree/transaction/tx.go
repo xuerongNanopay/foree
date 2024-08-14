@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"context"
 	"database/sql"
 	"time"
 
@@ -104,7 +105,7 @@ type ForeeTxRepo struct {
 	db *sql.DB
 }
 
-func (repo *ForeeTxRepo) InsertForeeTx(tx ForeeTx) (int64, error) {
+func (repo *ForeeTxRepo) InsertForeeTx(ctx context.Context, tx ForeeTx) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLForeeTxInsert,
 		tx.Type,
@@ -136,7 +137,7 @@ func (repo *ForeeTxRepo) InsertForeeTx(tx ForeeTx) (int64, error) {
 	return id, nil
 }
 
-func (repo *ForeeTxRepo) UpdateForeeTxById(tx ForeeTx) error {
+func (repo *ForeeTxRepo) UpdateForeeTxById(ctx context.Context, tx ForeeTx) error {
 	_, err := repo.db.Exec(sQLForeeTxUpdateById, tx.Status, tx.CurStage, tx.CurStageStatus, tx.ID)
 	if err != nil {
 		return err
@@ -144,7 +145,7 @@ func (repo *ForeeTxRepo) UpdateForeeTxById(tx ForeeTx) error {
 	return nil
 }
 
-func (repo *ForeeTxRepo) GetUniqueForeeTxById(id int64) (*ForeeTx, error) {
+func (repo *ForeeTxRepo) GetUniqueForeeTxById(ctx context.Context, id int64) (*ForeeTx, error) {
 	rows, err := repo.db.Query(sQLForeeTxGetById, id)
 
 	if err != nil {

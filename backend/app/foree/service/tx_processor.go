@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
+	time_util "xue.io/go-pay/util/time"
 )
 
 // It is the internal service for transaction process.
@@ -119,12 +121,29 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 		case transaction.TxStatusSent:
 			//Check status from scotia API.
 		case transaction.TxStatusComplete:
+			tx.Status = transaction.TxStatusComplete
+			tx.Conclusion = fmt.Sprintf("Complete at %s.", time_util.NowInToronto().Format(time.RFC3339))
+			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
+				return nil, err
+			}
+			return &tx, nil
 			// set tx sum to complete
 		case transaction.TxStatusReject:
 			//TODO: refund
-			// set tx sum to cancel
+			tx.Status = transaction.TxStatusReject
+			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
+			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
+				return nil, err
+			}
+			return &tx, nil
 		case transaction.TxStatusCancel:
-			// tx.Status =
+			//TODO: refund
+			tx.Status = transaction.TxStatusCancel
+			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
+			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
+				return nil, err
+			}
+			return &tx, nil
 		default:
 			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", tx.ID, tx.CurStageStatus, tx.CurStage)
 		}
