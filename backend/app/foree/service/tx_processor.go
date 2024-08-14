@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -40,8 +41,9 @@ func (p *TxProcessor) ProcessTx(tx transaction.ForeeTx) (*transaction.ForeeTx, e
 	var nTx *transaction.ForeeTx
 	maxLoop := 16
 	i := 0
+	ctx := context.Background()
 	for {
-		nTx, err = p.doProcessTx(tx)
+		nTx, err = p.doProcessTx(ctx, tx)
 		if err != nil {
 			return nil, err
 		}
@@ -67,7 +69,7 @@ func (p *TxProcessor) recordTxHistory(h *transaction.TxHistory) {
 
 }
 
-func (p *TxProcessor) doProcessTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	if tx.Status == transaction.TxStatusInitial {
 		tx.Status = transaction.TxStatusProcessing
 		tx.CurStage = transaction.TxStageInteracCI
