@@ -31,6 +31,17 @@ type TxHistory struct {
 	CreateAt   time.Time `json:"createAt"`
 }
 
+func NewTxHistory(tx *ForeeTx, extraInfo string) *TxHistory {
+	return &TxHistory{
+		Stage:      tx.CurStage,
+		Status:     tx.CurStageStatus,
+		ExtraInfo:  extraInfo,
+		ParentTxId: tx.ID,
+		OwnerId:    tx.OwnerId,
+		CreateAt:   time.Now(),
+	}
+}
+
 func NewTxHistoryRepo(db *sql.DB) *TxHistoryRepo {
 	return &TxHistoryRepo{db: db}
 }

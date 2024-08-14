@@ -31,5 +31,16 @@ func (p *TxProcessor) LoadTx(id int64) (*transaction.ForeeTx, error) {
 }
 
 func (p *TxProcessor) ProcessTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	return p.doProcessTx(tx)
+}
+
+func (p *TxProcessor) doProcessTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	if tx.Status == transaction.TxStatusInitial {
+		tx.CurStage = transaction.TxStageInteracCI
+		tx.CurStageStatus = transaction.TxStatusInitial
+		return &tx, nil
+	} else {
+
+	}
 	return nil, nil
 }

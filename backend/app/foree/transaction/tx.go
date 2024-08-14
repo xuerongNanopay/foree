@@ -77,7 +77,7 @@ type ForeeTx struct {
 	TotalRewardAmt     types.AmountData `json:"totalRewardAmt"`
 	TotalAmt           types.AmountData `json:"totalAmt"`
 	CurStage           TxStage          `json:"curStage"`
-	CurStageStatus     string           `json:"curStageStatus"`
+	CurStageStatus     TxStatus         `json:"curStageStatus"`
 	TransactionPurpose string           `json:"transactionPurpose"`
 	Conclusion         string           `json:"conclusion"`
 	OwnerId            int64            `json:"ownerId"`
