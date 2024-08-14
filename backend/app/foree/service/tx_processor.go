@@ -74,6 +74,11 @@ func (p *TxProcessor) doProcessTx(tx transaction.ForeeTx) (*transaction.ForeeTx,
 		tx.CurStageStatus = transaction.TxStatusInitial
 		return &tx, nil
 	}
+	if tx.Status == transaction.TxStatusComplete || tx.Status == transaction.TxStatusCancel || tx.Status == transaction.TxStatusReject {
+		//TODO: log warn.
+		return &tx, nil
+	}
+
 	switch tx.CurStage {
 	case transaction.TxStageInteracCI:
 		switch tx.CurStageStatus {
@@ -117,8 +122,7 @@ func (p *TxProcessor) doProcessTx(tx transaction.ForeeTx) (*transaction.ForeeTx,
 			//TODO: refund
 			// set tx sum to cancel
 		case transaction.TxStatusCancel:
-			//TODO: refund
-			// set tx sum to cancel
+			// tx.Status =
 		default:
 			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", tx.ID, tx.CurStageStatus, tx.CurStage)
 		}
