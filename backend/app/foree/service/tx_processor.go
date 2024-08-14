@@ -112,11 +112,13 @@ func (p *TxProcessor) doProcessTx(tx transaction.ForeeTx) (*transaction.ForeeTx,
 		case transaction.TxStatusSent:
 			//Check status from scotia API.
 		case transaction.TxStatusComplete:
-			//Move to next stage
+			// set tx sum to complete
 		case transaction.TxStatusReject:
-			//Set to reject
+			//TODO: refund
+			// set tx sum to cancel
 		case transaction.TxStatusCancel:
-			// set to cancel
+			//TODO: refund
+			// set tx sum to cancel
 		default:
 			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", tx.ID, tx.CurStageStatus, tx.CurStage)
 		}
