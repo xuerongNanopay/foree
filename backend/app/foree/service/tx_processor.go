@@ -30,11 +30,11 @@ type TxProcessor struct {
 	processingLock   sync.RWMutex
 }
 
-func (p *TxProcessor) CreateTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	return nil, nil
 }
 
-func (p *TxProcessor) LoadTx(id int64) (*transaction.ForeeTx, error) {
+func (p *TxProcessor) loadTx(id int64) (*transaction.ForeeTx, error) {
 	ctx := context.Background()
 	foree, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, id)
 	if err != nil {
@@ -54,7 +54,7 @@ func (p *TxProcessor) LoadTx(id int64) (*transaction.ForeeTx, error) {
 }
 
 // TODO: change argument to int64
-func (p *TxProcessor) ProcessTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	var err error
 	var nTx *transaction.ForeeTx
 	maxLoop := 16
@@ -221,7 +221,7 @@ func (p *TxProcessor) maybeRefund(tx transaction.ForeeTx) {
 }
 
 // TODO: change argement to id.
-func (p *TxProcessor) ApproveIDM(ctx context.Context, tx transaction.ForeeTx) {
+func (p *TxProcessor) approveIDM(ctx context.Context, tx transaction.ForeeTx) {
 	if tx.CurStage == transaction.TxStageIDM && tx.CurStageStatus == transaction.TxStatusSuspend {
 
 	}
@@ -229,7 +229,7 @@ func (p *TxProcessor) ApproveIDM(ctx context.Context, tx transaction.ForeeTx) {
 }
 
 // TODO: change argement to id.
-func (p *TxProcessor) RejectIDM(ctx context.Context, tx transaction.ForeeTx) {
+func (p *TxProcessor) rejectIDM(ctx context.Context, tx transaction.ForeeTx) {
 	if tx.CurStage == transaction.TxStageIDM && tx.CurStageStatus == transaction.TxStatusSuspend {
 
 	}
