@@ -38,6 +38,7 @@ func (p *TxProcessor) LoadTx(id int64) (*transaction.ForeeTx, error) {
 	return nil, nil
 }
 
+// TODO: change argument to int64
 func (p *TxProcessor) ProcessTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	var err error
 	var nTx *transaction.ForeeTx
@@ -122,7 +123,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			if err != nil {
 				return nil, err
 			}
-			go p.MaybeRefund(ctx, *nT)
+			go p.MaybeRefund(*nT)
 			return nT, nil
 		case transaction.TxStatusSuspend:
 			//Wait to approve
@@ -151,7 +152,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
 				return nil, err
 			}
-			go p.MaybeRefund(ctx, tx)
+			go p.MaybeRefund(tx)
 			return &tx, nil
 		case transaction.TxStatusCancelled:
 			//TODO: refund
@@ -160,7 +161,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
 				return nil, err
 			}
-			go p.MaybeRefund(ctx, tx)
+			go p.MaybeRefund(tx)
 			return &tx, nil
 		default:
 			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", tx.ID, tx.CurStageStatus, tx.CurStage)
@@ -198,6 +199,19 @@ func (p *TxProcessor) closeRemainingTx(ctx context.Context, tx transaction.Foree
 	}
 }
 
-func (p *TxProcessor) MaybeRefund(ctx context.Context, tx transaction.ForeeTx) {
+func (p *TxProcessor) MaybeRefund(tx transaction.ForeeTx) {
 	//TODO: implement
+}
+
+func (p *TxProcessor) ApproveIDM(ctx context.Context, tx transaction.ForeeTx) {
+	if tx.CurStage == transaction.TxStageIDM && tx.CurStageStatus == transaction.TxStatusSuspend {
+
+	}
+	//TODO: implement
+}
+
+func (p *TxProcessor) RejectIDM(ctx context.Context, tx transaction.ForeeTx) {
+	if tx.CurStage == transaction.TxStageIDM && tx.CurStageStatus == transaction.TxStatusSuspend {
+
+	}
 }
