@@ -40,6 +40,8 @@ func (p *TxProcessor) loadTx(id int64) (*transaction.ForeeTx, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Load CI
 	ci, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, foree.ID)
 	if err != nil {
 		return nil, err
@@ -55,6 +57,20 @@ func (p *TxProcessor) loadTx(id int64) (*transaction.ForeeTx, error) {
 	if srcInteracAcc == nil {
 		return nil, fmt.Errorf("SrcInteracAcc no found for InteracCITx `%v`", ci.SrcInteracAccId)
 	}
+	ci.SrcInteracAcc = srcInteracAcc
+
+	destInteracAcc, err := p.interacRepo.GetUniqueInteracAccountById(ctx, ci.DestInteracAccId)
+	if err != nil {
+		return nil, err
+	}
+	if destInteracAcc == nil {
+		return nil, fmt.Errorf("DestInteracAcc no found for InteracCITx `%v`", ci.DestInteracAccId)
+	}
+	ci.DestInteracAcc = destInteracAcc
+	foree.CI = ci
+
+	// Load IDM
+	// Load COUT
 
 	return foree, nil
 }

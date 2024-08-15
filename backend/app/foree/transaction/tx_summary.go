@@ -28,7 +28,7 @@ const (
             total_amount, total_currency,
             fee_amount, fee_currency, 
             reward_amount, reward_currency, 
-            is_cancel_allowed, parent_tx_id, owner_id
+            nbp_reference, is_cancel_allowed, parent_tx_id, owner_id
         ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `
 	sQLTxSummaryUpdateById = `
@@ -44,7 +44,7 @@ const (
             t.total_amount, t.total_currency,
             t.fee_amount, t.fee_currency, 
             t.reward_amount, t.reward_currency, 
-            t.is_cancel_allowed, t.parent_tx_id, t.owner_id, 
+            t.nbp_reference, t.is_cancel_allowed, t.parent_tx_id, t.owner_id, 
             t.create_at, t.update_at
         FROM tx_summary t
         where t.owner_id = ? and t.id = ?
@@ -57,7 +57,7 @@ const (
             t.total_amount, t.total_currency,
             t.fee_amount, t.fee_currency, 
             t.reward_amount, t.reward_currency, 
-            t.is_cancel_allowed, t.parent_tx_id, t.owner_id, 
+            t.nbp_reference, t.is_cancel_allowed, t.parent_tx_id, t.owner_id, 
             t.create_at, t.update_at
         FROM tx_summary t
         where t.ParentTxId = ?
@@ -70,7 +70,7 @@ const (
 	        t.total_amount, t.total_currency,
 	        t.fee_amount, t.fee_currency,
 	        t.reward_amount, t.reward_currency,
-	        t.is_cancel_allowed, t.parent_tx_id, t.owner_id,
+	        t.nbp_reference, t.is_cancel_allowed, t.parent_tx_id, t.owner_id,
 	        t.create_at, t.update_at
 	    FROM tx_summary t
 	    where t.owner_id = ?
@@ -85,7 +85,7 @@ const (
 	        t.total_amount, t.total_currency,
 	        t.fee_amount, t.fee_currency,
 	        t.reward_amount, t.reward_currency,
-	        t.is_cancel_allowed, t.parent_tx_id, t.owner_id,
+	        t.nbp_reference, t.is_cancel_allowed, t.parent_tx_id, t.owner_id,
 	        t.create_at, t.update_at
 	    FROM tx_summary t
 	    where t.owner_id = ? AND t.status = ?
@@ -112,6 +112,7 @@ type TxSummary struct {
 	FeeCurrency     string    `json:"feeCurrency"`
 	RewardAmount    string    `json:"rewardAmount"`
 	RewardCurrency  string    `json:"rewardCurrency"`
+	NBPReference    string    `json:"nbpReference"`
 	IsCancelAllowed bool      `json:"isCancelAllowed"`
 	ParentTxId      int64     `json:"parentTxd"`
 	OwnerId         int64     `json:"owerId"`
@@ -146,6 +147,7 @@ func (repo *TxSummaryRepo) InsertTxSummary(ctx context.Context, tx TxSummary) (i
 		tx.FeeCurrency,
 		tx.RewardAmount,
 		tx.RewardCurrency,
+		tx.NBPReference,
 		tx.IsCancelAllowed,
 		tx.ParentTxId,
 		tx.OwnerId,
@@ -284,6 +286,7 @@ func scanRowIntoTxSummary(rows *sql.Rows) (*TxSummary, error) {
 		&tx.FeeCurrency,
 		&tx.RewardAmount,
 		&tx.RewardCurrency,
+		&tx.NBPReference,
 		&tx.IsCancelAllowed,
 		&tx.ParentTxId,
 		&tx.OwnerId,

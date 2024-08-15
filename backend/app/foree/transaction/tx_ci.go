@@ -14,7 +14,7 @@ const (
         INSERT INTO interact_ci_tx
         (
             status, src_interac_acc_id, dest_interac_acc_id,
-            amount, currency, parent_tx_id, owner_id
+            api_reference, amount, currency, parent_tx_id, owner_id
         ) VALUES(?,?,?,?,?,?,?)
     `
 	sQLInteracCITxGetUniqueById = `
@@ -71,6 +71,7 @@ func (repo *InteracCITxRepo) InsertInteracCITx(ctx context.Context, tx InteracCI
 		tx.Status,
 		tx.SrcInteracAccId,
 		tx.DestInteracAccId,
+		tx.APIReference,
 		tx.Amt.Amount,
 		tx.Amt.Curreny,
 		tx.ParentTxId,
