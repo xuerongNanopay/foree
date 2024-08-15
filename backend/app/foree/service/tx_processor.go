@@ -123,7 +123,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			if err != nil {
 				return nil, err
 			}
-			go p.MaybeRefund(*nT)
+			go p.maybeRefund(*nT)
 			return nT, nil
 		case transaction.TxStatusSuspend:
 			//Wait to approve
@@ -146,22 +146,20 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			return &tx, nil
 			// set tx sum to complete
 		case transaction.TxStatusRejected:
-			//TODO: Mayberefund
 			tx.Status = transaction.TxStatusRejected
 			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
 				return nil, err
 			}
-			go p.MaybeRefund(tx)
+			go p.maybeRefund(tx)
 			return &tx, nil
 		case transaction.TxStatusCancelled:
-			//TODO: refund
 			tx.Status = transaction.TxStatusCancelled
 			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
 				return nil, err
 			}
-			go p.MaybeRefund(tx)
+			go p.maybeRefund(tx)
 			return &tx, nil
 		default:
 			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", tx.ID, tx.CurStageStatus, tx.CurStage)
@@ -199,7 +197,7 @@ func (p *TxProcessor) closeRemainingTx(ctx context.Context, tx transaction.Foree
 	}
 }
 
-func (p *TxProcessor) MaybeRefund(tx transaction.ForeeTx) {
+func (p *TxProcessor) maybeRefund(tx transaction.ForeeTx) {
 	//TODO: implement
 }
 
