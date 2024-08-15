@@ -44,6 +44,7 @@ type QuoteTransactionReq struct {
 	SrcCurrency  string  `json:"srcCurrency" validate:"eq=CAD"`
 	DestAmount   float64 `json:"DestAmount"`
 	DestCurrency string  `json:"DestCurrency" validate:"eq=PKR"`
+	RewardIds    string  `json:"rewardIds"`
 }
 
 func (q *QuoteTransactionReq) TrimSpace() {

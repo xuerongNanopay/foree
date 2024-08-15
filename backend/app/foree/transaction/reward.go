@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"context"
 	"database/sql"
 	"time"
 
@@ -22,6 +23,14 @@ const (
 			r.expire_at, f.create_at, f.update_at
 		FROM rewards as r
 	`
+	sQLRewardGetUniqueByTransactionId = `
+	SELECT
+		r.id, r.type, r.description, r.amount, r.currency,
+		r.status, r.is_redeemed, r.owner_id, r.transaction_id,
+		r.expire_at, f.create_at, f.update_at
+	FROM rewards as r
+	Where r.id = ?
+`
 	sQLRewardGetAllByTransactionId = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
@@ -30,13 +39,13 @@ const (
 		FROM rewards as r
 		Where r.transaction_id = ?
 	`
-	sQLRewardGetAllByOwnerId = `
+	sQLRewardGetAllUnredeemByOwnerId = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.is_redeemed, r.owner_id, r.transaction_id,
 			r.expire_at, f.create_at, f.update_at
 		FROM rewards as r
-		Where r.owner_id = ?
+		Where r.owner_id = ? AND r.is_redeemed = FALSE
 	`
 )
 
@@ -55,7 +64,7 @@ const (
 )
 
 type Reward struct {
-	ID            string           `json:"id"`
+	ID            int64            `json:"id"`
 	Type          string           `json:"type"`
 	Description   string           `json:"description"`
 	Amt           types.AmountData `json:"amt"`
@@ -76,7 +85,7 @@ type RewardRepo struct {
 	db *sql.DB
 }
 
-func (repo *FeeRepo) InsertReward(reward Reward) (int64, error) {
+func (repo *FeeRepo) InsertReward(ctx context.Context, reward Reward) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLRewardInsert,
 		reward.Type,
@@ -98,7 +107,7 @@ func (repo *FeeRepo) InsertReward(reward Reward) (int64, error) {
 	return id, nil
 }
 
-func (repo *FeeRepo) GetAllReward() ([]*Reward, error) {
+func (repo *FeeRepo) GetAllReward(ctx context.Context) ([]*Reward, error) {
 	rows, err := repo.db.Query(sQLRewardGetAll)
 
 	if err != nil {
@@ -122,7 +131,7 @@ func (repo *FeeRepo) GetAllReward() ([]*Reward, error) {
 	return rewards, nil
 }
 
-func (repo *FeeRepo) GetAllRewardByTransactionId(transactionId int64) ([]*Reward, error) {
+func (repo *FeeRepo) GetAllRewardByTransactionId(ctx context.Context, transactionId int64) ([]*Reward, error) {
 	rows, err := repo.db.Query(sQLRewardGetAllByTransactionId, transactionId)
 
 	if err != nil {
@@ -146,8 +155,8 @@ func (repo *FeeRepo) GetAllRewardByTransactionId(transactionId int64) ([]*Reward
 	return rewards, nil
 }
 
-func (repo *FeeRepo) GetAllRewardByOwnerId(owenerId int64) ([]*Reward, error) {
-	rows, err := repo.db.Query(sQLRewardGetAllByOwnerId, owenerId)
+func (repo *FeeRepo) GetAllUnredeemRewardByOwnerId(ctx context.Context, ownerId int64) ([]*Reward, error) {
+	rows, err := repo.db.Query(sQLRewardGetAllUnredeemByOwnerId, ownerId)
 
 	if err != nil {
 		return nil, err
