@@ -111,13 +111,19 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			tx.CurStageStatus = transaction.TxStatusInitial
 			return &tx, nil
 		case transaction.TxStatusRejected:
-			//TODO: refund
+			// Set to ForeeTx to terminal status.
 			tx.Status = transaction.TxStatusRejected
 			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
 				return nil, err
 			}
-			return &tx, nil
+			// Close remaing non-terminated transactions.
+			nT, err := p.closeRemainingTx(ctx, tx)
+			if err != nil {
+				return nil, err
+			}
+			go p.MaybeRefund(ctx, *nT)
+			return nT, nil
 		case transaction.TxStatusSuspend:
 			//Wait to approve
 			//Log warn?
@@ -139,12 +145,13 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			return &tx, nil
 			// set tx sum to complete
 		case transaction.TxStatusRejected:
-			//TODO: refund
+			//TODO: Mayberefund
 			tx.Status = transaction.TxStatusRejected
 			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
 				return nil, err
 			}
+			go p.MaybeRefund(ctx, tx)
 			return &tx, nil
 		case transaction.TxStatusCancelled:
 			//TODO: refund
@@ -153,6 +160,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
 				return nil, err
 			}
+			go p.MaybeRefund(ctx, tx)
 			return &tx, nil
 		default:
 			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", tx.ID, tx.CurStageStatus, tx.CurStage)
@@ -163,14 +171,33 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 	return nil, nil
 }
 
-func (p *TxProcessor) closeRestTx(ctx context.Context, tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *TxProcessor) closeRemainingTx(ctx context.Context, tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	switch tx.CurStage {
 	case transaction.TxStageInteracCI:
-		return nil, nil
+		idm := tx.IDM
+		co := tx.COUT
+		idm.Status = transaction.TxStatusClosed
+		co.Status = transaction.TxStatusClosed
+		if err := p.idmTxRepo.UpdateIDMTxById(ctx, *idm); err != nil {
+			return nil, err
+		}
+		if err := p.npbTxRepo.UpdateNBPCOTxById(ctx, *co); err != nil {
+			return nil, err
+		}
+		return &tx, nil
 	case transaction.TxStageIDM:
-		return nil, nil
+		co := tx.COUT
+		co.Status = transaction.TxStatusClosed
+		if err := p.npbTxRepo.UpdateNBPCOTxById(ctx, *co); err != nil {
+			return nil, err
+		}
+		return &tx, nil
 	default:
 		//TODO: Log warn
 		return &tx, nil
 	}
+}
+
+func (p *TxProcessor) MaybeRefund(ctx context.Context, tx transaction.ForeeTx) {
+	//TODO: implement
 }
