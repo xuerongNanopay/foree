@@ -94,7 +94,9 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			//Check status from scotia API.(Webhook, or cron)
 			//Just do noting waiting for cron
 		case transaction.TxStatusCompleted:
-			//Move to next stage
+			tx.CurStage = transaction.TxStageInteracCI
+			tx.CurStageStatus = transaction.TxStatusInitial
+			return &tx, nil
 		case transaction.TxStatusRejected:
 			//Set to reject
 		case transaction.TxStatusCancelled:
