@@ -142,7 +142,7 @@ func (a *AccountService) GetAllInteracs(ctx context.Context, req transport.Sessi
 		return nil, err
 	}
 
-	accs, derr := a.interacRepo.GetAllInteracAccountByOwnerId(session.User.ID)
+	accs, derr := a.interacRepo.GetAllNonDeleteInteracAccountByOwnerId(ctx, session.User.ID)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}

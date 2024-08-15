@@ -35,7 +35,22 @@ func (p *TxProcessor) CreateTx(tx transaction.ForeeTx) (*transaction.ForeeTx, er
 }
 
 func (p *TxProcessor) LoadTx(id int64) (*transaction.ForeeTx, error) {
-	return nil, nil
+	ctx := context.Background()
+	foree, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	ci, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, foree.ID)
+	if err != nil {
+		return nil, err
+	}
+	if ci == nil {
+		return nil, fmt.Errorf("InteracCITx no found for ForeeTx `%v`", foree.ID)
+	}
+
+	// srcInteracAcc, err := p.interacRepo.GetUniqueInteracAccountById()
+
+	return foree, nil
 }
 
 // TODO: change argument to int64

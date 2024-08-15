@@ -1,6 +1,7 @@
 package account
 
 import (
+	"context"
 	"database/sql"
 	"time"
 )
@@ -20,7 +21,7 @@ const (
 			status = ?, latest_acitvity_at = ?
 		WHERE id = ? AND a.owner_id = ?
 	`
-	sQLInteracAccountGetUniqueById = `
+	sQLInteracAccountGetUniqueNonDeleteById = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
 			a.last_name, a.address, a.phone_number, a.email, 
@@ -30,7 +31,7 @@ const (
 		FROM interac_accounts a
 		where a.owner_id = ? AND a.id = ? AND a.status != DELETE
 	`
-	sQLInteracAccountGetAllByOwnerId = `
+	sQLInteracAccountGetAllNonDeleteByOwnerId = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
 			a.last_name, a.address, a.phone_number, a.email, 
@@ -70,7 +71,7 @@ type InteracAccountRepo struct {
 	db *sql.DB
 }
 
-func (repo *InteracAccountRepo) InsertInteracAccount(acc InteracAccount) (int64, error) {
+func (repo *InteracAccountRepo) InsertInteracAccount(ctx context.Context, acc InteracAccount) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLInteracAccountInsert,
 		acc.Status,
@@ -96,7 +97,7 @@ func (repo *InteracAccountRepo) InsertInteracAccount(acc InteracAccount) (int64,
 	return id, nil
 }
 
-func (repo *ContactAccountRepo) UpdateInteracAccountById(acc InteracAccount) error {
+func (repo *ContactAccountRepo) UpdateInteracAccountById(ctx context.Context, acc InteracAccount) error {
 	_, err := repo.db.Exec(
 		sQLContactAccountUpdateById,
 		acc.Status,
@@ -110,32 +111,8 @@ func (repo *ContactAccountRepo) UpdateInteracAccountById(acc InteracAccount) err
 	return nil
 }
 
-func (repo *InteracAccountRepo) GetAllInteracAccountByOwnerId(ownerId int64) ([]*InteracAccount, error) {
-	rows, err := repo.db.Query(sQLInteracAccountGetAllByOwnerId, ownerId)
-
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	accounts := make([]*InteracAccount, 16)
-	for rows.Next() {
-		p, err := scanRowIntoInteracAccount(rows)
-		if err != nil {
-			return nil, err
-		}
-		accounts = append(accounts, p)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return accounts, nil
-}
-
-func (repo *InteracAccountRepo) GetUniqueInteracAccountById(ownerId, id int64) (*InteracAccount, error) {
-	rows, err := repo.db.Query(sQLInteracAccountGetUniqueById, ownerId, id)
+func (repo *InteracAccountRepo) GetUniqueNonDeleteInteracAccountById(ctx context.Context, ownerId, id int64) (*InteracAccount, error) {
+	rows, err := repo.db.Query(sQLInteracAccountGetUniqueNonDeleteById, ownerId, id)
 
 	if err != nil {
 		return nil, err
@@ -156,6 +133,30 @@ func (repo *InteracAccountRepo) GetUniqueInteracAccountById(ownerId, id int64) (
 	}
 
 	return f, nil
+}
+
+func (repo *InteracAccountRepo) GetAllNonDeleteInteracAccountByOwnerId(ctx context.Context, ownerId int64) ([]*InteracAccount, error) {
+	rows, err := repo.db.Query(sQLInteracAccountGetAllNonDeleteByOwnerId, ownerId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	accounts := make([]*InteracAccount, 16)
+	for rows.Next() {
+		p, err := scanRowIntoInteracAccount(rows)
+		if err != nil {
+			return nil, err
+		}
+		accounts = append(accounts, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return accounts, nil
 }
 
 func scanRowIntoInteracAccount(rows *sql.Rows) (*InteracAccount, error) {

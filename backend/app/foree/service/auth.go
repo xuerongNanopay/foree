@@ -295,7 +295,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 		Status:           account.AccountStatusActive,
 		LatestActivityAt: time.Now(),
 	}
-	_, derr := a.interacRepo.InsertInteracAccount(acc)
+	_, derr := a.interacRepo.InsertInteracAccount(ctx, acc)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}
