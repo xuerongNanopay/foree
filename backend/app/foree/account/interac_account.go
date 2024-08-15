@@ -16,10 +16,10 @@ const (
 			owner_id, latest_acitvity_at
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
-	sQLInteracAccountUpdateById = `
+	sQLInteracAccountUpdateNonDeleteById = `
 		UPDATE interac_accounts SET 
 			status = ?, latest_acitvity_at = ?
-		WHERE id = ? AND a.owner_id = ?
+		WHERE id = ? AND a.owner_id = ? AND a.status != DELETE
 	`
 	sQLInteracAccountGetUniqueNonDeleteById = `
 		SELECT 
@@ -97,9 +97,9 @@ func (repo *InteracAccountRepo) InsertInteracAccount(ctx context.Context, acc In
 	return id, nil
 }
 
-func (repo *ContactAccountRepo) UpdateInteracAccountById(ctx context.Context, acc InteracAccount) error {
+func (repo *InteracAccountRepo) UpdateNonDeleteInteracAccountById(ctx context.Context, acc InteracAccount) error {
 	_, err := repo.db.Exec(
-		sQLContactAccountUpdateById,
+		sQLInteracAccountUpdateNonDeleteById,
 		acc.Status,
 		acc.LatestActivityAt,
 		acc.OwnerId,

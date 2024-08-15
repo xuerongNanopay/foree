@@ -18,12 +18,12 @@ const (
 			account_hash, relationship_to_contact, owner_id, latest_acitvity_at
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
-	sQLContactAccountUpdateById = `
+	sQLContactAccountUpdateNonDeleteById = `
 		UPDATE contact_accounts SET 
 			status = ?, latest_acitvity_at = ?
-		WHERE id = ? AND a.owner_id = ?
+		WHERE id = ? AND a.owner_id = ? AND a.status != DELETE
 	`
-	sQLContactAccountGetUniqueById = `
+	sQLContactAccountGetNonDeleteUniqueById = `
 		SELECT 
 			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
@@ -33,7 +33,7 @@ const (
 		FROM contact_accounts a
 		where a.owner_id = ? AND a.id = ? AND a.status != DELETE
 	`
-	sQLContactAccountGetAllByOwnerId = `
+	sQLContactAccountGetAllNonDeleteByOwnerId = `
 		SELECT 
 			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
@@ -44,7 +44,7 @@ const (
 		where a.owner_id = ? AND a.status != DELETE
 		ORDER BY a.latest_acitvity_at DESC
 	`
-	sQLContactAccountQueryByOwnerId = `
+	sQLContactAccountQueryNonDeleteByOwnerId = `
 		SELECT 
 			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
@@ -153,9 +153,9 @@ func (repo *ContactAccountRepo) InsertContactAccount(acc ContactAccount) (int64,
 	return id, nil
 }
 
-func (repo *ContactAccountRepo) UpdateContactAccountById(acc ContactAccount) error {
+func (repo *ContactAccountRepo) UpdateNonDeleteContactAccountById(acc ContactAccount) error {
 	_, err := repo.db.Exec(
-		sQLContactAccountUpdateById,
+		sQLContactAccountUpdateNonDeleteById,
 		acc.Status,
 		acc.LatestActivityAt,
 		acc.OwnerId,
@@ -169,7 +169,7 @@ func (repo *ContactAccountRepo) UpdateContactAccountById(acc ContactAccount) err
 
 func (repo *ContactAccountRepo) RefreshContactLatestActivityAt(acc ContactAccount) error {
 	_, err := repo.db.Exec(
-		sQLContactAccountUpdateById,
+		sQLContactAccountUpdateNonDeleteById,
 		acc.Status,
 		time.Now(),
 		acc.OwnerId,
@@ -181,8 +181,8 @@ func (repo *ContactAccountRepo) RefreshContactLatestActivityAt(acc ContactAccoun
 	return nil
 }
 
-func (repo *ContactAccountRepo) GetUniqueContactAccountById(ownerid, id int64) (*ContactAccount, error) {
-	rows, err := repo.db.Query(sQLContactAccountGetUniqueById, ownerid, id)
+func (repo *ContactAccountRepo) GetUniqueNonDeleteContactAccountById(ownerid, id int64) (*ContactAccount, error) {
+	rows, err := repo.db.Query(sQLContactAccountGetNonDeleteUniqueById, ownerid, id)
 
 	if err != nil {
 		return nil, err
@@ -205,8 +205,8 @@ func (repo *ContactAccountRepo) GetUniqueContactAccountById(ownerid, id int64) (
 	return f, nil
 }
 
-func (repo *ContactAccountRepo) GetAllContactAccountByOwnerId(ownerId int64) ([]*ContactAccount, error) {
-	rows, err := repo.db.Query(sQLContactAccountGetAllByOwnerId, ownerId)
+func (repo *ContactAccountRepo) GetAllNonDeleteContactAccountByOwnerId(ownerId int64) ([]*ContactAccount, error) {
+	rows, err := repo.db.Query(sQLContactAccountGetAllNonDeleteByOwnerId, ownerId)
 
 	if err != nil {
 		return nil, err
@@ -229,8 +229,8 @@ func (repo *ContactAccountRepo) GetAllContactAccountByOwnerId(ownerId int64) ([]
 	return accounts, nil
 }
 
-func (repo *ContactAccountRepo) QueryContactAccountByOwnerId(ownerId int64, limit, offset int) ([]*ContactAccount, error) {
-	rows, err := repo.db.Query(sQLContactAccountQueryByOwnerId, ownerId, limit, offset)
+func (repo *ContactAccountRepo) QueryNonDeleteContactAccountByOwnerId(ownerId int64, limit, offset int) ([]*ContactAccount, error) {
+	rows, err := repo.db.Query(sQLContactAccountQueryNonDeleteByOwnerId, ownerId, limit, offset)
 
 	if err != nil {
 		return nil, err
