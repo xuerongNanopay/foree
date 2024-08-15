@@ -91,7 +91,8 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			//TODO: call send scotia API
 			//Set to Send
 		case transaction.TxStatusSent:
-			//Check status from scotia API.
+			//Check status from scotia API.(Webhook, or cron)
+			//Just do noting waiting for cron
 		case transaction.TxStatusCompleted:
 			//Move to next stage
 		case transaction.TxStatusRejected:
@@ -136,7 +137,8 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 		case transaction.TxStatusInitial:
 			//TODO: call send NBP API
 		case transaction.TxStatusSent:
-			//Check status from scotia API.
+			//Check status from NBP API.
+			//Or just wait for clone
 		case transaction.TxStatusCompleted:
 			tx.Status = transaction.TxStatusCompleted
 			tx.Conclusion = fmt.Sprintf("Complete at %s.", time_util.NowInToronto().Format(time.RFC3339))
