@@ -57,9 +57,9 @@ func (q *QuoteTransactionReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
 	ret := validateStruct(q, "Invalid quote transaction request")
 
-	if q.SrcAmount <= 0 && q.DestAmount <= 0 {
+	if q.SrcAmount <= 0 {
 		ret.AddDetails("srcAmount", fmt.Sprintf("invalid srcAmount `%v`", q.SrcAmount))
-		ret.AddDetails("DestAmount", fmt.Sprintf("invalid DestAmount `%v`", q.DestAmount))
+		// ret.AddDetails("DestAmount", fmt.Sprintf("invalid DestAmount `%v`", q.DestAmount))
 	}
 
 	if len(ret.Details) > 0 {
