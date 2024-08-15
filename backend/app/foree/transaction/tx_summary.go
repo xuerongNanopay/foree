@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"context"
 	"database/sql"
 	"time"
 )
@@ -126,7 +127,7 @@ type TxSummaryRepo struct {
 	db *sql.DB
 }
 
-func (repo *TxSummaryRepo) InsertTxSummary(tx TxSummary) (int64, error) {
+func (repo *TxSummaryRepo) InsertTxSummary(ctx context.Context, tx TxSummary) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLTxSummaryInsert,
 		tx.Summary,
@@ -159,7 +160,7 @@ func (repo *TxSummaryRepo) InsertTxSummary(tx TxSummary) (int64, error) {
 	return id, nil
 }
 
-func (repo *TxSummaryRepo) UpdateTxSummaryById(tx TxSummary) error {
+func (repo *TxSummaryRepo) UpdateTxSummaryById(ctx context.Context, tx TxSummary) error {
 	_, err := repo.db.Exec(sQLTxSummaryUpdateById, tx.Status, tx.IsCancelAllowed, tx.ID)
 	if err != nil {
 		return err
@@ -167,7 +168,7 @@ func (repo *TxSummaryRepo) UpdateTxSummaryById(tx TxSummary) error {
 	return nil
 }
 
-func (repo *TxSummaryRepo) GetUniqueTxSummaryById(userId, id int64) (*TxSummary, error) {
+func (repo *TxSummaryRepo) GetUniqueTxSummaryById(ctx context.Context, userId, id int64) (*TxSummary, error) {
 	rows, err := repo.db.Query(sQLTxSummaryGetUniqueById, userId, id)
 
 	if err != nil {
@@ -191,7 +192,7 @@ func (repo *TxSummaryRepo) GetUniqueTxSummaryById(userId, id int64) (*TxSummary,
 	return f, nil
 }
 
-func (repo *TxSummaryRepo) GetUniqueTxSummaryByParentTxId(parentTxId int64) (*TxSummary, error) {
+func (repo *TxSummaryRepo) GetUniqueTxSummaryByParentTxId(ctx context.Context, parentTxId int64) (*TxSummary, error) {
 	rows, err := repo.db.Query(sQLTxSummaryGetUniqueByParentTxId, parentTxId)
 
 	if err != nil {
@@ -215,7 +216,7 @@ func (repo *TxSummaryRepo) GetUniqueTxSummaryByParentTxId(parentTxId int64) (*Tx
 	return f, nil
 }
 
-func (repo *TxSummaryRepo) GetAllTxSummaryByOwnerId(ownerId int64, limit, offset int) ([]*TxSummary, error) {
+func (repo *TxSummaryRepo) GetAllTxSummaryByOwnerId(ctx context.Context, ownerId int64, limit, offset int) ([]*TxSummary, error) {
 	rows, err := repo.db.Query(sQLTxSummaryGetAllByOwnerId, ownerId, limit, offset)
 
 	if err != nil {
@@ -239,7 +240,7 @@ func (repo *TxSummaryRepo) GetAllTxSummaryByOwnerId(ownerId int64, limit, offset
 	return accounts, nil
 }
 
-func (repo *TxSummaryRepo) QueryTxSummaryByOwnerId(ownerId int64, status string, limit, offset int) ([]*TxSummary, error) {
+func (repo *TxSummaryRepo) QueryTxSummaryByOwnerId(ctx context.Context, ownerId int64, status string, limit, offset int) ([]*TxSummary, error) {
 	rows, err := repo.db.Query(sQLTxSummaryQueryByOwnerId, ownerId, status, limit, offset)
 
 	if err != nil {

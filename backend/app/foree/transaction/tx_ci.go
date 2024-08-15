@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"context"
 	"database/sql"
 	"time"
 
@@ -64,7 +65,7 @@ type InteracCITxRepo struct {
 	db *sql.DB
 }
 
-func (repo *InteracCITxRepo) InsertInteracCITx(tx InteracCITx) (int64, error) {
+func (repo *InteracCITxRepo) InsertInteracCITx(ctx context.Context, tx InteracCITx) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLInteracCITxInsert,
 		tx.Status,
@@ -85,7 +86,7 @@ func (repo *InteracCITxRepo) InsertInteracCITx(tx InteracCITx) (int64, error) {
 	return id, nil
 }
 
-func (repo *InteracCITxRepo) UpdateInteracCITxById(tx InteracCITx) error {
+func (repo *InteracCITxRepo) UpdateInteracCITxById(ctx context.Context, tx InteracCITx) error {
 	_, err := repo.db.Exec(sQLInteracCITxUpdateById, tx.Status, tx.APIReference, tx.Url, tx.ID)
 	if err != nil {
 		return err
@@ -93,7 +94,7 @@ func (repo *InteracCITxRepo) UpdateInteracCITxById(tx InteracCITx) error {
 	return nil
 }
 
-func (repo *InteracCITxRepo) GetUniqueInteracCITxByParentTxId(parentTxId int64) (*InteracCITx, error) {
+func (repo *InteracCITxRepo) GetUniqueInteracCITxByParentTxId(ctx context.Context, parentTxId int64) (*InteracCITx, error) {
 	rows, err := repo.db.Query(sQLInteracCITxGetUniqueByParentTxId, parentTxId)
 
 	if err != nil {
@@ -117,7 +118,7 @@ func (repo *InteracCITxRepo) GetUniqueInteracCITxByParentTxId(parentTxId int64) 
 	return f, nil
 }
 
-func (repo *InteracCITxRepo) GetUniqueInteracCITxById(id int64) (*InteracCITx, error) {
+func (repo *InteracCITxRepo) GetUniqueInteracCITxById(ctx context.Context, id int64) (*InteracCITx, error) {
 	rows, err := repo.db.Query(sQLInteracCITxGetUniqueById, id)
 
 	if err != nil {

@@ -107,7 +107,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			//Set to Send
 		case transaction.TxStatusCompleted:
 			//Move to next stage
-			tx.CurStage = transaction.TxStageNBPCI
+			tx.CurStage = transaction.TxStageNBPCO
 			tx.CurStageStatus = transaction.TxStatusInitial
 			return &tx, nil
 		case transaction.TxStatusRejected:
@@ -124,7 +124,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 		default:
 			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", tx.ID, tx.CurStageStatus, tx.CurStage)
 		}
-	case transaction.TxStageNBPCI:
+	case transaction.TxStageNBPCO:
 		switch tx.CurStageStatus {
 		case transaction.TxStatusInitial:
 			//TODO: call send NBP API
@@ -161,4 +161,16 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 		return nil, fmt.Errorf("transaction `%v` in unknown stage `%s`", tx.ID, tx.CurStage)
 	}
 	return nil, nil
+}
+
+func (p *TxProcessor) closeRestTx(ctx context.Context, tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	switch tx.CurStage {
+	case transaction.TxStageInteracCI:
+		return nil, nil
+	case transaction.TxStageIDM:
+		return nil, nil
+	default:
+		//TODO: Log warn
+		return &tx, nil
+	}
 }

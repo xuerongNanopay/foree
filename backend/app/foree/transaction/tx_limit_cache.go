@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -51,7 +52,7 @@ type TxLimitCacheRepo struct {
 	db *sql.DB
 }
 
-func (repo *TxLimitCacheRepo) InsertTxLimitCache(tx TxLimitCache) (int64, error) {
+func (repo *TxLimitCacheRepo) InsertTxLimitCache(ctx context.Context, tx TxLimitCache) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLTxLimitCacheInsert,
 		tx.Identity,
@@ -70,7 +71,7 @@ func (repo *TxLimitCacheRepo) InsertTxLimitCache(tx TxLimitCache) (int64, error)
 	return id, nil
 }
 
-func (repo *TxLimitCacheRepo) UpdateTxLimitCacheById(tx TxLimitCache) error {
+func (repo *TxLimitCacheRepo) UpdateTxLimitCacheById(ctx context.Context, tx TxLimitCache) error {
 	_, err := repo.db.Exec(sQLTxLimitCacheUpdateByIdentity, tx.UsedAmt.Amount, tx.ID)
 	if err != nil {
 		return err
@@ -78,7 +79,7 @@ func (repo *TxLimitCacheRepo) UpdateTxLimitCacheById(tx TxLimitCache) error {
 	return nil
 }
 
-func (repo *TxLimitCacheRepo) GetUniqueTxLimitCacheByIdentity(identity string) (*TxLimitCache, error) {
+func (repo *TxLimitCacheRepo) GetUniqueTxLimitCacheByIdentity(ctx context.Context, identity string) (*TxLimitCache, error) {
 	rows, err := repo.db.Query(sQLTxLimitCacheGetUniqueByIdentity, identity)
 
 	if err != nil {

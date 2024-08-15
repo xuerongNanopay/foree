@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"context"
 	"database/sql"
 	"time"
 
@@ -60,7 +61,7 @@ type NBPCOTxRepo struct {
 	db *sql.DB
 }
 
-func (repo *NBPCOTxRepo) InsertNBPCOTx(tx NBPCOTx) (int64, error) {
+func (repo *NBPCOTxRepo) InsertNBPCOTx(ctx context.Context, tx NBPCOTx) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLNBPCOTxInsert,
 		tx.Status,
@@ -80,7 +81,7 @@ func (repo *NBPCOTxRepo) InsertNBPCOTx(tx NBPCOTx) (int64, error) {
 	return id, nil
 }
 
-func (repo *NBPCOTxRepo) UpdateNBPCOTxById(tx NBPCOTx) error {
+func (repo *NBPCOTxRepo) UpdateNBPCOTxById(ctx context.Context, tx NBPCOTx) error {
 	_, err := repo.db.Exec(sQLNBPCOTxUpdateById, tx.Status, tx.ID)
 	if err != nil {
 		return err
@@ -88,7 +89,7 @@ func (repo *NBPCOTxRepo) UpdateNBPCOTxById(tx NBPCOTx) error {
 	return nil
 }
 
-func (repo *NBPCOTxRepo) GetUniqueNBPCOTxById(id int64) (*NBPCOTx, error) {
+func (repo *NBPCOTxRepo) GetUniqueNBPCOTxById(ctx context.Context, id int64) (*NBPCOTx, error) {
 	rows, err := repo.db.Query(sQLNBPCOTxGetUniqueById, id)
 
 	if err != nil {
@@ -112,7 +113,7 @@ func (repo *NBPCOTxRepo) GetUniqueNBPCOTxById(id int64) (*NBPCOTx, error) {
 	return f, nil
 }
 
-func (repo *NBPCOTxRepo) GetUniqueNBPCOTxByParentTxId(id int64) (*NBPCOTx, error) {
+func (repo *NBPCOTxRepo) GetUniqueNBPCOTxByParentTxId(ctx context.Context, id int64) (*NBPCOTx, error) {
 	rows, err := repo.db.Query(sQLNBPCOTxGetUniqueByParentTxId, id)
 
 	if err != nil {

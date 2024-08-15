@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -44,7 +45,7 @@ type TxQuoteRepo struct {
 	rwLock         sync.RWMutex
 }
 
-func (repo *TxQuoteRepo) InsertTxQuote(tx *TxQuote) (string, error) {
+func (repo *TxQuoteRepo) InsertTxQuote(ctx context.Context, tx *TxQuote) (string, error) {
 	tx.CreateAt = time.Now()
 	tx.ExpireAt = time.Now().Add(time.Duration(time.Minute * time.Duration(repo.expireInMinute)))
 	repo.rwLock.Lock()
@@ -76,7 +77,7 @@ func (repo *TxQuoteRepo) Delete(id string) {
 	delete(repo.mems[idx%2], id)
 }
 
-func (repo *TxQuoteRepo) GetUniqueById(id string) *TxQuote {
+func (repo *TxQuoteRepo) GetUniqueById(ctx context.Context, id string) *TxQuote {
 	idx, err := parseBucketId(id)
 	if err != nil {
 		return nil

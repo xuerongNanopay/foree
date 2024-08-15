@@ -64,7 +64,7 @@ type TxStage string
 const (
 	TxStageInteracCI TxStage = "INTERAC-CI"
 	TxStageIDM       TxStage = "Compliance-IDM"
-	TxStageNBPCI     TxStage = "INTERAC-CO"
+	TxStageNBPCO     TxStage = "NBP-CO"
 )
 
 // Only Support INITIAL, PROCESSING, CANCEL, COMPLETE.

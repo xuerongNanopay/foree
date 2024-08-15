@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"context"
 	"database/sql"
 	"time"
 )
@@ -88,7 +89,7 @@ type IdmTxRepo struct {
 	db *sql.DB
 }
 
-func (repo *IdmTxRepo) InsertIDMTx(tx IDMTx) (int64, error) {
+func (repo *IdmTxRepo) InsertIDMTx(ctx context.Context, tx IDMTx) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLIDMTxInsert,
 		tx.Status,
@@ -107,7 +108,7 @@ func (repo *IdmTxRepo) InsertIDMTx(tx IDMTx) (int64, error) {
 	return id, nil
 }
 
-func (repo *IdmTxRepo) UpdateIDMTxById(tx IDMTx) error {
+func (repo *IdmTxRepo) UpdateIDMTxById(ctx context.Context, tx IDMTx) error {
 	_, err := repo.db.Exec(sQLIDMTxUpdateById, tx.Status, tx.APIReference, tx.IDMResult, tx.ID)
 	if err != nil {
 		return err
@@ -115,7 +116,7 @@ func (repo *IdmTxRepo) UpdateIDMTxById(tx IDMTx) error {
 	return nil
 }
 
-func (repo *IdmTxRepo) GetUniqueIDMTxById(id int64) (*IDMTx, error) {
+func (repo *IdmTxRepo) GetUniqueIDMTxById(ctx context.Context, id int64) (*IDMTx, error) {
 	rows, err := repo.db.Query(sQLIDMTxGetUniqueById, id)
 
 	if err != nil {
@@ -139,7 +140,7 @@ func (repo *IdmTxRepo) GetUniqueIDMTxById(id int64) (*IDMTx, error) {
 	return f, nil
 }
 
-func (repo *IdmTxRepo) GetUniqueIDMTxByParentTxId(parentTxId int64) (*IDMTx, error) {
+func (repo *IdmTxRepo) GetUniqueIDMTxByParentTxId(ctx context.Context, parentTxId int64) (*IDMTx, error) {
 	rows, err := repo.db.Query(sQLIDMTxGetUniqueByParentTxId, parentTxId)
 
 	if err != nil {
@@ -210,7 +211,7 @@ func (repo *IDMComplianceRepo) InsertIDMComplance(c IDMCompliance) (int64, error
 	return id, nil
 }
 
-func (repo *IDMComplianceRepo) GetUniqueIDMComplianceById(id int64) (*IDMCompliance, error) {
+func (repo *IDMComplianceRepo) GetUniqueIDMComplianceById(ctx context.Context, id int64) (*IDMCompliance, error) {
 	rows, err := repo.db.Query(sQLIDMComplianceGetUniqueById, id)
 
 	if err != nil {
@@ -234,7 +235,7 @@ func (repo *IDMComplianceRepo) GetUniqueIDMComplianceById(id int64) (*IDMComplia
 	return f, nil
 }
 
-func (repo *IDMComplianceRepo) GetUniqueIDMComplianceByIDMTxId(idmTxId int64) (*IDMCompliance, error) {
+func (repo *IDMComplianceRepo) GetUniqueIDMComplianceByIDMTxId(ctx context.Context, idmTxId int64) (*IDMCompliance, error) {
 	rows, err := repo.db.Query(sQLIDMComplianceGetUniqueByIDMTxId, idmTxId)
 
 	if err != nil {
