@@ -70,7 +70,7 @@ const (
 // Only Support INITIAL, PROCESSING, CANCEL, COMPLETE.
 type ForeeTx struct {
 	ID                 int64            `json:"id"`
-	Type               string           `json:"type"`
+	Type               TxType           `json:"type"`
 	Status             TxStatus         `json:"status"`
 	Rate               types.Amount     `json:"Rate"`
 	SrcAmt             types.AmountData `json:"srcAmt"`

@@ -8,9 +8,13 @@ import (
 
 	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/transaction"
+	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/auth"
 	time_util "xue.io/go-pay/util/time"
 )
+
+type TxProcessorConfig struct {
+}
 
 // It is the internal service for transaction process.
 
@@ -23,6 +27,7 @@ type TxProcessor struct {
 	txLimitRepo      *transaction.TxLimitRepo
 	txLimitCacheRepo *transaction.TxLimitCacheRepo
 	foreeTxRepo      *transaction.ForeeTxRepo
+	rateRepo         *transaction.RateRepo
 	userRepo         *auth.UserRepo
 	contactRepo      *account.ContactAccountRepo
 	interacRepo      *account.InteracAccountRepo
@@ -30,7 +35,37 @@ type TxProcessor struct {
 	processingLock   sync.RWMutex
 }
 
+func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*transaction.ForeeTx, error) {
+	ctx := context.Background()
+	rate, err := p.rateRepo.GetUniqueRateById(ctx, transaction.GenerateRateId(quote.SrcCurrency, quote.DestCurrency))
+	if err != nil {
+		return nil, err
+	}
+	if rate == nil {
+		return nil, fmt.Errorf("user `%v` try to create transaction with unkown rate `%s`", user.ID, transaction.GenerateRateId(quote.SrcCurrency, quote.DestCurrency))
+	}
+	destAmount := rate.CalculateForwardAmount(quote.SrcAmount)
+	foreeTx := &transaction.ForeeTx{
+		Type:   transaction.TxTypeInteracToNBP,
+		Status: transaction.TxStatusInitial,
+		Rate:   types.Amount(rate.CalculateForwardAmount(quote.SrcAmount)),
+		SrcAmt: types.AmountData{
+			Amount:  types.Amount(quote.SrcAmount),
+			Curreny: quote.SrcCurrency,
+		},
+		DestAmt: types.AmountData{
+			Amount:  types.Amount(destAmount),
+			Curreny: quote.DestCurrency,
+		},
+	}
+	return foreeTx, nil
+}
+
 func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	return nil, nil
+}
+
+func (p *TxProcessor) InsertTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	return nil, nil
 }
 
@@ -105,6 +140,9 @@ func (p *TxProcessor) loadTx(id int64) (*transaction.ForeeTx, error) {
 
 // TODO: change argument to int64
 func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	if tx.Type != transaction.TxTypeInteracToNBP {
+		return nil, fmt.Errorf("unknow ForeeTx type `%s`", tx.Type)
+	}
 	var err error
 	var nTx *transaction.ForeeTx
 	maxLoop := 16
@@ -119,7 +157,7 @@ func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, e
 			return nTx, nil
 		}
 		// Record the history.
-		go p.recordTxHistory(transaction.NewTxHistory(nTx, ""))
+		go p.recordTxHistory(*transaction.NewTxHistory(nTx, ""))
 		tx = *nTx
 
 		if i > maxLoop {
@@ -130,8 +168,8 @@ func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, e
 
 }
 
-func (p *TxProcessor) recordTxHistory(h *transaction.TxHistory) {
-	if _, err := p.txHistoryRepo.InserTxHistory(*h); err != nil {
+func (p *TxProcessor) recordTxHistory(h transaction.TxHistory) {
+	if _, err := p.txHistoryRepo.InserTxHistory(h); err != nil {
 		fmt.Println(err.Error())
 	}
 
