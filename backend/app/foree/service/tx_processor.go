@@ -203,6 +203,7 @@ func (p *TxProcessor) MaybeRefund(tx transaction.ForeeTx) {
 	//TODO: implement
 }
 
+// TODO: change argement to id.
 func (p *TxProcessor) ApproveIDM(ctx context.Context, tx transaction.ForeeTx) {
 	if tx.CurStage == transaction.TxStageIDM && tx.CurStageStatus == transaction.TxStatusSuspend {
 
@@ -210,6 +211,7 @@ func (p *TxProcessor) ApproveIDM(ctx context.Context, tx transaction.ForeeTx) {
 	//TODO: implement
 }
 
+// TODO: change argement to id.
 func (p *TxProcessor) RejectIDM(ctx context.Context, tx transaction.ForeeTx) {
 	if tx.CurStage == transaction.TxStageIDM && tx.CurStageStatus == transaction.TxStatusSuspend {
 
