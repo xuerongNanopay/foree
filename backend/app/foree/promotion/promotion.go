@@ -1,6 +1,7 @@
 package promotion
 
 import (
+	"context"
 	"database/sql"
 	"time"
 
@@ -59,7 +60,7 @@ type PromotionRepo struct {
 	db *sql.DB
 }
 
-func (repo *PromotionRepo) UpdatePromotionByName(p Promotion) error {
+func (repo *PromotionRepo) UpdatePromotionByName(ctx context.Context, p Promotion) error {
 	_, err := repo.db.Exec(
 		sQLPromotionUpdateByName,
 		p.Quantity,
@@ -71,7 +72,7 @@ func (repo *PromotionRepo) UpdatePromotionByName(p Promotion) error {
 	return nil
 }
 
-func (repo *PromotionRepo) GetUniquePromotionByName(name string) (*Promotion, error) {
+func (repo *PromotionRepo) GetUniquePromotionByName(ctx context.Context, name string) (*Promotion, error) {
 	rows, err := repo.db.Query(sQLPromotionGetUniqueByName, name)
 
 	if err != nil {
