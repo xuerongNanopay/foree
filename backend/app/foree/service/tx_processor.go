@@ -70,7 +70,35 @@ func (p *TxProcessor) loadTx(id int64) (*transaction.ForeeTx, error) {
 	foree.CI = ci
 
 	// Load IDM
+	idm, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, foree.ID)
+	if err != nil {
+		return nil, err
+	}
+	if idm == nil {
+		return nil, fmt.Errorf("IDMTx no found for ForeeTx `%v`", foree.ID)
+	}
+	foree.IDM = idm
+
 	// Load COUT
+	cout, err := p.npbTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, foree.ID)
+	if err != nil {
+		return nil, err
+	}
+	if cout == nil {
+		return nil, fmt.Errorf("NBPCOTx no found for ForeeTx `%v`", foree.ID)
+	}
+
+	destContactAcc, err := p.contactRepo.GetUniqueContactAccountById(ctx, cout.DestContactAccId)
+	if err != nil {
+		return nil, err
+	}
+	if destContactAcc == nil {
+		return nil, fmt.Errorf("DestContactAcc no found for NBPCOTx `%v`", cout.DestContactAccId)
+	}
+	cout.DestContactAcc = destContactAcc
+	foree.COUT = cout
+
+	// TODO: fees?, rewards?
 
 	return foree, nil
 }
