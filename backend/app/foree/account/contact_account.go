@@ -1,6 +1,7 @@
 package account
 
 import (
+	"context"
 	"crypto/md5"
 	"database/sql"
 	"encoding/hex"
@@ -22,6 +23,16 @@ const (
 		UPDATE contact_accounts SET 
 			status = ?, latest_acitvity_at = ?
 		WHERE id = ? AND a.owner_id = ? AND a.status != DELETE
+	`
+	sQLContactAccountGetUniqueById = `
+		SELECT 
+			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
+			a.last_name, a.address1, a.address2, a.city, a.province,
+			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
+			a.account_hash, a.relationship_to_contact, a.owner_id
+			a.latest_acitvity_at, a.create_at, a.update_at
+		FROM contact_accounts a
+		where a.id = ?
 	`
 	sQLContactAccountGetNonDeleteUniqueById = `
 		SELECT 
@@ -119,7 +130,7 @@ type ContactAccountRepo struct {
 	db *sql.DB
 }
 
-func (repo *ContactAccountRepo) InsertContactAccount(acc ContactAccount) (int64, error) {
+func (repo *ContactAccountRepo) InsertContactAccount(ctx context.Context, acc ContactAccount) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLContactAccountInsert,
 		acc.HashId,
@@ -153,7 +164,7 @@ func (repo *ContactAccountRepo) InsertContactAccount(acc ContactAccount) (int64,
 	return id, nil
 }
 
-func (repo *ContactAccountRepo) UpdateNonDeleteContactAccountById(acc ContactAccount) error {
+func (repo *ContactAccountRepo) UpdateNonDeleteContactAccountById(ctx context.Context, acc ContactAccount) error {
 	_, err := repo.db.Exec(
 		sQLContactAccountUpdateNonDeleteById,
 		acc.Status,
@@ -167,7 +178,7 @@ func (repo *ContactAccountRepo) UpdateNonDeleteContactAccountById(acc ContactAcc
 	return nil
 }
 
-func (repo *ContactAccountRepo) RefreshContactLatestActivityAt(acc ContactAccount) error {
+func (repo *ContactAccountRepo) RefreshContactLatestActivityAt(ctx context.Context, acc ContactAccount) error {
 	_, err := repo.db.Exec(
 		sQLContactAccountUpdateNonDeleteById,
 		acc.Status,
@@ -181,7 +192,31 @@ func (repo *ContactAccountRepo) RefreshContactLatestActivityAt(acc ContactAccoun
 	return nil
 }
 
-func (repo *ContactAccountRepo) GetUniqueNonDeleteContactAccountById(ownerid, id int64) (*ContactAccount, error) {
+func (repo *ContactAccountRepo) GetUniqueContactAccountById(ctx context.Context, id int64) (*ContactAccount, error) {
+	rows, err := repo.db.Query(sQLContactAccountGetUniqueById, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *ContactAccount
+
+	for rows.Next() {
+		f, err = scanRowIntoContactAccount(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func (repo *ContactAccountRepo) GetUniqueNonDeleteContactAccountById(ctx context.Context, ownerid, id int64) (*ContactAccount, error) {
 	rows, err := repo.db.Query(sQLContactAccountGetNonDeleteUniqueById, ownerid, id)
 
 	if err != nil {
@@ -205,7 +240,7 @@ func (repo *ContactAccountRepo) GetUniqueNonDeleteContactAccountById(ownerid, id
 	return f, nil
 }
 
-func (repo *ContactAccountRepo) GetAllNonDeleteContactAccountByOwnerId(ownerId int64) ([]*ContactAccount, error) {
+func (repo *ContactAccountRepo) GetAllNonDeleteContactAccountByOwnerId(ctx context.Context, ownerId int64) ([]*ContactAccount, error) {
 	rows, err := repo.db.Query(sQLContactAccountGetAllNonDeleteByOwnerId, ownerId)
 
 	if err != nil {
@@ -229,7 +264,7 @@ func (repo *ContactAccountRepo) GetAllNonDeleteContactAccountByOwnerId(ownerId i
 	return accounts, nil
 }
 
-func (repo *ContactAccountRepo) QueryNonDeleteContactAccountByOwnerId(ownerId int64, limit, offset int) ([]*ContactAccount, error) {
+func (repo *ContactAccountRepo) QueryNonDeleteContactAccountByOwnerId(ctx context.Context, ownerId int64, limit, offset int) ([]*ContactAccount, error) {
 	rows, err := repo.db.Query(sQLContactAccountQueryNonDeleteByOwnerId, ownerId, limit, offset)
 
 	if err != nil {

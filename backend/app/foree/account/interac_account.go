@@ -21,6 +21,16 @@ const (
 			status = ?, latest_acitvity_at = ?
 		WHERE id = ? AND a.owner_id = ? AND a.status != DELETE
 	`
+	sQLInteracAccountGetUniqueById = `
+		SELECT 
+			a.id, a.first_name, a.middle_name,
+			a.last_name, a.address, a.phone_number, a.email, 
+			a.institution_name, a.branch_number, a.account_number,
+			a.owner_id, a.status, 
+			a.latest_acitvity_at, a.create_at, a.update_at
+		FROM interac_accounts a
+		where a.id = ?
+	`
 	sQLInteracAccountGetUniqueNonDeleteById = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
@@ -113,6 +123,30 @@ func (repo *InteracAccountRepo) UpdateNonDeleteInteracAccountById(ctx context.Co
 
 func (repo *InteracAccountRepo) GetUniqueNonDeleteInteracAccountById(ctx context.Context, ownerId, id int64) (*InteracAccount, error) {
 	rows, err := repo.db.Query(sQLInteracAccountGetUniqueNonDeleteById, ownerId, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *InteracAccount
+
+	for rows.Next() {
+		f, err = scanRowIntoInteracAccount(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func (repo *InteracAccountRepo) GetUniqueInteracAccountById(ctx context.Context, id int64) (*InteracAccount, error) {
+	rows, err := repo.db.Query(sQLInteracAccountGetUniqueById, id)
 
 	if err != nil {
 		return nil, err
