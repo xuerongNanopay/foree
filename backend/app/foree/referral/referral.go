@@ -2,7 +2,10 @@ package referral
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type ReferralType string
@@ -161,6 +164,6 @@ func scanRowIntoReferral(rows *sql.Rows) (*Referral, error) {
 	return u, nil
 }
 
-func GenerateReferralCode(userId int64) string {
-
+func GenerateReferralCode(id int64) string {
+	return fmt.Sprintf("%09d-%s", id, uuid.New().String())
 }
