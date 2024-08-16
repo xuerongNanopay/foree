@@ -88,7 +88,22 @@ func (f *Fee) ApplyFee(amt types.AmountData) (*FeeJoint, error) {
 
 func applyFeeOperator(op FeeOperator) (func(l, r types.Amount) bool, error) {
 	switch op {
-	// case FeeOperatorLTE:
+	case FeeOperatorLTE:
+		return func(l, r types.Amount) bool {
+			return float64(l) <= float64(r)
+		}, nil
+	case FeeOperatorLT:
+		return func(l, r types.Amount) bool {
+			return float64(l) < float64(r)
+		}, nil
+	case FeeOperatorGTE:
+		return func(l, r types.Amount) bool {
+			return float64(l) >= float64(r)
+		}, nil
+	case FeeOperatorGT:
+		return func(l, r types.Amount) bool {
+			return float64(l) > float64(r)
+		}, nil
 	default:
 		return nil, fmt.Errorf("Unknow fee operator `%s`", string(op))
 	}

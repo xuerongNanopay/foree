@@ -16,22 +16,12 @@ const (
 			status, is_redeemed, owner_id, applied_transaction_id
 		) VALUES(?,?,?,?,?,?,?,?)
 	`
-	sQLRewardGetAll = `
-		SELECT
-			r.id, r.type, r.description, r.amount, r.currency,
-			r.status, r.is_redeemed, r.owner_id, r.applied_transaction_id,
-			r.expire_at, f.create_at, f.update_at
-		FROM rewards as r
+	sQLRewardUpdateById = `
+		UPDATE rewards SET
+			status = ? , is_redeemed = ? , applied_transaction_id = ?
+		WHERE id = ?
 	`
 	sQLRewardGetUniqueRewardById = `
-		SELECT
-			r.id, r.type, r.description, r.amount, r.currency,
-			r.status, r.is_redeemed, r.owner_id, r.applied_transaction_id,
-			r.expire_at, f.create_at, f.update_at
-		FROM rewards as r
-		Where r.id = ?
-	`
-	sQLRewardGetUniqueByAppliedTransactionId = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.is_redeemed, r.owner_id, r.applied_transaction_id,
@@ -60,8 +50,9 @@ const (
 type RewardType string
 
 const (
-	RewardTypeSignUp  RewardType = "SIGN_UP_REWARD"
-	RewardTypeReferal RewardType = "REFERAL_REWARD"
+	RewardTypeSignUp   string = "SIGN_UP_REWARD"
+	RewardTypeReferal  string = "REFERAL_REWARD"
+	RewardTypeTxCreate string = "TxCreate_REWARD"
 )
 
 type RewardStatus string
@@ -93,7 +84,7 @@ type RewardRepo struct {
 	db *sql.DB
 }
 
-func (repo *FeeRepo) InsertReward(ctx context.Context, reward Reward) (int64, error) {
+func (repo *RewardRepo) InsertReward(ctx context.Context, reward Reward) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLRewardInsert,
 		reward.Type,
@@ -115,31 +106,39 @@ func (repo *FeeRepo) InsertReward(ctx context.Context, reward Reward) (int64, er
 	return id, nil
 }
 
-func (repo *FeeRepo) GetAllReward(ctx context.Context) ([]*Reward, error) {
-	rows, err := repo.db.Query(sQLRewardGetAll)
+func (repo *RewardRepo) UpdateRewardTxById(ctx context.Context, reward Reward) error {
+	_, err := repo.db.Exec(sQLRewardUpdateById, reward.Status, reward.IsRedeemed, reward.AppliedTransactionId, reward.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *RewardRepo) GetUniqueRewardById(ctx context.Context, id int64) (*Reward, error) {
+	rows, err := repo.db.Query(sQLRewardGetUniqueRewardById, id)
 
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	rewards := make([]*Reward, 16)
+	var f *Reward
+
 	for rows.Next() {
-		p, err := scanRowIntoReward(rows)
+		f, err = scanRowIntoReward(rows)
 		if err != nil {
 			return nil, err
 		}
-		rewards = append(rewards, p)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, err
+	if f.ID == 0 {
+		return nil, nil
 	}
 
-	return rewards, nil
+	return f, nil
 }
 
-func (repo *FeeRepo) GetAllRewardByAppliedTransactionId(ctx context.Context, appliedTransactionId int64) ([]*Reward, error) {
+func (repo *RewardRepo) GetAllRewardByAppliedTransactionId(ctx context.Context, appliedTransactionId int64) ([]*Reward, error) {
 	rows, err := repo.db.Query(sQLRewardGetAllByAppliedTransactionId, appliedTransactionId)
 
 	if err != nil {
@@ -163,7 +162,7 @@ func (repo *FeeRepo) GetAllRewardByAppliedTransactionId(ctx context.Context, app
 	return rewards, nil
 }
 
-func (repo *FeeRepo) GetAllUnredeemRewardByOwnerId(ctx context.Context, ownerId int64) ([]*Reward, error) {
+func (repo *RewardRepo) GetAllUnredeemRewardByOwnerId(ctx context.Context, ownerId int64) ([]*Reward, error) {
 	rows, err := repo.db.Query(sQLRewardGetAllUnredeemByOwnerId, ownerId)
 
 	if err != nil {
