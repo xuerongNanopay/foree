@@ -11,33 +11,33 @@ import (
 const (
 	sQLFeeGetAll = `
 		SELECT
-			f.id, f.description, f.type, f.condition,
+			f.name, f.description, f.type, f.condition,
 			f.condition_amount, f.condition_currency,
 			f.fee_amount, f.fee_currency,
 			f.is_apply_in_condition_amount_only
 			f.is_enable, f.create_at, f.update_at
 		FROM fees as f
 	`
-	sQLFeeGetUniqueById = `
+	sQLFeeGetUniqueByName = `
 		SELECT
-			f.id, f.description, f.type, f.condition,
+			f.name, f.description, f.type, f.condition,
 			f.condition_amount, f.condition_currency,
 			f.fee_amount, f.fee_currency,
 			f.is_apply_in_condition_amount_only
 			f.is_enable, f.create_at, f.update_at
 		FROM fees as f
-		Where f.id = ?
+		Where f.name = ?
 	`
 	sQLFeeJointInsert = `
 		INSERT INTO fees
 		(
-			fee_id, description, amount, currency,
+			feeName, description, amount, currency,
 			transaction_id, owner_id
 		) VALUES(?,?,?,?,?,?)
 	`
 	sQLFeeJointGetByTransactionId = `
 		SELECT
-			f.fee_id, f.description, f.amount, f.currency,
+			f.feeName, f.description, f.amount, f.currency,
 			f.transaction_id, f.owner_id, f.create_at, f.update_at
 		FROM fee_joint as f
 		Where f.transaction_id = ?
@@ -61,7 +61,7 @@ const (
 
 // TODO: ApplyFee func.
 type Fee struct {
-	ID                        string           `json:"id"`
+	Name                      string           `json:"name"`
 	Description               string           `json:"description"`
 	Type                      FeeType          `json:"type"`
 	Condition                 FeeOperator      `json:"condition"`
@@ -73,7 +73,11 @@ type Fee struct {
 	UpdateAt                  time.Time        `json:"updateAt"`
 }
 
-func (f *Fee) ApplyFee(amt types.AmountData) (*FeeJoint, error) {
+func (f *Fee) MaybeApplyFee(amt types.AmountData) (*FeeJoint, error) {
+	if !f.IsEnable {
+		return nil, nil
+	}
+
 	if amt.Curreny != f.ConditionAmt.Curreny {
 		return nil, fmt.Errorf("Fee should apply in same currency, expect `%s` but ``%s", f.ConditionAmt.Curreny, amt.Curreny)
 	}
@@ -84,7 +88,12 @@ func (f *Fee) ApplyFee(amt types.AmountData) (*FeeJoint, error) {
 	if !cond(f.ConditionAmt.Amount, amt.Amount) {
 		return nil, nil
 	}
-	return nil, nil
+
+	switch f.Type {
+
+	default:
+		return nil, fmt.Errorf("unknown fee type `%s`", string(f.Type))
+	}
 }
 
 func applyFeeOperator(op FeeOperator) (func(l, r types.Amount) bool, error) {
@@ -106,13 +115,13 @@ func applyFeeOperator(op FeeOperator) (func(l, r types.Amount) bool, error) {
 			return float64(l) > float64(r)
 		}, nil
 	default:
-		return nil, fmt.Errorf("Unknow fee operator `%s`", string(op))
+		return nil, fmt.Errorf("unknown fee operator `%s`", string(op))
 	}
 }
 
 type FeeJoint struct {
 	ID            int64            `json:"id"`
-	FeeId         string           `json:"feeId"`
+	FeeName       string           `json:"feeName"`
 	Description   string           `json:"description"`
 	Amt           types.AmountData `json:"amt"`
 	TransactionId int64            `json:"transactionId"`
@@ -137,8 +146,8 @@ type FeeJointRepo struct {
 	db *sql.DB
 }
 
-func (repo *FeeRepo) GetUniqueFeeById(id int64) (*Fee, error) {
-	rows, err := repo.db.Query(sQLFeeGetUniqueById, id)
+func (repo *FeeRepo) GetUniqueFeeByName(name string) (*Fee, error) {
+	rows, err := repo.db.Query(sQLFeeGetUniqueByName, name)
 
 	if err != nil {
 		return nil, err
@@ -154,7 +163,7 @@ func (repo *FeeRepo) GetUniqueFeeById(id int64) (*Fee, error) {
 		}
 	}
 
-	if f.ID == "" {
+	if f.Name == "" {
 		return nil, nil
 	}
 
@@ -188,7 +197,7 @@ func (repo *FeeRepo) GetAllFee() ([]*Fee, error) {
 func (repo *FeeJointRepo) InsertFeeJoint(feeJoint FeeJoint) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLFeeJointInsert,
-		feeJoint.FeeId,
+		feeJoint.FeeName,
 		feeJoint.Description,
 		feeJoint.Amt.Amount,
 		feeJoint.Amt.Curreny,
@@ -232,7 +241,7 @@ func (repo *FeeJointRepo) GetAllFeeJointbyTransactionId(transactionId int64) ([]
 func scanRowIntoFee(rows *sql.Rows) (*Fee, error) {
 	u := new(Fee)
 	err := rows.Scan(
-		&u.ID,
+		&u.Name,
 		&u.Description,
 		&u.Type,
 		&u.Condition,
@@ -256,7 +265,7 @@ func scanRowIntoFeeJoint(rows *sql.Rows) (*FeeJoint, error) {
 	u := new(FeeJoint)
 	err := rows.Scan(
 		&u.ID,
-		&u.FeeId,
+		&u.FeeName,
 		&u.Description,
 		&u.Amt.Amount,
 		&u.Amt.Curreny,
