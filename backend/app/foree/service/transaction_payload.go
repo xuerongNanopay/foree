@@ -38,15 +38,14 @@ func (q *FreeQuoteReq) Validate() *transport.BadRequestError {
 
 type QuoteTransactionReq struct {
 	transport.SessionReq
-	SrcAccId    int64   `json:"srcAccId" validate:"gt=0"`
-	DestAccId   int64   `json:"destAccId" validate:"gt=0"`
-	SrcAmount   float64 `json:"srcAmount"`
-	SrcCurrency string  `json:"srcCurrency" validate:"eq=CAD"`
-	// DestAmount   float64 `json:"DestAmount"`
-	DestCurrency       string `json:"DestCurrency" validate:"eq=PKR"`
-	RewardIds          string `json:"rewardIds"`
-	PromoCode          string `json:"promoCode"`
-	TransactionPurpose string `json:"transactionPurpose" validate:"required"`
+	SrcAccId           int64   `json:"srcAccId" validate:"gt=0"`
+	DestAccId          int64   `json:"destAccId" validate:"gt=0"`
+	SrcAmount          float64 `json:"srcAmount"`
+	SrcCurrency        string  `json:"srcCurrency" validate:"eq=CAD"`
+	DestCurrency       string  `json:"DestCurrency" validate:"eq=PKR"`
+	RewardIds          []int64 `json:"rewardIds"`
+	PromoCode          string  `json:"promoCode"`
+	TransactionPurpose string  `json:"transactionPurpose" validate:"required"`
 }
 
 func (q *QuoteTransactionReq) TrimSpace() {

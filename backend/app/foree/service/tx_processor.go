@@ -58,6 +58,9 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 			Curreny: quote.DestCurrency,
 		},
 		TransactionPurpose: quote.TransactionPurpose,
+		SrcAccId:           quote.SrcAccId,
+		DestAccId:          quote.DestAccId,
+		RewardIds:          quote.RewardIds,
 	}
 	//TODO: reward permission.
 	return foreeTx, nil
