@@ -13,18 +13,18 @@ const (
 		INSERT INTO rewards
 		(
 			type, description, amount, currency,
-			status, is_redeemed, owner_id, applied_transaction_id
+			status, owner_id, applied_transaction_id
 		) VALUES(?,?,?,?,?,?,?,?)
 	`
 	sQLRewardUpdateById = `
 		UPDATE rewards SET
-			status = ? , is_redeemed = ? , applied_transaction_id = ?
+			status = ?, applied_transaction_id = ?
 		WHERE id = ?
 	`
 	sQLRewardGetUniqueById = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
-			r.status, r.is_redeemed, r.owner_id, r.applied_transaction_id,
+			r.status, r.owner_id, r.applied_transaction_id,
 			r.expire_at, f.create_at, f.update_at
 		FROM rewards as r
 		Where r.id = ?
@@ -32,7 +32,7 @@ const (
 	sQLRewardGetAllByAppliedTransactionId = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
-			r.status, r.is_redeemed, r.owner_id, r.applied_transaction_id,
+			r.status, r.owner_id, r.applied_transaction_id,
 			r.expire_at, f.create_at, f.update_at
 		FROM rewards as r
 		Where r.applied_transaction_id = ?
@@ -40,7 +40,7 @@ const (
 	sQLRewardGetAllUnredeemByOwnerId = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
-			r.status, r.is_redeemed, r.owner_id, r.applied_transaction_id,
+			r.status, r.owner_id, r.applied_transaction_id,
 			r.expire_at, f.create_at, f.update_at
 		FROM rewards as r
 		Where r.owner_id = ? AND r.is_redeemed = FALSE
@@ -71,7 +71,6 @@ type Reward struct {
 	Description          string           `json:"description"`
 	Amt                  types.AmountData `json:"amt"`
 	Status               RewardStatus     `json:"status"`
-	IsRedeemed           bool             `json:"isRedeemed"`
 	OwnerId              int64            `json:"ownerId"`
 	AppliedTransactionId int64            `json:"appliedTransactionId"`
 	ExpireAt             time.Time        `json:"expireAt"`
@@ -95,7 +94,6 @@ func (repo *RewardRepo) InsertReward(ctx context.Context, reward Reward) (int64,
 		reward.Amt.Amount,
 		reward.Amt.Curreny,
 		reward.Status,
-		reward.IsRedeemed,
 		reward.OwnerId,
 		reward.AppliedTransactionId,
 	)
@@ -110,7 +108,7 @@ func (repo *RewardRepo) InsertReward(ctx context.Context, reward Reward) (int64,
 }
 
 func (repo *RewardRepo) UpdateRewardTxById(ctx context.Context, reward Reward) error {
-	_, err := repo.db.Exec(sQLRewardUpdateById, reward.Status, reward.IsRedeemed, reward.AppliedTransactionId, reward.ID)
+	_, err := repo.db.Exec(sQLRewardUpdateById, reward.Status, reward.AppliedTransactionId, reward.ID)
 	if err != nil {
 		return err
 	}
@@ -198,7 +196,6 @@ func scanRowIntoReward(rows *sql.Rows) (*Reward, error) {
 		&u.Amt.Amount,
 		&u.Amt.Curreny,
 		&u.Status,
-		&u.IsRedeemed,
 		&u.OwnerId,
 		&u.AppliedTransactionId,
 		&u.ExpireAt,
