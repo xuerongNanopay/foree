@@ -50,16 +50,16 @@ const (
 type RewardType string
 
 const (
-	RewardTypeSignUp   string = "SIGN_UP_REWARD"
-	RewardTypeReferal  string = "REFERAL_REWARD"
-	RewardTypeTxCreate string = "TxCreate_REWARD"
+	RewardTypeSignUp  string = "SIGN_UP_REWARD"
+	RewardTypeReferal string = "REFERAL_REWARD"
+	RewardTypeTx      string = "Tx_REWARD"
 )
 
 type RewardStatus string
 
 const (
-	RewardStatusEnable  = "ENABLE"
-	RewardStatusDisable = "DISABLE"
+	RewardStatusActive = "ACTIVE"
+	RewardStatusDelete = "DELETE"
 )
 
 type Reward struct {

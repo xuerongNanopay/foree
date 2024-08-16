@@ -58,7 +58,6 @@ const (
 	FeeOperatorGT  FeeOperator = "GT"
 )
 
-// TODO: ApplyFee func.
 type Fee struct {
 	Name                      string           `json:"name"`
 	Description               string           `json:"description"`
