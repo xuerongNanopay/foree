@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"xue.io/go-pay/app/foree/types"
@@ -70,6 +71,27 @@ type Fee struct {
 	IsEnable                  bool             `json:"isEnable"`
 	CreateAt                  time.Time        `json:"createAt"`
 	UpdateAt                  time.Time        `json:"updateAt"`
+}
+
+func (f *Fee) ApplyFee(amt types.AmountData) (*FeeJoint, error) {
+	if amt.Curreny != f.ConditionAmt.Curreny {
+		return nil, fmt.Errorf("Fee should apply in same currency, expect `%s` but ``%s", f.ConditionAmt.Curreny, amt.Curreny)
+	}
+	switch f.Condition {
+	case FeeTypeFixCost:
+
+	case FeeTypeVariableCost:
+
+	}
+	return nil, nil
+}
+
+func applyFeeOperator(op FeeOperator) (func(l, r types.Amount) bool, error) {
+	switch op {
+	// case FeeOperatorLTE:
+	default:
+		return nil, fmt.Errorf("Unknow fee operator `%s`", string(op))
+	}
 }
 
 type FeeJoint struct {

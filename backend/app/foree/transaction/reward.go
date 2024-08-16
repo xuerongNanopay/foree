@@ -13,36 +13,44 @@ const (
 		INSERT INTO rewards
 		(
 			type, description, amount, currency,
-			status, is_redeemed, owner_id, transaction_id
+			status, is_redeemed, owner_id, applied_transaction_id
 		) VALUES(?,?,?,?,?,?,?,?)
 	`
 	sQLRewardGetAll = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
-			r.status, r.is_redeemed, r.owner_id, r.transaction_id,
+			r.status, r.is_redeemed, r.owner_id, r.applied_transaction_id,
 			r.expire_at, f.create_at, f.update_at
 		FROM rewards as r
 	`
-	sQLRewardGetUniqueByTransactionId = `
-	SELECT
-		r.id, r.type, r.description, r.amount, r.currency,
-		r.status, r.is_redeemed, r.owner_id, r.transaction_id,
-		r.expire_at, f.create_at, f.update_at
-	FROM rewards as r
-	Where r.id = ?
-`
-	sQLRewardGetAllByTransactionId = `
+	sQLRewardGetUniqueRewardById = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
-			r.status, r.is_redeemed, r.owner_id, r.transaction_id,
+			r.status, r.is_redeemed, r.owner_id, r.applied_transaction_id,
 			r.expire_at, f.create_at, f.update_at
 		FROM rewards as r
-		Where r.transaction_id = ?
+		Where r.id = ?
+	`
+	sQLRewardGetUniqueByAppliedTransactionId = `
+		SELECT
+			r.id, r.type, r.description, r.amount, r.currency,
+			r.status, r.is_redeemed, r.owner_id, r.applied_transaction_id,
+			r.expire_at, f.create_at, f.update_at
+		FROM rewards as r
+		Where r.id = ?
+	`
+	sQLRewardGetAllByAppliedTransactionId = `
+		SELECT
+			r.id, r.type, r.description, r.amount, r.currency,
+			r.status, r.is_redeemed, r.owner_id, r.applied_transaction_id,
+			r.expire_at, f.create_at, f.update_at
+		FROM rewards as r
+		Where r.applied_transaction_id = ?
 	`
 	sQLRewardGetAllUnredeemByOwnerId = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
-			r.status, r.is_redeemed, r.owner_id, r.transaction_id,
+			r.status, r.is_redeemed, r.owner_id, r.applied_transaction_id,
 			r.expire_at, f.create_at, f.update_at
 		FROM rewards as r
 		Where r.owner_id = ? AND r.is_redeemed = FALSE
@@ -64,17 +72,17 @@ const (
 )
 
 type Reward struct {
-	ID            int64            `json:"id"`
-	Type          string           `json:"type"`
-	Description   string           `json:"description"`
-	Amt           types.AmountData `json:"amt"`
-	Status        RewardStatus     `json:"status"`
-	IsRedeemed    bool             `json:"isRedeemed"`
-	OwnerId       int64            `json:"ownerId"`
-	TransactionId int64            `json:"transactionId"`
-	ExpireAt      time.Time        `json:"expireAt"`
-	CreateAt      time.Time        `json:"createAt"`
-	UpdateAt      time.Time        `json:"updateAt"`
+	ID                   int64            `json:"id"`
+	Type                 string           `json:"type"`
+	Description          string           `json:"description"`
+	Amt                  types.AmountData `json:"amt"`
+	Status               RewardStatus     `json:"status"`
+	IsRedeemed           bool             `json:"isRedeemed"`
+	OwnerId              int64            `json:"ownerId"`
+	AppliedTransactionId int64            `json:"appliedTransactionId"`
+	ExpireAt             time.Time        `json:"expireAt"`
+	CreateAt             time.Time        `json:"createAt"`
+	UpdateAt             time.Time        `json:"updateAt"`
 }
 
 func NewRewardRepo(db *sql.DB) *RewardRepo {
@@ -95,7 +103,7 @@ func (repo *FeeRepo) InsertReward(ctx context.Context, reward Reward) (int64, er
 		reward.Status,
 		reward.IsRedeemed,
 		reward.OwnerId,
-		reward.TransactionId,
+		reward.AppliedTransactionId,
 	)
 	if err != nil {
 		return 0, err
@@ -131,8 +139,8 @@ func (repo *FeeRepo) GetAllReward(ctx context.Context) ([]*Reward, error) {
 	return rewards, nil
 }
 
-func (repo *FeeRepo) GetAllRewardByTransactionId(ctx context.Context, transactionId int64) ([]*Reward, error) {
-	rows, err := repo.db.Query(sQLRewardGetAllByTransactionId, transactionId)
+func (repo *FeeRepo) GetAllRewardByAppliedTransactionId(ctx context.Context, appliedTransactionId int64) ([]*Reward, error) {
+	rows, err := repo.db.Query(sQLRewardGetAllByAppliedTransactionId, appliedTransactionId)
 
 	if err != nil {
 		return nil, err
@@ -190,7 +198,7 @@ func scanRowIntoReward(rows *sql.Rows) (*Reward, error) {
 		&u.Status,
 		&u.IsRedeemed,
 		&u.OwnerId,
-		&u.TransactionId,
+		&u.AppliedTransactionId,
 		&u.ExpireAt,
 		&u.CreateAt,
 		&u.UpdateAt,

@@ -44,7 +44,7 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 	if rate == nil {
 		return nil, fmt.Errorf("user `%v` try to create transaction with unkown rate `%s`", user.ID, transaction.GenerateRateId(quote.SrcCurrency, quote.DestCurrency))
 	}
-	destAmount := rate.CalculateForwardAmount(quote.SrcAmount)
+
 	foreeTx := &transaction.ForeeTx{
 		Type:   transaction.TxTypeInteracToNBP,
 		Status: transaction.TxStatusInitial,
@@ -54,7 +54,7 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 			Curreny: quote.SrcCurrency,
 		},
 		DestAmt: types.AmountData{
-			Amount:  types.Amount(destAmount),
+			Amount:  types.Amount(rate.CalculateForwardAmount(quote.SrcAmount)),
 			Curreny: quote.DestCurrency,
 		},
 		TransactionPurpose: quote.TransactionPurpose,
@@ -62,7 +62,9 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 		DestAccId:          quote.DestAccId,
 		RewardIds:          quote.RewardIds,
 	}
-	//TODO: reward permission.
+
+	// Calculate fee:
+	// if
 	return foreeTx, nil
 }
 
