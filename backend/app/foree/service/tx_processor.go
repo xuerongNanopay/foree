@@ -345,6 +345,6 @@ func (p *TxProcessor) rejectIDM(ctx context.Context, tx transaction.ForeeTx) {
 	}
 }
 
-func CanApplyPromoCode() {
+func (p *TxProcessor) mayBeApplyPromoCode(promo transaction.PromoCode, quote QuoteTransactionReq) {
 
 }
