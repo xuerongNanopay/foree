@@ -13,6 +13,10 @@ import (
 	time_util "xue.io/go-pay/util/time"
 )
 
+const (
+	TransactionFee string = "FOREE_TX_FEE"
+)
+
 type TxProcessorConfig struct {
 }
 
@@ -31,6 +35,8 @@ type TxProcessor struct {
 	userRepo         *auth.UserRepo
 	contactRepo      *account.ContactAccountRepo
 	interacRepo      *account.InteracAccountRepo
+	feeRepo          *transaction.FeeRepo
+	feeJointRepo     *transaction.FeeJointRepo
 	processingMap    []map[int64]*transaction.ForeeTx // Avoid duplicate process
 	processingLock   sync.RWMutex
 }
@@ -43,6 +49,12 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 	}
 	if rate == nil {
 		return nil, fmt.Errorf("user `%v` try to create transaction with unkown rate `%s`", user.ID, transaction.GenerateRateId(quote.SrcCurrency, quote.DestCurrency))
+	}
+	if quote.PromoCode != "" && len(quote.RewardIds) > 0 {
+		return nil, fmt.Errorf("user `%v` try to use both promo code and rewards", user.ID)
+	}
+	if len(quote.RewardIds) > 1 {
+		return nil, fmt.Errorf("user `%v` try to apply `%v` rewards", user.ID, len(quote.RewardIds))
 	}
 
 	foreeTx := &transaction.ForeeTx{
@@ -63,8 +75,11 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 		RewardIds:          quote.RewardIds,
 	}
 
-	// Calculate fee:
-	// if
+	//PromoCode
+	//Reward
+	//Fee
+	//Total
+	//Summary
 	return foreeTx, nil
 }
 
@@ -328,4 +343,8 @@ func (p *TxProcessor) rejectIDM(ctx context.Context, tx transaction.ForeeTx) {
 	if tx.CurStage == transaction.TxStageIDM && tx.CurStageStatus == transaction.TxStatusSuspend {
 
 	}
+}
+
+func CanApplyPromoCode() {
+
 }
