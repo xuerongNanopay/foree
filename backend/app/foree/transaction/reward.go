@@ -21,7 +21,7 @@ const (
 			status = ? , is_redeemed = ? , applied_transaction_id = ?
 		WHERE id = ?
 	`
-	sQLRewardGetUniqueRewardById = `
+	sQLRewardGetUniqueById = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.is_redeemed, r.owner_id, r.applied_transaction_id,
@@ -116,7 +116,7 @@ func (repo *RewardRepo) UpdateRewardTxById(ctx context.Context, reward Reward) e
 }
 
 func (repo *RewardRepo) GetUniqueRewardById(ctx context.Context, id int64) (*Reward, error) {
-	rows, err := repo.db.Query(sQLRewardGetUniqueRewardById, id)
+	rows, err := repo.db.Query(sQLRewardGetUniqueById, id)
 
 	if err != nil {
 		return nil, err
