@@ -40,10 +40,10 @@ type QuoteTransactionReq struct {
 	transport.SessionReq
 	SrcAccId           int64   `json:"srcAccId" validate:"gt=0"`
 	DestAccId          int64   `json:"destAccId" validate:"gt=0"`
-	SrcAmount          float64 `json:"srcAmount"`
+	SrcAmount          float64 `json:"srcAmount" validate:"gt=10,lt=1000"`
 	SrcCurrency        string  `json:"srcCurrency" validate:"eq=CAD"`
 	DestCurrency       string  `json:"DestCurrency" validate:"eq=PKR"`
-	RewardIds          []int64 `json:"rewardIds"`
+	RewardIds          []int64 `json:"rewardIds" validate:"max=1"`
 	PromoCode          string  `json:"promoCode"`
 	TransactionPurpose string  `json:"transactionPurpose" validate:"required"`
 }
@@ -57,9 +57,8 @@ func (q *QuoteTransactionReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
 	ret := validateStruct(q, "Invalid quote transaction request")
 
-	if q.SrcAmount <= 0 {
-		ret.AddDetails("srcAmount", fmt.Sprintf("invalid srcAmount `%v`", q.SrcAmount))
-		// ret.AddDetails("DestAmount", fmt.Sprintf("invalid DestAmount `%v`", q.DestAmount))
+	if q.PromoCode != "" && len(q.RewardIds) > 0 {
+		ret.AddDetails("promoCode", "cannot apply promocode and reward together")
 	}
 
 	if len(ret.Details) > 0 {

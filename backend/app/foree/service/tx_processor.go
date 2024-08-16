@@ -50,12 +50,12 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 	if rate == nil {
 		return nil, fmt.Errorf("user `%v` try to create transaction with unkown rate `%s`", user.ID, transaction.GenerateRateId(quote.SrcCurrency, quote.DestCurrency))
 	}
-	if quote.PromoCode != "" && len(quote.RewardIds) > 0 {
-		return nil, fmt.Errorf("user `%v` try to use both promo code and rewards", user.ID)
-	}
-	if len(quote.RewardIds) > 1 {
-		return nil, fmt.Errorf("user `%v` try to apply `%v` rewards", user.ID, len(quote.RewardIds))
-	}
+
+	//PromoCode
+	//Reward
+	//Fee
+	//Total
+	//Summary
 
 	foreeTx := &transaction.ForeeTx{
 		Type:   transaction.TxTypeInteracToNBP,
@@ -74,12 +74,6 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 		DestAccId:          quote.DestAccId,
 		RewardIds:          quote.RewardIds,
 	}
-
-	//PromoCode
-	//Reward
-	//Fee
-	//Total
-	//Summary
 	return foreeTx, nil
 }
 
