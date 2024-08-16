@@ -15,8 +15,8 @@ const (
 	sQLReferralInsert = `
 		INSERT INTO referral
 		(	
-			referral_type, referral_code, referrer_id, referree_id
-		) VALUES (?,?,?,?)
+			referral_type, referral_value, referral_code, referrer_id, referree_id
+		) VALUES (?,?,?,?,?)
 	`
 	sQLReferralUpdateByReferralCode = `
 		UPDATE referral SET 
@@ -25,7 +25,7 @@ const (
 	`
 	sQLReferralGetUniqueByReferralCode = `
 		SELECT 
-			r.id, r.referral_type, r.referral_code, 
+			r.id, r.referral_type, r.referral_value, r.referral_code, 
 			r.referrer_id, r.referree_id, r.accept_at
 			r.create_at, r.update_at
 		FROM referral as r
@@ -33,7 +33,7 @@ const (
 	`
 	sQLReferralGetUniqueByReferreeId = `
 		SELECT 
-			r.id, r.referral_type, r.referral_code, 
+			r.id, r.referral_type, r.referral_value, r.referral_code, 
 			r.referrer_id, r.referree_id, r.accept_at
 			r.create_at, r.update_at
 		FROM referral as r
@@ -42,14 +42,15 @@ const (
 )
 
 type Referral struct {
-	ID           int64        `json:"id"`
-	ReferralType ReferralType `json:"referralType"`
-	ReferralCode string       `json:"referralCode"`
-	ReferrerId   int64        `json:"referrerId"`
-	ReferreeId   int64        `json:"referreeId"`
-	AcceptAt     time.Time    `json:"acceptAt"`
-	CreateAt     time.Time    `json:"createAt"`
-	UpdateAt     time.Time    `json:"updateAt"`
+	ID            int64        `json:"id"`
+	ReferralType  ReferralType `json:"referralType"`
+	ReferralValue string       `json:"referralValue"`
+	ReferralCode  string       `json:"referralCode"`
+	ReferrerId    int64        `json:"referrerId"`
+	ReferreeId    int64        `json:"referreeId"`
+	AcceptAt      time.Time    `json:"acceptAt"`
+	CreateAt      time.Time    `json:"createAt"`
+	UpdateAt      time.Time    `json:"updateAt"`
 }
 
 func NewReferralRepo(db *sql.DB) *ReferralRepo {
@@ -64,6 +65,7 @@ func (repo *ReferralRepo) InsertReferral(r Referral) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLReferralInsert,
 		r.ReferralType,
+		r.ReferralValue,
 		r.ReferralCode,
 		r.ReferrerId,
 		r.ReferreeId,
@@ -144,6 +146,7 @@ func scanRowIntoReferral(rows *sql.Rows) (*Referral, error) {
 	err := rows.Scan(
 		&u.ID,
 		&u.ReferralType,
+		&u.ReferralValue,
 		&u.ReferralCode,
 		&u.ReferrerId,
 		&u.ReferreeId,
@@ -156,4 +159,8 @@ func scanRowIntoReferral(rows *sql.Rows) (*Referral, error) {
 	}
 
 	return u, nil
+}
+
+func GenerateReferralCode(userId int64) string {
+
 }
