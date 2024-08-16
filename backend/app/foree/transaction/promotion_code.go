@@ -12,7 +12,7 @@ const (
 	sQLPromoCodeGetUniqueByCode = `
 		SELECT
 			P.code, p.description, p.min_amount, p.min_currency, p.limit_per_acc,
-			p.start_time, p.end_time, p.create_at, p.update_at
+			p.is_enable, p.start_time, p.end_time, p.create_at, p.update_at
 		FROM promo_code as p
 		Where p.code = ?
 	`
@@ -23,6 +23,7 @@ type PromoCode struct {
 	Description string           `json:"description"`
 	MinAmt      types.AmountData `json:"minAmt"`
 	LimitPerAcc int              `json:"limit_per_acc"`
+	IsEnable    bool             `json:"isEnable"`
 	StartTime   time.Time        `json:"startTime"`
 	EndTime     time.Time        `json:"endTime"`
 	CreateAt    time.Time        `json:"createAt"`
@@ -68,6 +69,8 @@ func scanRowIntoPromoCode(rows *sql.Rows) (*PromoCode, error) {
 		&p.Description,
 		&p.MinAmt.Amount,
 		&p.MinAmt.Curreny,
+		&p.LimitPerAcc,
+		&p.IsEnable,
 		&p.StartTime,
 		&p.EndTime,
 		&p.CreateAt,
