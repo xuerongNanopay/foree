@@ -37,13 +37,13 @@ const (
 		FROM rewards as r
 		Where r.applied_transaction_id = ?
 	`
-	sQLRewardGetAllUnredeemByOwnerId = `
+	sQLRewardGetAllActiveByOwnerId = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
 			r.expire_at, f.create_at, f.update_at
 		FROM rewards as r
-		Where r.owner_id = ? AND r.is_redeemed = FALSE
+		Where r.owner_id = ? AND r.status = ACTIVE
 	`
 )
 
@@ -163,8 +163,8 @@ func (repo *RewardRepo) GetAllRewardByAppliedTransactionId(ctx context.Context, 
 	return rewards, nil
 }
 
-func (repo *RewardRepo) GetAllUnredeemRewardByOwnerId(ctx context.Context, ownerId int64) ([]*Reward, error) {
-	rows, err := repo.db.Query(sQLRewardGetAllUnredeemByOwnerId, ownerId)
+func (repo *RewardRepo) GetAllActiveRewardByOwnerId(ctx context.Context, ownerId int64) ([]*Reward, error) {
+	rows, err := repo.db.Query(sQLRewardGetAllActiveByOwnerId, ownerId)
 
 	if err != nil {
 		return nil, err
