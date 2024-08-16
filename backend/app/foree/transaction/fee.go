@@ -3,6 +3,7 @@ package transaction
 import (
 	"database/sql"
 	"fmt"
+	"math"
 	"time"
 
 	"xue.io/go-pay/app/foree/types"
@@ -13,8 +14,7 @@ const (
 		SELECT
 			f.name, f.description, f.type, f.condition,
 			f.condition_amount, f.condition_currency,
-			f.fee_amount, f.fee_currency,
-			f.is_apply_in_condition_amount_only
+			f.ratio, f.is_apply_in_condition_amount_only
 			f.is_enable, f.create_at, f.update_at
 		FROM fees as f
 	`
@@ -22,8 +22,7 @@ const (
 		SELECT
 			f.name, f.description, f.type, f.condition,
 			f.condition_amount, f.condition_currency,
-			f.fee_amount, f.fee_currency,
-			f.is_apply_in_condition_amount_only
+			f.ratio, f.is_apply_in_condition_amount_only
 			f.is_enable, f.create_at, f.update_at
 		FROM fees as f
 		Where f.name = ?
@@ -66,8 +65,8 @@ type Fee struct {
 	Type                      FeeType          `json:"type"`
 	Condition                 FeeOperator      `json:"condition"`
 	ConditionAmt              types.AmountData `json:"conditionAmt"`
-	FeeAmt                    types.AmountData `json:"feeAmt"`
-	IsApplyInConditionAmtOnly bool             `json:"isApplyInConditionAmtOnly"`
+	Ratio                     types.Amount     `json:"ratio"`
+	IsApplyInConditionAmtOnly bool             `json:"isApplyInConditionAmtOnly"` //TODO: support in future.
 	IsEnable                  bool             `json:"isEnable"`
 	CreateAt                  time.Time        `json:"createAt"`
 	UpdateAt                  time.Time        `json:"updateAt"`
@@ -90,7 +89,22 @@ func (f *Fee) MaybeApplyFee(amt types.AmountData) (*FeeJoint, error) {
 	}
 
 	switch f.Type {
-
+	case FeeTypeFixCost:
+		return &FeeJoint{
+			FeeName: f.Name,
+			Amt: types.AmountData{
+				Amount:  f.Ratio,
+				Curreny: f.ConditionAmt.Curreny,
+			},
+		}, nil
+	case FeeTypeVariableCost:
+		return &FeeJoint{
+			FeeName: f.Name,
+			Amt: types.AmountData{
+				Amount:  types.Amount(math.Round(float64(f.Ratio*amt.Amount)*100.0) / 100.0),
+				Curreny: f.ConditionAmt.Curreny,
+			},
+		}, nil
 	default:
 		return nil, fmt.Errorf("unknown fee type `%s`", string(f.Type))
 	}
@@ -247,8 +261,7 @@ func scanRowIntoFee(rows *sql.Rows) (*Fee, error) {
 		&u.Condition,
 		&u.ConditionAmt.Amount,
 		&u.ConditionAmt.Curreny,
-		&u.FeeAmt.Amount,
-		&u.FeeAmt.Curreny,
+		&u.Ratio,
 		&u.IsApplyInConditionAmtOnly,
 		&u.IsEnable,
 		&u.CreateAt,
