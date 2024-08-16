@@ -59,8 +59,10 @@ const (
 type RewardStatus string
 
 const (
-	RewardStatusActive = "ACTIVE"
-	RewardStatusDelete = "DELETE"
+	RewardStatusActive   = "ACTIVE"
+	RewardStatusPending  = "PENDING"
+	RewardStatusRedeemed = "REDEEMED"
+	RewardStatusDelete   = "DELETE"
 )
 
 type Reward struct {
