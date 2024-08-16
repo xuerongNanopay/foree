@@ -23,6 +23,7 @@ const (
         INSERT INTO tx_summary
         (
             summary, type, status, rate, 
+			src_acc_id, dest_acc_id,
             src_acc_summary, src_amount, src_currency, 
             dest_acc_summary, dest_amount, dest_currency,
             total_amount, total_currency,
@@ -38,7 +39,8 @@ const (
     `
 	sQLTxSummaryGetUniqueById = `
         SELECT 
-            t.id, t.summary, t.type, t.status, t.rate
+            t.id, t.summary, t.type, t.status, t.rate,
+			t.src_acc_id, t.dest_acc_id,
             t.src_acc_summary, t.src_amount, t.src_currency, 
             t.dest_acc_summary, t.dest_amount, t.dest_currency,
             t.total_amount, t.total_currency,
@@ -51,7 +53,8 @@ const (
     `
 	sQLTxSummaryGetUniqueByParentTxId = `
         SELECT 
-            t.id, t.summary, t.type, t.status, t.rate
+            t.id, t.summary, t.type, t.status, t.rate,
+			t.src_acc_id, t.dest_acc_id,
             t.src_acc_summary, t.src_amount, t.src_currency, 
             t.dest_acc_summary, t.dest_amount, t.dest_currency,
             t.total_amount, t.total_currency,
@@ -64,7 +67,8 @@ const (
     `
 	sQLTxSummaryGetAllByOwnerId = `
 	    SELECT
-	        t.id, t.summary, t.type, t.status, t.rate
+	        t.id, t.summary, t.type, t.status, t.rate,
+			t.src_acc_id, t.dest_acc_id,
 	        t.src_acc_summary, t.src_amount, t.src_currency,
 	        t.dest_acc_summary, t.dest_amount, t.dest_currency,
 	        t.total_amount, t.total_currency,
@@ -79,7 +83,8 @@ const (
 	`
 	sQLTxSummaryQueryByOwnerId = `
 	    SELECT
-	        t.id, t.summary, t.type, t.status, t.rate
+	        t.id, t.summary, t.type, t.status, t.rate,
+			t.src_acc_id, t.dest_acc_id,
 	        t.src_acc_summary, t.src_amount, t.src_currency,
 	        t.dest_acc_summary, t.dest_amount, t.dest_currency,
 	        t.total_amount, t.total_currency,
@@ -100,6 +105,8 @@ type TxSummary struct {
 	Type            string    `json:"type"`
 	Status          string    `json:"status"`
 	Rate            string    `json:"rate"`
+	SrcAccId        int64     `json:"srcAccId"`
+	DestAccId       int64     `json:"destAccId"`
 	SrcAccSummary   string    `json:"srcAccSummary"`
 	SrcAmount       string    `json:"srcAmount"`
 	SrcCurrency     string    `json:"srcCurrency"`
@@ -135,6 +142,8 @@ func (repo *TxSummaryRepo) InsertTxSummary(ctx context.Context, tx TxSummary) (i
 		tx.Type,
 		tx.Status,
 		tx.Rate,
+		tx.SrcAccId,
+		tx.DestAccId,
 		tx.SrcAccSummary,
 		tx.SrcAmount,
 		tx.SrcCurrency,
@@ -274,6 +283,8 @@ func scanRowIntoTxSummary(rows *sql.Rows) (*TxSummary, error) {
 		&tx.Type,
 		&tx.Status,
 		&tx.Rate,
+		&tx.SrcAccId,
+		&tx.DestAccId,
 		&tx.SrcAccSummary,
 		&tx.SrcAmount,
 		&tx.SrcCurrency,
