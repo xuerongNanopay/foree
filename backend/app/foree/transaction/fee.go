@@ -77,11 +77,12 @@ func (f *Fee) ApplyFee(amt types.AmountData) (*FeeJoint, error) {
 	if amt.Curreny != f.ConditionAmt.Curreny {
 		return nil, fmt.Errorf("Fee should apply in same currency, expect `%s` but ``%s", f.ConditionAmt.Curreny, amt.Curreny)
 	}
-	switch f.Condition {
-	case FeeTypeFixCost:
-
-	case FeeTypeVariableCost:
-
+	cond, err := applyFeeOperator(f.Condition)
+	if err != nil {
+		return nil, err
+	}
+	if !cond(f.ConditionAmt.Amount, amt.Amount) {
+		return nil, nil
 	}
 	return nil, nil
 }
