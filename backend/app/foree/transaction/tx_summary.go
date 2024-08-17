@@ -37,7 +37,7 @@ const (
             status = ?, is_cancel_allowed = ? 
         WHERE id = ?
     `
-	sQLTxSummaryGetUniqueById = `
+	sQLTxSummaryGetUniqueByOwnerAndId = `
         SELECT 
             t.id, t.summary, t.type, t.status, t.rate,
 			t.src_acc_id, t.dest_acc_id,
@@ -179,8 +179,8 @@ func (repo *TxSummaryRepo) UpdateTxSummaryById(ctx context.Context, tx TxSummary
 	return nil
 }
 
-func (repo *TxSummaryRepo) GetUniqueTxSummaryById(ctx context.Context, userId, id int64) (*TxSummary, error) {
-	rows, err := repo.db.Query(sQLTxSummaryGetUniqueById, userId, id)
+func (repo *TxSummaryRepo) GetUniqueTxSummaryByOwnerAndId(ctx context.Context, userId, id int64) (*TxSummary, error) {
+	rows, err := repo.db.Query(sQLTxSummaryGetUniqueByOwnerAndId, userId, id)
 
 	if err != nil {
 		return nil, err
