@@ -29,7 +29,7 @@ type TxProcessor struct {
 	txHistoryRepo      *transaction.TxHistoryRepo
 	txSummaryRepo      *transaction.TxSummaryRepo
 	txLimitRepo        *transaction.TxLimitRepo
-	txLimitCacheRepo   *transaction.TxLimitCacheRepo
+	txLimitCacheRepo   *transaction.DailyTxLimitRepo
 	foreeTxRepo        *transaction.ForeeTxRepo
 	rateRepo           *transaction.RateRepo
 	userRepo           *auth.UserRepo
@@ -171,6 +171,10 @@ existpromo:
 	foreeTx.TotalAmt = totalAmt
 
 	return foreeTx, nil
+}
+
+func (p *TxProcessor) GetTxLimit(user auth.User) {
+
 }
 
 func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
