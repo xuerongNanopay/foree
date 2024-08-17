@@ -30,6 +30,19 @@ type PromoCode struct {
 	UpdateAt    time.Time        `json:"updateAt"`
 }
 
+func (p *PromoCode) IsValid() bool {
+	if !p.IsEnable {
+		return false
+	}
+
+	now := time.Now().Unix()
+
+	if now > p.StartTime.Unix() || (now > p.EndTime.Unix() && !p.EndTime.IsZero()) {
+		return false
+	}
+	return true
+}
+
 func NewPromoCodeRepo(db *sql.DB) *PromoCodeRepo {
 	return &PromoCodeRepo{db: db}
 }

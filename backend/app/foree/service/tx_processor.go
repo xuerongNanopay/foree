@@ -23,23 +23,25 @@ type TxProcessorConfig struct {
 // It is the internal service for transaction process.
 
 type TxProcessor struct {
-	interacTxRepo    *transaction.InteracCITxRepo
-	npbTxRepo        *transaction.NBPCOTxRepo
-	idmTxRepo        *transaction.IdmTxRepo
-	txHistoryRepo    *transaction.TxHistoryRepo
-	txSummaryRepo    *transaction.TxSummaryRepo
-	txLimitRepo      *transaction.TxLimitRepo
-	txLimitCacheRepo *transaction.TxLimitCacheRepo
-	foreeTxRepo      *transaction.ForeeTxRepo
-	rateRepo         *transaction.RateRepo
-	userRepo         *auth.UserRepo
-	contactRepo      *account.ContactAccountRepo
-	interacRepo      *account.InteracAccountRepo
-	feeRepo          *transaction.FeeRepo
-	feeJointRepo     *transaction.FeeJointRepo
-	rewardRepo       *transaction.RewardRepo
-	processingMap    []map[int64]*transaction.ForeeTx // Avoid duplicate process
-	processingLock   sync.RWMutex
+	interacTxRepo      *transaction.InteracCITxRepo
+	npbTxRepo          *transaction.NBPCOTxRepo
+	idmTxRepo          *transaction.IdmTxRepo
+	txHistoryRepo      *transaction.TxHistoryRepo
+	txSummaryRepo      *transaction.TxSummaryRepo
+	txLimitRepo        *transaction.TxLimitRepo
+	txLimitCacheRepo   *transaction.TxLimitCacheRepo
+	foreeTxRepo        *transaction.ForeeTxRepo
+	rateRepo           *transaction.RateRepo
+	userRepo           *auth.UserRepo
+	contactRepo        *account.ContactAccountRepo
+	interacRepo        *account.InteracAccountRepo
+	feeRepo            *transaction.FeeRepo
+	feeJointRepo       *transaction.FeeJointRepo
+	promoCodeRepo      *transaction.PromoCodeRepo
+	promoCodeJointRepo *transaction.PromoCodeJointRepo
+	rewardRepo         *transaction.RewardRepo
+	processingMap      []map[int64]*transaction.ForeeTx // Avoid duplicate process
+	processingLock     sync.RWMutex
 }
 
 func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*transaction.ForeeTx, error) {
@@ -72,11 +74,41 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 		if r.Amt.Curreny != quote.SrcCurrency {
 			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` that apply currency `%v` to currency `%v`", user.ID, rewardId, r.Amt.Curreny, quote.SrcCurrency)
 		}
-		if (quote.SrcAmount - float64(r.Amt.Amount)) < 4 {
+		if (quote.SrcAmount - float64(r.Amt.Amount)) < 10 {
 			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` with srcAmount `%v`", user.ID, rewardId, quote.SrcCurrency)
 		}
 		reward = r
 	}
+
+	//TODO:
+	//Don't return err. Just ignore the promocode reward.
+	if quote.PromoCode != "" {
+		promoCode, err := p.promoCodeRepo.GetUniquePromoCodeByCode(ctx, quote.PromoCode)
+		if err != nil {
+			//TODO: log
+			goto existpromo
+		}
+		if promoCode == nil {
+			//TODO: log
+			goto existpromo
+		}
+		if !promoCode.IsValid() {
+			//TODO: log
+			goto existpromo
+		}
+		if quote.SrcCurrency != promoCode.MinAmt.Curreny {
+			//TODO: log
+			goto existpromo
+		}
+		if quote.SrcAmount < float64(promoCode.MinAmt.Amount) {
+			//TODO: log
+			goto existpromo
+		}
+		//TODO: check account limit.
+	}
+
+existpromo:
+
 	// reward, err := p.rewardRepo.UpdateRewardTxById()
 	// if err != nil {
 	// 	return nil, err
@@ -369,8 +401,4 @@ func (p *TxProcessor) rejectIDM(ctx context.Context, tx transaction.ForeeTx) {
 	if tx.CurStage == transaction.TxStageIDM && tx.CurStageStatus == transaction.TxStatusSuspend {
 
 	}
-}
-
-func (p *TxProcessor) mayBeApplyPromoCode(promo transaction.PromoCode, quote QuoteTransactionReq) {
-
 }
