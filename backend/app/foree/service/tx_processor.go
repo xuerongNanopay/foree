@@ -122,7 +122,7 @@ existpromo:
 		return nil, err
 	}
 	if joint != nil {
-		joint.Description = "AAAAA"
+		joint.Description = fee.Description
 		joint.OwnerId = user.ID
 	}
 	//Fee
