@@ -61,7 +61,7 @@ type SessionRepo struct {
 	activeInHour   int
 	numberOfBucket int
 	mems           []map[string]*Session
-	lock           sync.Mutex
+	rwLock         sync.RWMutex
 }
 
 func (repo *SessionRepo) InsertSession(session Session) (string, error) {
@@ -69,8 +69,8 @@ func (repo *SessionRepo) InsertSession(session Session) (string, error) {
 	session.LatestActiveAt = time.Now()
 	session.ExpireAt = time.Now().Add(time.Duration(time.Hour * time.Duration(repo.expireInHour)))
 
-	repo.lock.Lock()
-	defer repo.lock.Unlock()
+	repo.rwLock.Lock()
+	defer repo.rwLock.Unlock()
 
 	session.ID = generateSessionId(repo.cur)
 	if len(repo.mems[repo.cur%repo.numberOfBucket]) > repo.maxBucketSize {
@@ -91,8 +91,8 @@ func (repo *SessionRepo) UpdateSession(session Session) (*Session, error) {
 		return nil, err
 	}
 
-	repo.lock.Lock()
-	defer repo.lock.Unlock()
+	repo.rwLock.Lock()
+	defer repo.rwLock.Unlock()
 
 	repo.mems[idx%repo.numberOfBucket][session.ID] = &session
 
@@ -104,8 +104,8 @@ func (repo *SessionRepo) purge(bucketIdx int) {
 	time.Sleep(time.Hour * time.Duration(repo.expireInHour/2))
 	//TODO: Log
 	//Clear all quote by just replace with new map
-	repo.lock.Lock()
-	defer repo.lock.Unlock()
+	repo.rwLock.Lock()
+	defer repo.rwLock.Unlock()
 	repo.mems[bucketIdx%repo.numberOfBucket] = make(map[string]*Session, repo.maxBucketSize/4)
 }
 
@@ -114,8 +114,8 @@ func (repo *SessionRepo) Delete(id string) {
 	if err != nil {
 		return
 	}
-	repo.lock.Lock()
-	defer repo.lock.Unlock()
+	repo.rwLock.Lock()
+	defer repo.rwLock.Unlock()
 	delete(repo.mems[idx%repo.numberOfBucket], id)
 }
 
@@ -124,6 +124,8 @@ func (repo *SessionRepo) GetSessionUniqueById(id string) *Session {
 	if err != nil {
 		return nil
 	}
+	repo.rwLock.RLock()
+	defer repo.rwLock.RUnlock()
 	mem := repo.mems[idx%repo.numberOfBucket]
 	if mem == nil {
 		return nil

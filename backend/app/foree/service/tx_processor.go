@@ -109,6 +109,7 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 
 existpromo:
 
+	//Fee
 	fee, err := p.feeRepo.GetUniqueFeeByName(FeeName)
 	if err != nil {
 		return nil, err
@@ -125,7 +126,7 @@ existpromo:
 		joint.Description = fee.Description
 		joint.OwnerId = user.ID
 	}
-	//Fee
+
 	//Total
 	totalAmt := types.AmountData{}
 
@@ -155,12 +156,20 @@ existpromo:
 		SrcAccId:           quote.SrcAccId,
 		DestAccId:          quote.DestAccId,
 	}
-	// RewardIds:          quote.RewardIds,
-	// Fees:               []*transaction.FeeJoint{joint},
-	// Rewards:            []*transaction.Reward{},
-	// TotalRewardAmt:     reward.Amt,
-	// TotalFeeAmt:        joint.Amt,
-	// TotalAmt:           totalAmt,
+
+	if joint != nil {
+		foreeTx.Fees = []*transaction.FeeJoint{joint}
+		foreeTx.TotalFeeAmt = joint.Amt
+	}
+
+	if reward != nil {
+		foreeTx.RewardIds = quote.RewardIds
+		foreeTx.Rewards = []*transaction.Reward{reward}
+		foreeTx.TotalRewardAmt = reward.Amt
+	}
+
+	foreeTx.TotalAmt = totalAmt
+
 	return foreeTx, nil
 }
 
