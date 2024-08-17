@@ -92,7 +92,7 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 			return nil, fmt.Errorf("user `%v` try to redeem unknown reward `%v`", user.ID, rewardId)
 		}
 		if r.OwnerId != user.ID {
-			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` that is belong to `%v`", user.ID, rewardId, rewardId, r.OwnerId)
+			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` that is belong to `%v`", user.ID, rewardId, r.OwnerId)
 		}
 		if r.Status != transaction.RewardStatusActive {
 			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` that is currently in status `%v`", user.ID, rewardId, r.Status)
