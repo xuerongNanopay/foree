@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	sQLTxLimitGetUniqueById = `
+	sQLTxLimitGetUniqueByName = `
 		SELECT
 			l.name, l.amount, l.currency,
 			l.is_min_limit, l.is_enable,
@@ -39,8 +39,8 @@ type TxLimitRepo struct {
 	db *sql.DB
 }
 
-func (repo *InteracCITxRepo) GetUniqueTxLimitById(id int64) (*TxLimit, error) {
-	rows, err := repo.db.Query(sQLTxLimitGetUniqueById, id)
+func (repo *TxLimitRepo) GetUniqueTxLimitByName(name string) (*TxLimit, error) {
+	rows, err := repo.db.Query(sQLTxLimitGetUniqueByName, name)
 
 	if err != nil {
 		return nil, err
