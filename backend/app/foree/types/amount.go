@@ -13,8 +13,8 @@ func (a Amount) MarshalJSON() ([]byte, error) {
 }
 
 type AmountData struct {
-	Amount  Amount `json:"amount,omitempty"`
-	Curreny string `json:"currency,omitempty"`
+	Amount   Amount `json:"amount,omitempty"`
+	Currency string `json:"currency,omitempty"`
 }
 
 type RateDate struct {
@@ -23,5 +23,5 @@ type RateDate struct {
 }
 
 func (r RateDate) String() string {
-	return fmt.Sprintf("%.2f%v:%.2f%v", r.Src.Amount, strings.ToUpper(r.Src.Curreny), r.Dest.Amount, strings.ToUpper(r.Dest.Curreny))
+	return fmt.Sprintf("%.2f%v:%.2f%v", r.Src.Amount, strings.ToUpper(r.Src.Currency), r.Dest.Amount, strings.ToUpper(r.Dest.Currency))
 }

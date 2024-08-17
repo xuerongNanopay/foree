@@ -73,7 +73,7 @@ func (repo *InteracCITxRepo) InsertInteracCITx(ctx context.Context, tx InteracCI
 		tx.DestInteracAccId,
 		tx.APIReference,
 		tx.Amt.Amount,
-		tx.Amt.Curreny,
+		tx.Amt.Currency,
 		tx.ParentTxId,
 		tx.OwnerId,
 	)
@@ -151,7 +151,7 @@ func scanRowIntoInteracCITx(rows *sql.Rows) (*InteracCITx, error) {
 		&tx.SrcInteracAccId,
 		&tx.DestInteracAccId,
 		&tx.Amt.Amount,
-		&tx.Amt.Curreny,
+		&tx.Amt.Currency,
 		&tx.APIReference,
 		&tx.Url,
 		&tx.ParentTxId,

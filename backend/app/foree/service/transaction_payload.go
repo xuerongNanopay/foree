@@ -192,8 +192,8 @@ type RateDTO struct {
 
 func NewRateDTO(r *transaction.Rate) *RateDTO {
 	return &RateDTO{
-		SrcCurrency:  r.SrcAmt.Curreny,
-		DestCurrency: r.DestAmt.Curreny,
+		SrcCurrency:  r.SrcAmt.Currency,
+		DestCurrency: r.DestAmt.Currency,
 		amt:          r.GetForwardRate(),
 	}
 }

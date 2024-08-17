@@ -56,9 +56,9 @@ func (repo *RateRepo) InsertRate(ctx context.Context, r Rate) (string, error) {
 		sqlRateInsert,
 		r.GetId(),
 		r.SrcAmt.Amount,
-		strings.ToUpper(r.SrcAmt.Curreny),
+		strings.ToUpper(r.SrcAmt.Currency),
 		r.GetForwardRate(),
-		strings.ToUpper(r.DestAmt.Curreny),
+		strings.ToUpper(r.DestAmt.Currency),
 	)
 	if err != nil {
 		return "", err
@@ -107,9 +107,9 @@ func scanRowIntoRate(rows *sql.Rows) (*Rate, error) {
 	err := rows.Scan(
 		&u.ID,
 		&u.SrcAmt.Amount,
-		&u.SrcAmt.Curreny,
+		&u.SrcAmt.Currency,
 		&u.DestAmt.Amount,
-		&u.DestAmt.Curreny,
+		&u.DestAmt.Currency,
 		&u.CreateAt,
 		&u.UpdateAt,
 	)
@@ -121,11 +121,11 @@ func scanRowIntoRate(rows *sql.Rows) (*Rate, error) {
 }
 
 func (r *Rate) GetId() string {
-	return GenerateRateId(r.SrcAmt.Curreny, r.DestAmt.Curreny)
+	return GenerateRateId(r.SrcAmt.Currency, r.DestAmt.Currency)
 }
 
 func (r *Rate) ToSummary() string {
-	return fmt.Sprintf("$%.2f %s : %.2f %s", r.SrcAmt.Amount, r.SrcAmt.Curreny, r.DestAmt.Amount, r.DestAmt.Curreny)
+	return fmt.Sprintf("$%.2f %s : %.2f %s", r.SrcAmt.Amount, r.SrcAmt.Currency, r.DestAmt.Amount, r.DestAmt.Currency)
 }
 
 func (r *Rate) GetForwardRate() float64 {

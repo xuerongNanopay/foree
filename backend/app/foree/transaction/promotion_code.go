@@ -81,7 +81,7 @@ func scanRowIntoPromoCode(rows *sql.Rows) (*PromoCode, error) {
 		&p.Code,
 		&p.Description,
 		&p.MinAmt.Amount,
-		&p.MinAmt.Curreny,
+		&p.MinAmt.Currency,
 		&p.LimitPerAcc,
 		&p.IsEnable,
 		&p.StartTime,

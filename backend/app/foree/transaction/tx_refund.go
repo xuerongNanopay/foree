@@ -41,7 +41,7 @@ type ForeeRefundTx struct {
 // 		&tx.SrcInteracAccId,
 // 		&tx.DestInteracAccId,
 // 		&tx.Amt.Amount,
-// 		&tx.Amt.Curreny,
+// 		&tx.Amt.Currency,
 // 		&tx.APIReference,
 // 		&tx.Url,
 // 		&tx.ParentTxId,

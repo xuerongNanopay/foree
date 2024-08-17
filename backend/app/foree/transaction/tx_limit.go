@@ -7,11 +7,13 @@ import (
 	"xue.io/go-pay/app/foree/types"
 )
 
+//TODO: Redesign? Daily limit should be account base.
+
 const (
 	sQLTxLimitGetUniqueByName = `
 		SELECT
-			l.name, l.amount, l.currency,
-			l.is_min_limit, l.is_enable,
+			l.name, l.min_amt_amount, l.min_amt_currency,
+			l.max_amt_amount, l.max_amt_currency,, l.is_enable,
 			l.create_at, l.update_at
 		FROM tx_limit l
 		where l.name = ?
@@ -19,16 +21,28 @@ const (
 )
 
 type TxLimit struct {
-	Name       string           `json:"name"`
-	Amt        types.AmountData `json:"amt"`
-	IsMinLimit bool             `json:"isMinLimit"`
-	IsEnable   bool             `json:"isEnable"`
-	CreateAt   time.Time        `json:"createAt"`
-	UpdateAt   time.Time        `json:"updateAt"`
+	Name     string           `json:"name"`
+	MinAmt   types.AmountData `json:"minLimit"`
+	MaxAmt   types.AmountData `json:"maxLimit"`
+	IsEnable bool             `json:"isEnable"`
+	CreateAt time.Time        `json:"createAt"`
+	UpdateAt time.Time        `json:"updateAt"`
 }
 
 func (l *TxLimit) IsViolateLimit(amt types.AmountData) bool {
-	return false
+	if !l.IsEnable {
+		return false
+	}
+
+	if amt.Amount < l.MinAmt.Amount {
+		return false
+	}
+
+	if amt.Amount > l.MaxAmt.Amount {
+		return false
+	}
+
+	return true
 }
 
 func NewTxLimitRepo(db *sql.DB) *TxLimitRepo {
@@ -67,9 +81,10 @@ func scanRowIntoTxLimit(rows *sql.Rows) (*TxLimit, error) {
 	l := new(TxLimit)
 	err := rows.Scan(
 		&l.Name,
-		&l.Amt.Amount,
-		&l.Amt.Curreny,
-		&l.IsMinLimit,
+		&l.MinAmt.Amount,
+		&l.MinAmt.Currency,
+		&l.MaxAmt.Amount,
+		&l.MaxAmt.Currency,
 		&l.IsEnable,
 		&l.CreateAt,
 		&l.UpdateAt,

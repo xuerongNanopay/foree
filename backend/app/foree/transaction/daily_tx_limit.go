@@ -58,9 +58,9 @@ func (repo *DailyTxLimitRepo) InsertDailyTxLimit(ctx context.Context, tx DailyTx
 		sQLDailyTxLimitInsert,
 		tx.Reference,
 		tx.UsedAmt.Amount,
-		tx.UsedAmt.Curreny,
+		tx.UsedAmt.Currency,
 		tx.MaxAmt.Amount,
-		tx.MaxAmt.Curreny,
+		tx.MaxAmt.Currency,
 	)
 	if err != nil {
 		return 0, err
@@ -110,9 +110,9 @@ func scanRowIntoDailyTxLimit(rows *sql.Rows) (*DailyTxLimit, error) {
 		&tx.ID,
 		&tx.Reference,
 		&tx.UsedAmt.Amount,
-		&tx.UsedAmt.Curreny,
+		&tx.UsedAmt.Currency,
 		&tx.MaxAmt.Amount,
-		&tx.MaxAmt.Curreny,
+		&tx.MaxAmt.Currency,
 		&tx.CreateAt,
 		&tx.UpdateAt,
 	)

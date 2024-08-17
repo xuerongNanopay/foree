@@ -17,6 +17,33 @@ const (
 	FeeName string = "FOREE_TX_CAD_FEE"
 )
 
+var txLimits = map[string]transaction.TxLimit{
+	"foree_personal": {
+		Name: "foree_personal-group-tx-limit",
+		MinAmt: types.AmountData{
+			Amount:   types.Amount(10.0),
+			Currency: "CAD",
+		},
+		MaxAmt: types.AmountData{
+			Amount:   types.Amount(1000.0),
+			Currency: "CAD",
+		},
+		IsEnable: true,
+	},
+	"foree_bo": {
+		Name: "foree_bo-group-tx-limit",
+		MinAmt: types.AmountData{
+			Amount:   types.Amount(2.0),
+			Currency: "CAD",
+		},
+		MaxAmt: types.AmountData{
+			Amount:   types.Amount(1000.0),
+			Currency: "CAD",
+		},
+		IsEnable: true,
+	},
+}
+
 type TxProcessorConfig struct {
 }
 
@@ -28,8 +55,7 @@ type TxProcessor struct {
 	idmTxRepo          *transaction.IdmTxRepo
 	txHistoryRepo      *transaction.TxHistoryRepo
 	txSummaryRepo      *transaction.TxSummaryRepo
-	txLimitRepo        *transaction.TxLimitRepo
-	txLimitCacheRepo   *transaction.DailyTxLimitRepo
+	dailyTxLimiteRepo  *transaction.DailyTxLimitRepo
 	foreeTxRepo        *transaction.ForeeTxRepo
 	rateRepo           *transaction.RateRepo
 	userRepo           *auth.UserRepo
@@ -71,8 +97,8 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 		if r.Status != transaction.RewardStatusActive {
 			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` that is currently in status `%v`", user.ID, rewardId, r.Status)
 		}
-		if r.Amt.Curreny != quote.SrcCurrency {
-			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` that apply currency `%v` to currency `%v`", user.ID, rewardId, r.Amt.Curreny, quote.SrcCurrency)
+		if r.Amt.Currency != quote.SrcCurrency {
+			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` that apply currency `%v` to currency `%v`", user.ID, rewardId, r.Amt.Currency, quote.SrcCurrency)
 		}
 		if (quote.SrcAmount - float64(r.Amt.Amount)) < 10 {
 			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` with srcAmount `%v`", user.ID, rewardId, quote.SrcCurrency)
@@ -96,7 +122,7 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 			//TODO: log
 			goto existpromo
 		}
-		if quote.SrcCurrency != promoCode.MinAmt.Curreny {
+		if quote.SrcCurrency != promoCode.MinAmt.Currency {
 			//TODO: log
 			goto existpromo
 		}
@@ -118,7 +144,7 @@ existpromo:
 		return nil, fmt.Errorf("fee `%v` not found", FeeName)
 	}
 
-	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(quote.SrcAmount), Curreny: quote.SrcCurrency})
+	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(quote.SrcAmount), Currency: quote.SrcCurrency})
 	if err != nil {
 		return nil, err
 	}
@@ -145,12 +171,12 @@ existpromo:
 		Status: transaction.TxStatusInitial,
 		Rate:   types.Amount(rate.CalculateForwardAmount(quote.SrcAmount)),
 		SrcAmt: types.AmountData{
-			Amount:  types.Amount(quote.SrcAmount),
-			Curreny: quote.SrcCurrency,
+			Amount:   types.Amount(quote.SrcAmount),
+			Currency: quote.SrcCurrency,
 		},
 		DestAmt: types.AmountData{
-			Amount:  types.Amount(rate.CalculateForwardAmount(quote.SrcAmount)),
-			Curreny: quote.DestCurrency,
+			Amount:   types.Amount(rate.CalculateForwardAmount(quote.SrcAmount)),
+			Currency: quote.DestCurrency,
 		},
 		TransactionPurpose: quote.TransactionPurpose,
 		SrcAccId:           quote.SrcAccId,
@@ -173,8 +199,84 @@ existpromo:
 	return foreeTx, nil
 }
 
-func (p *TxProcessor) GetTxLimit(user auth.User) {
+func (p *TxProcessor) GetDailyTxLimit(user auth.User) (*transaction.DailyTxLimit, error) {
+	ctx := context.Background()
+	return p.getDailyTxLimit(ctx, user)
+}
 
+func (p *TxProcessor) addDailyTxLimit(ctx context.Context, user auth.User, amt types.AmountData) (*transaction.DailyTxLimit, error) {
+	dailyLimit, err := p.getDailyTxLimit(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	dailyLimit.UsedAmt.Amount += amt.Amount
+
+	if err := p.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
+		return nil, err
+	}
+	newDailyLimit, err := p.getDailyTxLimit(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	return newDailyLimit, nil
+}
+
+func (p *TxProcessor) minusDailyTxLimit(ctx context.Context, user auth.User, amt types.AmountData) (*transaction.DailyTxLimit, error) {
+	dailyLimit, err := p.getDailyTxLimit(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	dailyLimit.UsedAmt.Amount -= amt.Amount
+
+	if err := p.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
+		return nil, err
+	}
+	newDailyLimit, err := p.getDailyTxLimit(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	return newDailyLimit, nil
+}
+
+// I don't case race condition here, cause create transaction will save it.
+func (p *TxProcessor) getDailyTxLimit(ctx context.Context, user auth.User) (*transaction.DailyTxLimit, error) {
+	reference := transaction.GenerateDailyTxLimitReference(user.ID)
+	dailyLimit, err := p.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, reference)
+	if err != nil {
+		return nil, err
+	}
+
+	txLimit, ok := txLimits[user.Group]
+	if !ok {
+		return nil, fmt.Errorf("transaction limit no found for group `%v`", user.Group)
+	}
+
+	// If not create one.
+	if dailyLimit == nil {
+		dailyLimit = &transaction.DailyTxLimit{
+			Reference: reference,
+			UsedAmt: types.AmountData{
+				Amount:   0.0,
+				Currency: txLimit.MaxAmt.Currency,
+			},
+			MaxAmt: types.AmountData{
+				Amount:   txLimit.MaxAmt.Amount,
+				Currency: txLimit.MaxAmt.Currency,
+			},
+		}
+		_, err := p.dailyTxLimiteRepo.InsertDailyTxLimit(ctx, *dailyLimit)
+		if err != nil {
+			return nil, err
+		}
+		dl, err := p.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, reference)
+		if err != nil {
+			return nil, err
+		}
+		dailyLimit = dl
+	}
+	return dailyLimit, nil
 }
 
 func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {

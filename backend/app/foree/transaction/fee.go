@@ -76,8 +76,8 @@ func (f *Fee) MaybeApplyFee(amt types.AmountData) (*FeeJoint, error) {
 		return nil, nil
 	}
 
-	if amt.Curreny != f.ConditionAmt.Curreny {
-		return nil, fmt.Errorf("Fee should apply in same currency, expect `%s` but ``%s", f.ConditionAmt.Curreny, amt.Curreny)
+	if amt.Currency != f.ConditionAmt.Currency {
+		return nil, fmt.Errorf("Fee should apply in same currency, expect `%s` but ``%s", f.ConditionAmt.Currency, amt.Currency)
 	}
 	cond, err := applyFeeOperator(f.Condition)
 	if err != nil {
@@ -92,16 +92,16 @@ func (f *Fee) MaybeApplyFee(amt types.AmountData) (*FeeJoint, error) {
 		return &FeeJoint{
 			FeeName: f.Name,
 			Amt: types.AmountData{
-				Amount:  f.Ratio,
-				Curreny: f.ConditionAmt.Curreny,
+				Amount:   f.Ratio,
+				Currency: f.ConditionAmt.Currency,
 			},
 		}, nil
 	case FeeTypeVariableCost:
 		return &FeeJoint{
 			FeeName: f.Name,
 			Amt: types.AmountData{
-				Amount:  types.Amount(math.Round(float64(f.Ratio*amt.Amount)*100.0) / 100.0),
-				Curreny: f.ConditionAmt.Curreny,
+				Amount:   types.Amount(math.Round(float64(f.Ratio*amt.Amount)*100.0) / 100.0),
+				Currency: f.ConditionAmt.Currency,
 			},
 		}, nil
 	default:
@@ -213,7 +213,7 @@ func (repo *FeeJointRepo) InsertFeeJoint(feeJoint FeeJoint) (int64, error) {
 		feeJoint.FeeName,
 		feeJoint.Description,
 		feeJoint.Amt.Amount,
-		feeJoint.Amt.Curreny,
+		feeJoint.Amt.Currency,
 		feeJoint.TransactionId,
 		feeJoint.OwnerId,
 	)
@@ -259,7 +259,7 @@ func scanRowIntoFee(rows *sql.Rows) (*Fee, error) {
 		&u.Type,
 		&u.Condition,
 		&u.ConditionAmt.Amount,
-		&u.ConditionAmt.Curreny,
+		&u.ConditionAmt.Currency,
 		&u.Ratio,
 		&u.IsApplyInConditionAmtOnly,
 		&u.IsEnable,
@@ -280,7 +280,7 @@ func scanRowIntoFeeJoint(rows *sql.Rows) (*FeeJoint, error) {
 		&u.FeeName,
 		&u.Description,
 		&u.Amt.Amount,
-		&u.Amt.Curreny,
+		&u.Amt.Currency,
 		&u.TransactionId,
 		&u.OwnerId,
 		&u.CreateAt,
