@@ -132,7 +132,6 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 		}
 		//TODO: check account limit.
 	}
-
 existpromo:
 
 	//Fee
@@ -153,8 +152,11 @@ existpromo:
 		joint.OwnerId = user.ID
 	}
 
-	//Total
-	totalAmt := types.AmountData{}
+	//Total = quote.srcAmount + fees - rewards
+	totalAmt := types.AmountData{
+		Amount:   types.Amount(quote.SrcAmount),
+		Currency: quote.SrcCurrency,
+	}
 
 	if joint != nil {
 		totalAmt.Amount += joint.Amt.Amount
@@ -163,8 +165,6 @@ existpromo:
 	if reward != nil {
 		totalAmt.Amount -= reward.Amt.Amount
 	}
-
-	//Summary
 
 	foreeTx := &transaction.ForeeTx{
 		Type:   transaction.TxTypeInteracToNBP,
