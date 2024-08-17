@@ -64,6 +64,8 @@ func (repo *TxQuoteRepo) purge(bucketIdx int) {
 	time.Sleep(time.Minute*time.Duration(repo.expireInMinute) + time.Minute)
 	//TODO: Log
 	//Clear all quote by just replace with new map
+	repo.rwLock.Lock()
+	defer repo.rwLock.Unlock()
 	repo.mems[bucketIdx%2] = make(map[string]*TxQuote, repo.maxBucketSize)
 }
 
