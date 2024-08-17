@@ -248,13 +248,12 @@ func (p *TxProcessor) getDailyTxLimit(ctx context.Context, user auth.User) (*tra
 		return nil, err
 	}
 
-	txLimit, ok := txLimits[user.Group]
-	if !ok {
-		return nil, fmt.Errorf("transaction limit no found for group `%v`", user.Group)
-	}
-
 	// If not create one.
 	if dailyLimit == nil {
+		txLimit, ok := txLimits[user.Group]
+		if !ok {
+			return nil, fmt.Errorf("transaction limit no found for group `%v`", user.Group)
+		}
 		dailyLimit = &transaction.DailyTxLimit{
 			Reference: reference,
 			UsedAmt: types.AmountData{
