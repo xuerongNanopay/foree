@@ -61,13 +61,19 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 			return nil, err
 		}
 		if r == nil {
-			return nil, fmt.Errorf("user `%v` try to use unknown reward `%v`", user.ID, rewardId)
+			return nil, fmt.Errorf("user `%v` try to redeem unknown reward `%v`", user.ID, rewardId)
 		}
 		if r.OwnerId != user.ID {
-			return nil, fmt.Errorf("user `%v` try to use reward `%v` that is belong to `%v`", user.ID, rewardId, rewardId, r.OwnerId)
+			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` that is belong to `%v`", user.ID, rewardId, rewardId, r.OwnerId)
 		}
 		if r.Status != transaction.RewardStatusActive {
-			return nil, fmt.Errorf("user `%v` try to use reward `%v` that is currently in status `%v`", user.ID, rewardId, r.Status)
+			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` that is currently in status `%v`", user.ID, rewardId, r.Status)
+		}
+		if r.Amt.Curreny != quote.SrcCurrency {
+			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` that apply currency `%v` to currency `%v`", user.ID, rewardId, r.Amt.Curreny, quote.SrcCurrency)
+		}
+		if (quote.SrcAmount - float64(r.Amt.Amount)) < 4 {
+			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` with srcAmount `%v`", user.ID, rewardId, quote.SrcCurrency)
 		}
 		reward = r
 	}
