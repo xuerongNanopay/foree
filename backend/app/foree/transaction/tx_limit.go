@@ -10,16 +10,16 @@ import (
 const (
 	sQLTxLimitGetUniqueById = `
 		SELECT
-			l.id, l.amount, l.currency,
+			l.name, l.amount, l.currency,
 			l.is_min_limit, l.is_enable,
 			l.create_at, l.update_at
 		FROM tx_limit l
-		where l.id = ?
+		where l.name = ?
 	`
 )
 
 type TxLimit struct {
-	ID         string           `json:"id"`
+	Name       string           `json:"name"`
 	Amt        types.AmountData `json:"amt"`
 	IsMinLimit bool             `json:"isMinLimit"`
 	IsEnable   bool             `json:"isEnable"`
@@ -56,7 +56,7 @@ func (repo *InteracCITxRepo) GetUniqueTxLimitById(id int64) (*TxLimit, error) {
 		}
 	}
 
-	if f.ID == "" {
+	if f.Name == "" {
 		return nil, nil
 	}
 
@@ -66,7 +66,7 @@ func (repo *InteracCITxRepo) GetUniqueTxLimitById(id int64) (*TxLimit, error) {
 func scanRowIntoTxLimit(rows *sql.Rows) (*TxLimit, error) {
 	l := new(TxLimit)
 	err := rows.Scan(
-		&l.ID,
+		&l.Name,
 		&l.Amt.Amount,
 		&l.Amt.Curreny,
 		&l.IsMinLimit,

@@ -123,7 +123,7 @@ func scanRowIntoTxLimitCache(rows *sql.Rows) (*TxLimitCache, error) {
 	return tx, nil
 }
 
-func GenerateIdentity(referenceId int64) string {
+func GenerateTxLimitCacheIdentity(userId int64) string {
 	now := time_util.NowInToronto()
-	return fmt.Sprintf("%v_%s", referenceId, now.Format(time.DateOnly))
+	return fmt.Sprintf("%v_%s", userId, now.Format(time.DateOnly))
 }
