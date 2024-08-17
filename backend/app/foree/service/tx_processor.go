@@ -37,6 +37,7 @@ type TxProcessor struct {
 	interacRepo      *account.InteracAccountRepo
 	feeRepo          *transaction.FeeRepo
 	feeJointRepo     *transaction.FeeJointRepo
+	rewardRepo       *transaction.RewardRepo
 	processingMap    []map[int64]*transaction.ForeeTx // Avoid duplicate process
 	processingLock   sync.RWMutex
 }
@@ -51,8 +52,33 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 		return nil, fmt.Errorf("user `%v` try to create transaction with unkown rate `%s`", user.ID, transaction.GenerateRateId(quote.SrcCurrency, quote.DestCurrency))
 	}
 
-	//PromoCode
 	//Reward
+	var reward *transaction.Reward
+	if len(quote.RewardIds) == 1 {
+		rewardId := quote.RewardIds[1]
+		r, err := p.rewardRepo.GetUniqueRewardById(ctx, rewardId)
+		if err != nil {
+			return nil, err
+		}
+		if r == nil {
+			return nil, fmt.Errorf("user `%v` try to use unknown reward `%v`", user.ID, rewardId)
+		}
+		if r.OwnerId != user.ID {
+			return nil, fmt.Errorf("user `%v` try to use reward `%v` that is belong to `%v`", user.ID, rewardId, rewardId, r.OwnerId)
+		}
+		if r.Status != transaction.RewardStatusActive {
+			return nil, fmt.Errorf("user `%v` try to use reward `%v` that is currently in status `%v`", user.ID, rewardId, r.Status)
+		}
+		reward = r
+	}
+	// reward, err := p.rewardRepo.UpdateRewardTxById()
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if reward == nil {
+	// 	return nil, fmt.Errorf("user `%v` try to use unknown reward `%v`", user.ID, )
+	// }
+	//PromoCode
 	//Fee
 	//Total
 	//Summary

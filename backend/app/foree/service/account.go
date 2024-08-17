@@ -48,7 +48,7 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 		return nil, transport.WrapInteralServerError(derr)
 	}
 
-	nAcc, nErr := a.contactRepo.GetUniqueNonDeleteContactAccountById(ctx, session.User.ID, accId)
+	nAcc, nErr := a.contactRepo.GetUniqueNonDeleteContactAccountByOwnerAndId(ctx, session.User.ID, accId)
 	if nErr != nil {
 		return nil, transport.WrapInteralServerError(nErr)
 	}
@@ -65,7 +65,7 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 	if err != nil {
 		return err
 	}
-	acc, derr := a.contactRepo.GetUniqueNonDeleteContactAccountById(ctx, session.User.ID, req.ContactId)
+	acc, derr := a.contactRepo.GetUniqueNonDeleteContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
 	if derr != nil {
 		return transport.WrapInteralServerError(derr)
 	}
@@ -76,7 +76,7 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 
 	newAcc := *acc
 	newAcc.Status = account.AccountStatusDelete
-	derr = a.contactRepo.UpdateNonDeleteContactAccountById(ctx, newAcc)
+	derr = a.contactRepo.UpdateNonDeleteContactAccountByIdAndOwner(ctx, newAcc)
 	if derr != nil {
 		return transport.WrapInteralServerError(derr)
 	}
@@ -89,7 +89,7 @@ func (a *AccountService) GetContact(ctx context.Context, req GetContactReq) (*Co
 		return nil, err
 	}
 
-	acc, derr := a.contactRepo.GetUniqueNonDeleteContactAccountById(ctx, session.User.ID, req.ContactId)
+	acc, derr := a.contactRepo.GetUniqueNonDeleteContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}

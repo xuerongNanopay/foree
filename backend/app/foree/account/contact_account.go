@@ -19,7 +19,7 @@ const (
 			account_hash, relationship_to_contact, owner_id, latest_acitvity_at
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
-	sQLContactAccountUpdateNonDeleteById = `
+	sQLContactAccountUpdateNonDeleteByIdAndOwner = `
 		UPDATE contact_accounts SET 
 			status = ?, latest_acitvity_at = ?
 		WHERE id = ? AND a.owner_id = ? AND a.status != DELETE
@@ -34,7 +34,7 @@ const (
 		FROM contact_accounts a
 		where a.id = ?
 	`
-	sQLContactAccountGetNonDeleteUniqueById = `
+	sQLContactAccountGetNonDeleteUniqueByOwnerAndId = `
 		SELECT 
 			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
@@ -164,9 +164,9 @@ func (repo *ContactAccountRepo) InsertContactAccount(ctx context.Context, acc Co
 	return id, nil
 }
 
-func (repo *ContactAccountRepo) UpdateNonDeleteContactAccountById(ctx context.Context, acc ContactAccount) error {
+func (repo *ContactAccountRepo) UpdateNonDeleteContactAccountByIdAndOwner(ctx context.Context, acc ContactAccount) error {
 	_, err := repo.db.Exec(
-		sQLContactAccountUpdateNonDeleteById,
+		sQLContactAccountUpdateNonDeleteByIdAndOwner,
 		acc.Status,
 		acc.LatestActivityAt,
 		acc.OwnerId,
@@ -178,9 +178,9 @@ func (repo *ContactAccountRepo) UpdateNonDeleteContactAccountById(ctx context.Co
 	return nil
 }
 
-func (repo *ContactAccountRepo) RefreshContactLatestActivityAt(ctx context.Context, acc ContactAccount) error {
+func (repo *ContactAccountRepo) RefreshContactLatestActivityAtAndOwner(ctx context.Context, acc ContactAccount) error {
 	_, err := repo.db.Exec(
-		sQLContactAccountUpdateNonDeleteById,
+		sQLContactAccountUpdateNonDeleteByIdAndOwner,
 		acc.Status,
 		time.Now(),
 		acc.OwnerId,
@@ -216,8 +216,8 @@ func (repo *ContactAccountRepo) GetUniqueContactAccountById(ctx context.Context,
 	return f, nil
 }
 
-func (repo *ContactAccountRepo) GetUniqueNonDeleteContactAccountById(ctx context.Context, ownerid, id int64) (*ContactAccount, error) {
-	rows, err := repo.db.Query(sQLContactAccountGetNonDeleteUniqueById, ownerid, id)
+func (repo *ContactAccountRepo) GetUniqueNonDeleteContactAccountByOwnerAndId(ctx context.Context, ownerid, id int64) (*ContactAccount, error) {
+	rows, err := repo.db.Query(sQLContactAccountGetNonDeleteUniqueByOwnerAndId, ownerid, id)
 
 	if err != nil {
 		return nil, err
