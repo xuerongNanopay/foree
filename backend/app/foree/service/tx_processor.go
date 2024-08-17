@@ -127,6 +127,16 @@ existpromo:
 	}
 	//Fee
 	//Total
+	totalAmt := types.AmountData{}
+
+	if joint != nil {
+		totalAmt.Amount += joint.Amt.Amount
+	}
+
+	if reward != nil {
+		totalAmt.Amount -= reward.Amt.Amount
+	}
+
 	//Summary
 
 	foreeTx := &transaction.ForeeTx{
@@ -144,8 +154,13 @@ existpromo:
 		TransactionPurpose: quote.TransactionPurpose,
 		SrcAccId:           quote.SrcAccId,
 		DestAccId:          quote.DestAccId,
-		RewardIds:          quote.RewardIds,
 	}
+	// RewardIds:          quote.RewardIds,
+	// Fees:               []*transaction.FeeJoint{joint},
+	// Rewards:            []*transaction.Reward{},
+	// TotalRewardAmt:     reward.Amt,
+	// TotalFeeAmt:        joint.Amt,
+	// TotalAmt:           totalAmt,
 	return foreeTx, nil
 }
 
