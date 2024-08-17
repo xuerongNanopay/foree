@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	TransactionFee string = "FOREE_TX_FEE"
+	FeeName string = "FOREE_TX_CAD_FEE"
 )
 
 type TxProcessorConfig struct {
@@ -80,7 +80,7 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 		reward = r
 	}
 
-	//TODO:
+	//TODO: PromoCode
 	//Don't return err. Just ignore the promocode reward.
 	if quote.PromoCode != "" {
 		promoCode, err := p.promoCodeRepo.GetUniquePromoCodeByCode(ctx, quote.PromoCode)
@@ -109,14 +109,22 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 
 existpromo:
 
-	// reward, err := p.rewardRepo.UpdateRewardTxById()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// if reward == nil {
-	// 	return nil, fmt.Errorf("user `%v` try to use unknown reward `%v`", user.ID, )
-	// }
-	//PromoCode
+	fee, err := p.feeRepo.GetUniqueFeeByName(FeeName)
+	if err != nil {
+		return nil, err
+	}
+	if fee == nil {
+		return nil, fmt.Errorf("fee `%v` not found", FeeName)
+	}
+
+	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(quote.SrcAmount), Curreny: quote.SrcCurrency})
+	if err != nil {
+		return nil, err
+	}
+	if joint != nil {
+		joint.Description = "AAAAA"
+		joint.OwnerId = user.ID
+	}
 	//Fee
 	//Total
 	//Summary
