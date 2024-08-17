@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"xue.io/go-pay/app/foree/types"
+	time_util "xue.io/go-pay/util/time"
 )
 
 const (
@@ -123,10 +124,6 @@ func scanRowIntoTxLimitCache(rows *sql.Rows) (*TxLimitCache, error) {
 }
 
 func GenerateIdentity(referenceId int64) string {
-	now := time.Now()
-	loc, err := time.LoadLocation("America/Toronto")
-	if err == nil {
-		now = now.In(loc)
-	}
+	now := time_util.NowInToronto()
 	return fmt.Sprintf("%v_%s", referenceId, now.Format(time.DateOnly))
 }
