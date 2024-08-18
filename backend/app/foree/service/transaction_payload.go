@@ -57,9 +57,10 @@ func (q *QuoteTransactionReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
 	ret := validateStruct(q, "Invalid quote transaction request")
 
-	if q.PromoCode != "" && len(q.RewardIds) > 0 {
-		ret.AddDetails("promoCode", "cannot apply promocode and reward together")
-	}
+	//TODO: support promoCode
+	// if q.PromoCode != "" && len(q.RewardIds) > 0 {
+	// 	ret.AddDetails("promoCode", "cannot apply promocode and reward together")
+	// }
 
 	if len(ret.Details) > 0 {
 		return ret
