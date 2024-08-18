@@ -18,6 +18,7 @@ const (
 	FeeName string = "FOREE_TX_CAD_FEE"
 )
 
+// Group level transaction limit.
 var txLimits = map[string]transaction.TxLimit{
 	"foree_personal": {
 		Name: "foree_personal-group-tx-limit",
@@ -217,6 +218,14 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 	foreeTx.TotalAmt = totalAmt
 
 	return foreeTx, nil
+}
+
+func (p *TxProcessor) GetTxLimit(user auth.User) (*transaction.TxLimit, error) {
+	txLimit, ok := txLimits[user.Group]
+	if !ok {
+		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", user.Group)
+	}
+	return &txLimit, nil
 }
 
 func (p *TxProcessor) GetDailyTxLimit(user auth.User) (*transaction.DailyTxLimit, error) {
