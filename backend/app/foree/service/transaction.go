@@ -5,6 +5,7 @@ import (
 
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/transport"
+	"xue.io/go-pay/app/foree/types"
 )
 
 type TransactionService struct {
@@ -25,7 +26,11 @@ func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*Rate
 
 // Can be use same cache as above.
 func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*TxSummaryDetailDTO, transport.ForeeError) {
-	return nil, nil
+	sumTx := &TxSummaryDetailDTO{
+		Summary:   "Free qupte",
+		SrcAmount: types.Amount(req.SrcAmount),
+	}
+	return sumTx, nil
 }
 
 func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionReq) (*TxSummaryDetailDTO, transport.ForeeError) {

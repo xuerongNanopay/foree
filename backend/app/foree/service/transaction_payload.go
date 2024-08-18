@@ -7,12 +7,12 @@ import (
 
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/transport"
+	"xue.io/go-pay/app/foree/types"
 )
 
 type FreeQuoteReq struct {
 	SrcAmount    float64 `json:"srcAmount"`
 	SrcCurrency  string  `json:"srcCurrency" validate:"eq=CAD"`
-	DestAmount   float64 `json:"DestAmount"`
 	DestCurrency string  `json:"DestCurrency" validate:"eq=PKR"`
 }
 
@@ -25,9 +25,8 @@ func (q *FreeQuoteReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
 	ret := validateStruct(q, "Invalid free quote request")
 
-	if q.SrcAmount <= 0 && q.DestAmount <= 0 {
+	if q.SrcAmount <= 0 {
 		ret.AddDetails("srcAmount", fmt.Sprintf("invalid srcAmount `%v`", q.SrcAmount))
-		ret.AddDetails("DestAmount", fmt.Sprintf("invalid DestAmount `%v`", q.DestAmount))
 	}
 
 	if len(ret.Details) > 0 {
@@ -226,25 +225,25 @@ func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
 }
 
 type TxSummaryDetailDTO struct {
-	ID              int64     `json:"id"`
-	Summary         string    `json:"sumary"`
-	Type            string    `json:"type"`
-	Status          string    `json:"status"`
-	Rate            string    `json:"rate"`
-	SrcAccSummary   string    `json:"srcAccSummary"`
-	SrcAmount       string    `json:"srcAmount"`
-	SrcCurrency     string    `json:"srcCurrency"`
-	DestAccSummary  string    `json:"destAccSummary"`
-	DestAmount      string    `json:"destAmount"`
-	DestCurrency    string    `json:"destCurrency"`
-	TotalAmount     string    `json:"totalAmount"`
-	TotalCurrency   string    `json:"totalCurrency"`
-	FeeAmount       string    `json:"feeAmount"`
-	FeeCurrency     string    `json:"feeCurrency"`
-	RewardAmount    string    `json:"rewardAmount"`
-	RewardCurrency  string    `json:"rewardCurrency"`
-	IsCancelAllowed bool      `json:"isCancelAllowed"`
-	CreateAt        time.Time `json:"createAt"`
+	ID              int64        `json:"id"`
+	Summary         string       `json:"sumary"`
+	Type            string       `json:"type"`
+	Status          string       `json:"status"`
+	Rate            string       `json:"rate"`
+	SrcAccSummary   string       `json:"srcAccSummary"`
+	SrcAmount       types.Amount `json:"srcAmount"`
+	SrcCurrency     string       `json:"srcCurrency"`
+	DestAccSummary  string       `json:"destAccSummary"`
+	DestAmount      types.Amount `json:"destAmount"`
+	DestCurrency    string       `json:"destCurrency"`
+	TotalAmount     types.Amount `json:"totalAmount"`
+	TotalCurrency   string       `json:"totalCurrency"`
+	FeeAmount       types.Amount `json:"feeAmount"`
+	FeeCurrency     string       `json:"feeCurrency"`
+	RewardAmount    types.Amount `json:"rewardAmount"`
+	RewardCurrency  string       `json:"rewardCurrency"`
+	IsCancelAllowed bool         `json:"isCancelAllowed"`
+	CreateAt        time.Time    `json:"createAt"`
 }
 
 func NewTxSummaryDetailDTO(tx *transaction.TxSummary) *TxSummaryDetailDTO {
