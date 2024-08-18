@@ -48,7 +48,7 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 		return nil, transport.WrapInteralServerError(derr)
 	}
 
-	nAcc, nErr := a.contactRepo.GetUniqueNonDeleteContactAccountByOwnerAndId(ctx, session.User.ID, accId)
+	nAcc, nErr := a.contactRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, accId)
 	if nErr != nil {
 		return nil, transport.WrapInteralServerError(nErr)
 	}
@@ -65,7 +65,7 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 	if err != nil {
 		return err
 	}
-	acc, derr := a.contactRepo.GetUniqueNonDeleteContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
+	acc, derr := a.contactRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
 	if derr != nil {
 		return transport.WrapInteralServerError(derr)
 	}
@@ -76,20 +76,20 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 
 	newAcc := *acc
 	newAcc.Status = account.AccountStatusDelete
-	derr = a.contactRepo.UpdateNonDeleteContactAccountByIdAndOwner(ctx, newAcc)
+	derr = a.contactRepo.UpdateActiveContactAccountByIdAndOwner(ctx, newAcc)
 	if derr != nil {
 		return transport.WrapInteralServerError(derr)
 	}
 	return nil
 }
 
-func (a *AccountService) GetContact(ctx context.Context, req GetContactReq) (*ContactAccountDetailDTO, transport.ForeeError) {
+func (a *AccountService) GetActiveContact(ctx context.Context, req GetContactReq) (*ContactAccountDetailDTO, transport.ForeeError) {
 	session, err := a.authService.Authorize(ctx, req.SessionId, Contact_GET)
 	if err != nil {
 		return nil, err
 	}
 
-	acc, derr := a.contactRepo.GetUniqueNonDeleteContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
+	acc, derr := a.contactRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}
@@ -101,13 +101,13 @@ func (a *AccountService) GetContact(ctx context.Context, req GetContactReq) (*Co
 	return NewContactAccountDetailDTO(acc), nil
 }
 
-func (a *AccountService) GetAllContacts(ctx context.Context, req transport.SessionReq) ([]*ContactAccountSummaryDTO, transport.ForeeError) {
+func (a *AccountService) GetAllActiveContacts(ctx context.Context, req transport.SessionReq) ([]*ContactAccountSummaryDTO, transport.ForeeError) {
 	session, err := a.authService.Authorize(ctx, req.SessionId, Contact_QUERY)
 	if err != nil {
 		return nil, err
 	}
 
-	accs, derr := a.contactRepo.GetAllNonDeleteContactAccountByOwnerId(ctx, session.User.ID)
+	accs, derr := a.contactRepo.GetAllActiveContactAccountByOwnerId(ctx, session.User.ID)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}
@@ -119,12 +119,12 @@ func (a *AccountService) GetAllContacts(ctx context.Context, req transport.Sessi
 	return ret, nil
 }
 
-func (a *AccountService) QueryContacts(ctx context.Context, req QueryContactReq) ([]*ContactAccountSummaryDTO, transport.ForeeError) {
+func (a *AccountService) QueryActiveContacts(ctx context.Context, req QueryContactReq) ([]*ContactAccountSummaryDTO, transport.ForeeError) {
 	session, err := a.authService.Authorize(ctx, req.SessionId, Contact_QUERY)
 	if err != nil {
 		return nil, err
 	}
-	accs, derr := a.contactRepo.QueryNonDeleteContactAccountByOwnerId(ctx, session.User.ID, req.Limit, req.Offset)
+	accs, derr := a.contactRepo.QueryActiveContactAccountByOwnerId(ctx, session.User.ID, req.Limit, req.Offset)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}
@@ -136,13 +136,13 @@ func (a *AccountService) QueryContacts(ctx context.Context, req QueryContactReq)
 	return ret, nil
 }
 
-func (a *AccountService) GetAllInteracs(ctx context.Context, req transport.SessionReq) ([]*InteracAccountSummaryDTO, transport.ForeeError) {
+func (a *AccountService) GetAllActiveInteracs(ctx context.Context, req transport.SessionReq) ([]*InteracAccountSummaryDTO, transport.ForeeError) {
 	session, err := a.authService.Authorize(ctx, req.SessionId, PermInteracQuery)
 	if err != nil {
 		return nil, err
 	}
 
-	accs, derr := a.interacRepo.GetAllNonDeleteInteracAccountByOwnerId(ctx, session.User.ID)
+	accs, derr := a.interacRepo.GetAllActiveInteracAccountByOwnerId(ctx, session.User.ID)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}

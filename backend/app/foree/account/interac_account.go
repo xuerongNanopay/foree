@@ -16,10 +16,10 @@ const (
 			owner_id, latest_acitvity_at
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
-	sQLInteracAccountUpdateNonDeleteByIdAndOwner = `
+	sQLInteracAccountUpdateActiveByIdAndOwner = `
 		UPDATE interac_accounts SET 
 			status = ?, latest_acitvity_at = ?
-		WHERE id = ? AND a.owner_id = ? AND a.status != DELETE
+		WHERE id = ? AND a.owner_id = ? AND a.status = ACTIVE
 	`
 	sQLInteracAccountGetUniqueById = `
 		SELECT 
@@ -31,7 +31,7 @@ const (
 		FROM interac_accounts a
 		where a.id = ?
 	`
-	sQLInteracAccountGetUniqueNonDeleteById = `
+	sQLInteracAccountGetUniqueActiveById = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
 			a.last_name, a.address, a.phone_number, a.email, 
@@ -39,9 +39,9 @@ const (
 			a.owner_id, a.status, 
 			a.latest_acitvity_at, a.create_at, a.update_at
 		FROM interac_accounts a
-		where a.owner_id = ? AND a.id = ? AND a.status != DELETE
+		where a.owner_id = ? AND a.id = ? AND a.status = ACTIVE
 	`
-	sQLInteracAccountGetAllNonDeleteByOwnerId = `
+	sQLInteracAccountGetAllActiveByOwnerId = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
 			a.last_name, a.address, a.phone_number, a.email, 
@@ -49,7 +49,7 @@ const (
 			a.owner_id, a.status, 
 			a.create_at, a.update_at
 		FROM interac_accounts a
-		where a.owner_id = ? AND a.status != DELETE
+		where a.owner_id = ? AND a.status = ACTIVE
 		ORDER BY a.latest_acitvity_at DESC
 	`
 )
@@ -107,9 +107,9 @@ func (repo *InteracAccountRepo) InsertInteracAccount(ctx context.Context, acc In
 	return id, nil
 }
 
-func (repo *InteracAccountRepo) UpdateNonDeleteInteracAccountByIdAndOwner(ctx context.Context, acc InteracAccount) error {
+func (repo *InteracAccountRepo) UpdateActiveInteracAccountByIdAndOwner(ctx context.Context, acc InteracAccount) error {
 	_, err := repo.db.Exec(
-		sQLInteracAccountUpdateNonDeleteByIdAndOwner,
+		sQLInteracAccountUpdateActiveByIdAndOwner,
 		acc.Status,
 		acc.LatestActivityAt,
 		acc.OwnerId,
@@ -121,8 +121,8 @@ func (repo *InteracAccountRepo) UpdateNonDeleteInteracAccountByIdAndOwner(ctx co
 	return nil
 }
 
-func (repo *InteracAccountRepo) GetUniqueNonDeleteInteracAccountById(ctx context.Context, ownerId, id int64) (*InteracAccount, error) {
-	rows, err := repo.db.Query(sQLInteracAccountGetUniqueNonDeleteById, ownerId, id)
+func (repo *InteracAccountRepo) GetUniqueActiveInteracAccountById(ctx context.Context, ownerId, id int64) (*InteracAccount, error) {
+	rows, err := repo.db.Query(sQLInteracAccountGetUniqueActiveById, ownerId, id)
 
 	if err != nil {
 		return nil, err
@@ -169,8 +169,8 @@ func (repo *InteracAccountRepo) GetUniqueInteracAccountById(ctx context.Context,
 	return f, nil
 }
 
-func (repo *InteracAccountRepo) GetAllNonDeleteInteracAccountByOwnerId(ctx context.Context, ownerId int64) ([]*InteracAccount, error) {
-	rows, err := repo.db.Query(sQLInteracAccountGetAllNonDeleteByOwnerId, ownerId)
+func (repo *InteracAccountRepo) GetAllActiveInteracAccountByOwnerId(ctx context.Context, ownerId int64) ([]*InteracAccount, error) {
+	rows, err := repo.db.Query(sQLInteracAccountGetAllActiveByOwnerId, ownerId)
 
 	if err != nil {
 		return nil, err

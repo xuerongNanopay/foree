@@ -19,10 +19,10 @@ const (
 			account_hash, relationship_to_contact, owner_id, latest_acitvity_at
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
-	sQLContactAccountUpdateNonDeleteByIdAndOwner = `
+	sQLContactAccountUpdateActiveByIdAndOwner = `
 		UPDATE contact_accounts SET 
 			status = ?, latest_acitvity_at = ?
-		WHERE id = ? AND a.owner_id = ? AND a.status != DELETE
+		WHERE id = ? AND a.owner_id = ? AND a.status = ACTIVE
 	`
 	sQLContactAccountGetUniqueById = `
 		SELECT 
@@ -34,7 +34,7 @@ const (
 		FROM contact_accounts a
 		where a.id = ?
 	`
-	sQLContactAccountGetNonDeleteUniqueByOwnerAndId = `
+	sQLContactAccountGetActiveUniqueByOwnerAndId = `
 		SELECT 
 			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
@@ -42,9 +42,9 @@ const (
 			a.account_hash, a.relationship_to_contact, a.owner_id
 			a.latest_acitvity_at, a.create_at, a.update_at
 		FROM contact_accounts a
-		where a.owner_id = ? AND a.id = ? AND a.status != DELETE
+		where a.owner_id = ? AND a.id = ? AND a.status = ACTIVE
 	`
-	sQLContactAccountGetAllNonDeleteByOwnerId = `
+	sQLContactAccountGetAllActiveByOwnerId = `
 		SELECT 
 			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
@@ -52,10 +52,10 @@ const (
 			a.account_hash, a.relationship_to_contact, a.owner_id
 			a.latest_acitvity_at, a.create_at, a.update_at
 		FROM contact_accounts a
-		where a.owner_id = ? AND a.status != DELETE
+		where a.owner_id = ? AND a.status = ACTIVE
 		ORDER BY a.latest_acitvity_at DESC
 	`
-	sQLContactAccountQueryNonDeleteByOwnerId = `
+	sQLContactAccountQueryActiveByOwnerId = `
 		SELECT 
 			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
@@ -63,7 +63,7 @@ const (
 			a.account_hash, a.relationship_to_contact, a.owner_id
 			a.latest_acitvity_at, a.create_at, a.update_at
 		FROM contact_accounts a
-		where a.owner_id = ? AND a.status != DELETE
+		where a.owner_id = ? AND a.status = ACTIVE
 		LIMIT ? OFFSET ?
 	`
 )
@@ -164,9 +164,9 @@ func (repo *ContactAccountRepo) InsertContactAccount(ctx context.Context, acc Co
 	return id, nil
 }
 
-func (repo *ContactAccountRepo) UpdateNonDeleteContactAccountByIdAndOwner(ctx context.Context, acc ContactAccount) error {
+func (repo *ContactAccountRepo) UpdateActiveContactAccountByIdAndOwner(ctx context.Context, acc ContactAccount) error {
 	_, err := repo.db.Exec(
-		sQLContactAccountUpdateNonDeleteByIdAndOwner,
+		sQLContactAccountUpdateActiveByIdAndOwner,
 		acc.Status,
 		acc.LatestActivityAt,
 		acc.OwnerId,
@@ -180,7 +180,7 @@ func (repo *ContactAccountRepo) UpdateNonDeleteContactAccountByIdAndOwner(ctx co
 
 func (repo *ContactAccountRepo) RefreshContactLatestActivityAtAndOwner(ctx context.Context, acc ContactAccount) error {
 	_, err := repo.db.Exec(
-		sQLContactAccountUpdateNonDeleteByIdAndOwner,
+		sQLContactAccountUpdateActiveByIdAndOwner,
 		acc.Status,
 		time.Now(),
 		acc.OwnerId,
@@ -216,8 +216,8 @@ func (repo *ContactAccountRepo) GetUniqueContactAccountById(ctx context.Context,
 	return f, nil
 }
 
-func (repo *ContactAccountRepo) GetUniqueNonDeleteContactAccountByOwnerAndId(ctx context.Context, ownerid, id int64) (*ContactAccount, error) {
-	rows, err := repo.db.Query(sQLContactAccountGetNonDeleteUniqueByOwnerAndId, ownerid, id)
+func (repo *ContactAccountRepo) GetUniqueActiveContactAccountByOwnerAndId(ctx context.Context, ownerid, id int64) (*ContactAccount, error) {
+	rows, err := repo.db.Query(sQLContactAccountGetActiveUniqueByOwnerAndId, ownerid, id)
 
 	if err != nil {
 		return nil, err
@@ -240,8 +240,8 @@ func (repo *ContactAccountRepo) GetUniqueNonDeleteContactAccountByOwnerAndId(ctx
 	return f, nil
 }
 
-func (repo *ContactAccountRepo) GetAllNonDeleteContactAccountByOwnerId(ctx context.Context, ownerId int64) ([]*ContactAccount, error) {
-	rows, err := repo.db.Query(sQLContactAccountGetAllNonDeleteByOwnerId, ownerId)
+func (repo *ContactAccountRepo) GetAllActiveContactAccountByOwnerId(ctx context.Context, ownerId int64) ([]*ContactAccount, error) {
+	rows, err := repo.db.Query(sQLContactAccountGetAllActiveByOwnerId, ownerId)
 
 	if err != nil {
 		return nil, err
@@ -264,8 +264,8 @@ func (repo *ContactAccountRepo) GetAllNonDeleteContactAccountByOwnerId(ctx conte
 	return accounts, nil
 }
 
-func (repo *ContactAccountRepo) QueryNonDeleteContactAccountByOwnerId(ctx context.Context, ownerId int64, limit, offset int) ([]*ContactAccount, error) {
-	rows, err := repo.db.Query(sQLContactAccountQueryNonDeleteByOwnerId, ownerId, limit, offset)
+func (repo *ContactAccountRepo) QueryActiveContactAccountByOwnerId(ctx context.Context, ownerId int64, limit, offset int) ([]*ContactAccount, error) {
+	rows, err := repo.db.Query(sQLContactAccountQueryActiveByOwnerId, ownerId, limit, offset)
 
 	if err != nil {
 		return nil, err

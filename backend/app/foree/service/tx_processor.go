@@ -8,6 +8,7 @@ import (
 
 	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/transaction"
+	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/auth"
 	time_util "xue.io/go-pay/util/time"
@@ -70,14 +71,14 @@ type TxProcessor struct {
 	processingLock     sync.RWMutex
 }
 
-func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*transaction.ForeeTx, error) {
+func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*transaction.ForeeTx, transport.ForeeError) {
 	ctx := context.Background()
 	rate, err := p.rateRepo.GetUniqueRateById(ctx, transaction.GenerateRateId(quote.SrcCurrency, quote.DestCurrency))
 	if err != nil {
-		return nil, err
+		return nil, transport.WrapInteralServerError(err)
 	}
 	if rate == nil {
-		return nil, fmt.Errorf("user `%v` try to create transaction with unkown rate `%s`", user.ID, transaction.GenerateRateId(quote.SrcCurrency, quote.DestCurrency))
+		return nil, transport.NewInteralServerError("user `%v` try to create transaction with unkown rate `%s`", user.ID, transaction.GenerateRateId(quote.SrcCurrency, quote.DestCurrency))
 	}
 
 	//Reward
@@ -86,70 +87,81 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 		rewardId := quote.RewardIds[1]
 		r, err := p.rewardRepo.GetUniqueRewardById(ctx, rewardId)
 		if err != nil {
-			return nil, err
+			return nil, transport.WrapInteralServerError(err)
 		}
 		if r == nil {
-			return nil, fmt.Errorf("user `%v` try to redeem unknown reward `%v`", user.ID, rewardId)
+			return nil, transport.NewInteralServerError("user `%v` try to redeem unknown reward `%v`", user.ID, rewardId)
 		}
 		if r.OwnerId != user.ID {
-			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` that is belong to `%v`", user.ID, rewardId, r.OwnerId)
+			return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` that is belong to `%v`", user.ID, rewardId, r.OwnerId)
 		}
 		if r.Status != transaction.RewardStatusActive {
-			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` that is currently in status `%v`", user.ID, rewardId, r.Status)
+			return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` that is currently in status `%v`", user.ID, rewardId, r.Status)
 		}
 		if r.Amt.Currency != quote.SrcCurrency {
-			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` that apply currency `%v` to currency `%v`", user.ID, rewardId, r.Amt.Currency, quote.SrcCurrency)
+			return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` that apply currency `%v` to currency `%v`", user.ID, rewardId, r.Amt.Currency, quote.SrcCurrency)
 		}
-		if (quote.SrcAmount - float64(r.Amt.Amount)) < 10 {
-			return nil, fmt.Errorf("user `%v` try to redeem reward `%v` with srcAmount `%v`", user.ID, rewardId, quote.SrcCurrency)
-		}
+		// if (quote.SrcAmount - float64(r.Amt.Amount)) < 10 {
+		// 	return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` with srcAmount `%v`", user.ID, rewardId, quote.SrcCurrency))
+		// }
 		reward = r
 	}
 
 	//TODO: PromoCode
 	//Don't return err. Just ignore the promocode reward.
-	if quote.PromoCode != "" {
-		promoCode, err := p.promoCodeRepo.GetUniquePromoCodeByCode(ctx, quote.PromoCode)
-		if err != nil {
-			//TODO: log
-			goto existpromo
-		}
-		if promoCode == nil {
-			//TODO: log
-			goto existpromo
-		}
-		if !promoCode.IsValid() {
-			//TODO: log
-			goto existpromo
-		}
-		if quote.SrcCurrency != promoCode.MinAmt.Currency {
-			//TODO: log
-			goto existpromo
-		}
-		if quote.SrcAmount < float64(promoCode.MinAmt.Amount) {
-			//TODO: log
-			goto existpromo
-		}
-		//TODO: check account limit.
-	}
-existpromo:
+	// 	if quote.PromoCode != "" {
+	// 		promoCode, err := p.promoCodeRepo.GetUniquePromoCodeByCode(ctx, quote.PromoCode)
+	// 		if err != nil {
+	// 			//TODO: log
+	// 			goto existpromo
+	// 		}
+	// 		if promoCode == nil {
+	// 			//TODO: log
+	// 			goto existpromo
+	// 		}
+	// 		if !promoCode.IsValid() {
+	// 			//TODO: log
+	// 			goto existpromo
+	// 		}
+	// 		if quote.SrcCurrency != promoCode.MinAmt.Currency {
+	// 			//TODO: log
+	// 			goto existpromo
+	// 		}
+	// 		if quote.SrcAmount < float64(promoCode.MinAmt.Amount) {
+	// 			//TODO: log
+	// 			goto existpromo
+	// 		}
+	// 		//TODO: check account limit.
+	// 	}
+	// existpromo:
 
 	//Fee
 	fee, err := p.feeRepo.GetUniqueFeeByName(FeeName)
 	if err != nil {
-		return nil, err
+		return nil, transport.WrapInteralServerError(err)
 	}
 	if fee == nil {
-		return nil, fmt.Errorf("fee `%v` not found", FeeName)
+		return nil, transport.NewInteralServerError("fee `%v` not found", FeeName)
 	}
 
 	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(quote.SrcAmount), Currency: quote.SrcCurrency})
 	if err != nil {
-		return nil, err
+		return nil, transport.WrapInteralServerError(err)
 	}
 	if joint != nil {
 		joint.Description = fee.Description
 		joint.OwnerId = user.ID
+	}
+
+	txLimit, ok := txLimits[user.Group]
+	if !ok {
+		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", user.Group)
+	}
+
+	//TODO: check srcAmount/limit.
+	dailyLimit, err := p.getDailyTxLimit(ctx, user)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
 	}
 
 	//Total = quote.srcAmount + fees - rewards
@@ -158,12 +170,12 @@ existpromo:
 		Currency: quote.SrcCurrency,
 	}
 
-	if joint != nil {
-		totalAmt.Amount += joint.Amt.Amount
-	}
-
 	if reward != nil {
 		totalAmt.Amount -= reward.Amt.Amount
+	}
+
+	if joint != nil {
+		totalAmt.Amount += joint.Amt.Amount
 	}
 
 	foreeTx := &transaction.ForeeTx{
