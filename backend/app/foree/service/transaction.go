@@ -3,22 +3,33 @@ package service
 import (
 	"context"
 	"fmt"
+	"sync"
+	"time"
 
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/app/foree/types"
 )
 
+var rateCacheTimeout time.Duration = 15 * time.Minute
+
+type RateCacheItem struct {
+	rate   transaction.Rate
+	expire time.Time
+}
+
 type TransactionService struct {
-	txSummaryRepo *transaction.TxSummaryRepo
-	txQuoteRepo   *transaction.TxQuoteRepo
-	rateRepo      *transaction.RateRepo
-	txProcessor   *TxProcessor
+	txSummaryRepo   *transaction.TxSummaryRepo
+	txQuoteRepo     *transaction.TxQuoteRepo
+	rateRepo        *transaction.RateRepo
+	txProcessor     *TxProcessor
+	rateCache       map[string]RateCacheItem
+	rateCacheRWLock sync.RWMutex
 }
 
 // Can be cache for 5 minutes.
 func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*RateDTO, transport.ForeeError) {
-	rate, err := t.rateRepo.GetUniqueRateById(ctx, transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency))
+	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -34,9 +45,38 @@ func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*Rate
 	return NewRateDTO(rate), nil
 }
 
+func (t *TransactionService) getRate(ctx context.Context, src, dest string) (*transaction.Rate, error) {
+	rateId := transaction.GenerateRateId(src, dest)
+
+	t.rateCacheRWLock.RLock()
+	rateCache, ok := t.rateCache[rateId]
+	t.rateCacheRWLock.RUnlock()
+
+	if ok && rateCache.expire.After(time.Now()) {
+		return &rateCache.rate, nil
+	}
+
+	rate, err := t.rateRepo.GetUniqueRateById(ctx, rateId)
+	if err != nil {
+		return nil, err
+	}
+
+	if !t.rateCacheRWLock.TryLock() {
+		return rate, nil
+	}
+	defer t.rateCacheRWLock.Unlock()
+
+	t.rateCache[rateId] = RateCacheItem{
+		rate:   *rate,
+		expire: time.Now().Add(rateCacheTimeout),
+	}
+	return rate, nil
+}
+
 // Can be use same cache as above.
+// Do we want it? Or we can calculate at frontend.
 func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*TxSummaryDetailDTO, transport.ForeeError) {
-	rate, err := t.rateRepo.GetUniqueRateById(ctx, transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency))
+	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
