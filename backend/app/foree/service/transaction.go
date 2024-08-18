@@ -12,20 +12,24 @@ import (
 	"xue.io/go-pay/auth"
 )
 
-var rateCacheTimeout time.Duration = 15 * time.Minute
+var (
+	rateCacheTimeout time.Duration = 15 * time.Minute
+	feeCacheTimeout  time.Duration = time.Hour
+)
 
-type RateCacheItem struct {
-	rate   transaction.Rate
-	expire time.Time
+type CacheItem[T any] struct {
+	item     T
+	createAt time.Time
 }
 
 const (
-	FeeName string = "FOREE_TX_CAD_FEE"
+	FeeName           string = "FOREE_TX_CAD_FEE"
+	DefaultForeeGroup string = "FOREE_PERSONAL"
 )
 
 // Group level transaction limit.
 var txLimits = map[string]transaction.TxLimit{
-	"foree_personal": {
+	"FOREE_PERSONAL": {
 		Name: "foree_personal-group-tx-limit",
 		MinAmt: types.AmountData{
 			Amount:   types.Amount(10.0),
@@ -37,7 +41,7 @@ var txLimits = map[string]transaction.TxLimit{
 		},
 		IsEnable: true,
 	},
-	"foree_bo": {
+	"FOREE_BO": {
 		Name: "foree_bo-group-tx-limit",
 		MinAmt: types.AmountData{
 			Amount:   types.Amount(2.0),
@@ -60,13 +64,15 @@ type TransactionService struct {
 	feeRepo           *transaction.FeeRepo
 	feeJointRepo      *transaction.FeeJointRepo
 	txProcessor       *TxProcessor
-	rateCache         map[string]RateCacheItem
+	rateCache         map[string]CacheItem[transaction.Rate]
 	rateCacheRWLock   sync.RWMutex
+	feeCache          map[string]CacheItem[transaction.Fee]
+	feeCacheRWLock    sync.RWMutex
 }
 
 // Can be cache for 5 minutes.
 func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*RateDTO, transport.ForeeError) {
-	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency)
+	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, 30*time.Minute)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -82,16 +88,15 @@ func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*Rate
 	return NewRateDTO(rate), nil
 }
 
-// Only case this cache won't work is that volume density of request is high.
-func (t *TransactionService) getRate(ctx context.Context, src, dest string) (*transaction.Rate, error) {
+func (t *TransactionService) getRate(ctx context.Context, src, dest string, validIn time.Duration) (*transaction.Rate, error) {
 	rateId := transaction.GenerateRateId(src, dest)
 
 	t.rateCacheRWLock.RLock()
 	rateCache, ok := t.rateCache[rateId]
 	t.rateCacheRWLock.RUnlock()
 
-	if ok && rateCache.expire.After(time.Now()) {
-		return &rateCache.rate, nil
+	if ok && rateCache.createAt.Add(validIn).After(time.Now()) {
+		return &rateCache.item, nil
 	}
 
 	rate, err := t.rateRepo.GetUniqueRateById(ctx, rateId)
@@ -99,14 +104,16 @@ func (t *TransactionService) getRate(ctx context.Context, src, dest string) (*tr
 		return nil, err
 	}
 
+	//There is a change that write lock never work.
+	//But if this case happen, we already a big company.
 	if !t.rateCacheRWLock.TryLock() {
 		return rate, nil
 	}
 	defer t.rateCacheRWLock.Unlock()
 
-	t.rateCache[rateId] = RateCacheItem{
-		rate:   *rate,
-		expire: time.Now().Add(rateCacheTimeout),
+	t.rateCache[rateId] = CacheItem[transaction.Rate]{
+		item:     *rate,
+		createAt: time.Now(),
 	}
 	return rate, nil
 }
@@ -114,7 +121,7 @@ func (t *TransactionService) getRate(ctx context.Context, src, dest string) (*tr
 // Can be use same cache as above.
 // Do we want it? Or we can calculate at frontend.
 func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*TxSummaryDetailDTO, transport.ForeeError) {
-	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency)
+	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, 30*time.Minute)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -129,6 +136,30 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 		)
 	}
 
+	//fee
+	fee, err := t.getFee(ctx, FeeName, 2*time.Hour)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+	if fee == nil {
+		return nil, transport.NewInteralServerError("fee `%v` not found", FeeName)
+	}
+
+	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	//Total = quote.srcAmount + fees - rewards
+	totalAmt := types.AmountData{
+		Amount:   types.Amount(req.SrcAmount),
+		Currency: req.SrcCurrency,
+	}
+
+	if joint != nil {
+		totalAmt.Amount += joint.Amt.Amount
+	}
+
 	//TODO: calculate fee.
 	sumTx := &TxSummaryDetailDTO{
 		Summary:      "Free qupte",
@@ -140,8 +171,36 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 	return sumTx, nil
 }
 
-func (p *TransactionService) quoteTx(ctx context.Context, user auth.User, quote QuoteTransactionReq) (*transaction.ForeeTx, transport.ForeeError) {
-	rate, err := p.rateRepo.GetUniqueRateById(ctx, transaction.GenerateRateId(quote.SrcCurrency, quote.DestCurrency))
+func (t *TransactionService) getFee(ctx context.Context, feeName string, validIn time.Duration) (*transaction.Fee, error) {
+	t.feeCacheRWLock.RLock()
+	feeCache, ok := t.feeCache[feeName]
+	t.feeCacheRWLock.RUnlock()
+
+	if ok && feeCache.createAt.Add(validIn).After(time.Now()) {
+		return &feeCache.item, nil
+	}
+
+	fee, err := t.feeRepo.GetUniqueFeeByName(ctx, feeName)
+	if err != nil {
+		return nil, err
+	}
+
+	//There is a change that write lock never work.
+	//But if this case happen, we already a big company.
+	if !t.feeCacheRWLock.TryLock() {
+		return fee, nil
+	}
+	defer t.feeCacheRWLock.Unlock()
+
+	t.feeCache[feeName] = CacheItem[transaction.Fee]{
+		item:     *fee,
+		createAt: time.Now(),
+	}
+	return fee, nil
+}
+
+func (t *TransactionService) QuoteTx(ctx context.Context, user auth.User, quote QuoteTransactionReq) (*transaction.ForeeTx, transport.ForeeError) {
+	rate, err := t.rateRepo.GetUniqueRateById(ctx, transaction.GenerateRateId(quote.SrcCurrency, quote.DestCurrency))
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -153,7 +212,7 @@ func (p *TransactionService) quoteTx(ctx context.Context, user auth.User, quote 
 	var reward *transaction.Reward
 	if len(quote.RewardIds) == 1 {
 		rewardId := quote.RewardIds[1]
-		r, err := p.rewardRepo.GetUniqueRewardById(ctx, rewardId)
+		r, err := t.rewardRepo.GetUniqueRewardById(ctx, rewardId)
 		if err != nil {
 			return nil, transport.WrapInteralServerError(err)
 		}
@@ -178,7 +237,7 @@ func (p *TransactionService) quoteTx(ctx context.Context, user auth.User, quote 
 	//TODO: PromoCode
 	//Don't return err. Just ignore the promocode reward.
 	// 	if quote.PromoCode != "" {
-	// 		promoCode, err := p.promoCodeRepo.GetUniquePromoCodeByCode(ctx, quote.PromoCode)
+	// 		promoCode, err := t.promoCodeRepo.GetUniquePromoCodeByCode(ctx, quote.PromoCode)
 	// 		if err != nil {
 	// 			//TODO: log
 	// 			goto existpromo
@@ -204,7 +263,7 @@ func (p *TransactionService) quoteTx(ctx context.Context, user auth.User, quote 
 	// existpromo:
 
 	//Fee
-	fee, err := p.feeRepo.GetUniqueFeeByName(FeeName)
+	fee, err := t.getFee(ctx, FeeName, time.Hour)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -227,7 +286,7 @@ func (p *TransactionService) quoteTx(ctx context.Context, user auth.User, quote 
 	}
 
 	//TODO: check srcAmount/limit.
-	dailyLimit, err := p.getDailyTxLimit(ctx, user)
+	dailyLimit, err := t.getDailyTxLimit(ctx, user)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -287,11 +346,11 @@ func (p *TransactionService) quoteTx(ctx context.Context, user auth.User, quote 
 	return foreeTx, nil
 }
 
-func (p *TransactionService) rollBackTx(tx transaction.ForeeTx) {
+func (t *TransactionService) rollBackTx(tx transaction.ForeeTx) {
 	// log error.
 }
 
-func (p *TransactionService) GetTxLimit(user auth.User) (*transaction.TxLimit, error) {
+func (t *TransactionService) GetTxLimit(user auth.User) (*transaction.TxLimit, error) {
 	txLimit, ok := txLimits[user.Group]
 	if !ok {
 		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", user.Group)
@@ -299,41 +358,41 @@ func (p *TransactionService) GetTxLimit(user auth.User) (*transaction.TxLimit, e
 	return &txLimit, nil
 }
 
-func (p *TransactionService) GetDailyTxLimit(user auth.User) (*transaction.DailyTxLimit, error) {
+func (t *TransactionService) GetDailyTxLimit(user auth.User) (*transaction.DailyTxLimit, error) {
 	ctx := context.Background()
-	return p.getDailyTxLimit(ctx, user)
+	return t.getDailyTxLimit(ctx, user)
 }
 
-func (p *TransactionService) addDailyTxLimit(ctx context.Context, user auth.User, amt types.AmountData) (*transaction.DailyTxLimit, error) {
-	dailyLimit, err := p.getDailyTxLimit(ctx, user)
+func (t *TransactionService) addDailyTxLimit(ctx context.Context, user auth.User, amt types.AmountData) (*transaction.DailyTxLimit, error) {
+	dailyLimit, err := t.getDailyTxLimit(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
 	dailyLimit.UsedAmt.Amount += amt.Amount
 
-	if err := p.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
+	if err := t.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
 		return nil, err
 	}
-	newDailyLimit, err := p.getDailyTxLimit(ctx, user)
+	newDailyLimit, err := t.getDailyTxLimit(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 	return newDailyLimit, nil
 }
 
-func (p *TransactionService) minusDailyTxLimit(ctx context.Context, user auth.User, amt types.AmountData) (*transaction.DailyTxLimit, error) {
-	dailyLimit, err := p.getDailyTxLimit(ctx, user)
+func (t *TransactionService) minusDailyTxLimit(ctx context.Context, user auth.User, amt types.AmountData) (*transaction.DailyTxLimit, error) {
+	dailyLimit, err := t.getDailyTxLimit(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
 	dailyLimit.UsedAmt.Amount -= amt.Amount
 
-	if err := p.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
+	if err := t.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
 		return nil, err
 	}
-	newDailyLimit, err := p.getDailyTxLimit(ctx, user)
+	newDailyLimit, err := t.getDailyTxLimit(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -341,9 +400,9 @@ func (p *TransactionService) minusDailyTxLimit(ctx context.Context, user auth.Us
 }
 
 // I don't case race condition here, cause create transaction will save it.
-func (p *TransactionService) getDailyTxLimit(ctx context.Context, user auth.User) (*transaction.DailyTxLimit, error) {
+func (t *TransactionService) getDailyTxLimit(ctx context.Context, user auth.User) (*transaction.DailyTxLimit, error) {
 	reference := transaction.GenerateDailyTxLimitReference(user.ID)
-	dailyLimit, err := p.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, reference)
+	dailyLimit, err := t.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, reference)
 	if err != nil {
 		return nil, err
 	}
@@ -365,11 +424,11 @@ func (p *TransactionService) getDailyTxLimit(ctx context.Context, user auth.User
 				Currency: txLimit.MaxAmt.Currency,
 			},
 		}
-		_, err := p.dailyTxLimiteRepo.InsertDailyTxLimit(ctx, *dailyLimit)
+		_, err := t.dailyTxLimiteRepo.InsertDailyTxLimit(ctx, *dailyLimit)
 		if err != nil {
 			return nil, err
 		}
-		dl, err := p.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, reference)
+		dl, err := t.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, reference)
 		if err != nil {
 			return nil, err
 		}

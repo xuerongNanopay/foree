@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"math"
@@ -159,7 +160,7 @@ type FeeJointRepo struct {
 	db *sql.DB
 }
 
-func (repo *FeeRepo) GetUniqueFeeByName(name string) (*Fee, error) {
+func (repo *FeeRepo) GetUniqueFeeByName(ctx context.Context, name string) (*Fee, error) {
 	rows, err := repo.db.Query(sQLFeeGetUniqueByName, name)
 
 	if err != nil {
