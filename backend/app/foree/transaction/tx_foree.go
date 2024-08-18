@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/types"
 )
 
@@ -89,16 +90,18 @@ type ForeeTx struct {
 	CreateAt           time.Time        `json:"createAt"`
 	UpdateAt           time.Time        `json:"updateAt"`
 
-	FeeJointIds []int64        `json:"feeJointIds"`
-	Fees        []*FeeJoint    `json:"fees"`
-	RewardIds   []int64        `json:"rewardIds"`
-	Rewards     []*Reward      `json:"rewards"`
-	CI          *InteracCITx   `json:"ci"`
-	IDM         *IDMTx         `json:"idm"`
-	COUT        *NBPCOTx       `json:"cout"`
-	Summary     *TxSummary     `json:"summary"`
-	RefundTx    *ForeeRefundTx `json:"refundTx"`
-	History     []*TxHistory   `json:"history"`
+	InteracAcc  *account.InteracAccount `json:"interacAcc"`
+	ContactAcc  *account.ContactAccount `json:"contactAcc"`
+	FeeJointIds []int64                 `json:"feeJointIds"`
+	Fees        []*FeeJoint             `json:"fees"`
+	RewardIds   []int64                 `json:"rewardIds"`
+	Rewards     []*Reward               `json:"rewards"`
+	CI          *InteracCITx            `json:"ci"`
+	IDM         *IDMTx                  `json:"idm"`
+	COUT        *NBPCOTx                `json:"cout"`
+	Summary     *TxSummary              `json:"summary"`
+	RefundTx    *ForeeRefundTx          `json:"refundTx"`
+	History     []*TxHistory            `json:"history"`
 }
 
 func NewForeeTxRepo(db *sql.DB) *ForeeTxRepo {
