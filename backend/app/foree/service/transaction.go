@@ -62,6 +62,8 @@ type TransactionService struct {
 	rewardRepo        *transaction.RewardRepo
 	dailyTxLimiteRepo *transaction.DailyTxLimitRepo
 	feeRepo           *transaction.FeeRepo
+	contactRepo       *account.ContactAccountRepo
+	interacRepo       *account.InteracAccountRepo
 	feeJointRepo      *transaction.FeeJointRepo
 	txProcessor       *TxProcessor
 	rateCache         map[string]CacheItem[transaction.Rate]
@@ -212,7 +214,10 @@ func (t *TransactionService) QuoteTx(ctx context.Context, user auth.User, req Qu
 		return nil, transport.NewInteralServerError("user `%v` try to create transaction with unkown rate `%s`", user.ID, transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency))
 	}
 
-	//Reward
+	// Get CI and COUT acccount.
+	ciAcc, err := 
+
+	// Get reward
 	var reward *transaction.Reward
 	if len(req.RewardIds) == 1 {
 		rewardId := req.RewardIds[1]

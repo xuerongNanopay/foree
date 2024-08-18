@@ -8,7 +8,6 @@ import (
 
 	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/transaction"
-	"xue.io/go-pay/auth"
 	time_util "xue.io/go-pay/util/time"
 )
 
@@ -18,22 +17,16 @@ type TxProcessorConfig struct {
 // It is the internal service for transaction process.
 
 type TxProcessor struct {
-	interacTxRepo      *transaction.InteracCITxRepo
-	npbTxRepo          *transaction.NBPCOTxRepo
-	idmTxRepo          *transaction.IdmTxRepo
-	txHistoryRepo      *transaction.TxHistoryRepo
-	txSummaryRepo      *transaction.TxSummaryRepo
-	dailyTxLimiteRepo  *transaction.DailyTxLimitRepo
-	foreeTxRepo        *transaction.ForeeTxRepo
-	rateRepo           *transaction.RateRepo
-	userRepo           *auth.UserRepo
-	contactRepo        *account.ContactAccountRepo
-	interacRepo        *account.InteracAccountRepo
-	promoCodeRepo      *transaction.PromoCodeRepo
-	promoCodeJointRepo *transaction.PromoCodeJointRepo
-	rewardRepo         *transaction.RewardRepo
-	processingMap      []map[int64]*transaction.ForeeTx // Avoid duplicate process
-	processingLock     sync.RWMutex
+	interacTxRepo  *transaction.InteracCITxRepo
+	npbTxRepo      *transaction.NBPCOTxRepo
+	idmTxRepo      *transaction.IdmTxRepo
+	txHistoryRepo  *transaction.TxHistoryRepo
+	txSummaryRepo  *transaction.TxSummaryRepo
+	foreeTxRepo    *transaction.ForeeTxRepo
+	contactRepo    *account.ContactAccountRepo
+	interacRepo    *account.InteracAccountRepo
+	processingMap  []map[int64]*transaction.ForeeTx // Avoid duplicate process
+	processingLock sync.RWMutex
 }
 
 func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
