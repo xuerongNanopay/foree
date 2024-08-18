@@ -45,6 +45,7 @@ func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*Rate
 	return NewRateDTO(rate), nil
 }
 
+// Only case this cache won't work is that volume density of request is high.
 func (t *TransactionService) getRate(ctx context.Context, src, dest string) (*transaction.Rate, error) {
 	rateId := transaction.GenerateRateId(src, dest)
 
