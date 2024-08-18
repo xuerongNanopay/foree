@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/transport"
@@ -21,14 +22,42 @@ func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*Rate
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
+	if rate == nil {
+		return nil, transport.NewFormError(
+			"Invalid rate request",
+			"srcCurrency",
+			fmt.Sprintf("unsupport srcCurrency %s", req.SrcCurrency),
+			"destCurrency",
+			fmt.Sprintf("unsupport destCurrency %s", req.DestCurrency),
+		)
+	}
 	return NewRateDTO(rate), nil
 }
 
 // Can be use same cache as above.
 func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*TxSummaryDetailDTO, transport.ForeeError) {
+	rate, err := t.rateRepo.GetUniqueRateById(ctx, transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency))
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	if rate == nil {
+		return nil, transport.NewFormError(
+			"Invalid rate request",
+			"srcCurrency",
+			fmt.Sprintf("unsupport srcCurrency %s", req.SrcCurrency),
+			"destCurrency",
+			fmt.Sprintf("unsupport destCurrency %s", req.DestCurrency),
+		)
+	}
+
+	//TODO: calculate fee.
 	sumTx := &TxSummaryDetailDTO{
-		Summary:   "Free qupte",
-		SrcAmount: types.Amount(req.SrcAmount),
+		Summary:      "Free qupte",
+		SrcAmount:    types.Amount(req.SrcAmount),
+		SrcCurrency:  req.SrcCurrency,
+		DestAmount:   types.Amount(rate.CalculateForwardAmount(req.SrcAmount)),
+		DestCurrency: req.DestCurrency,
 	}
 	return sumTx, nil
 }
