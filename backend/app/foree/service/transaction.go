@@ -3,15 +3,24 @@ package service
 import (
 	"context"
 
+	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/transport"
 )
 
 type TransactionService struct {
+	txSummaryRepo *transaction.TxSummaryRepo
+	txQuoteRepo   *transaction.TxQuoteRepo
+	rateRepo      *transaction.RateRepo
+	txProcessor   *TxProcessor
 }
 
 // Can be cache for 5 minutes.
 func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*RateDTO, transport.ForeeError) {
-	return nil, nil
+	rate, err := t.rateRepo.GetUniqueRateById(ctx, transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency))
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+	return NewRateDTO(rate), nil
 }
 
 // Can be use same cache as above.
