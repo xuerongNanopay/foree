@@ -37,8 +37,8 @@ func (q *FreeQuoteReq) Validate() *transport.BadRequestError {
 
 type QuoteTransactionReq struct {
 	transport.SessionReq
-	SrcAccId           int64   `json:"srcAccId" validate:"gt=0"`
-	DestAccId          int64   `json:"destAccId" validate:"gt=0"`
+	CinAccId           int64   `json:"cinAccId" validate:"gt=0"`
+	CoutAccId          int64   `json:"coutAccId" validate:"gt=0"`
 	SrcAmount          float64 `json:"srcAmount" validate:"gt=10,lt=1000"`
 	SrcCurrency        string  `json:"srcCurrency" validate:"eq=CAD"`
 	DestCurrency       string  `json:"DestCurrency" validate:"eq=PKR"`

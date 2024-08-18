@@ -267,8 +267,8 @@ func (p *TransactionService) quoteTx(ctx context.Context, user auth.User, quote 
 			Currency: quote.DestCurrency,
 		},
 		TransactionPurpose: quote.TransactionPurpose,
-		SrcAccId:           quote.SrcAccId,
-		DestAccId:          quote.DestAccId,
+		CinAccId:           quote.CinAccId,
+		CoutAccId:          quote.CoutAccId,
 	}
 
 	if joint != nil {
@@ -285,6 +285,10 @@ func (p *TransactionService) quoteTx(ctx context.Context, user auth.User, quote 
 	foreeTx.TotalAmt = totalAmt
 
 	return foreeTx, nil
+}
+
+func (p *TransactionService) rollBackTx(tx transaction.ForeeTx) {
+	// log error.
 }
 
 func (p *TransactionService) GetTxLimit(user auth.User) (*transaction.TxLimit, error) {
