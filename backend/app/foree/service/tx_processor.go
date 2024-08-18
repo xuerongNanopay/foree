@@ -170,8 +170,16 @@ func (p *TxProcessor) quoteTx(user auth.User, quote QuoteTransactionReq) (*trans
 		Currency: quote.SrcCurrency,
 	}
 
+	if totalAmt.Amount+dailyLimit.UsedAmt.Amount > txLimit.MaxAmt.Amount {
+		return nil, transport.NewFormError("Invalid quote transaction request", "srcAmount", fmt.Sprintf("available amount is %v", txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount))
+	}
+
 	if reward != nil {
 		totalAmt.Amount -= reward.Amt.Amount
+	}
+
+	if totalAmt.Amount < txLimit.MinAmt.Amount {
+		return nil, transport.NewFormError("Invalid quote transaction request", "srcAmount", fmt.Sprintf("amount should at lease %v %s without rewards", txLimit.MinAmt.Amount, txLimit.MinAmt.Currency))
 	}
 
 	if joint != nil {
