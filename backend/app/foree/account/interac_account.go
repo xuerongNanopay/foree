@@ -31,7 +31,7 @@ const (
 		FROM interac_accounts a
 		where a.id = ?
 	`
-	sQLInteracAccountGetUniqueActiveById = `
+	sQLInteracAccountGetUniqueActiveByOwnerAndId = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
 			a.last_name, a.address, a.phone_number, a.email, 
@@ -121,8 +121,8 @@ func (repo *InteracAccountRepo) UpdateActiveInteracAccountByIdAndOwner(ctx conte
 	return nil
 }
 
-func (repo *InteracAccountRepo) GetUniqueActiveInteracAccountById(ctx context.Context, ownerId, id int64) (*InteracAccount, error) {
-	rows, err := repo.db.Query(sQLInteracAccountGetUniqueActiveById, ownerId, id)
+func (repo *InteracAccountRepo) GetUniqueActiveInteracAccountByOwnerAndId(ctx context.Context, ownerId, id int64) (*InteracAccount, error) {
+	rows, err := repo.db.Query(sQLInteracAccountGetUniqueActiveByOwnerAndId, ownerId, id)
 
 	if err != nil {
 		return nil, err

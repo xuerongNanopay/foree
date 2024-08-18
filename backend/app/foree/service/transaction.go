@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/app/foree/types"
@@ -56,6 +57,7 @@ var txLimits = map[string]transaction.TxLimit{
 }
 
 type TransactionService struct {
+	authService       *AuthService
 	txSummaryRepo     *transaction.TxSummaryRepo
 	txQuoteRepo       *transaction.TxQuoteRepo
 	rateRepo          *transaction.RateRepo
@@ -205,17 +207,32 @@ func (t *TransactionService) getFee(ctx context.Context, feeName string, validIn
 	return fee, nil
 }
 
-func (t *TransactionService) QuoteTx(ctx context.Context, user auth.User, req QuoteTransactionReq) (*QuoteTransactionDTO, transport.ForeeError) {
+func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionReq) (*QuoteTransactionDTO, transport.ForeeError) {
+	session, serr := t.authService.VerifySession(ctx, req.SessionId)
+	if serr != nil {
+		return nil, serr
+	}
+
+	user := *session.User
 	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, 5*time.Minute)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if rate == nil {
-		return nil, transport.NewInteralServerError("user `%v` try to create transaction with unkown rate `%s`", user.ID, transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency))
+		return nil, transport.NewInteralServerError("user `%v` try to quote transaction with unkown rate `%s`", user.ID, transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency))
 	}
 
-	// Get CI and COUT acccount.
-	ciAcc, err := 
+	// Get CI account.
+	ciAcc, err := t.interacRepo.GetUniqueActiveInteracAccountByOwnerAndId(ctx, user.ID, req.CinAccId)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+	if ciAcc == nil {
+		return nil, transport.NewInteralServerError("user `%v` try to use unkown ci account `%v`", user.ID, req.CinAccId)
+	}
+
+	// Get Cout account.
+	coutAcc, err := t.contactRepo.GetUniqueActiveContactAccountByOwnerAndId()
 
 	// Get reward
 	var reward *transaction.Reward
