@@ -175,11 +175,11 @@ func (q *CreateUserReq) Validate() *transport.BadRequestError {
 // --------------- Response ------------------
 
 type UserDTO struct {
-	FirstName  string `json:"firstName"`
-	MiddleName string `json:"middleName"`
-	LastName   string `json:"lastName"`
-	Status     string `json:"status"`
-	AvatarUrl  string `json:"avatarUrl"`
+	FirstName  string `json:"firstName,omitempty"`
+	MiddleName string `json:"middleName,omitempty"`
+	LastName   string `json:"lastName,omitempty"`
+	Status     string `json:"status,omitempty"`
+	AvatarUrl  string `json:"avatarUrl,omitempty"`
 }
 
 func NewUserDTO(user *auth.User) *UserDTO {

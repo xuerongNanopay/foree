@@ -199,15 +199,15 @@ func NewRateDTO(r *transaction.Rate) *RateDTO {
 }
 
 type TxSummaryDTO struct {
-	ID              int64     `json:"id"`
-	Summary         string    `json:"sumary"`
-	Type            string    `json:"type"`
-	Status          string    `json:"status"`
-	Rate            string    `json:"rate"`
-	TotalAmount     string    `json:"totalAmount"`
-	TotalCurrency   string    `json:"totalCurrency"`
-	IsCancelAllowed bool      `json:"isCancelAllowed"`
-	CreateAt        time.Time `json:"createAt"`
+	ID              int64     `json:"id,omitempty"`
+	Summary         string    `json:"sumary,omitempty"`
+	Type            string    `json:"type,omitempty"`
+	Status          string    `json:"status,omitempty"`
+	Rate            string    `json:"rate,omitempty"`
+	TotalAmount     string    `json:"totalAmount,omitempty"`
+	TotalCurrency   string    `json:"totalCurrency,omitempty"`
+	IsCancelAllowed bool      `json:"isCancelAllowed,omitempty"`
+	CreateAt        time.Time `json:"createAt,omitempty"`
 }
 
 func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
@@ -225,25 +225,25 @@ func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
 }
 
 type TxSummaryDetailDTO struct {
-	ID              int64        `json:"id"`
-	Summary         string       `json:"sumary"`
-	Type            string       `json:"type"`
-	Status          string       `json:"status"`
-	Rate            string       `json:"rate"`
-	SrcAccSummary   string       `json:"srcAccSummary"`
-	SrcAmount       types.Amount `json:"srcAmount"`
-	SrcCurrency     string       `json:"srcCurrency"`
-	DestAccSummary  string       `json:"destAccSummary"`
-	DestAmount      types.Amount `json:"destAmount"`
-	DestCurrency    string       `json:"destCurrency"`
-	TotalAmount     types.Amount `json:"totalAmount"`
-	TotalCurrency   string       `json:"totalCurrency"`
-	FeeAmount       types.Amount `json:"feeAmount"`
-	FeeCurrency     string       `json:"feeCurrency"`
-	RewardAmount    types.Amount `json:"rewardAmount"`
-	RewardCurrency  string       `json:"rewardCurrency"`
-	IsCancelAllowed bool         `json:"isCancelAllowed"`
-	CreateAt        time.Time    `json:"createAt"`
+	ID              int64        `json:"id,omitempty"`
+	Summary         string       `json:"sumary,omitempty"`
+	Type            string       `json:"type,omitempty"`
+	Status          string       `json:"status,omitempty"`
+	Rate            string       `json:"rate,omitempty"`
+	SrcAccSummary   string       `json:"srcAccSummary,omitempty"`
+	SrcAmount       types.Amount `json:"srcAmount,omitempty"`
+	SrcCurrency     string       `json:"srcCurrency,omitempty"`
+	DestAccSummary  string       `json:"destAccSummary,omitempty"`
+	DestAmount      types.Amount `json:"destAmount,omitempty"`
+	DestCurrency    string       `json:"destCurrency,omitempty"`
+	TotalAmount     types.Amount `json:"totalAmount,omitempty"`
+	TotalCurrency   string       `json:"totalCurrency,omitempty"`
+	FeeAmount       types.Amount `json:"feeAmount,omitempty"`
+	FeeCurrency     string       `json:"feeCurrency,omitempty"`
+	RewardAmount    types.Amount `json:"rewardAmount,omitempty"`
+	RewardCurrency  string       `json:"rewardCurrency,omitempty"`
+	IsCancelAllowed bool         `json:"isCancelAllowed,omitempty"`
+	CreateAt        time.Time    `json:"createAt,omitempty"`
 }
 
 func NewTxSummaryDetailDTO(tx *transaction.TxSummary) *TxSummaryDetailDTO {
@@ -268,4 +268,9 @@ func NewTxSummaryDetailDTO(tx *transaction.TxSummary) *TxSummaryDetailDTO {
 		IsCancelAllowed: tx.IsCancelAllowed,
 		CreateAt:        tx.CreateAt,
 	}
+}
+
+type QuoteTransactionDTO struct {
+	QuoteId string             `json:"quoteId,omitempty"`
+	TxSum   TxSummaryDetailDTO `json:"txSum,omitempty"`
 }

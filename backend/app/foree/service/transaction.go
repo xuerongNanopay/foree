@@ -118,9 +118,7 @@ func (t *TransactionService) getRate(ctx context.Context, src, dest string, vali
 	return rate, nil
 }
 
-// Can be use same cache as above.
-// Do we want it? Or we can calculate at frontend.
-func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*TxSummaryDetailDTO, transport.ForeeError) {
+func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*QuoteTransactionDTO, transport.ForeeError) {
 	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, 30*time.Minute)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
@@ -150,7 +148,7 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	//Total = quote.srcAmount + fees - rewards
+	//Total = req.srcAmount + fees - rewards
 	totalAmt := types.AmountData{
 		Amount:   types.Amount(req.SrcAmount),
 		Currency: req.SrcCurrency,
@@ -161,14 +159,20 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 	}
 
 	//TODO: calculate fee.
-	sumTx := &TxSummaryDetailDTO{
-		Summary:      "Free qupte",
-		SrcAmount:    types.Amount(req.SrcAmount),
-		SrcCurrency:  req.SrcCurrency,
-		DestAmount:   types.Amount(rate.CalculateForwardAmount(req.SrcAmount)),
-		DestCurrency: req.DestCurrency,
+	txSum := TxSummaryDetailDTO{
+		Summary:       "Free qupte",
+		SrcAmount:     types.Amount(req.SrcAmount),
+		SrcCurrency:   req.SrcCurrency,
+		DestAmount:    types.Amount(rate.CalculateForwardAmount(req.SrcAmount)),
+		DestCurrency:  req.DestCurrency,
+		FeeAmount:     joint.Amt.Amount,
+		FeeCurrency:   joint.Amt.Currency,
+		TotalAmount:   totalAmt.Amount,
+		TotalCurrency: totalAmt.Currency,
 	}
-	return sumTx, nil
+	return &QuoteTransactionDTO{
+		TxSum: txSum,
+	}, nil
 }
 
 func (t *TransactionService) getFee(ctx context.Context, feeName string, validIn time.Duration) (*transaction.Fee, error) {
@@ -199,19 +203,19 @@ func (t *TransactionService) getFee(ctx context.Context, feeName string, validIn
 	return fee, nil
 }
 
-func (t *TransactionService) QuoteTx(ctx context.Context, user auth.User, quote QuoteTransactionReq) (*transaction.ForeeTx, transport.ForeeError) {
-	rate, err := t.rateRepo.GetUniqueRateById(ctx, transaction.GenerateRateId(quote.SrcCurrency, quote.DestCurrency))
+func (t *TransactionService) QuoteTx(ctx context.Context, user auth.User, req QuoteTransactionReq) (*QuoteTransactionDTO, transport.ForeeError) {
+	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, 5*time.Minute)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if rate == nil {
-		return nil, transport.NewInteralServerError("user `%v` try to create transaction with unkown rate `%s`", user.ID, transaction.GenerateRateId(quote.SrcCurrency, quote.DestCurrency))
+		return nil, transport.NewInteralServerError("user `%v` try to create transaction with unkown rate `%s`", user.ID, transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency))
 	}
 
 	//Reward
 	var reward *transaction.Reward
-	if len(quote.RewardIds) == 1 {
-		rewardId := quote.RewardIds[1]
+	if len(req.RewardIds) == 1 {
+		rewardId := req.RewardIds[1]
 		r, err := t.rewardRepo.GetUniqueRewardById(ctx, rewardId)
 		if err != nil {
 			return nil, transport.WrapInteralServerError(err)
@@ -225,19 +229,19 @@ func (t *TransactionService) QuoteTx(ctx context.Context, user auth.User, quote 
 		if r.Status != transaction.RewardStatusActive {
 			return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` that is currently in status `%v`", user.ID, rewardId, r.Status)
 		}
-		if r.Amt.Currency != quote.SrcCurrency {
-			return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` that apply currency `%v` to currency `%v`", user.ID, rewardId, r.Amt.Currency, quote.SrcCurrency)
+		if r.Amt.Currency != req.SrcCurrency {
+			return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` that apply currency `%v` to currency `%v`", user.ID, rewardId, r.Amt.Currency, req.SrcCurrency)
 		}
-		// if (quote.SrcAmount - float64(r.Amt.Amount)) < 10 {
-		// 	return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` with srcAmount `%v`", user.ID, rewardId, quote.SrcCurrency))
+		// if (req.SrcAmount - float64(r.Amt.Amount)) < 10 {
+		// 	return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` with srcAmount `%v`", user.ID, rewardId, req.SrcCurrency))
 		// }
 		reward = r
 	}
 
 	//TODO: PromoCode
 	//Don't return err. Just ignore the promocode reward.
-	// 	if quote.PromoCode != "" {
-	// 		promoCode, err := t.promoCodeRepo.GetUniquePromoCodeByCode(ctx, quote.PromoCode)
+	// 	if req.PromoCode != "" {
+	// 		promoCode, err := t.promoCodeRepo.GetUniquePromoCodeByCode(ctx, req.PromoCode)
 	// 		if err != nil {
 	// 			//TODO: log
 	// 			goto existpromo
@@ -250,11 +254,11 @@ func (t *TransactionService) QuoteTx(ctx context.Context, user auth.User, quote 
 	// 			//TODO: log
 	// 			goto existpromo
 	// 		}
-	// 		if quote.SrcCurrency != promoCode.MinAmt.Currency {
+	// 		if req.SrcCurrency != promoCode.MinAmt.Currency {
 	// 			//TODO: log
 	// 			goto existpromo
 	// 		}
-	// 		if quote.SrcAmount < float64(promoCode.MinAmt.Amount) {
+	// 		if req.SrcAmount < float64(promoCode.MinAmt.Amount) {
 	// 			//TODO: log
 	// 			goto existpromo
 	// 		}
@@ -271,7 +275,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, user auth.User, quote 
 		return nil, transport.NewInteralServerError("fee `%v` not found", FeeName)
 	}
 
-	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(quote.SrcAmount), Currency: quote.SrcCurrency})
+	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -291,14 +295,14 @@ func (t *TransactionService) QuoteTx(ctx context.Context, user auth.User, quote 
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	//Total = quote.srcAmount + fees - rewards
+	//Total = req.srcAmount + fees - rewards
 	totalAmt := types.AmountData{
-		Amount:   types.Amount(quote.SrcAmount),
-		Currency: quote.SrcCurrency,
+		Amount:   types.Amount(req.SrcAmount),
+		Currency: req.SrcCurrency,
 	}
 
 	if totalAmt.Amount+dailyLimit.UsedAmt.Amount > txLimit.MaxAmt.Amount {
-		return nil, transport.NewFormError("Invalid quote transaction request", "srcAmount", fmt.Sprintf("available amount is %v", txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount))
+		return nil, transport.NewFormError("Invalid req transaction request", "srcAmount", fmt.Sprintf("available amount is %v", txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount))
 	}
 
 	if reward != nil {
@@ -306,7 +310,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, user auth.User, quote 
 	}
 
 	if totalAmt.Amount < txLimit.MinAmt.Amount {
-		return nil, transport.NewFormError("Invalid quote transaction request", "srcAmount", fmt.Sprintf("amount should at lease %v %s without rewards", txLimit.MinAmt.Amount, txLimit.MinAmt.Currency))
+		return nil, transport.NewFormError("Invalid req transaction request", "srcAmount", fmt.Sprintf("amount should at lease %v %s without rewards", txLimit.MinAmt.Amount, txLimit.MinAmt.Currency))
 	}
 
 	if joint != nil {
@@ -316,18 +320,18 @@ func (t *TransactionService) QuoteTx(ctx context.Context, user auth.User, quote 
 	foreeTx := &transaction.ForeeTx{
 		Type:   transaction.TxTypeInteracToNBP,
 		Status: transaction.TxStatusInitial,
-		Rate:   types.Amount(rate.CalculateForwardAmount(quote.SrcAmount)),
+		Rate:   types.Amount(rate.CalculateForwardAmount(req.SrcAmount)),
 		SrcAmt: types.AmountData{
-			Amount:   types.Amount(quote.SrcAmount),
-			Currency: quote.SrcCurrency,
+			Amount:   types.Amount(req.SrcAmount),
+			Currency: req.SrcCurrency,
 		},
 		DestAmt: types.AmountData{
-			Amount:   types.Amount(rate.CalculateForwardAmount(quote.SrcAmount)),
-			Currency: quote.DestCurrency,
+			Amount:   types.Amount(rate.CalculateForwardAmount(req.SrcAmount)),
+			Currency: req.DestCurrency,
 		},
-		TransactionPurpose: quote.TransactionPurpose,
-		CinAccId:           quote.CinAccId,
-		CoutAccId:          quote.CoutAccId,
+		TransactionPurpose: req.TransactionPurpose,
+		CinAccId:           req.CinAccId,
+		CoutAccId:          req.CoutAccId,
 	}
 
 	if joint != nil {
@@ -336,14 +340,28 @@ func (t *TransactionService) QuoteTx(ctx context.Context, user auth.User, quote 
 	}
 
 	if reward != nil {
-		foreeTx.RewardIds = quote.RewardIds
+		foreeTx.RewardIds = req.RewardIds
 		foreeTx.Rewards = []*transaction.Reward{reward}
 		foreeTx.TotalRewardAmt = reward.Amt
 	}
 
 	foreeTx.TotalAmt = totalAmt
 
-	return foreeTx, nil
+	txSum := &TxSummaryDetailDTO{
+		Summary:       "Free qupte",
+		SrcAmount:     types.Amount(req.SrcAmount),
+		SrcCurrency:   req.SrcCurrency,
+		DestAmount:    types.Amount(rate.CalculateForwardAmount(req.SrcAmount)),
+		DestCurrency:  req.DestCurrency,
+		FeeAmount:     joint.Amt.Amount,
+		FeeCurrency:   joint.Amt.Currency,
+		TotalAmount:   totalAmt.Amount,
+		TotalCurrency: totalAmt.Currency,
+	}
+	return &QuoteTransactionDTO{
+		QuoteId: "TODO",
+		TxSum:   *txSum,
+	}, nil
 }
 
 func (t *TransactionService) rollBackTx(tx transaction.ForeeTx) {

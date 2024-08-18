@@ -135,14 +135,14 @@ func (q *QueryContactReq) Validate() *transport.BadRequestError {
 // ----------   Response --------------
 
 type ContactAccountSummaryDTO struct {
-	ID              int64                      `json:"id"`
-	Status          account.AccountStatus      `json:"status"`
-	FirstName       string                     `json:"firstName"`
-	MiddleName      string                     `json:"middleName"`
-	LastName        string                     `json:"lastName"`
-	TransferMethod  account.ContactAccountType `json:"transferMethod"`
-	BankName        string                     `json:"bankName"`
-	AccountNoOrIBAN string                     `json:"accountNoOrIBAN"`
+	ID              int64                      `json:"id,omitempty"`
+	Status          account.AccountStatus      `json:"status,omitempty"`
+	FirstName       string                     `json:"firstName,omitempty"`
+	MiddleName      string                     `json:"middleName,omitempty"`
+	LastName        string                     `json:"lastName,omitempty"`
+	TransferMethod  account.ContactAccountType `json:"transferMethod,omitempty"`
+	BankName        string                     `json:"bankName,omitempty"`
+	AccountNoOrIBAN string                     `json:"accountNoOrIBAN,omitempty"`
 }
 
 func NewContactAccountSummaryDTO(account *account.ContactAccount) *ContactAccountSummaryDTO {
@@ -159,22 +159,22 @@ func NewContactAccountSummaryDTO(account *account.ContactAccount) *ContactAccoun
 }
 
 type ContactAccountDetailDTO struct {
-	ID                    int64                      `json:"id"`
-	Status                account.AccountStatus      `json:"status"`
-	FirstName             string                     `json:"firstName"`
-	MiddleName            string                     `json:"middleName"`
-	LastName              string                     `json:"lastName"`
-	Address1              string                     `json:"address1"`
-	Address2              string                     `json:"address2"`
-	City                  string                     `json:"city"`
-	Province              string                     `json:"province"`
-	Country               string                     `json:"country"`
-	PostalCode            string                     `json:"postalCode"`
-	PhoneNumber           string                     `json:"phoneNumber"`
-	RelationshipToContact string                     `json:"relationshipToContact"`
-	TransferMethod        account.ContactAccountType `json:"transferMethod"`
-	BankName              string                     `json:"bankName"`
-	AccountNoOrIBAN       string                     `json:"accountNoOrIBAN"`
+	ID                    int64                      `json:"id,omitempty"`
+	Status                account.AccountStatus      `json:"status,omitempty"`
+	FirstName             string                     `json:"firstName,omitempty"`
+	MiddleName            string                     `json:"middleName,omitempty"`
+	LastName              string                     `json:"lastName,omitempty"`
+	Address1              string                     `json:"address1,omitempty"`
+	Address2              string                     `json:"address2,omitempty"`
+	City                  string                     `json:"city,omitempty"`
+	Province              string                     `json:"province,omitempty"`
+	Country               string                     `json:"country,omitempty"`
+	PostalCode            string                     `json:"postalCode,omitempty"`
+	PhoneNumber           string                     `json:"phoneNumber,omitempty"`
+	RelationshipToContact string                     `json:"relationshipToContact,omitempty"`
+	TransferMethod        account.ContactAccountType `json:"transferMethod,omitempty"`
+	BankName              string                     `json:"bankName,omitempty"`
+	AccountNoOrIBAN       string                     `json:"accountNoOrIBAN,omitempty"`
 }
 
 func NewContactAccountDetailDTO(account *account.ContactAccount) *ContactAccountDetailDTO {
@@ -199,12 +199,12 @@ func NewContactAccountDetailDTO(account *account.ContactAccount) *ContactAccount
 }
 
 type InteracAccountSummaryDTO struct {
-	ID         int64                 `json:"id"`
-	Status     account.AccountStatus `json:"status"`
-	FirstName  string                `json:"firstName"`
-	MiddleName string                `json:"middleName"`
-	LastName   string                `json:"lastName"`
-	Email      string                `json:"email"`
+	ID         int64                 `json:"id,omitempty"`
+	Status     account.AccountStatus `json:"status,omitempty"`
+	FirstName  string                `json:"firstName,omitempty"`
+	MiddleName string                `json:"middleName,omitempty"`
+	LastName   string                `json:"lastName,omitempty"`
+	Email      string                `json:"email,omitempty"`
 }
 
 func NewInteracAccountSummaryDTO(account *account.InteracAccount) *InteracAccountSummaryDTO {
