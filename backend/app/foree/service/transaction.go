@@ -58,6 +58,7 @@ var txLimits = map[string]transaction.TxLimit{
 
 type TransactionService struct {
 	authService       *AuthService
+	foreeTxRepo       *transaction.ForeeTxRepo
 	txSummaryRepo     *transaction.TxSummaryRepo
 	txQuoteRepo       *transaction.TxQuoteRepo
 	rateRepo          *transaction.RateRepo
@@ -318,7 +319,6 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", user.Group)
 	}
 
-	//TODO: check srcAmount/limit.
 	dailyLimit, err := t.getDailyTxLimit(ctx, user)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
@@ -427,6 +427,10 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}, nil
 }
 
+// TODO: Upgrade to use transaction.
+// 1. Recheck daily limit
+// 2. create all transactions
+// 3. send to process
 func (t *TransactionService) createTx(ctx context.Context, req CreateTransactionReq) (*QuoteTransactionDTO, transport.ForeeError) {
 	session, serr := t.authService.VerifySession(ctx, req.SessionId)
 	if serr != nil {
@@ -443,6 +447,46 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	if foreeTx == nil {
 		return nil, transport.NewInteralServerError("user `%v` do not find foreeTx in quote `%v`", user.ID, req.QuoteId)
 	}
+
+	foreeTx.OwnerId = user.ID
+	// Recheck rewards and limit.
+	if len(foreeTx.Rewards) == 1 {
+		reward := foreeTx.Rewards[1]
+		reward, err := t.rewardRepo.GetUniqueRewardById(ctx, reward.ID)
+		if err != nil {
+			return nil, transport.WrapInteralServerError(err)
+		}
+		if reward.Status != transaction.RewardStatusActive {
+			return nil, transport.NewInteralServerError("user `%v` try to create a transaction with reward `%v` in status `%s`", user.ID, reward.ID, reward.Status)
+		}
+	}
+
+	txLimit, ok := txLimits[user.Group]
+	if !ok {
+		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", user.Group)
+	}
+
+	dailyLimit, err := t.getDailyTxLimit(ctx, *user)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	if foreeTx.SrcAmt.Amount+dailyLimit.UsedAmt.Amount > txLimit.MaxAmt.Amount {
+		return nil, transport.NewInteralServerError("user `%v` try to create a transaction with `%v` but the remaining limit is `%v`", user.ID, foreeTx.SrcAmt.Amount, txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount)
+	}
+
+	foreeTxID, err := t.foreeTxRepo.InsertForeeTx(ctx, *foreeTx)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+	//fees
+	//Summary
+	//limit
+
+	//CI
+	//IDM
+	//COUT
+	//Success to return?
 
 	return nil, nil
 }
