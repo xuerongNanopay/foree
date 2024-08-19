@@ -480,11 +480,18 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
+
+	if _, err := t.addDailyTxLimit(ctx, *user, foreeTx.SrcAmt); err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+
 	summary := foreeTx.Summary
 	summary.ParentTxId = foreeTxID
 	summaryId, err := t.txSummaryRepo.InsertTxSummary(ctx, *summary)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
 	summary.ID = summaryId
-	//TODO: update limit
 	//fees
 	//Summary
 	//limit
@@ -525,11 +532,8 @@ func (t *TransactionService) addDailyTxLimit(ctx context.Context, user auth.User
 	if err := t.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
 		return nil, err
 	}
-	newDailyLimit, err := t.getDailyTxLimit(ctx, user)
-	if err != nil {
-		return nil, err
-	}
-	return newDailyLimit, nil
+
+	return dailyLimit, nil
 }
 
 func (t *TransactionService) minusDailyTxLimit(ctx context.Context, user auth.User, amt types.AmountData) (*transaction.DailyTxLimit, error) {
@@ -543,11 +547,8 @@ func (t *TransactionService) minusDailyTxLimit(ctx context.Context, user auth.Us
 	if err := t.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
 		return nil, err
 	}
-	newDailyLimit, err := t.getDailyTxLimit(ctx, user)
-	if err != nil {
-		return nil, err
-	}
-	return newDailyLimit, nil
+
+	return dailyLimit, nil
 }
 
 // I don't case race condition here, cause create transaction will save it.
