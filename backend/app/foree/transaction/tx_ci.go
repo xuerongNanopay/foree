@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
+	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/types"
 )
 
@@ -66,17 +67,37 @@ type InteracCITxRepo struct {
 }
 
 func (repo *InteracCITxRepo) InsertInteracCITx(ctx context.Context, tx InteracCITx) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLInteracCITxInsert,
-		tx.Status,
-		tx.SrcInteracAccId,
-		tx.DestInteracAccId,
-		tx.APIReference,
-		tx.Amt.Amount,
-		tx.Amt.Currency,
-		tx.ParentTxId,
-		tx.OwnerId,
-	)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLInteracCITxInsert,
+			tx.Status,
+			tx.SrcInteracAccId,
+			tx.DestInteracAccId,
+			tx.APIReference,
+			tx.Amt.Amount,
+			tx.Amt.Currency,
+			tx.ParentTxId,
+			tx.OwnerId,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLInteracCITxInsert,
+			tx.Status,
+			tx.SrcInteracAccId,
+			tx.DestInteracAccId,
+			tx.APIReference,
+			tx.Amt.Amount,
+			tx.Amt.Currency,
+			tx.ParentTxId,
+			tx.OwnerId,
+		)
+	}
+
 	if err != nil {
 		return 0, err
 	}
@@ -88,7 +109,17 @@ func (repo *InteracCITxRepo) InsertInteracCITx(ctx context.Context, tx InteracCI
 }
 
 func (repo *InteracCITxRepo) UpdateInteracCITxById(ctx context.Context, tx InteracCITx) error {
-	_, err := repo.db.Exec(sQLInteracCITxUpdateById, tx.Status, tx.APIReference, tx.Url, tx.ID)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+
+	if ok {
+		_, err = dTx.Exec(sQLInteracCITxUpdateById, tx.Status, tx.APIReference, tx.Url, tx.ID)
+
+	} else {
+		_, err = repo.db.Exec(sQLInteracCITxUpdateById, tx.Status, tx.APIReference, tx.Url, tx.ID)
+
+	}
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
+	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/types"
 )
 
@@ -63,16 +64,35 @@ type NBPCOTxRepo struct {
 }
 
 func (repo *NBPCOTxRepo) InsertNBPCOTx(ctx context.Context, tx NBPCOTx) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLNBPCOTxInsert,
-		tx.Status,
-		tx.Amt.Amount,
-		tx.Amt.Currency,
-		tx.APIReference,
-		tx.DestContactAccId,
-		tx.ParentTxId,
-		tx.OwnerId,
-	)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLNBPCOTxInsert,
+			tx.Status,
+			tx.Amt.Amount,
+			tx.Amt.Currency,
+			tx.APIReference,
+			tx.DestContactAccId,
+			tx.ParentTxId,
+			tx.OwnerId,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLNBPCOTxInsert,
+			tx.Status,
+			tx.Amt.Amount,
+			tx.Amt.Currency,
+			tx.APIReference,
+			tx.DestContactAccId,
+			tx.ParentTxId,
+			tx.OwnerId,
+		)
+	}
+
 	if err != nil {
 		return 0, err
 	}
@@ -84,7 +104,16 @@ func (repo *NBPCOTxRepo) InsertNBPCOTx(ctx context.Context, tx NBPCOTx) (int64, 
 }
 
 func (repo *NBPCOTxRepo) UpdateNBPCOTxById(ctx context.Context, tx NBPCOTx) error {
-	_, err := repo.db.Exec(sQLNBPCOTxUpdateById, tx.Status, tx.ID)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+
+	if ok {
+		_, err = dTx.Exec(sQLNBPCOTxUpdateById, tx.Status, tx.ID)
+	} else {
+		_, err = repo.db.Exec(sQLNBPCOTxUpdateById, tx.Status, tx.ID)
+	}
+
 	if err != nil {
 		return err
 	}

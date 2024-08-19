@@ -137,7 +137,7 @@ func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, e
 }
 
 func (p *TxProcessor) recordTxHistory(h transaction.TxHistory) {
-	if _, err := p.txHistoryRepo.InserTxHistory(h); err != nil {
+	if _, err := p.txHistoryRepo.InserTxHistory(context.Background(), h); err != nil {
 		fmt.Println(err.Error())
 	}
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"xue.io/go-pay/app/foree/constant"
 )
 
 const (
@@ -90,14 +92,31 @@ type IdmTxRepo struct {
 }
 
 func (repo *IdmTxRepo) InsertIDMTx(ctx context.Context, tx IDMTx) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLIDMTxInsert,
-		tx.Status,
-		tx.Ip,
-		tx.UserAgent,
-		tx.ParentTxId,
-		tx.OwnerId,
-	)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLIDMTxInsert,
+			tx.Status,
+			tx.Ip,
+			tx.UserAgent,
+			tx.ParentTxId,
+			tx.OwnerId,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLIDMTxInsert,
+			tx.Status,
+			tx.Ip,
+			tx.UserAgent,
+			tx.ParentTxId,
+			tx.OwnerId,
+		)
+	}
+
 	if err != nil {
 		return 0, err
 	}
@@ -109,7 +128,17 @@ func (repo *IdmTxRepo) InsertIDMTx(ctx context.Context, tx IDMTx) (int64, error)
 }
 
 func (repo *IdmTxRepo) UpdateIDMTxById(ctx context.Context, tx IDMTx) error {
-	_, err := repo.db.Exec(sQLIDMTxUpdateById, tx.Status, tx.APIReference, tx.IDMResult, tx.ID)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+
+	if ok {
+		_, err = dTx.Exec(sQLIDMTxUpdateById, tx.Status, tx.APIReference, tx.IDMResult, tx.ID)
+
+	} else {
+		_, err = repo.db.Exec(sQLIDMTxUpdateById, tx.Status, tx.APIReference, tx.IDMResult, tx.ID)
+	}
+
 	if err != nil {
 		return err
 	}

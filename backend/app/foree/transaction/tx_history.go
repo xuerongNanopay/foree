@@ -1,8 +1,11 @@
 package transaction
 
 import (
+	"context"
 	"database/sql"
 	"time"
+
+	"xue.io/go-pay/app/foree/constant"
 )
 
 const (
@@ -50,15 +53,32 @@ type TxHistoryRepo struct {
 	db *sql.DB
 }
 
-func (repo *TxHistoryRepo) InserTxHistory(h TxHistory) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLTxHistoryInsert,
-		h.Stage,
-		h.Stage,
-		h.ExtraInfo,
-		h.ParentTxId,
-		h.OwnerId,
-	)
+func (repo *TxHistoryRepo) InserTxHistory(ctx context.Context, h TxHistory) (int64, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLTxHistoryInsert,
+			h.Stage,
+			h.Stage,
+			h.ExtraInfo,
+			h.ParentTxId,
+			h.OwnerId,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLTxHistoryInsert,
+			h.Stage,
+			h.Stage,
+			h.ExtraInfo,
+			h.ParentTxId,
+			h.OwnerId,
+		)
+	}
+
 	if err != nil {
 		return 0, err
 	}
