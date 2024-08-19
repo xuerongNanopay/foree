@@ -232,7 +232,13 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	// Get Cout account.
-	coutAcc, err := t.contactRepo.GetUniqueActiveContactAccountByOwnerAndId()
+	coutAcc, err := t.contactRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, user.ID, req.CoutAccId)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+	if coutAcc == nil {
+		return nil, transport.NewInteralServerError("user `%v` try to use unkown cout account `%v`", user.ID, req.CoutAccId)
+	}
 
 	// Get reward
 	var reward *transaction.Reward
@@ -354,6 +360,8 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		TransactionPurpose: req.TransactionPurpose,
 		CinAccId:           req.CinAccId,
 		CoutAccId:          req.CoutAccId,
+		InteracAcc:         ciAcc,
+		ContactAcc:         coutAcc,
 	}
 
 	if joint != nil {
@@ -369,20 +377,42 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 
 	foreeTx.TotalAmt = totalAmt
 
-	txSum := &TxSummaryDetailDTO{
-		Summary:       "Free qupte",
-		SrcAmount:     types.Amount(req.SrcAmount),
-		SrcCurrency:   req.SrcCurrency,
-		DestAmount:    types.Amount(rate.CalculateForwardAmount(req.SrcAmount)),
-		DestCurrency:  req.DestCurrency,
-		FeeAmount:     joint.Amt.Amount,
-		FeeCurrency:   joint.Amt.Currency,
-		TotalAmount:   totalAmt.Amount,
-		TotalCurrency: totalAmt.Currency,
+	txSummary := transaction.TxSummary{
+		Summary: fmt.Sprintf(
+			"$%.2f%s -> %.2f%s | %s -> %s",
+			foreeTx.SrcAmt.Amount, foreeTx.SrcAmt.Currency,
+			foreeTx.DestAmt.Amount, foreeTx.DestAmt.Currency,
+			foreeTx.InteracAcc.GetLegalName(),
+			foreeTx.ContactAcc.GetLegalName(),
+		),
+		Type:           string(coutAcc.Type),
+		Status:         string(transaction.TxStatusInitial),
+		Rate:           rate.ToSummary(),
+		SrcAccSummary:  foreeTx.InteracAcc.GetLegalName(),
+		SrcAmount:      foreeTx.SrcAmt.Amount,
+		SrcCurrency:    foreeTx.SrcAmt.Currency,
+		DestAccSummary: foreeTx.ContactAcc.GetLegalName(),
+		DestAmount:     foreeTx.DestAmt.Amount,
+		DestCurrency:   foreeTx.DestAmt.Currency,
+		TotalAmount:    foreeTx.TotalAmt.Amount,
+		TotalCurrency:  foreeTx.TotalAmt.Currency,
 	}
+
+	if joint != nil {
+		txSummary.FeeAmount = foreeTx.TotalFeeAmt.Amount
+		txSummary.FeeCurrency = foreeTx.TotalFeeAmt.Currency
+	}
+
+	if reward != nil {
+		txSummary.RewardAmount = foreeTx.TotalRewardAmt.Amount
+		txSummary.RewardCurrency = foreeTx.TotalRewardAmt.Currency
+	}
+
+	foreeTx.Summary = &txSummary
+
 	return &QuoteTransactionDTO{
 		QuoteId: "TODO",
-		TxSum:   *txSum,
+		TxSum:   *NewTxSummaryDetailDTO(txSummary),
 	}, nil
 }
 

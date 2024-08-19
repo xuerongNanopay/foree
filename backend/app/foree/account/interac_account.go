@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -71,6 +72,13 @@ type InteracAccount struct {
 	LatestActivityAt time.Time     `json:"latestActivityAt"`
 	CreateAt         time.Time     `json:"createAt"`
 	UpdateAt         time.Time     `json:"updateAt"`
+}
+
+func (c *InteracAccount) GetLegalName() string {
+	if c.MiddleName == "" {
+		return fmt.Sprintf("%s %s", c.FirstName, c.LastName)
+	}
+	return fmt.Sprintf("%s %s %s", c.FirstName, c.MiddleName, c.LastName)
 }
 
 func NewInteracAccountRepo(db *sql.DB) *InteracAccountRepo {

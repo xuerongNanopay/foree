@@ -103,6 +103,13 @@ type ContactAccount struct {
 	UpdateAt              time.Time          `json:"updateAt"`
 }
 
+func (c *ContactAccount) GetLegalName() string {
+	if c.MiddleName == "" {
+		return fmt.Sprintf("%s %s", c.FirstName, c.LastName)
+	}
+	return fmt.Sprintf("%s %s %s", c.FirstName, c.MiddleName, c.LastName)
+}
+
 func (c *ContactAccount) HashMyself() {
 	s := fmt.Sprintf(
 		"%s%s%s%s%s%s%s%s%s%s%s",
