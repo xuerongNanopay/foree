@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/types"
 )
 
@@ -144,13 +145,28 @@ type PromoCodeJointRepo struct {
 }
 
 func (repo *PromoCodeJointRepo) InsertPromoCodeJoin(ctx context.Context, p PromoCodeJoint) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLPromoCodeJointInsert,
-		p.Status,
-		p.PromoCode,
-		p.OwnerId,
-		p.TransactionId,
-	)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLPromoCodeJointInsert,
+			p.Status,
+			p.PromoCode,
+			p.OwnerId,
+			p.TransactionId,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLPromoCodeJointInsert,
+			p.Status,
+			p.PromoCode,
+			p.OwnerId,
+			p.TransactionId,
+		)
+	}
 	if err != nil {
 		return 0, err
 	}
@@ -162,7 +178,16 @@ func (repo *PromoCodeJointRepo) InsertPromoCodeJoin(ctx context.Context, p Promo
 }
 
 func (repo *PromoCodeJointRepo) UpdatePromoCodeJoinTxByTransactionId(ctx context.Context, p PromoCodeJoint) error {
-	_, err := repo.db.Exec(sQLPromoCodeJointUpdateByTransactionId, p.Status, p.TransactionId)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	if ok {
+		_, err = dTx.Exec(sQLPromoCodeJointUpdateByTransactionId, p.Status, p.TransactionId)
+
+	} else {
+		_, err = repo.db.Exec(sQLPromoCodeJointUpdateByTransactionId, p.Status, p.TransactionId)
+	}
+
 	if err != nil {
 		return err
 	}

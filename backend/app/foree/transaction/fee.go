@@ -7,6 +7,7 @@ import (
 	"math"
 	"time"
 
+	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/types"
 )
 
@@ -208,16 +209,33 @@ func (repo *FeeRepo) GetAllFee() ([]*Fee, error) {
 	return fees, nil
 }
 
-func (repo *FeeJointRepo) InsertFeeJoint(feeJoint FeeJoint) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLFeeJointInsert,
-		feeJoint.FeeName,
-		feeJoint.Description,
-		feeJoint.Amt.Amount,
-		feeJoint.Amt.Currency,
-		feeJoint.TransactionId,
-		feeJoint.OwnerId,
-	)
+func (repo *FeeJointRepo) InsertFeeJoint(ctx context.Context, feeJoint FeeJoint) (int64, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLFeeJointInsert,
+			feeJoint.FeeName,
+			feeJoint.Description,
+			feeJoint.Amt.Amount,
+			feeJoint.Amt.Currency,
+			feeJoint.TransactionId,
+			feeJoint.OwnerId,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLFeeJointInsert,
+			feeJoint.FeeName,
+			feeJoint.Description,
+			feeJoint.Amt.Amount,
+			feeJoint.Amt.Currency,
+			feeJoint.TransactionId,
+			feeJoint.OwnerId,
+		)
+	}
 	if err != nil {
 		return 0, err
 	}
