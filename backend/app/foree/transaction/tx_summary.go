@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/types"
 )
 
@@ -139,32 +140,66 @@ type TxSummaryRepo struct {
 }
 
 func (repo *TxSummaryRepo) InsertTxSummary(ctx context.Context, tx TxSummary) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLTxSummaryInsert,
-		tx.Summary,
-		tx.Type,
-		tx.Status,
-		tx.Rate,
-		tx.PaymentUrl,
-		tx.SrcAccId,
-		tx.DestAccId,
-		tx.SrcAccSummary,
-		tx.SrcAmount,
-		tx.SrcCurrency,
-		tx.DestAccSummary,
-		tx.DestAmount,
-		tx.DestCurrency,
-		tx.TotalAmount,
-		tx.TotalCurrency,
-		tx.FeeAmount,
-		tx.FeeCurrency,
-		tx.RewardAmount,
-		tx.RewardCurrency,
-		tx.NBPReference,
-		tx.IsCancelAllowed,
-		tx.ParentTxId,
-		tx.OwnerId,
-	)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+	if ok {
+		result, err = dTx.Exec(
+			sQLTxSummaryInsert,
+			tx.Summary,
+			tx.Type,
+			tx.Status,
+			tx.Rate,
+			tx.PaymentUrl,
+			tx.SrcAccId,
+			tx.DestAccId,
+			tx.SrcAccSummary,
+			tx.SrcAmount,
+			tx.SrcCurrency,
+			tx.DestAccSummary,
+			tx.DestAmount,
+			tx.DestCurrency,
+			tx.TotalAmount,
+			tx.TotalCurrency,
+			tx.FeeAmount,
+			tx.FeeCurrency,
+			tx.RewardAmount,
+			tx.RewardCurrency,
+			tx.NBPReference,
+			tx.IsCancelAllowed,
+			tx.ParentTxId,
+			tx.OwnerId,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLTxSummaryInsert,
+			tx.Summary,
+			tx.Type,
+			tx.Status,
+			tx.Rate,
+			tx.PaymentUrl,
+			tx.SrcAccId,
+			tx.DestAccId,
+			tx.SrcAccSummary,
+			tx.SrcAmount,
+			tx.SrcCurrency,
+			tx.DestAccSummary,
+			tx.DestAmount,
+			tx.DestCurrency,
+			tx.TotalAmount,
+			tx.TotalCurrency,
+			tx.FeeAmount,
+			tx.FeeCurrency,
+			tx.RewardAmount,
+			tx.RewardCurrency,
+			tx.NBPReference,
+			tx.IsCancelAllowed,
+			tx.ParentTxId,
+			tx.OwnerId,
+		)
+	}
+
 	if err != nil {
 		return 0, err
 	}
@@ -176,7 +211,15 @@ func (repo *TxSummaryRepo) InsertTxSummary(ctx context.Context, tx TxSummary) (i
 }
 
 func (repo *TxSummaryRepo) UpdateTxSummaryById(ctx context.Context, tx TxSummary) error {
-	_, err := repo.db.Exec(sQLTxSummaryUpdateById, tx.Status, tx.IsCancelAllowed, tx.PaymentUrl, tx.ID)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	if ok {
+		_, err = dTx.Exec(sQLTxSummaryUpdateById, tx.Status, tx.IsCancelAllowed, tx.PaymentUrl, tx.ID)
+	} else {
+		_, err = repo.db.Exec(sQLTxSummaryUpdateById, tx.Status, tx.IsCancelAllowed, tx.PaymentUrl, tx.ID)
+	}
+
 	if err != nil {
 		return err
 	}

@@ -468,6 +468,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 		if reward.Status != transaction.RewardStatusActive {
 			return nil, transport.NewInteralServerError("user `%v` try to create a transaction with reward `%v` in status `%s`", user.ID, reward.ID, reward.Status)
 		}
+		//TODO: update reward
 	}
 
 	// Recheck limit
@@ -502,6 +503,8 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 		return nil, transport.WrapInteralServerError(err)
 	}
 	summary.ID = summaryId
+
+	//TODO: fee join.
 
 	//TODO: send to processor.
 	//CI
