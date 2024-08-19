@@ -398,6 +398,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		DestCurrency:   foreeTx.DestAmt.Currency,
 		TotalAmount:    foreeTx.TotalAmt.Amount,
 		TotalCurrency:  foreeTx.TotalAmt.Currency,
+		OwnerId:        user.ID,
 	}
 
 	if joint != nil {
@@ -431,7 +432,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 // 1. Recheck daily limit
 // 2. create all transactions
 // 3. send to process
-func (t *TransactionService) createTx(ctx context.Context, req CreateTransactionReq) (*QuoteTransactionDTO, transport.ForeeError) {
+func (t *TransactionService) createTx(ctx context.Context, req CreateTransactionReq) (*TxSummaryDetailDTO, transport.ForeeError) {
 	session, serr := t.authService.VerifySession(ctx, req.SessionId)
 	if serr != nil {
 		return nil, serr
@@ -449,7 +450,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	}
 
 	foreeTx.OwnerId = user.ID
-	// Recheck rewards and limit.
+	// Recheck rewards and limit.(Need? see performace first)
 	if len(foreeTx.Rewards) == 1 {
 		reward := foreeTx.Rewards[1]
 		reward, err := t.rewardRepo.GetUniqueRewardById(ctx, reward.ID)
@@ -479,6 +480,11 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
+	summary := foreeTx.Summary
+	summary.ParentTxId = foreeTxID
+	summaryId, err := t.txSummaryRepo.InsertTxSummary(ctx, *summary)
+	summary.ID = summaryId
+	//TODO: update limit
 	//fees
 	//Summary
 	//limit
@@ -580,10 +586,6 @@ func (t *TransactionService) getDailyTxLimit(ctx context.Context, user auth.User
 		dailyLimit = dl
 	}
 	return dailyLimit, nil
-}
-
-func (t *TransactionService) ConfirmQuote(ctx context.Context, req ConfirmQuoteReq) (*TxSummaryDetailDTO, transport.ForeeError) {
-	return nil, nil
 }
 
 func (t *TransactionService) GetTransaction(ctx context.Context, req GetTransactionReq) (*TxSummaryDetailDTO, transport.ForeeError) {

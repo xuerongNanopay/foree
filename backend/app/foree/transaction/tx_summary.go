@@ -11,13 +11,13 @@ import (
 type TxSummaryStatus string
 
 const (
-	TxSummaryStatusActionRequire TxSummaryStatus = "Action Require"
-	TxSummaryStatusAwaitPayment  TxSummaryStatus = "Await Payment"
-	TxSummaryStatusInProgress    TxSummaryStatus = "In Progress"
-	TxSummaryStatusCompleted     TxSummaryStatus = "Completed"
-	TxSummaryStatusCancelled     TxSummaryStatus = "Cancelled"
-	TxSummaryStatusRefunding     TxSummaryStatus = "Refunding"
-	TxSummaryStatusRefunded      TxSummaryStatus = "Refunded"
+	TxSummaryStatusInitial      TxSummaryStatus = "Initial"
+	TxSummaryStatusAwaitPayment TxSummaryStatus = "Await Payment"
+	TxSummaryStatusInProgress   TxSummaryStatus = "In Progress"
+	TxSummaryStatusCompleted    TxSummaryStatus = "Completed"
+	TxSummaryStatusCancelled    TxSummaryStatus = "Cancelled"
+	TxSummaryStatusRefunding    TxSummaryStatus = "Refunding"
+	TxSummaryStatusRefunded     TxSummaryStatus = "Refunded"
 )
 
 const (
@@ -36,13 +36,13 @@ const (
     `
 	sQLTxSummaryUpdateById = `
         UPDATE tx_summary SET 
-            status = ?, is_cancel_allowed = ? 
+            status = ?, is_cancel_allowed = ?, payment_url = ?
         WHERE id = ?
     `
 	sQLTxSummaryGetUniqueByOwnerAndId = `
         SELECT 
             t.id, t.summary, t.type, t.status, t.rate,
-			t.src_acc_id, t.dest_acc_id,
+			t.payment_url, t.src_acc_id, t.dest_acc_id,
             t.src_acc_summary, t.src_amount, t.src_currency, 
             t.dest_acc_summary, t.dest_amount, t.dest_currency,
             t.total_amount, t.total_currency,
@@ -56,7 +56,7 @@ const (
 	sQLTxSummaryGetUniqueByParentTxId = `
         SELECT 
             t.id, t.summary, t.type, t.status, t.rate,
-			t.src_acc_id, t.dest_acc_id,
+			t.payment_url, t.src_acc_id, t.dest_acc_id,
             t.src_acc_summary, t.src_amount, t.src_currency, 
             t.dest_acc_summary, t.dest_amount, t.dest_currency,
             t.total_amount, t.total_currency,
@@ -70,7 +70,7 @@ const (
 	sQLTxSummaryGetAllByOwnerId = `
 	    SELECT
 	        t.id, t.summary, t.type, t.status, t.rate,
-			t.src_acc_id, t.dest_acc_id,
+			t.payment_url, t.src_acc_id, t.dest_acc_id,
 	        t.src_acc_summary, t.src_amount, t.src_currency,
 	        t.dest_acc_summary, t.dest_amount, t.dest_currency,
 	        t.total_amount, t.total_currency,
@@ -86,7 +86,7 @@ const (
 	sQLTxSummaryQueryByOwnerId = `
 	    SELECT
 	        t.id, t.summary, t.type, t.status, t.rate,
-			t.src_acc_id, t.dest_acc_id,
+			t.payment_url, t.src_acc_id, t.dest_acc_id,
 	        t.src_acc_summary, t.src_amount, t.src_currency,
 	        t.dest_acc_summary, t.dest_amount, t.dest_currency,
 	        t.total_amount, t.total_currency,
@@ -107,6 +107,7 @@ type TxSummary struct {
 	Type            string       `json:"type"`
 	Status          string       `json:"status"`
 	Rate            string       `json:"rate"`
+	PaymentUrl      string       `json:"paymentUrl"`
 	SrcAccId        int64        `json:"srcAccId"`
 	DestAccId       int64        `json:"destAccId"`
 	SrcAccSummary   string       `json:"srcAccSummary"`
@@ -144,6 +145,7 @@ func (repo *TxSummaryRepo) InsertTxSummary(ctx context.Context, tx TxSummary) (i
 		tx.Type,
 		tx.Status,
 		tx.Rate,
+		tx.PaymentUrl,
 		tx.SrcAccId,
 		tx.DestAccId,
 		tx.SrcAccSummary,
@@ -174,7 +176,7 @@ func (repo *TxSummaryRepo) InsertTxSummary(ctx context.Context, tx TxSummary) (i
 }
 
 func (repo *TxSummaryRepo) UpdateTxSummaryById(ctx context.Context, tx TxSummary) error {
-	_, err := repo.db.Exec(sQLTxSummaryUpdateById, tx.Status, tx.IsCancelAllowed, tx.ID)
+	_, err := repo.db.Exec(sQLTxSummaryUpdateById, tx.Status, tx.IsCancelAllowed, tx.PaymentUrl, tx.ID)
 	if err != nil {
 		return err
 	}

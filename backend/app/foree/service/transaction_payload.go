@@ -230,6 +230,7 @@ type TxSummaryDetailDTO struct {
 	Type            string       `json:"type,omitempty"`
 	Status          string       `json:"status,omitempty"`
 	Rate            string       `json:"rate,omitempty"`
+	PaymentUrl      string       `json:"paymentUrl,omitempty"`
 	SrcAccSummary   string       `json:"srcAccSummary,omitempty"`
 	SrcAmount       types.Amount `json:"srcAmount,omitempty"`
 	SrcCurrency     string       `json:"srcCurrency,omitempty"`
@@ -253,6 +254,7 @@ func NewTxSummaryDetailDTO(tx transaction.TxSummary) *TxSummaryDetailDTO {
 		Type:            tx.Type,
 		Status:          tx.Status,
 		Rate:            tx.Rate,
+		PaymentUrl:      tx.PaymentUrl,
 		SrcAccSummary:   tx.SrcAccSummary,
 		SrcAmount:       tx.SrcAmount,
 		SrcCurrency:     tx.SrcCurrency,
