@@ -199,15 +199,15 @@ func NewRateDTO(r *transaction.Rate) *RateDTO {
 }
 
 type TxSummaryDTO struct {
-	ID              int64     `json:"id,omitempty"`
-	Summary         string    `json:"sumary,omitempty"`
-	Type            string    `json:"type,omitempty"`
-	Status          string    `json:"status,omitempty"`
-	Rate            string    `json:"rate,omitempty"`
-	TotalAmount     string    `json:"totalAmount,omitempty"`
-	TotalCurrency   string    `json:"totalCurrency,omitempty"`
-	IsCancelAllowed bool      `json:"isCancelAllowed,omitempty"`
-	CreateAt        time.Time `json:"createAt,omitempty"`
+	ID              int64                       `json:"id,omitempty"`
+	Summary         string                      `json:"sumary,omitempty"`
+	Type            string                      `json:"type,omitempty"`
+	Status          transaction.TxSummaryStatus `json:"status,omitempty"`
+	Rate            string                      `json:"rate,omitempty"`
+	TotalAmount     string                      `json:"totalAmount,omitempty"`
+	TotalCurrency   string                      `json:"totalCurrency,omitempty"`
+	IsCancelAllowed bool                        `json:"isCancelAllowed,omitempty"`
+	CreateAt        time.Time                   `json:"createAt,omitempty"`
 }
 
 func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
@@ -225,26 +225,26 @@ func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
 }
 
 type TxSummaryDetailDTO struct {
-	ID              int64        `json:"id,omitempty"`
-	Summary         string       `json:"sumary,omitempty"`
-	Type            string       `json:"type,omitempty"`
-	Status          string       `json:"status,omitempty"`
-	Rate            string       `json:"rate,omitempty"`
-	PaymentUrl      string       `json:"paymentUrl,omitempty"`
-	SrcAccSummary   string       `json:"srcAccSummary,omitempty"`
-	SrcAmount       types.Amount `json:"srcAmount,omitempty"`
-	SrcCurrency     string       `json:"srcCurrency,omitempty"`
-	DestAccSummary  string       `json:"destAccSummary,omitempty"`
-	DestAmount      types.Amount `json:"destAmount,omitempty"`
-	DestCurrency    string       `json:"destCurrency,omitempty"`
-	TotalAmount     types.Amount `json:"totalAmount,omitempty"`
-	TotalCurrency   string       `json:"totalCurrency,omitempty"`
-	FeeAmount       types.Amount `json:"feeAmount,omitempty"`
-	FeeCurrency     string       `json:"feeCurrency,omitempty"`
-	RewardAmount    types.Amount `json:"rewardAmount,omitempty"`
-	RewardCurrency  string       `json:"rewardCurrency,omitempty"`
-	IsCancelAllowed bool         `json:"isCancelAllowed,omitempty"`
-	CreateAt        time.Time    `json:"createAt,omitempty"`
+	ID              int64                       `json:"id,omitempty"`
+	Summary         string                      `json:"sumary,omitempty"`
+	Type            string                      `json:"type,omitempty"`
+	Status          transaction.TxSummaryStatus `json:"status,omitempty"`
+	Rate            string                      `json:"rate,omitempty"`
+	PaymentUrl      string                      `json:"paymentUrl,omitempty"`
+	SrcAccSummary   string                      `json:"srcAccSummary,omitempty"`
+	SrcAmount       types.Amount                `json:"srcAmount,omitempty"`
+	SrcCurrency     string                      `json:"srcCurrency,omitempty"`
+	DestAccSummary  string                      `json:"destAccSummary,omitempty"`
+	DestAmount      types.Amount                `json:"destAmount,omitempty"`
+	DestCurrency    string                      `json:"destCurrency,omitempty"`
+	TotalAmount     types.Amount                `json:"totalAmount,omitempty"`
+	TotalCurrency   string                      `json:"totalCurrency,omitempty"`
+	FeeAmount       types.Amount                `json:"feeAmount,omitempty"`
+	FeeCurrency     string                      `json:"feeCurrency,omitempty"`
+	RewardAmount    types.Amount                `json:"rewardAmount,omitempty"`
+	RewardCurrency  string                      `json:"rewardCurrency,omitempty"`
+	IsCancelAllowed bool                        `json:"isCancelAllowed,omitempty"`
+	CreateAt        time.Time                   `json:"createAt,omitempty"`
 }
 
 func NewTxSummaryDetailDTO(tx transaction.TxSummary) *TxSummaryDetailDTO {

@@ -102,32 +102,32 @@ const (
 )
 
 type TxSummary struct {
-	ID              int64        `json:"id"`
-	Summary         string       `json:"sumary"`
-	Type            string       `json:"type"`
-	Status          string       `json:"status"`
-	Rate            string       `json:"rate"`
-	PaymentUrl      string       `json:"paymentUrl"`
-	SrcAccId        int64        `json:"srcAccId"`
-	DestAccId       int64        `json:"destAccId"`
-	SrcAccSummary   string       `json:"srcAccSummary"`
-	SrcAmount       types.Amount `json:"srcAmount"`
-	SrcCurrency     string       `json:"srcCurrency"`
-	DestAccSummary  string       `json:"destAccSummary"`
-	DestAmount      types.Amount `json:"destAmount"`
-	DestCurrency    string       `json:"destCurrency"`
-	TotalAmount     types.Amount `json:"totalAmount"`
-	TotalCurrency   string       `json:"totalCurrency"`
-	FeeAmount       types.Amount `json:"feeAmount"`
-	FeeCurrency     string       `json:"feeCurrency"`
-	RewardAmount    types.Amount `json:"rewardAmount"`
-	RewardCurrency  string       `json:"rewardCurrency"`
-	NBPReference    string       `json:"nbpReference"`
-	IsCancelAllowed bool         `json:"isCancelAllowed"`
-	ParentTxId      int64        `json:"parentTxd"`
-	OwnerId         int64        `json:"owerId"`
-	CreateAt        time.Time    `json:"createAt"`
-	UpdateAt        time.Time    `json:"updateAt"`
+	ID              int64           `json:"id"`
+	Summary         string          `json:"sumary"`
+	Type            string          `json:"type"`
+	Status          TxSummaryStatus `json:"status"`
+	Rate            string          `json:"rate"`
+	PaymentUrl      string          `json:"paymentUrl"`
+	SrcAccId        int64           `json:"srcAccId"`
+	DestAccId       int64           `json:"destAccId"`
+	SrcAccSummary   string          `json:"srcAccSummary"`
+	SrcAmount       types.Amount    `json:"srcAmount"`
+	SrcCurrency     string          `json:"srcCurrency"`
+	DestAccSummary  string          `json:"destAccSummary"`
+	DestAmount      types.Amount    `json:"destAmount"`
+	DestCurrency    string          `json:"destCurrency"`
+	TotalAmount     types.Amount    `json:"totalAmount"`
+	TotalCurrency   string          `json:"totalCurrency"`
+	FeeAmount       types.Amount    `json:"feeAmount"`
+	FeeCurrency     string          `json:"feeCurrency"`
+	RewardAmount    types.Amount    `json:"rewardAmount"`
+	RewardCurrency  string          `json:"rewardCurrency"`
+	NBPReference    string          `json:"nbpReference"`
+	IsCancelAllowed bool            `json:"isCancelAllowed"`
+	ParentTxId      int64           `json:"parentTxd"`
+	OwnerId         int64           `json:"owerId"`
+	CreateAt        time.Time       `json:"createAt"`
+	UpdateAt        time.Time       `json:"updateAt"`
 }
 
 func NewTxSummaryRepo(db *sql.DB) *TxSummaryRepo {

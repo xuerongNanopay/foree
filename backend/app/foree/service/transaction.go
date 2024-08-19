@@ -388,7 +388,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 			foreeTx.ContactAcc.GetLegalName(),
 		),
 		Type:           string(coutAcc.Type),
-		Status:         string(transaction.TxStatusInitial),
+		Status:         transaction.TxSummaryStatusInitial,
 		Rate:           rate.ToSummary(),
 		SrcAccSummary:  foreeTx.InteracAcc.GetLegalName(),
 		SrcAmount:      foreeTx.SrcAmt.Amount,
@@ -429,6 +429,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 }
 
 // TODO: Upgrade to use transaction.
+// TODO: check performance of this function.
 // 1. Recheck daily limit
 // 2. create all transactions
 // 3. send to process
@@ -492,10 +493,8 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 		return nil, transport.WrapInteralServerError(err)
 	}
 	summary.ID = summaryId
-	//fees
-	//Summary
-	//limit
 
+	//TODO: send to processor.
 	//CI
 	//IDM
 	//COUT
