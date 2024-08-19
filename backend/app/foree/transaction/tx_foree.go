@@ -179,7 +179,15 @@ func (repo *ForeeTxRepo) InsertForeeTx(ctx context.Context, tx ForeeTx) (int64, 
 }
 
 func (repo *ForeeTxRepo) UpdateForeeTxById(ctx context.Context, tx ForeeTx) error {
-	_, err := repo.db.Exec(sQLForeeTxUpdateById, tx.Status, tx.CurStage, tx.CurStageStatus, tx.ID)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	if ok {
+		_, err = dTx.Exec(sQLForeeTxUpdateById, tx.Status, tx.CurStage, tx.CurStageStatus, tx.ID)
+	} else {
+		_, err = repo.db.Exec(sQLForeeTxUpdateById, tx.Status, tx.CurStage, tx.CurStageStatus, tx.ID)
+	}
+
 	if err != nil {
 		return err
 	}
