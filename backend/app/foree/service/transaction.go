@@ -432,6 +432,19 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	if serr != nil {
 		return nil, serr
 	}
+
+	quote := t.quoteRepo.GetUniqueById(ctx, req.QuoteId)
+	user := session.User
+	if quote.OwerId != session.User.ID {
+		return nil, transport.NewInteralServerError("user `%v` try to create a transaction with quote belong to `%v`", user.ID, quote.OwerId)
+	}
+
+	foreeTx := quote.Tx
+	if foreeTx == nil {
+		return nil, transport.NewInteralServerError("user `%v` do not find foreeTx in quote `%v`", user.ID, req.QuoteId)
+	}
+
+	return nil, nil
 }
 
 func (t *TransactionService) rollBackTx(tx transaction.ForeeTx) {
