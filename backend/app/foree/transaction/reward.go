@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/types"
 )
 
@@ -87,16 +88,34 @@ type RewardRepo struct {
 }
 
 func (repo *RewardRepo) InsertReward(ctx context.Context, reward Reward) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLRewardInsert,
-		reward.Type,
-		reward.Description,
-		reward.Amt.Amount,
-		reward.Amt.Currency,
-		reward.Status,
-		reward.OwnerId,
-		reward.AppliedTransactionId,
-	)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLRewardInsert,
+			reward.Type,
+			reward.Description,
+			reward.Amt.Amount,
+			reward.Amt.Currency,
+			reward.Status,
+			reward.OwnerId,
+			reward.AppliedTransactionId,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLRewardInsert,
+			reward.Type,
+			reward.Description,
+			reward.Amt.Amount,
+			reward.Amt.Currency,
+			reward.Status,
+			reward.OwnerId,
+			reward.AppliedTransactionId,
+		)
+	}
 	if err != nil {
 		return 0, err
 	}
@@ -108,7 +127,15 @@ func (repo *RewardRepo) InsertReward(ctx context.Context, reward Reward) (int64,
 }
 
 func (repo *RewardRepo) UpdateRewardTxById(ctx context.Context, reward Reward) error {
-	_, err := repo.db.Exec(sQLRewardUpdateById, reward.Status, reward.AppliedTransactionId, reward.ID)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	if ok {
+		_, err = dTx.Exec(sQLRewardUpdateById, reward.Status, reward.AppliedTransactionId, reward.ID)
+	} else {
+		_, err = repo.db.Exec(sQLRewardUpdateById, reward.Status, reward.AppliedTransactionId, reward.ID)
+	}
+
 	if err != nil {
 		return err
 	}

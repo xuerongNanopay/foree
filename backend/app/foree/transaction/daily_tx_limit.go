@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/types"
 	time_util "xue.io/go-pay/util/time"
 )
@@ -54,14 +55,31 @@ type DailyTxLimitRepo struct {
 }
 
 func (repo *DailyTxLimitRepo) InsertDailyTxLimit(ctx context.Context, tx DailyTxLimit) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLDailyTxLimitInsert,
-		tx.Reference,
-		tx.UsedAmt.Amount,
-		tx.UsedAmt.Currency,
-		tx.MaxAmt.Amount,
-		tx.MaxAmt.Currency,
-	)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLDailyTxLimitInsert,
+			tx.Reference,
+			tx.UsedAmt.Amount,
+			tx.UsedAmt.Currency,
+			tx.MaxAmt.Amount,
+			tx.MaxAmt.Currency,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLDailyTxLimitInsert,
+			tx.Reference,
+			tx.UsedAmt.Amount,
+			tx.UsedAmt.Currency,
+			tx.MaxAmt.Amount,
+			tx.MaxAmt.Currency,
+		)
+	}
+
 	if err != nil {
 		return 0, err
 	}
@@ -73,7 +91,15 @@ func (repo *DailyTxLimitRepo) InsertDailyTxLimit(ctx context.Context, tx DailyTx
 }
 
 func (repo *DailyTxLimitRepo) UpdateDailyTxLimitById(ctx context.Context, tx DailyTxLimit) error {
-	_, err := repo.db.Exec(sQLDailyTxLimitUpdateByReference, tx.UsedAmt.Amount, tx.ID)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+
+	if ok {
+		_, err = dTx.Exec(sQLDailyTxLimitUpdateByReference, tx.UsedAmt.Amount, tx.ID)
+	} else {
+		_, err = repo.db.Exec(sQLDailyTxLimitUpdateByReference, tx.UsedAmt.Amount, tx.ID)
+	}
 	if err != nil {
 		return err
 	}
