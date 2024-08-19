@@ -17,7 +17,7 @@ import (
 
 type TxQuote struct {
 	ID       string    `json:"id"`
-	Tx       ForeeTx   `json:"tx"`
+	Tx       *ForeeTx  `json:"tx"`
 	OwerId   int64     `json:"owerId"`
 	ExpireAt time.Time `json:"expireAt"`
 	CreateAt time.Time `json:"createAt"`
@@ -26,9 +26,9 @@ type TxQuote struct {
 // set to 512
 func NewTxQuoteRepo(expire, maxBucketSize int) *TxQuoteRepo {
 	return &TxQuoteRepo{
-		mems: [2]map[string]*TxQuote{
-			make(map[string]*TxQuote, maxBucketSize),
-			make(map[string]*TxQuote, maxBucketSize),
+		mems: [2]map[string]TxQuote{
+			make(map[string]TxQuote, maxBucketSize),
+			make(map[string]TxQuote, maxBucketSize),
 		},
 		cur:            0,
 		expireInMinute: expire,
@@ -38,14 +38,14 @@ func NewTxQuoteRepo(expire, maxBucketSize int) *TxQuoteRepo {
 
 // Still have performance issue
 type TxQuoteRepo struct {
-	mems           [2]map[string]*TxQuote
+	mems           [2]map[string]TxQuote
 	cur            int
 	maxBucketSize  int
 	expireInMinute int
 	rwLock         sync.RWMutex
 }
 
-func (repo *TxQuoteRepo) InsertTxQuote(ctx context.Context, tx *TxQuote) (string, error) {
+func (repo *TxQuoteRepo) InsertTxQuote(ctx context.Context, tx TxQuote) (string, error) {
 	tx.CreateAt = time.Now()
 	tx.ExpireAt = time.Now().Add(time.Duration(time.Minute * time.Duration(repo.expireInMinute)))
 	repo.rwLock.Lock()
@@ -66,7 +66,7 @@ func (repo *TxQuoteRepo) purge(bucketIdx int) {
 	//Clear all quote by just replace with new map
 	repo.rwLock.Lock()
 	defer repo.rwLock.Unlock()
-	repo.mems[bucketIdx%2] = make(map[string]*TxQuote, repo.maxBucketSize)
+	repo.mems[bucketIdx%2] = make(map[string]TxQuote, repo.maxBucketSize)
 }
 
 func (repo *TxQuoteRepo) Delete(id string) {
@@ -90,7 +90,7 @@ func (repo *TxQuoteRepo) GetUniqueById(ctx context.Context, id string) *TxQuote 
 	if !ok {
 		return nil
 	}
-	return s
+	return &s
 }
 
 func generateTxQuoteId(bucketId int) string {

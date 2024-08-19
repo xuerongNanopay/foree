@@ -64,6 +64,7 @@ type TransactionService struct {
 	rewardRepo        *transaction.RewardRepo
 	dailyTxLimiteRepo *transaction.DailyTxLimitRepo
 	feeRepo           *transaction.FeeRepo
+	quoteRepo         *transaction.TxQuoteRepo
 	contactRepo       *account.ContactAccountRepo
 	interacRepo       *account.InteracAccountRepo
 	feeJointRepo      *transaction.FeeJointRepo
@@ -362,6 +363,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		CoutAccId:          req.CoutAccId,
 		InteracAcc:         ciAcc,
 		ContactAcc:         coutAcc,
+		OwnerId:            user.ID,
 	}
 
 	if joint != nil {
@@ -410,8 +412,17 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 
 	foreeTx.Summary = &txSummary
 
+	quoteId, err := t.quoteRepo.InsertTxQuote(ctx, transaction.TxQuote{
+		Tx:     foreeTx,
+		OwerId: user.ID,
+	})
+
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+
 	return &QuoteTransactionDTO{
-		QuoteId: "TODO",
+		QuoteId: quoteId,
 		TxSum:   *NewTxSummaryDetailDTO(txSummary),
 	}, nil
 }
