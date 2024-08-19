@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"sync"
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
+	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/app/foree/types"
@@ -57,6 +59,7 @@ var txLimits = map[string]transaction.TxLimit{
 }
 
 type TransactionService struct {
+	db                *sql.DB
 	authService       *AuthService
 	foreeTxRepo       *transaction.ForeeTxRepo
 	txSummaryRepo     *transaction.TxSummaryRepo
@@ -262,9 +265,6 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		if r.Amt.Currency != req.SrcCurrency {
 			return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` that apply currency `%v` to currency `%v`", user.ID, rewardId, r.Amt.Currency, req.SrcCurrency)
 		}
-		// if (req.SrcAmount - float64(r.Amt.Amount)) < 10 {
-		// 	return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` with srcAmount `%v`", user.ID, rewardId, req.SrcCurrency))
-		// }
 		reward = r
 	}
 
@@ -450,8 +450,15 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 		return nil, transport.NewInteralServerError("user `%v` do not find foreeTx in quote `%v`", user.ID, req.QuoteId)
 	}
 
+	dTx, err := t.db.Begin()
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+	//Lock ci account.
+
 	foreeTx.OwnerId = user.ID
-	// Recheck rewards and limit.(Need? see performace first)
+	// Recheck rewards
 	if len(foreeTx.Rewards) == 1 {
 		reward := foreeTx.Rewards[1]
 		reward, err := t.rewardRepo.GetUniqueRewardById(ctx, reward.ID)
@@ -463,6 +470,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 		}
 	}
 
+	// Recheck limit
 	txLimit, ok := txLimits[user.Group]
 	if !ok {
 		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", user.Group)
@@ -477,6 +485,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 		return nil, transport.NewInteralServerError("user `%v` try to create a transaction with `%v` but the remaining limit is `%v`", user.ID, foreeTx.SrcAmt.Amount, txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount)
 	}
 
+	// Create foree transaction.
 	foreeTxID, err := t.foreeTxRepo.InsertForeeTx(ctx, *foreeTx)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)

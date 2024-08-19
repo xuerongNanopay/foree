@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
+	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/types"
 )
 
@@ -113,29 +114,60 @@ type ForeeTxRepo struct {
 }
 
 func (repo *ForeeTxRepo) InsertForeeTx(ctx context.Context, tx ForeeTx) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLForeeTxInsert,
-		tx.Type,
-		tx.Status,
-		tx.Rate,
-		tx.CinAccId,
-		tx.CoutAccId,
-		tx.SrcAmt.Amount,
-		tx.SrcAmt.Currency,
-		tx.DestAmt.Amount,
-		tx.DestAmt.Currency,
-		tx.TotalFeeAmt.Amount,
-		tx.TotalFeeAmt.Currency,
-		tx.TotalRewardAmt.Amount,
-		tx.TotalRewardAmt.Currency,
-		tx.TotalAmt.Amount,
-		tx.TotalAmt.Currency,
-		tx.CurStage,
-		tx.CurStageStatus,
-		tx.TransactionPurpose,
-		tx.Conclusion,
-		tx.OwnerId,
-	)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLForeeTxInsert,
+			tx.Type,
+			tx.Status,
+			tx.Rate,
+			tx.CinAccId,
+			tx.CoutAccId,
+			tx.SrcAmt.Amount,
+			tx.SrcAmt.Currency,
+			tx.DestAmt.Amount,
+			tx.DestAmt.Currency,
+			tx.TotalFeeAmt.Amount,
+			tx.TotalFeeAmt.Currency,
+			tx.TotalRewardAmt.Amount,
+			tx.TotalRewardAmt.Currency,
+			tx.TotalAmt.Amount,
+			tx.TotalAmt.Currency,
+			tx.CurStage,
+			tx.CurStageStatus,
+			tx.TransactionPurpose,
+			tx.Conclusion,
+			tx.OwnerId,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLForeeTxInsert,
+			tx.Type,
+			tx.Status,
+			tx.Rate,
+			tx.CinAccId,
+			tx.CoutAccId,
+			tx.SrcAmt.Amount,
+			tx.SrcAmt.Currency,
+			tx.DestAmt.Amount,
+			tx.DestAmt.Currency,
+			tx.TotalFeeAmt.Amount,
+			tx.TotalFeeAmt.Currency,
+			tx.TotalRewardAmt.Amount,
+			tx.TotalRewardAmt.Currency,
+			tx.TotalAmt.Amount,
+			tx.TotalAmt.Currency,
+			tx.CurStage,
+			tx.CurStageStatus,
+			tx.TransactionPurpose,
+			tx.Conclusion,
+			tx.OwnerId,
+		)
+	}
 	if err != nil {
 		return 0, err
 	}
