@@ -67,18 +67,18 @@ func (q *QuoteTransactionReq) Validate() *transport.BadRequestError {
 	return nil
 }
 
-type ConfirmQuoteReq struct {
+type CreateTransactionReq struct {
 	transport.SessionReq
 	QuoteId string `json:"quoteId" validate:"required"`
 }
 
-func (q *ConfirmQuoteReq) TrimSpace() {
+func (q *CreateTransactionReq) TrimSpace() {
 	q.QuoteId = strings.TrimSpace(q.QuoteId)
 }
 
-func (q *ConfirmQuoteReq) Validate() *transport.BadRequestError {
+func (q *CreateTransactionReq) Validate() *transport.BadRequestError {
 	q.TrimSpace()
-	if ret := validateStruct(q, "Invalid confirm quote request"); len(ret.Details) > 0 {
+	if ret := validateStruct(q, "Invalid create quote request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil

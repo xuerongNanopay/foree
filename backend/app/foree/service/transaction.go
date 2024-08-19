@@ -427,6 +427,13 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}, nil
 }
 
+func (t *TransactionService) createTx(ctx context.Context, req CreateTransactionReq) (*QuoteTransactionDTO, transport.ForeeError) {
+	session, serr := t.authService.VerifySession(ctx, req.SessionId)
+	if serr != nil {
+		return nil, serr
+	}
+}
+
 func (t *TransactionService) rollBackTx(tx transaction.ForeeTx) {
 	// log error.
 }
