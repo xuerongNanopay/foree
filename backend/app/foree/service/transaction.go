@@ -500,7 +500,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	//COUT
 	//Success to return?
 
-	return nil, nil
+	return NewTxSummaryDetailDTO(*summary), nil
 }
 
 func (t *TransactionService) rollBackTx(tx transaction.ForeeTx) {
