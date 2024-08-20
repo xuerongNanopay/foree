@@ -429,11 +429,6 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}, nil
 }
 
-// TODO: Upgrade to use transaction.
-// TODO: check performance of this function.
-// 1. Recheck daily limit
-// 2. create all transactions
-// 3. send to process
 func (t *TransactionService) createTx(ctx context.Context, req CreateTransactionReq) (*TxSummaryDetailDTO, transport.ForeeError) {
 	session, serr := t.authService.VerifySession(ctx, req.SessionId)
 	if serr != nil {
@@ -614,7 +609,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	//IDM
 	//COUT
 	//Success to return?
-	go t.txProcessor.fulfillAndProcessTx(*foreeTx)
+	go t.txProcessor.createAndProcessTx(*foreeTx)
 
 	if err = dTx.Commit(); err != nil {
 		return nil, transport.WrapInteralServerError(err)

@@ -29,16 +29,23 @@ type TxProcessor struct {
 	processingLock sync.RWMutex
 }
 
-var todo int64 = 11
+func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
+	foreeTx, err := p.createTx(tx)
+	if err != nil {
+		//todo log
+		return
+	}
+	go p.processTx(*foreeTx)
+}
 
 // Create CI, COUT, IDM for ForeeTx
-// Log error
-func (p *TxProcessor) fulfillAndProcessTx(tx transaction.ForeeTx) {
+func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	wg := sync.WaitGroup{}
 	dTx, err := p.db.Begin()
 	if err != nil {
+		dTx.Rollback()
 		//TODO: log err
-		return
+		return nil, err
 	}
 
 	ctx := context.Background()
@@ -128,30 +135,38 @@ func (p *TxProcessor) fulfillAndProcessTx(tx transaction.ForeeTx) {
 	if ciErr != nil {
 		dTx.Rollback()
 		//log error: ciErr
-		return
+		return nil, err
 	}
 	if idmErr != nil {
 		dTx.Rollback()
 		//log error: idmErr
-		return
+		return nil, err
 	}
 	if coutErr != nil {
 		dTx.Rollback()
 		//log error: coutErr
-		return
+		return nil, err
 	}
 
 	tx.CI = ciTx
 	tx.IDM = idmTx
 	tx.COUT = coutTx
 
+	if err = dTx.Commit(); err != nil {
+		//TODO: log
+		return nil, err
+	}
+	return &tx, nil
 }
 
-func (p *TxProcessor) loadTx(id int64) (*transaction.ForeeTx, error) {
+func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx, error) {
 	ctx := context.Background()
 	foree, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, id)
 	if err != nil {
 		return nil, err
+	}
+	if foree == nil {
+		return nil, fmt.Errorf("ForeeTx no found with id `%v`", id)
 	}
 
 	// Load CI
@@ -159,7 +174,7 @@ func (p *TxProcessor) loadTx(id int64) (*transaction.ForeeTx, error) {
 	if err != nil {
 		return nil, err
 	}
-	if ci == nil {
+	if isEmptyCheck && ci == nil {
 		return nil, fmt.Errorf("InteracCITx no found for ForeeTx `%v`", foree.ID)
 	}
 
@@ -167,19 +182,11 @@ func (p *TxProcessor) loadTx(id int64) (*transaction.ForeeTx, error) {
 	if err != nil {
 		return nil, err
 	}
-	if srcInteracAcc == nil {
+	if isEmptyCheck && srcInteracAcc == nil {
 		return nil, fmt.Errorf("SrcInteracAcc no found for InteracCITx `%v`", ci.SrcInteracAccId)
 	}
 	ci.SrcInteracAcc = srcInteracAcc
 
-	destInteracAcc, err := p.interacRepo.GetUniqueInteracAccountById(ctx, ci.DestInteracAccId)
-	if err != nil {
-		return nil, err
-	}
-	if destInteracAcc == nil {
-		return nil, fmt.Errorf("DestInteracAcc no found for InteracCITx `%v`", ci.DestInteracAccId)
-	}
-	ci.DestInteracAcc = destInteracAcc
 	foree.CI = ci
 
 	// Load IDM
@@ -187,7 +194,7 @@ func (p *TxProcessor) loadTx(id int64) (*transaction.ForeeTx, error) {
 	if err != nil {
 		return nil, err
 	}
-	if idm == nil {
+	if isEmptyCheck && idm == nil {
 		return nil, fmt.Errorf("IDMTx no found for ForeeTx `%v`", foree.ID)
 	}
 	foree.IDM = idm
@@ -197,7 +204,7 @@ func (p *TxProcessor) loadTx(id int64) (*transaction.ForeeTx, error) {
 	if err != nil {
 		return nil, err
 	}
-	if cout == nil {
+	if isEmptyCheck && cout == nil {
 		return nil, fmt.Errorf("NBPCOTx no found for ForeeTx `%v`", foree.ID)
 	}
 
@@ -205,7 +212,7 @@ func (p *TxProcessor) loadTx(id int64) (*transaction.ForeeTx, error) {
 	if err != nil {
 		return nil, err
 	}
-	if destContactAcc == nil {
+	if isEmptyCheck && destContactAcc == nil {
 		return nil, fmt.Errorf("DestContactAcc no found for NBPCOTx `%v`", cout.DestContactAccId)
 	}
 	cout.DestContactAcc = destContactAcc
@@ -216,10 +223,9 @@ func (p *TxProcessor) loadTx(id int64) (*transaction.ForeeTx, error) {
 	return foree, nil
 }
 
-// TODO: change argument to int64
 func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	if tx.Type != transaction.TxTypeInteracToNBP {
-		return nil, fmt.Errorf("unknow ForeeTx type `%s`", tx.Type)
+		return nil, fmt.Errorf("unknow ForeeTx type `%s` for transaction `%v`", tx.Type, tx.ID)
 	}
 	var err error
 	var nTx *transaction.ForeeTx
@@ -242,13 +248,6 @@ func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, e
 			return nil, fmt.Errorf("unexpect looping for ForeeTx `%v`", nTx.ID)
 		}
 		i += 1
-	}
-
-}
-
-func (p *TxProcessor) recordTxHistory(h transaction.TxHistory) {
-	if _, err := p.txHistoryRepo.InserTxHistory(context.Background(), h); err != nil {
-		fmt.Println(err.Error())
 	}
 
 }
@@ -379,6 +378,12 @@ func (p *TxProcessor) closeRemainingTx(ctx context.Context, tx transaction.Foree
 	default:
 		//TODO: Log warn
 		return &tx, nil
+	}
+}
+
+func (p *TxProcessor) recordTxHistory(h transaction.TxHistory) {
+	if _, err := p.txHistoryRepo.InserTxHistory(context.Background(), h); err != nil {
+		fmt.Println(err.Error())
 	}
 }
 

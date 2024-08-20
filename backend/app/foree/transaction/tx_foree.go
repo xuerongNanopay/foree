@@ -88,40 +88,40 @@ const (
 
 // Only Support INITIAL, PROCESSING, CANCEL, COMPLETE.
 type ForeeTx struct {
-	ID                 int64            `json:"id"`
-	Type               TxType           `json:"type"`
-	Status             TxStatus         `json:"status"`
-	Rate               types.Amount     `json:"Rate"`
-	CinAccId           int64            `json:"cinAccId"`
-	CoutAccId          int64            `json:"coutAccId"`
-	SrcAmt             types.AmountData `json:"srcAmt"`
-	DestAmt            types.AmountData `json:"destAmt"`
-	TotalFeeAmt        types.AmountData `json:"totalFeeAmt"`
-	TotalRewardAmt     types.AmountData `json:"totalRewardAmt"`
-	TotalAmt           types.AmountData `json:"totalAmt"`
-	CurStage           TxStage          `json:"curStage"`
-	CurStageStatus     TxStatus         `json:"curStageStatus"`
-	TransactionPurpose string           `json:"transactionPurpose"`
-	Conclusion         string           `json:"conclusion"`
-	OwnerId            int64            `json:"ownerId"`
-	CreateAt           time.Time        `json:"createAt"`
-	UpdateAt           time.Time        `json:"updateAt"`
+	ID                 int64            `json:"id,omitempty"`
+	Type               TxType           `json:"type,omitempty"`
+	Status             TxStatus         `json:"status,omitempty"`
+	Rate               types.Amount     `json:"Rate,omitempty"`
+	CinAccId           int64            `json:"cinAccId,omitempty"`
+	CoutAccId          int64            `json:"coutAccId,omitempty"`
+	SrcAmt             types.AmountData `json:"srcAmt,omitempty"`
+	DestAmt            types.AmountData `json:"destAmt,omitempty"`
+	TotalFeeAmt        types.AmountData `json:"totalFeeAmt,omitempty"`
+	TotalRewardAmt     types.AmountData `json:"totalRewardAmt,omitempty"`
+	TotalAmt           types.AmountData `json:"totalAmt,omitempty"`
+	CurStage           TxStage          `json:"curStage,omitempty"`
+	CurStageStatus     TxStatus         `json:"curStageStatus,omitempty"`
+	TransactionPurpose string           `json:"transactionPurpose,omitempty"`
+	Conclusion         string           `json:"conclusion,omitempty"`
+	OwnerId            int64            `json:"ownerId,omitempty"`
+	CreateAt           time.Time        `json:"createAt,omitempty"`
+	UpdateAt           time.Time        `json:"updateAt,omitempty"`
 
-	Ip          string                  `json:"ip"`
-	UserAgent   string                  `json:"userAgent"`
-	Owner       *auth.User              `json:"ower"`
-	InteracAcc  *account.InteracAccount `json:"interacAcc"`
-	ContactAcc  *account.ContactAccount `json:"contactAcc"`
-	FeeJointIds []int64                 `json:"feeJointIds"`
-	Fees        []*FeeJoint             `json:"fees"`
-	RewardIds   []int64                 `json:"rewardIds"`
-	Rewards     []*Reward               `json:"rewards"`
-	CI          *InteracCITx            `json:"ci"`
-	IDM         *IDMTx                  `json:"idm"`
-	COUT        *NBPCOTx                `json:"cout"`
-	Summary     *TxSummary              `json:"summary"`
-	RefundTx    *ForeeRefundTx          `json:"refundTx"`
-	History     []*TxHistory            `json:"history"`
+	Ip          string                  `json:"ip,omitempty"`
+	UserAgent   string                  `json:"userAgent,omitempty"`
+	Owner       *auth.User              `json:"ower,omitempty"`
+	InteracAcc  *account.InteracAccount `json:"interacAcc,omitempty"`
+	ContactAcc  *account.ContactAccount `json:"contactAcc,omitempty"`
+	FeeJointIds []int64                 `json:"feeJointIds,omitempty"`
+	Fees        []*FeeJoint             `json:"fees,omitempty"`
+	RewardIds   []int64                 `json:"rewardIds,omitempty"`
+	Rewards     []*Reward               `json:"rewards,omitempty"`
+	CI          *InteracCITx            `json:"ci,omitempty"`
+	IDM         *IDMTx                  `json:"idm,omitempty"`
+	COUT        *NBPCOTx                `json:"cout,omitempty"`
+	Summary     *TxSummary              `json:"summary,omitempty"`
+	RefundTx    *ForeeRefundTx          `json:"refundTx,omitempty"`
+	History     []*TxHistory            `json:"history,omitempty"`
 }
 
 func NewForeeTxRepo(db *sql.DB) *ForeeTxRepo {
