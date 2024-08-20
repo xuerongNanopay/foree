@@ -33,19 +33,20 @@ type ScotiaProfile struct {
 
 type CITxProcessor struct {
 	scotiaProfile ScotiaProfile
-	scotiaClient  *scotia.ScotiaClient
+	scotiaClient  scotia.ScotiaClient
+	interacTxRepo *transaction.InteracCITxRepo
 	foreeTxRepo   *transaction.ForeeTxRepo
 	db            *sql.DB
 }
 
-func (p *CITxProcessor) requestPayment(ctx context.Context, tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	dTx, err := p.db.Begin()
 	if err != nil {
 		dTx.Rollback()
 		//TODO: log err
 		return nil, err
 	}
-
+	ctx := context.Background()
 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
 
 	// Lock transaction and safety check.
@@ -57,12 +58,68 @@ func (p *CITxProcessor) requestPayment(ctx context.Context, tx transaction.Foree
 	}
 
 	if nForeeTx.CurStage != transaction.TxStageInteracCI && nForeeTx.CurStageStatus != transaction.TxStatusInitial {
+		dTx.Rollback()
 		return nil, fmt.Errorf("transaction `%v` is in status `%s` at stage `%s`", nForeeTx.ID, nForeeTx.CurStageStatus, nForeeTx.Status)
 	}
 
-	// API call
-	//
+	resp, err := p.scotiaClient.RequestPayment(*p.createRequestPaymentReq(tx))
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode/100 != 2 {
+		//TODO: logging?
+		dTx.Rollback()
+		return nil, fmt.Errorf("scotial request payment error: (httpCode: `%v`, request: `%s`, response: `%s`)", resp.StatusCode, resp.RawRequest, resp.RawResponse)
+	}
+
+	//TODO: log success
+
+	tx.CI.ScotiaPaymentId = resp.Data.PaymentId
+	tx.CI.Status = transaction.TxStatusSent
+	tx.CI.ScotiaClearingReference = resp.Data.ClearingSystemReference
+
+	tx.CurStageStatus = transaction.TxStatusSent
+
+	err = p.interacTxRepo.UpdateInteracCITxById(ctx, *tx.CI)
+	if err != nil {
+		dTx.Rollback()
+		return nil, err
+	}
+
+	err = p.foreeTxRepo.UpdateForeeTxById(ctx, tx)
+	if err != nil {
+		dTx.Rollback()
+		return nil, err
+	}
+
+	// We can safely end the transactin here.
+	if err = dTx.Commit(); err != nil {
+		return nil, err
+	}
+
+	// Get url payment link
+	statusResp, err := p.scotiaClient.PaymentStatus(scotia.PaymentStatusRequest{
+		PaymentId:  tx.CI.ScotiaPaymentId,
+		EndToEndId: tx.Summary.NBPReference,
+	})
+
+	if statusResp.StatusCode/100 != 2 {
+		//TODO: logging?
+		return nil, fmt.Errorf("scotial payment status error: (httpCode: `%v`, request: `%s`, response: `%s`)", statusResp.StatusCode, statusResp.RawRequest, statusResp.RawResponse)
+	}
+
+	if len(statusResp.PaymentStatuses) > 0 {
+		// Set payment url
+		tx.CI.PaymentUrl = statusResp.PaymentStatuses[0].GatewayUrl
+		tx.Summary.PaymentUrl = statusResp.PaymentStatuses[0].GatewayUrl
+	}
+
 	return nil, nil
+}
+
+func (p *CITxProcessor) fetchPaymenUrl(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+
 }
 
 func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.RequestPaymentRequest {

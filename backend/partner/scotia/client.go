@@ -25,8 +25,8 @@ const (
 
 type ScotiaClient interface {
 	RequestPayment(req RequestPaymentRequest) (*RequestPaymentResponse, error)
-	PaymentDetail(req *PaymentDetailRequest) (*PaymentDetailResponse, error)
-	PaymentStatus(req *PaymentStatusRequest) (*PaymentStatusResponse, error)
+	PaymentDetail(req PaymentDetailRequest) (*PaymentDetailResponse, error)
+	PaymentStatus(req PaymentStatusRequest) (*PaymentStatusResponse, error)
 	CancelPayment(req CancelPaymentRequest) (*CancelPaymentResponse, error)
 	GetConfigs() map[string]string
 	SetConfig(key string, value string)
@@ -74,7 +74,7 @@ func (s *scotiaClientImpl) SetConfig(key string, value string) {
 	s.config.SetConfig(key, value)
 }
 
-func (s *scotiaClientImpl) PaymentStatus(req *PaymentStatusRequest) (*PaymentStatusResponse, error) {
+func (s *scotiaClientImpl) PaymentStatus(req PaymentStatusRequest) (*PaymentStatusResponse, error) {
 	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests", s.config.GetBaseUrl())
 	r, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -118,7 +118,7 @@ func (s *scotiaClientImpl) PaymentStatus(req *PaymentStatusRequest) (*PaymentSta
 	return ret, nil
 }
 
-func (s *scotiaClientImpl) PaymentDetail(req *PaymentDetailRequest) (*PaymentDetailResponse, error) {
+func (s *scotiaClientImpl) PaymentDetail(req PaymentDetailRequest) (*PaymentDetailResponse, error) {
 	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests/%v", s.config.GetBaseUrl(), req.PaymentId)
 	r, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
