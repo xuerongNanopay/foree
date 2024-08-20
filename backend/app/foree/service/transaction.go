@@ -704,14 +704,14 @@ func (t *TransactionService) getDailyTxLimit(ctx context.Context, user auth.User
 	return dailyLimit, nil
 }
 
-func (t *TransactionService) GetTransaction(ctx context.Context, req GetTransactionReq) (*TxSummaryDetailDTO, transport.ForeeError) {
+func (t *TransactionService) GetSummaryTx(ctx context.Context, req GetTransactionReq) (*TxSummaryDetailDTO, transport.ForeeError) {
 	return nil, nil
 }
 
-func (t *TransactionService) GetAllTransactions(ctx context.Context, req GetAllTransactionReq) ([]*TxSummaryDTO, transport.ForeeError) {
+func (t *TransactionService) GetAllSummaryTxs(ctx context.Context, req GetAllTransactionReq) ([]*TxSummaryDTO, transport.ForeeError) {
 	return nil, nil
 }
 
-func (t *TransactionService) QueryTransactions(ctx context.Context, req QueryTransactionReq) ([]*TxSummaryDTO, transport.ForeeError) {
+func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTransactionReq) ([]*TxSummaryDTO, transport.ForeeError) {
 	return nil, nil
 }
