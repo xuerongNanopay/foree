@@ -221,7 +221,7 @@ type IDMComplianceRepo struct {
 	db *sql.DB
 }
 
-func (repo *IDMComplianceRepo) InsertIDMComplance(c IDMCompliance) (int64, error) {
+func (repo *IDMComplianceRepo) InsertIDMComplance(ctx context.Context, c IDMCompliance) (int64, error) {
 	result, err := repo.db.Exec(
 		sQLIDMComplianceInsert,
 		c.IDMTxId,

@@ -107,6 +107,8 @@ type ForeeTx struct {
 	CreateAt           time.Time        `json:"createAt"`
 	UpdateAt           time.Time        `json:"updateAt"`
 
+	Ip          string                  `json:"ip"`
+	UserAgent   string                  `json:"userAgent"`
 	Owner       *auth.User              `json:"ower"`
 	InteracAcc  *account.InteracAccount `json:"interacAcc"`
 	ContactAcc  *account.ContactAccount `json:"contactAcc"`

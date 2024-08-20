@@ -13,9 +13,6 @@ import (
 	time_util "xue.io/go-pay/util/time"
 )
 
-type TxProcessorConfig struct {
-}
-
 // It is the internal service for transaction process.
 
 type TxProcessor struct {
@@ -73,7 +70,80 @@ func (p *TxProcessor) fulfillAndProcessTx(tx transaction.ForeeTx) {
 	wg.Add(1)
 	go createCI()
 
+	// Create IDM
+	var idmTx *transaction.IDMTx
+	var idmErr error
+	createIDM := func() {
+		defer wg.Done()
+		idmId, err := p.idmTxRepo.InsertIDMTx(ctx, transaction.IDMTx{
+			Status:     transaction.TxStatusInitial,
+			Ip:         tx.Ip,
+			UserAgent:  tx.UserAgent,
+			ParentTxId: tx.ID,
+			OwnerId:    tx.OwnerId,
+		})
+		if err != nil {
+			idmErr = err
+			return
+		}
+		idm, err := p.idmTxRepo.GetUniqueIDMTxById(ctx, idmId)
+		if err != nil {
+			idmErr = err
+			return
+		}
+		idmTx = idm
+	}
+	wg.Add(1)
+	go createIDM()
+
+	// Create Cout
+	var coutTx *transaction.NBPCOTx
 	var coutErr error
+	createCout := func() {
+		defer wg.Done()
+		coutId, err := p.npbTxRepo.InsertNBPCOTx(ctx, transaction.NBPCOTx{
+			Status:           transaction.TxStatusInitial,
+			Amt:              tx.SrcAmt,
+			APIReference:     transaction.GenerateNbpId("NBP", tx.ID),
+			DestContactAccId: tx.CoutAccId,
+			ParentTxId:       tx.ID,
+			OwnerId:          tx.OwnerId,
+		})
+		if err != nil {
+			coutErr = err
+			return
+		}
+		cout, err := p.npbTxRepo.GetUniqueNBPCOTxById(ctx, coutId)
+		if err != nil {
+			coutErr = err
+			return
+		}
+		coutTx = cout
+	}
+
+	wg.Add(1)
+	go createCout()
+
+	wg.Wait()
+	if ciErr != nil {
+		dTx.Rollback()
+		//log error: ciErr
+		return
+	}
+	if idmErr != nil {
+		dTx.Rollback()
+		//log error: idmErr
+		return
+	}
+	if coutErr != nil {
+		dTx.Rollback()
+		//log error: coutErr
+		return
+	}
+
+	tx.CI = ciTx
+	tx.IDM = idmTx
+	tx.COUT = coutTx
 
 }
 
