@@ -44,6 +44,17 @@ const (
 		FROM interac_accounts a
 		where a.owner_id = ? AND a.id = ? AND a.status = ACTIVE
 	`
+	sQLInteracAccountGetUniqueActiveForUPdateByOwnerAndId = `
+		SELECT 
+			a.id, a.first_name, a.middle_name,
+			a.last_name, a.address, a.phone_number, a.email, 
+			a.institution_name, a.branch_number, a.account_number,
+			a.owner_id, a.status, 
+			a.latest_acitvity_at, a.create_at, a.update_at
+		FROM interac_accounts a
+		where a.owner_id = ? AND a.id = ? AND a.status = ACTIVE
+		FOR UPDATE
+	`
 	sQLInteracAccountGetAllActiveByOwnerId = `
 		SELECT 
 			a.id, a.first_name, a.middle_name,
@@ -172,6 +183,40 @@ func (repo *InteracAccountRepo) UpdateActiveInteracAccountByIdAndOwner(ctx conte
 
 func (repo *InteracAccountRepo) GetUniqueActiveInteracAccountByOwnerAndId(ctx context.Context, ownerId, id int64) (*InteracAccount, error) {
 	rows, err := repo.db.Query(sQLInteracAccountGetUniqueActiveByOwnerAndId, ownerId, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *InteracAccount
+
+	for rows.Next() {
+		f, err = scanRowIntoInteracAccount(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func (repo *InteracAccountRepo) GetUniqueActiveInteracAccountForUpdateByOwnerAndId(ctx context.Context, ownerId, id int64) (*InteracAccount, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var rows *sql.Rows
+
+	if ok {
+		rows, err = dTx.Query(sQLInteracAccountGetUniqueActiveForUPdateByOwnerAndId, ownerId, id)
+
+	} else {
+		rows, err = repo.db.Query(sQLInteracAccountGetUniqueActiveForUPdateByOwnerAndId, ownerId, id)
+	}
 
 	if err != nil {
 		return nil, err
