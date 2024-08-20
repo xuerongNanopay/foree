@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"sync"
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
+	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
 	time_util "xue.io/go-pay/util/time"
 )
@@ -17,6 +19,7 @@ type TxProcessorConfig struct {
 // It is the internal service for transaction process.
 
 type TxProcessor struct {
+	db             *sql.DB
 	interacTxRepo  *transaction.InteracCITxRepo
 	npbTxRepo      *transaction.NBPCOTxRepo
 	idmTxRepo      *transaction.IdmTxRepo
@@ -29,12 +32,39 @@ type TxProcessor struct {
 	processingLock sync.RWMutex
 }
 
-func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	return nil, nil
-}
+var todo int64 = 11
 
-func (p *TxProcessor) InsertTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	return nil, nil
+// Create CI, COUT, IDM for ForeeTx
+// Log error
+func (p *TxProcessor) fulfillAndProcessTx(tx transaction.ForeeTx) {
+	wg := sync.WaitGroup{}
+	dTx, err := p.db.Begin()
+	if err != nil {
+		//TODO: log err
+		return
+	}
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+
+	var ciTx *transaction.InteracCITx
+	var ciErr error
+	createCI := func() {
+		defer wg.Done()
+		ciId, err := p.interacTxRepo.InsertInteracCITx(ctx, transaction.InteracCITx{
+			Status:           transaction.TxStatusInitial,
+			SrcInteracAccId:  tx.CinAccId,
+			DestInteracAccId: todo,
+			Amt:              tx.SrcAmt,
+			ParentTxId:       tx.ID,
+			OwnerId:          tx.OwnerId,
+		})
+		if err != nil {
+			ciErr = err
+			return
+		}
+	}
+
 }
 
 func (p *TxProcessor) loadTx(id int64) (*transaction.ForeeTx, error) {

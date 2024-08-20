@@ -364,6 +364,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		InteracAcc:         ciAcc,
 		ContactAcc:         coutAcc,
 		OwnerId:            user.ID,
+		Owner:              &user,
 	}
 
 	if joint != nil {
@@ -542,6 +543,8 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 		return nil, foreeTxErr
 	}
 
+	foreeTx.ID = foreeTxID
+
 	// Create TxSummary, feeJoin, update reward, update limit.
 	wg = sync.WaitGroup{}
 
@@ -611,6 +614,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	//IDM
 	//COUT
 	//Success to return?
+	go t.txProcessor.fulfillAndProcessTx(*foreeTx)
 
 	if err = dTx.Commit(); err != nil {
 		return nil, transport.WrapInteralServerError(err)
