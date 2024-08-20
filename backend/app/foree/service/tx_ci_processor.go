@@ -11,6 +11,8 @@ import (
 	"xue.io/go-pay/partner/scotia"
 )
 
+const DefaultScotiaProfileName = "FOREE"
+
 type ScotiaProfile struct {
 	Name                          string
 	legalName                     string
