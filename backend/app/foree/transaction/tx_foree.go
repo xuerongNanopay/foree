@@ -40,6 +40,21 @@ const (
         FROM foree_tx t
         where t.id = ?
 	`
+	sQLForeeTxGetForUpdateById = `
+		SELECT 
+			t.id, t.type, t.status, t.rate
+			t.cin_acc_id, t.cout_acc_id,
+			t.src_amount, t.src_currency, 
+			t.dest_amount, t.dest_currency,
+			t.total_fee_amount, t.total_fee_currency, 
+			t.total_reward_amount, t.total_reward_currency, 
+			t.total_amount, t.total_currency,
+			t.cur_stage, t.cur_stage_status, t.transaction_purpose, t.conclusion,
+			t.owner_id, t.create_at, t.update_at
+		FROM foree_tx t
+		where t.id = ?
+		FOR UPDATE
+	`
 	//TODO: support get alls?
 )
 
@@ -196,6 +211,40 @@ func (repo *ForeeTxRepo) UpdateForeeTxById(ctx context.Context, tx ForeeTx) erro
 
 func (repo *ForeeTxRepo) GetUniqueForeeTxById(ctx context.Context, id int64) (*ForeeTx, error) {
 	rows, err := repo.db.Query(sQLForeeTxGetById, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *ForeeTx
+
+	for rows.Next() {
+		f, err = scanRowIntoForeeTx(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func (repo *ForeeTxRepo) GetUniqueForeeTxForUpdateById(ctx context.Context, id int64) (*ForeeTx, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var rows *sql.Rows
+
+	if ok {
+		rows, err = dTx.Query(sQLForeeTxGetForUpdateById, id)
+
+	} else {
+		rows, err = repo.db.Query(sQLForeeTxGetForUpdateById, id)
+	}
 
 	if err != nil {
 		return nil, err
