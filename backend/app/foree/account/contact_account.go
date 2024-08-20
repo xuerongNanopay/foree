@@ -7,6 +7,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"time"
+
+	"xue.io/go-pay/app/foree/constant"
 )
 
 const (
@@ -138,29 +140,61 @@ type ContactAccountRepo struct {
 }
 
 func (repo *ContactAccountRepo) InsertContactAccount(ctx context.Context, acc ContactAccount) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLContactAccountInsert,
-		acc.HashId,
-		acc.Status,
-		acc.Type,
-		acc.FirstName,
-		acc.MiddleName,
-		acc.LastName,
-		acc.Address1,
-		acc.Address2,
-		acc.City,
-		acc.Province,
-		acc.Country,
-		acc.PostalCode,
-		acc.PhoneNumber,
-		acc.InstitutionName,
-		acc.BranchNumber,
-		acc.AccountNumber,
-		acc.AccountHash,
-		acc.RelationshipToContact,
-		acc.OwnerId,
-		acc.LatestActivityAt,
-	)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLContactAccountInsert,
+			acc.HashId,
+			acc.Status,
+			acc.Type,
+			acc.FirstName,
+			acc.MiddleName,
+			acc.LastName,
+			acc.Address1,
+			acc.Address2,
+			acc.City,
+			acc.Province,
+			acc.Country,
+			acc.PostalCode,
+			acc.PhoneNumber,
+			acc.InstitutionName,
+			acc.BranchNumber,
+			acc.AccountNumber,
+			acc.AccountHash,
+			acc.RelationshipToContact,
+			acc.OwnerId,
+			acc.LatestActivityAt,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLContactAccountInsert,
+			acc.HashId,
+			acc.Status,
+			acc.Type,
+			acc.FirstName,
+			acc.MiddleName,
+			acc.LastName,
+			acc.Address1,
+			acc.Address2,
+			acc.City,
+			acc.Province,
+			acc.Country,
+			acc.PostalCode,
+			acc.PhoneNumber,
+			acc.InstitutionName,
+			acc.BranchNumber,
+			acc.AccountNumber,
+			acc.AccountHash,
+			acc.RelationshipToContact,
+			acc.OwnerId,
+			acc.LatestActivityAt,
+		)
+	}
+
 	if err != nil {
 		return 0, err
 	}
@@ -172,13 +206,28 @@ func (repo *ContactAccountRepo) InsertContactAccount(ctx context.Context, acc Co
 }
 
 func (repo *ContactAccountRepo) UpdateActiveContactAccountByIdAndOwner(ctx context.Context, acc ContactAccount) error {
-	_, err := repo.db.Exec(
-		sQLContactAccountUpdateActiveByIdAndOwner,
-		acc.Status,
-		acc.LatestActivityAt,
-		acc.OwnerId,
-		acc.ID,
-	)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+
+	if ok {
+		_, err = dTx.Exec(
+			sQLContactAccountUpdateActiveByIdAndOwner,
+			acc.Status,
+			acc.LatestActivityAt,
+			acc.OwnerId,
+			acc.ID,
+		)
+	} else {
+		_, err = repo.db.Exec(
+			sQLContactAccountUpdateActiveByIdAndOwner,
+			acc.Status,
+			acc.LatestActivityAt,
+			acc.OwnerId,
+			acc.ID,
+		)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -186,17 +235,8 @@ func (repo *ContactAccountRepo) UpdateActiveContactAccountByIdAndOwner(ctx conte
 }
 
 func (repo *ContactAccountRepo) RefreshContactLatestActivityAtAndOwner(ctx context.Context, acc ContactAccount) error {
-	_, err := repo.db.Exec(
-		sQLContactAccountUpdateActiveByIdAndOwner,
-		acc.Status,
-		time.Now(),
-		acc.OwnerId,
-		acc.ID,
-	)
-	if err != nil {
-		return err
-	}
-	return nil
+	acc.LatestActivityAt = time.Now()
+	return repo.UpdateActiveContactAccountByIdAndOwner(ctx, acc)
 }
 
 func (repo *ContactAccountRepo) GetUniqueContactAccountById(ctx context.Context, id int64) (*ContactAccount, error) {

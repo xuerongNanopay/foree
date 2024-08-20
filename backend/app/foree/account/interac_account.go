@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"xue.io/go-pay/app/foree/constant"
 )
 
 const (
@@ -90,21 +92,45 @@ type InteracAccountRepo struct {
 }
 
 func (repo *InteracAccountRepo) InsertInteracAccount(ctx context.Context, acc InteracAccount) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLInteracAccountInsert,
-		acc.Status,
-		acc.FirstName,
-		acc.MiddleName,
-		acc.LastName,
-		acc.Address,
-		acc.PhoneNumber,
-		acc.Email,
-		acc.InstitutionName,
-		acc.BranchNumber,
-		acc.AccountNumber,
-		acc.OwnerId,
-		acc.LatestActivityAt,
-	)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLInteracAccountInsert,
+			acc.Status,
+			acc.FirstName,
+			acc.MiddleName,
+			acc.LastName,
+			acc.Address,
+			acc.PhoneNumber,
+			acc.Email,
+			acc.InstitutionName,
+			acc.BranchNumber,
+			acc.AccountNumber,
+			acc.OwnerId,
+			acc.LatestActivityAt,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLInteracAccountInsert,
+			acc.Status,
+			acc.FirstName,
+			acc.MiddleName,
+			acc.LastName,
+			acc.Address,
+			acc.PhoneNumber,
+			acc.Email,
+			acc.InstitutionName,
+			acc.BranchNumber,
+			acc.AccountNumber,
+			acc.OwnerId,
+			acc.LatestActivityAt,
+		)
+	}
+
 	if err != nil {
 		return 0, err
 	}
@@ -116,13 +142,28 @@ func (repo *InteracAccountRepo) InsertInteracAccount(ctx context.Context, acc In
 }
 
 func (repo *InteracAccountRepo) UpdateActiveInteracAccountByIdAndOwner(ctx context.Context, acc InteracAccount) error {
-	_, err := repo.db.Exec(
-		sQLInteracAccountUpdateActiveByIdAndOwner,
-		acc.Status,
-		acc.LatestActivityAt,
-		acc.OwnerId,
-		acc.ID,
-	)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+
+	if ok {
+		_, err = dTx.Exec(
+			sQLInteracAccountUpdateActiveByIdAndOwner,
+			acc.Status,
+			acc.LatestActivityAt,
+			acc.OwnerId,
+			acc.ID,
+		)
+	} else {
+		_, err = repo.db.Exec(
+			sQLInteracAccountUpdateActiveByIdAndOwner,
+			acc.Status,
+			acc.LatestActivityAt,
+			acc.OwnerId,
+			acc.ID,
+		)
+	}
+
 	if err != nil {
 		return err
 	}
