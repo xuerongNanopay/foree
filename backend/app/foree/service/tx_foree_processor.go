@@ -51,6 +51,13 @@ func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, er
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
 
+	_, err = p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, tx.ID)
+	if err != nil {
+		dTx.Rollback()
+		//TODO: log err
+		return nil, err
+	}
+
 	// Create CI
 	var ciTx *transaction.InteracCITx
 	var ciErr error

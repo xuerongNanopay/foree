@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 
 	"xue.io/go-pay/app/foree/transaction"
 )
@@ -13,6 +14,7 @@ type InteracCreditAccount struct {
 }
 
 type CITxProcessor struct {
+	db *sql.DB
 }
 
 func (p *CITxProcessor) requestPayment(ctx context.Context, tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
