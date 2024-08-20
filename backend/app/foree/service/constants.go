@@ -9,6 +9,7 @@ import (
 	"xue.io/go-pay/app/foree/transaction"
 )
 
+const NbpIdPrefix = "NP"
 const UserGroup = "foree-person"
 
 // 3600 * 24 * 365 *19

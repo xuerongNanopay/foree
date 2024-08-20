@@ -548,6 +548,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	createSummaryTx := func() {
 		defer wg.Done()
 		foreeTx.Summary.ParentTxId = foreeTxID
+		foreeTx.Summary.NBPReference = transaction.GenerateNbpId(NbpIdPrefix, foreeTxID)
 		id, err := t.txSummaryRepo.InsertTxSummary(ctx, *foreeTx.Summary)
 		if err != nil {
 			txSummaryErr = transport.WrapInteralServerError(err)
