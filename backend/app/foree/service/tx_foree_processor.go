@@ -47,23 +47,33 @@ func (p *TxProcessor) fulfillAndProcessTx(tx transaction.ForeeTx) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
 
+	// Create CI
 	var ciTx *transaction.InteracCITx
 	var ciErr error
 	createCI := func() {
 		defer wg.Done()
 		ciId, err := p.interacTxRepo.InsertInteracCITx(ctx, transaction.InteracCITx{
-			Status:           transaction.TxStatusInitial,
-			SrcInteracAccId:  tx.CinAccId,
-			DestInteracAccId: todo,
-			Amt:              tx.SrcAmt,
-			ParentTxId:       tx.ID,
-			OwnerId:          tx.OwnerId,
+			Status:          transaction.TxStatusInitial,
+			SrcInteracAccId: tx.CinAccId,
+			Amt:             tx.SrcAmt,
+			ParentTxId:      tx.ID,
+			OwnerId:         tx.OwnerId,
 		})
 		if err != nil {
 			ciErr = err
 			return
 		}
+		ci, err := p.interacTxRepo.GetUniqueInteracCITxById(ctx, ciId)
+		if err != nil {
+			ciErr = err
+			return
+		}
+		ciTx = ci
 	}
+	wg.Add(1)
+	go createCI()
+
+	var coutErr error
 
 }
 
