@@ -507,30 +507,24 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	go limitChecker()
 
 	// Create foree transaction.
-	foreeTxID, err := t.foreeTxRepo.InsertForeeTx(ctx, *foreeTx)
-	if err != nil {
-		return nil, transport.WrapInteralServerError(err)
+	var foreeTxErr transport.ForeeError
+	var foreeTxID int64
+	createForeeTx := func() {
+		id, err := t.foreeTxRepo.InsertForeeTx(ctx, *foreeTx)
+		if err != nil {
+			dTx.Rollback()
+			foreeTxErr = transport.WrapInteralServerError(err)
+		}
+
+		if _, err := t.addDailyTxLimit(ctx, *user, foreeTx.SrcAmt); err != nil {
+			dTx.Rollback()
+			foreeTxErr = transport.WrapInteralServerError(err)
+		}
+		foreeTxID = id
 	}
 
-	if _, err := t.addDailyTxLimit(ctx, *user, foreeTx.SrcAmt); err != nil {
-		return nil, transport.WrapInteralServerError(err)
-	}
-
-	summary := foreeTx.Summary
-	summary.ParentTxId = foreeTxID
-	summaryId, err := t.txSummaryRepo.InsertTxSummary(ctx, *summary)
-	if err != nil {
-		return nil, transport.WrapInteralServerError(err)
-	}
-	summary.ID = summaryId
-
-	//TODO: fee join.
-
-	//TODO: send to processor.
-	//CI
-	//IDM
-	//COUT
-	//Success to return?
+	wg.Add(1)
+	go createForeeTx()
 
 	wg.Wait()
 	if limitErr != nil {
@@ -541,6 +535,28 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 		dTx.Rollback()
 		return nil, rewardErr
 	}
+	if foreeTxErr != nil {
+		dTx.Rollback()
+		return nil, foreeTxErr
+	}
+
+	summary := foreeTx.Summary
+	summary.ParentTxId = foreeTxID
+	summaryId, err := t.txSummaryRepo.InsertTxSummary(ctx, *summary)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+	summary.ID = summaryId
+
+	// feeJoint
+	// reward
+
+	//TODO: send to processor.
+	//CI
+	//IDM
+	//COUT
+	//Success to return?
+
 	return NewTxSummaryDetailDTO(*summary), nil
 }
 
