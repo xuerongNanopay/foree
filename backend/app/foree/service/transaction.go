@@ -450,41 +450,61 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 		return nil, transport.NewInteralServerError("user `%v` do not find foreeTx in quote `%v`", user.ID, req.QuoteId)
 	}
 
+	// Start database transaction.
 	dTx, err := t.db.Begin()
 	if err != nil {
+		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(err)
 	}
 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
 	//Lock ci account.
-
-	foreeTx.OwnerId = user.ID
-	// Recheck rewards
-	if len(foreeTx.Rewards) == 1 {
-		reward := foreeTx.Rewards[1]
-		reward, err := t.rewardRepo.GetUniqueRewardById(ctx, reward.ID)
-		if err != nil {
-			return nil, transport.WrapInteralServerError(err)
-		}
-		if reward.Status != transaction.RewardStatusActive {
-			return nil, transport.NewInteralServerError("user `%v` try to create a transaction with reward `%v` in status `%s`", user.ID, reward.ID, reward.Status)
-		}
-		//TODO: update reward
-	}
-
-	// Recheck limit
-	txLimit, ok := txLimits[user.Group]
-	if !ok {
-		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", user.Group)
-	}
-
-	dailyLimit, err := t.getDailyTxLimit(ctx, *user)
+	_, err = t.interacRepo.GetUniqueActiveInteracAccountForUpdateByOwnerAndId(ctx, foreeTx.OwnerId, foreeTx.CinAccId)
 	if err != nil {
+		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	if foreeTx.SrcAmt.Amount+dailyLimit.UsedAmt.Amount > txLimit.MaxAmt.Amount {
-		return nil, transport.NewInteralServerError("user `%v` try to create a transaction with `%v` but the remaining limit is `%v`", user.ID, foreeTx.SrcAmt.Amount, txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount)
+	var wg sync.WaitGroup
+
+	// Recheck rewards
+	var rewardErr transport.ForeeError
+	rewardChecker := func() {
+		defer wg.Done()
+		if len(foreeTx.Rewards) == 1 {
+			reward := foreeTx.Rewards[1]
+			reward, err := t.rewardRepo.GetUniqueRewardById(ctx, reward.ID)
+			if err != nil {
+				rewardErr = transport.WrapInteralServerError(err)
+			}
+			if reward.Status != transaction.RewardStatusActive {
+				rewardErr = transport.NewInteralServerError("user `%v` try to create a transaction with reward `%v` in status `%s`", user.ID, reward.ID, reward.Status)
+			}
+			//TODO: update reward
+		}
 	}
+	wg.Add(1)
+	go rewardChecker()
+
+	// Recheck limit
+	var limitErr transport.ForeeError
+	limitChecker := func() {
+		txLimit, ok := txLimits[user.Group]
+		if !ok {
+			limitErr = transport.NewInteralServerError("transaction limit no found for group `%v`", user.Group)
+		}
+
+		dailyLimit, err := t.getDailyTxLimit(ctx, *user)
+		if err != nil {
+			limitErr = transport.WrapInteralServerError(err)
+		}
+
+		if foreeTx.SrcAmt.Amount+dailyLimit.UsedAmt.Amount > txLimit.MaxAmt.Amount {
+			limitErr = transport.NewInteralServerError("user `%v` try to create a transaction with `%v` but the remaining limit is `%v`", user.ID, foreeTx.SrcAmt.Amount, txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount)
+		}
+	}
+
+	wg.Add(1)
+	go limitChecker()
 
 	// Create foree transaction.
 	foreeTxID, err := t.foreeTxRepo.InsertForeeTx(ctx, *foreeTx)
@@ -512,6 +532,15 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	//COUT
 	//Success to return?
 
+	wg.Wait()
+	if limitErr != nil {
+		dTx.Rollback()
+		return nil, limitErr
+	}
+	if rewardErr != nil {
+		dTx.Rollback()
+		return nil, rewardErr
+	}
 	return NewTxSummaryDetailDTO(*summary), nil
 }
 
