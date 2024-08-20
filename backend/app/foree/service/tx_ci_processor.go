@@ -12,7 +12,7 @@ import (
 )
 
 type ScotiaProfile struct {
-	id                            string
+	Name                          string
 	legalName                     string
 	companyName                   string
 	initiatingPartyName           string
