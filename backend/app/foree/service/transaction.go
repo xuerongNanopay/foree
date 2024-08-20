@@ -488,6 +488,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	// Recheck limit
 	var limitErr transport.ForeeError
 	limitChecker := func() {
+		defer wg.Done()
 		txLimit, ok := txLimits[user.Group]
 		if !ok {
 			limitErr = transport.NewInteralServerError("transaction limit no found for group `%v`", user.Group)
@@ -510,6 +511,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	var foreeTxErr transport.ForeeError
 	var foreeTxID int64
 	createForeeTx := func() {
+		defer wg.Done()
 		id, err := t.foreeTxRepo.InsertForeeTx(ctx, *foreeTx)
 		if err != nil {
 			dTx.Rollback()
@@ -540,16 +542,69 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 		return nil, foreeTxErr
 	}
 
-	summary := foreeTx.Summary
-	summary.ParentTxId = foreeTxID
-	summaryId, err := t.txSummaryRepo.InsertTxSummary(ctx, *summary)
-	if err != nil {
-		return nil, transport.WrapInteralServerError(err)
-	}
-	summary.ID = summaryId
+	// Create TxSummary, feeJoin, update reward, update limit.
+	wg = sync.WaitGroup{}
 
-	// feeJoint
+	// Create TxSummary
+	var txSummaryErr transport.ForeeError
+	createSummaryTx := func() {
+		defer wg.Done()
+		foreeTx.Summary.ParentTxId = foreeTxID
+		id, err := t.txSummaryRepo.InsertTxSummary(ctx, *foreeTx.Summary)
+		if err != nil {
+			txSummaryErr = transport.WrapInteralServerError(err)
+		}
+		foreeTx.Summary.ID = id
+	}
+	wg.Add(1)
+	go createSummaryTx()
+
+	// Create feeJoint
+	var feeJointError transport.ForeeError
+	createFeeJoint := func() {
+		defer wg.Done()
+		for _, feeJoin := range foreeTx.Fees {
+			feeJoin.TransactionId = foreeTxID
+			_, err := t.feeJointRepo.InsertFeeJoint(ctx, *feeJoin)
+			if err != nil {
+				feeJointError = transport.WrapInteralServerError(err)
+				return
+			}
+		}
+	}
+	wg.Add(1)
+	go createFeeJoint()
+
 	// reward
+	var rewardError transport.ForeeError
+	updateReward := func() {
+		defer wg.Done()
+		if len(foreeTx.Rewards) == 1 {
+			r := foreeTx.Rewards[1]
+			r.AppliedTransactionId = foreeTxID
+			r.Status = transaction.RewardStatusPending
+			err := t.rewardRepo.UpdateRewardTxById(ctx, *r)
+			if err != nil {
+				rewardError = transport.WrapInteralServerError(err)
+			}
+		}
+	}
+	wg.Add(1)
+	go updateReward()
+
+	wg.Wait()
+	if txSummaryErr != nil {
+		dTx.Rollback()
+		return nil, txSummaryErr
+	}
+	if feeJointError != nil {
+		dTx.Rollback()
+		return nil, feeJointError
+	}
+	if rewardError != nil {
+		dTx.Rollback()
+		return nil, rewardError
+	}
 
 	//TODO: send to processor.
 	//CI
@@ -557,7 +612,11 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	//COUT
 	//Success to return?
 
-	return NewTxSummaryDetailDTO(*summary), nil
+	if err = dTx.Commit(); err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	return NewTxSummaryDetailDTO(*foreeTx.Summary), nil
 }
 
 func (t *TransactionService) rollBackTx(tx transaction.ForeeTx) {
