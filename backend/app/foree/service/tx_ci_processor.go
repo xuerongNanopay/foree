@@ -39,19 +39,24 @@ type CITxProcessor struct {
 	foreeTxRepo    *transaction.ForeeTxRepo
 	txSummaryRepo  *transaction.TxSummaryRepo
 	db             *sql.DB
-	waitLoop       chan transaction.ForeeTx
+	waitChan       chan transaction.ForeeTx
 	processingMap  []map[int64]*transaction.ForeeTx // Avoid duplicate process
 	processingLock sync.RWMutex
 }
 
 func (p *CITxProcessor) start() error {
-	go p.startWaitLoop()
+	go p.startProcessLoop()
 	return nil
 }
 
-func (p *CITxProcessor) startWaitLoop() {
+// timer, checker,
+func (p *CITxProcessor) startProcessLoop() {
 	for {
+		select {
+		case _ = <-p.waitChan:
+			//if tx in processinMap
 
+		}
 	}
 
 	//TODO: log fata if code reach here.
@@ -100,6 +105,10 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 		PaymentId:  tx.CI.ScotiaPaymentId,
 		EndToEndId: tx.Summary.NBPReference,
 	})
+	if err != nil {
+		dTx.Rollback()
+		return nil, err
+	}
 
 	if statusResp.StatusCode/100 != 2 {
 		//TODO: logging?
@@ -153,6 +162,7 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 
 func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.RequestPaymentRequest {
 	expireDate := time.Now().Add(time.Hour * time.Duration(p.scotiaProfile.expireInHours))
+
 	req := &scotia.RequestPaymentRequest{
 		RequestData: &scotia.RequestPaymentRequestData{
 			ProductCode:                    "DOMESTIC",
@@ -228,5 +238,7 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 }
 
 func (p *CITxProcessor) waitPaymentConfirm(tx transaction.ForeeTx) {
-	p.waitLoop <- tx
+	go func() {
+		p.waitChan <- tx
+	}()
 }
