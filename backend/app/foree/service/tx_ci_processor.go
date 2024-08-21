@@ -39,6 +39,9 @@ type CITxProcessor struct {
 	txSummaryRepo *transaction.TxSummaryRepo
 	txProcessor   *TxProcessor
 	db            *sql.DB
+	doneChan      chan int64
+	startChan     chan transaction.ForeeTx
+	ticker        time.Ticker
 }
 
 func (p *CITxProcessor) start() error {

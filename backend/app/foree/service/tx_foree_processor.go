@@ -230,7 +230,7 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	return foree, nil
 }
 
-func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *TxProcessor) processTx(tx transaction.ForeeTx) {
 	if tx.Type != transaction.TxTypeInteracToNBP {
 		return nil, fmt.Errorf("unknow ForeeTx type `%s` for transaction `%v`", tx.Type, tx.ID)
 	}
@@ -242,17 +242,20 @@ func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, e
 	for {
 		nTx, err = p.doProcessTx(ctx, tx)
 		if err != nil {
-			return nil, err
+			//TODO: log err
+			return
 		}
 		if tx.CurStage == nTx.CurStage && nTx.CurStageStatus == tx.CurStageStatus {
-			return nTx, nil
+			return
 		}
 		// Record the history.
 		go p.recordTxHistory(*transaction.NewTxHistory(nTx, ""))
 		tx = *nTx
 
 		if i > maxLoop {
-			return nil, fmt.Errorf("unexpect looping for ForeeTx `%v`", nTx.ID)
+			//log error
+			return
+			// return nil, fmt.Errorf("unexpect looping for ForeeTx `%v`", nTx.ID)
 		}
 		i += 1
 	}
