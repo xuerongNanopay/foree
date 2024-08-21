@@ -92,7 +92,7 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 	// Get url payment link
 	statusResp, err := p.scotiaClient.PaymentStatus(scotia.PaymentStatusRequest{
 		PaymentId:  tx.CI.ScotiaPaymentId,
-		EndToEndId: tx.Summary.NBPReference,
+		EndToEndId: tx.CI.EndToEndId,
 	})
 	if err != nil {
 		dTx.Rollback()

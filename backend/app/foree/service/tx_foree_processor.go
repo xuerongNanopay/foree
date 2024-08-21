@@ -66,6 +66,7 @@ func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, er
 		ciId, err := p.interacTxRepo.InsertInteracCITx(ctx, transaction.InteracCITx{
 			Status:          transaction.TxStatusInitial,
 			SrcInteracAccId: tx.CinAccId,
+			EndToEndId:      tx.Summary.NBPReference,
 			Amt:             tx.SrcAmt,
 			ParentTxId:      tx.ID,
 			OwnerId:         tx.OwnerId,

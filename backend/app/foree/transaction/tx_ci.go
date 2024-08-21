@@ -15,14 +15,14 @@ const (
         INSERT INTO interact_ci_tx
         (
             status, src_interac_acc_id,
-            amount, currency, parent_tx_id, owner_id
-        ) VALUES(?,?,?,?,?,?,?)
+            amount, currency, end_to_end_id, parent_tx_id, owner_id
+        ) VALUES(?,?,?,?,?,?,?,?)
     `
 	sQLInteracCITxGetUniqueById = `
         SELECT 
             t.id, t.status, t.src_interac_acc_id,
             t.amount, t.currency, t.scotia_payment_id, 
-			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id
+			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
             t.parent_tx_id, t.owner_id, t.create_at, t.update_at
         FROM interact_ci_tx t
         where t.id = ?
@@ -32,15 +32,15 @@ const (
         SELECT 
             t.id, t.status, t.src_interac_acc_id,
             t.amount, t.currency, t.scotia_payment_id, 
-			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id
+			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
             t.parent_tx_id, t.owner_id, t.create_at, t.update_at
         FROM interact_ci_tx t
         where t.parent_tx_id = ?
     `
 	sQLInteracCITxUpdateById = `
         UPDATE interact_ci_tx SET 
-            status = ?, scotia_payment_id = ?, scotia_status = ?
-			scotia_clearing_reference = ?, payment_url = ?, end_to_end_id = ?
+            status = ?, scotia_payment_id = ?, scotia_status = ?,
+			scotia_clearing_reference = ?, payment_url = ?
         WHERE id = ?
     `
 )
@@ -83,6 +83,7 @@ func (repo *InteracCITxRepo) InsertInteracCITx(ctx context.Context, tx InteracCI
 			tx.SrcInteracAccId,
 			tx.Amt.Amount,
 			tx.Amt.Currency,
+			tx.EndToEndId,
 			tx.ParentTxId,
 			tx.OwnerId,
 		)
@@ -93,6 +94,7 @@ func (repo *InteracCITxRepo) InsertInteracCITx(ctx context.Context, tx InteracCI
 			tx.SrcInteracAccId,
 			tx.Amt.Amount,
 			tx.Amt.Currency,
+			tx.EndToEndId,
 			tx.ParentTxId,
 			tx.OwnerId,
 		)
@@ -114,10 +116,10 @@ func (repo *InteracCITxRepo) UpdateInteracCITxById(ctx context.Context, tx Inter
 	var err error
 
 	if ok {
-		_, err = dTx.Exec(sQLInteracCITxUpdateById, tx.Status, tx.ScotiaPaymentId, tx.ScotiaStatus, tx.ScotiaClearingReference, tx.PaymentUrl, tx.EndToEndId, tx.ID)
+		_, err = dTx.Exec(sQLInteracCITxUpdateById, tx.Status, tx.ScotiaPaymentId, tx.ScotiaStatus, tx.ScotiaClearingReference, tx.PaymentUrl, tx.ID)
 
 	} else {
-		_, err = repo.db.Exec(sQLInteracCITxUpdateById, tx.Status, tx.ScotiaPaymentId, tx.ScotiaStatus, tx.ScotiaClearingReference, tx.PaymentUrl, tx.EndToEndId, tx.ID)
+		_, err = repo.db.Exec(sQLInteracCITxUpdateById, tx.Status, tx.ScotiaPaymentId, tx.ScotiaStatus, tx.ScotiaClearingReference, tx.PaymentUrl, tx.ID)
 
 	}
 	if err != nil {
