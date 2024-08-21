@@ -8,7 +8,6 @@ import (
 	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/types"
-	"xue.io/go-pay/auth"
 )
 
 const (
@@ -107,9 +106,9 @@ type ForeeTx struct {
 	CreateAt           time.Time        `json:"createAt,omitempty"`
 	UpdateAt           time.Time        `json:"updateAt,omitempty"`
 
-	Ip          string                  `json:"ip,omitempty"`
-	UserAgent   string                  `json:"userAgent,omitempty"`
-	Owner       *auth.User              `json:"ower,omitempty"`
+	Ip        string `json:"ip,omitempty"`
+	UserAgent string `json:"userAgent,omitempty"`
+	// Owner       *auth.User              `json:"ower,omitempty"`
 	InteracAcc  *account.InteracAccount `json:"interacAcc,omitempty"`
 	ContactAcc  *account.ContactAccount `json:"contactAcc,omitempty"`
 	FeeJointIds []int64                 `json:"feeJointIds,omitempty"`
