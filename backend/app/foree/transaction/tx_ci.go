@@ -37,6 +37,25 @@ const (
         FROM interact_ci_tx t
         where t.parent_tx_id = ?
     `
+	sQLInteracCITxGetUniqueByScotiaPaymentId = `
+		SELECT 
+			t.id, t.status, t.src_interac_acc_id,
+			t.amount, t.currency, t.scotia_payment_id, 
+			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
+			t.parent_tx_id, t.owner_id, t.create_at, t.update_at
+		FROM interact_ci_tx t
+		where t.scotia_payment_id = ?
+		FOR UPDATE
+	`
+	sQLInteracCITxGetAllByStatus = `
+		SELECT 
+			t.id, t.status, t.src_interac_acc_id,
+			t.amount, t.currency, t.scotia_payment_id, 
+			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
+			t.parent_tx_id, t.owner_id, t.create_at, t.update_at
+		FROM interact_ci_tx t
+		where t.status = ?
+	`
 	sQLInteracCITxUpdateById = `
         UPDATE interact_ci_tx SET 
             status = ?, scotia_payment_id = ?, scotia_status = ?,
@@ -152,6 +171,39 @@ func (repo *InteracCITxRepo) GetUniqueInteracCITxByParentTxId(ctx context.Contex
 	return f, nil
 }
 
+func (repo *InteracCITxRepo) GetUniqueInteracCITxByScotiaPaymentId(ctx context.Context, scotiaPaymentId int64) (*InteracCITx, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var rows *sql.Rows
+
+	if ok {
+		rows, err = dTx.Query(sQLInteracCITxGetUniqueByScotiaPaymentId, scotiaPaymentId)
+	} else {
+		rows, err = repo.db.Query(sQLInteracCITxGetUniqueByScotiaPaymentId, scotiaPaymentId)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *InteracCITx
+
+	for rows.Next() {
+		f, err = scanRowIntoInteracCITx(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
 func (repo *InteracCITxRepo) GetUniqueInteracCITxById(ctx context.Context, id int64) (*InteracCITx, error) {
 	rows, err := repo.db.Query(sQLInteracCITxGetUniqueById, id)
 
@@ -174,6 +226,30 @@ func (repo *InteracCITxRepo) GetUniqueInteracCITxById(ctx context.Context, id in
 	}
 
 	return f, nil
+}
+
+func (repo *InteracCITxRepo) GetAllInteracCITxByStatus(ctx context.Context, status TxStatus) ([]*InteracCITx, error) {
+	rows, err := repo.db.Query(sQLInteracCITxGetAllByStatus, status)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	txs := make([]*InteracCITx, 16)
+	for rows.Next() {
+		p, err := scanRowIntoInteracCITx(rows)
+		if err != nil {
+			return nil, err
+		}
+		txs = append(txs, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return txs, nil
 }
 
 func scanRowIntoInteracCITx(rows *sql.Rows) (*InteracCITx, error) {
