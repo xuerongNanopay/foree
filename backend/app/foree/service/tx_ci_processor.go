@@ -227,16 +227,24 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 	return req
 }
 
-func (p *CITxProcessor) updateScotiaStatus(ciTx transaction.InteracCITx) (string, error) {
+func (p *CITxProcessor) refreshScotiaStatus(ciTx transaction.InteracCITx) {
+	if ciTx.Status != transaction.TxStatusSent {
+		//Log
+		return
+	}
+
 	detailResp, err := p.scotiaClient.PaymentDetail(scotia.PaymentDetailRequest{
 		PaymentId:  ciTx.ScotiaPaymentId,
 		EndToEndId: ciTx.EndToEndId,
 	})
 	if err != nil {
-		return "", err
+		//TODO: Log error
+		return
 	}
 	if detailResp.StatusCode/100 != 2 {
-		return "", fmt.Errorf("scotia paymentdetail error: (httpCode: `%v`, request: `%s`, response: `%s`)", detailResp.StatusCode, detailResp.RawRequest, detailResp.RawResponse)
+		//TODO: Log error
+		return
+		// return "", fmt.Errorf("scotia paymentdetail error: (httpCode: `%v`, request: `%s`, response: `%s`)", detailResp.StatusCode, detailResp.RawRequest, detailResp.RawResponse)
 	}
 
 	scotiaStatus := detailResp.PaymentDetail.TransactionStatus
@@ -244,6 +252,66 @@ func (p *CITxProcessor) updateScotiaStatus(ciTx transaction.InteracCITx) (string
 		scotiaStatus = detailResp.PaymentDetail.RequestForPaymentStatus
 	}
 	newStatus := scotiaToInternalStatusMapper(scotiaStatus)
+
+	if newStatus == transaction.TxStatusSent {
+		//Log debug
+		return
+	}
+
+	dTx, err := p.db.Begin()
+	if err != nil {
+		dTx.Rollback()
+		//TODO: log err
+		return
+	}
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+	_, err = p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, ciTx.ParentTxId)
+	if err != nil {
+		dTx.Rollback()
+		//TODO: log err
+		return
+	}
+
+	foreeTx, err := p.txProcessor.loadTx(ciTx.ParentTxId, true)
+	if err != nil {
+		dTx.Rollback()
+		//TODO: log err
+		return
+	}
+
+	if foreeTx.CurStage != transaction.TxStageInteracCI && foreeTx.CurStageStatus != transaction.TxStatusSent {
+		dTx.Rollback()
+		//TODO: log err
+		return
+	}
+
+	// Update Foree Tx and CI Tx.
+	foreeTx.CI.Status = newStatus
+	foreeTx.CI.ScotiaStatus = scotiaStatus
+	foreeTx.CurStageStatus = newStatus
+
+	err = p.interacTxRepo.UpdateInteracCITxById(ctx, *foreeTx.CI)
+	if err != nil {
+		dTx.Rollback()
+		//TODO: log err
+		return
+	}
+
+	err = p.foreeTxRepo.UpdateForeeTxById(ctx, *foreeTx)
+	if err != nil {
+		dTx.Rollback()
+		//TODO: log err
+		return
+	}
+
+	if err = dTx.Commit(); err != nil {
+		//TODO: log err
+		return
+	}
+
+	//TODO: Forward to Txprocessor
 
 }
 
