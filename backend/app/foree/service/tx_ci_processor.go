@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sync"
 	"time"
 
 	"xue.io/go-pay/app/foree/constant"
@@ -32,12 +33,28 @@ type ScotiaProfile struct {
 }
 
 type CITxProcessor struct {
-	scotiaProfile ScotiaProfile
-	scotiaClient  scotia.ScotiaClient
-	interacTxRepo *transaction.InteracCITxRepo
-	foreeTxRepo   *transaction.ForeeTxRepo
-	txSummaryRepo *transaction.TxSummaryRepo
-	db            *sql.DB
+	scotiaProfile  ScotiaProfile
+	scotiaClient   scotia.ScotiaClient
+	interacTxRepo  *transaction.InteracCITxRepo
+	foreeTxRepo    *transaction.ForeeTxRepo
+	txSummaryRepo  *transaction.TxSummaryRepo
+	db             *sql.DB
+	waitLoop       chan transaction.ForeeTx
+	processingMap  []map[int64]*transaction.ForeeTx // Avoid duplicate process
+	processingLock sync.RWMutex
+}
+
+func (p *CITxProcessor) start() error {
+	go p.startWaitLoop()
+	return nil
+}
+
+func (p *CITxProcessor) startWaitLoop() {
+	for {
+
+	}
+
+	//TODO: log fata if code reach here.
 }
 
 func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
@@ -210,12 +227,6 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 	return req
 }
 
-func (p *CITxProcessor) waitPaymentReceive(ctx context.Context, tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	return nil, nil
+func (p *CITxProcessor) waitPaymentConfirm(tx transaction.ForeeTx) {
+	p.waitLoop <- tx
 }
-
-func (p *CITxProcessor) doWait(ctx context.Context, tx transaction.ForeeTx) {
-	return
-}
-
-func generateScotiaIdentification()
