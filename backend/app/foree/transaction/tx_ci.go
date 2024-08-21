@@ -22,7 +22,7 @@ const (
         SELECT 
             t.id, t.status, t.src_interac_acc_id,
             t.amount, t.currency, t.scotia_payment_id, 
-			t.scotia_status, t.scotia_clearing_reference, t.payment_url,
+			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id
             t.parent_tx_id, t.owner_id, t.create_at, t.update_at
         FROM interact_ci_tx t
         where t.id = ?
@@ -32,7 +32,7 @@ const (
         SELECT 
             t.id, t.status, t.src_interac_acc_id,
             t.amount, t.currency, t.scotia_payment_id, 
-			t.scotia_status, t.scotia_clearing_reference, t.payment_url,
+			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id
             t.parent_tx_id, t.owner_id, t.create_at, t.update_at
         FROM interact_ci_tx t
         where t.parent_tx_id = ?
@@ -40,7 +40,7 @@ const (
 	sQLInteracCITxUpdateById = `
         UPDATE interact_ci_tx SET 
             status = ?, scotia_payment_id = ?, scotia_status = ?
-			scotia_clearing_reference = ?, payment_url = ?
+			scotia_clearing_reference = ?, payment_url = ?, end_to_end_id = ?
         WHERE id = ?
     `
 )
@@ -48,10 +48,11 @@ const (
 type InteracCITx struct {
 	ID                      int64                   `json:"id"`
 	Status                  TxStatus                `json:"status"`
-	PaymentUrl              string                  `json:"paymentUrl"`
 	ScotiaPaymentId         string                  `json:"scotiaPaymentId"`
 	ScotiaStatus            string                  `json:"scotiaStatus"`
 	ScotiaClearingReference string                  `json:"scotiaClearingReference"`
+	PaymentUrl              string                  `json:"paymentUrl"`
+	EndToEndId              string                  `json:"endToEndId"`
 	SrcInteracAccId         int64                   `json:"srcInteracAccId"`
 	SrcInteracAcc           *account.InteracAccount `json:"srcInteracAcc"`
 	Amt                     types.AmountData        `json:"Amt"`
@@ -113,10 +114,10 @@ func (repo *InteracCITxRepo) UpdateInteracCITxById(ctx context.Context, tx Inter
 	var err error
 
 	if ok {
-		_, err = dTx.Exec(sQLInteracCITxUpdateById, tx.Status, tx.ScotiaPaymentId, tx.ScotiaStatus, tx.ScotiaClearingReference, tx.PaymentUrl, tx.ID)
+		_, err = dTx.Exec(sQLInteracCITxUpdateById, tx.Status, tx.ScotiaPaymentId, tx.ScotiaStatus, tx.ScotiaClearingReference, tx.PaymentUrl, tx.EndToEndId, tx.ID)
 
 	} else {
-		_, err = repo.db.Exec(sQLInteracCITxUpdateById, tx.Status, tx.ScotiaPaymentId, tx.ScotiaStatus, tx.ScotiaClearingReference, tx.PaymentUrl, tx.ID)
+		_, err = repo.db.Exec(sQLInteracCITxUpdateById, tx.Status, tx.ScotiaPaymentId, tx.ScotiaStatus, tx.ScotiaClearingReference, tx.PaymentUrl, tx.EndToEndId, tx.ID)
 
 	}
 	if err != nil {
@@ -185,6 +186,7 @@ func scanRowIntoInteracCITx(rows *sql.Rows) (*InteracCITx, error) {
 		&tx.ScotiaStatus,
 		&tx.ScotiaClearingReference,
 		&tx.PaymentUrl,
+		&tx.EndToEndId,
 		&tx.ParentTxId,
 		&tx.OwnerId,
 		&tx.CreateAt,
