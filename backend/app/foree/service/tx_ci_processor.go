@@ -312,7 +312,6 @@ func (p *CITxProcessor) refreshScotiaStatus(ciTx transaction.InteracCITx) {
 	}
 
 	//TODO: Forward to Txprocessor
-
 }
 
 // func (p *CITxProcessor) getScotiaRawDetail(paymentId string) (string, error) {
