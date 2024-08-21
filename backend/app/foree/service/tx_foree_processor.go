@@ -16,17 +16,16 @@ import (
 // It is the internal service for transaction process.
 
 type TxProcessor struct {
-	db             *sql.DB
-	interacTxRepo  *transaction.InteracCITxRepo
-	npbTxRepo      *transaction.NBPCOTxRepo
-	idmTxRepo      *transaction.IdmTxRepo
-	txHistoryRepo  *transaction.TxHistoryRepo
-	txSummaryRepo  *transaction.TxSummaryRepo
-	foreeTxRepo    *transaction.ForeeTxRepo
-	contactRepo    *account.ContactAccountRepo
-	interacRepo    *account.InteracAccountRepo
-	processingMap  []map[int64]*transaction.ForeeTx // Avoid duplicate process
-	processingLock sync.RWMutex
+	db            *sql.DB
+	interacTxRepo *transaction.InteracCITxRepo
+	npbTxRepo     *transaction.NBPCOTxRepo
+	idmTxRepo     *transaction.IdmTxRepo
+	txHistoryRepo *transaction.TxHistoryRepo
+	txSummaryRepo *transaction.TxSummaryRepo
+	foreeTxRepo   *transaction.ForeeTxRepo
+	contactRepo   *account.ContactAccountRepo
+	interacRepo   *account.InteracAccountRepo
+	ciTxProcessor *CITxProcessor
 }
 
 func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {

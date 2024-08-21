@@ -37,6 +37,7 @@ type CITxProcessor struct {
 	interacTxRepo *transaction.InteracCITxRepo
 	foreeTxRepo   *transaction.ForeeTxRepo
 	txSummaryRepo *transaction.TxSummaryRepo
+	txProcessor   *TxProcessor
 	db            *sql.DB
 }
 
@@ -226,6 +227,46 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 	return req
 }
 
-func (p *CITxProcessor) tryUpdateStatus(tx transaction.ForeeTx) {
+func (p *CITxProcessor) getScotiaStatus(ciTx transaction.InteracCITx) (string, error) {
+	detailResp, err := p.scotiaClient.PaymentDetail(scotia.PaymentDetailRequest{
+		PaymentId:  ciTx.ScotiaPaymentId,
+		EndToEndId: ciTx.EndToEndId,
+	})
+	if err != nil {
+		return "", err
+	}
 
+}
+
+// func (p *CITxProcessor) getScotiaRawDetail(paymentId string) (string, error) {
+
+// }
+
+func scotiaToInternalStatusMapper(scotiaStatus string) transaction.TxStatus {
+	switch scotiaStatus {
+	case "ACCC":
+		fallthrough
+	case "ACSP":
+		fallthrough
+	case "COMPLETED":
+		fallthrough
+	case "REALTIME_DEPOSIT_COMPLETED":
+		fallthrough
+	case "DEPOSIT_COMPLETE":
+		return transaction.TxStatusCompleted
+	case "RJCT":
+		fallthrough
+	case "DECLINED":
+		fallthrough
+	case "REALTIME_DEPOSIT_FAILED":
+		fallthrough
+	case "DIRECT_DEPOSIT_FAILED":
+		return transaction.TxStatusRejected
+	case "CANCELLED":
+		fallthrough
+	case "EXPIRED":
+		return transaction.TxStatusCancelled
+	default:
+		return transaction.TxStatusSent
+	}
 }
