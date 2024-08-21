@@ -34,7 +34,12 @@ func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
 		//todo log
 		return
 	}
-	go p.processTx(*foreeTx)
+
+	_, err = p.processTx(*foreeTx)
+	if err != nil {
+		//TODO log
+		return
+	}
 }
 
 // Create CI, COUT, IDM for ForeeTx

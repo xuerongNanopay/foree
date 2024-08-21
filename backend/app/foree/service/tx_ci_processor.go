@@ -230,7 +230,7 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 	return req
 }
 
-func (p *CITxProcessor) refreshScotiaStatusAndProcess(ciTx transaction.InteracCITx) (*transaction.ForeeTx, error) {
+func (p *CITxProcessor) refreshScotiaStatusAndTryProcess(ciTx transaction.InteracCITx) (*transaction.ForeeTx, error) {
 	if ciTx.Status != transaction.TxStatusSent {
 		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: InteracCITx `%v` is in `%s`", ciTx.ID, ciTx.Status)
 	}
@@ -254,7 +254,7 @@ func (p *CITxProcessor) refreshScotiaStatusAndProcess(ciTx transaction.InteracCI
 
 	newStatus := scotiaToInternalStatusMapper(scotiaStatus)
 	if newStatus == transaction.TxStatusSent {
-		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: InteracCITx `%v` is still in status `%s`", ciTx.Id, scotiaStatus)
+		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: InteracCITx `%v` is still in status `%s`", ciTx.ID, scotiaStatus)
 	}
 
 	dTx, err := p.db.Begin()
@@ -303,10 +303,10 @@ func (p *CITxProcessor) refreshScotiaStatusAndProcess(ciTx transaction.InteracCI
 		return nil, err
 	}
 
-	//TODO: Forward to Txprocessor
+	return p.txProcessor.processTx(*foreeTx)
 }
 
-// func (p *CITxProcessor) getScotiaRawDetail(paymentId string) (string, error) {
+// func (p *CITxProcessor) ProcessCITx(paymentId string) (string, error) {
 
 // }
 
