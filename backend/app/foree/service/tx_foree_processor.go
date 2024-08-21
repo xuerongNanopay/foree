@@ -230,7 +230,7 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	return foree, nil
 }
 
-func (p *TxProcessor) processTx(tx transaction.ForeeTx) {
+func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	if tx.Type != transaction.TxTypeInteracToNBP {
 		return nil, fmt.Errorf("unknow ForeeTx type `%s` for transaction `%v`", tx.Type, tx.ID)
 	}
@@ -242,20 +242,17 @@ func (p *TxProcessor) processTx(tx transaction.ForeeTx) {
 	for {
 		nTx, err = p.doProcessTx(ctx, tx)
 		if err != nil {
-			//TODO: log err
-			return
+			return nil, err
 		}
 		if tx.CurStage == nTx.CurStage && nTx.CurStageStatus == tx.CurStageStatus {
-			return
+			return nTx, nil
 		}
 		// Record the history.
 		go p.recordTxHistory(*transaction.NewTxHistory(nTx, ""))
 		tx = *nTx
 
 		if i > maxLoop {
-			//log error
-			return
-			// return nil, fmt.Errorf("unexpect looping for ForeeTx `%v`", nTx.ID)
+			return nil, fmt.Errorf("unexpect looping for ForeeTx `%v`", nTx.ID)
 		}
 		i += 1
 	}
@@ -361,7 +358,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 	default:
 		return nil, fmt.Errorf("transaction `%v` in unknown stage `%s`", tx.ID, tx.CurStage)
 	}
-	return nil, nil
+	return &tx, nil
 }
 
 func (p *TxProcessor) closeRemainingTx(ctx context.Context, tx transaction.ForeeTx) (*transaction.ForeeTx, error) {

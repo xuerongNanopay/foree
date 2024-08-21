@@ -230,10 +230,9 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 	return req
 }
 
-func (p *CITxProcessor) refreshScotiaStatus(ciTx transaction.InteracCITx) {
+func (p *CITxProcessor) refreshScotiaStatusAndProcess(ciTx transaction.InteracCITx) (*transaction.ForeeTx, error) {
 	if ciTx.Status != transaction.TxStatusSent {
-		//Log
-		return
+		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: InteracCITx `%v` is in `%s`", ciTx.ID, ciTx.Status)
 	}
 
 	detailResp, err := p.scotiaClient.PaymentDetail(scotia.PaymentDetailRequest{
@@ -241,31 +240,27 @@ func (p *CITxProcessor) refreshScotiaStatus(ciTx transaction.InteracCITx) {
 		EndToEndId: ciTx.EndToEndId,
 	})
 	if err != nil {
-		//TODO: Log error
-		return
+		return nil, err
 	}
+
 	if detailResp.StatusCode/100 != 2 {
-		//TODO: Log error
-		return
-		// return "", fmt.Errorf("scotia paymentdetail error: (httpCode: `%v`, request: `%s`, response: `%s`)", detailResp.StatusCode, detailResp.RawRequest, detailResp.RawResponse)
+		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: scotia paymentdetail error: (httpCode: `%v`, request: `%s`, response: `%s`)", detailResp.StatusCode, detailResp.RawRequest, detailResp.RawResponse)
 	}
 
 	scotiaStatus := detailResp.PaymentDetail.TransactionStatus
 	if scotiaStatus == "" {
 		scotiaStatus = detailResp.PaymentDetail.RequestForPaymentStatus
 	}
-	newStatus := scotiaToInternalStatusMapper(scotiaStatus)
 
+	newStatus := scotiaToInternalStatusMapper(scotiaStatus)
 	if newStatus == transaction.TxStatusSent {
-		//Log debug
-		return
+		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: InteracCITx `%v` is still in status `%s`", ciTx.Id, scotiaStatus)
 	}
 
 	dTx, err := p.db.Begin()
 	if err != nil {
 		dTx.Rollback()
-		//TODO: log err
-		return
+		return nil, err
 	}
 
 	ctx := context.Background()
@@ -273,21 +268,18 @@ func (p *CITxProcessor) refreshScotiaStatus(ciTx transaction.InteracCITx) {
 	_, err = p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, ciTx.ParentTxId)
 	if err != nil {
 		dTx.Rollback()
-		//TODO: log err
-		return
+		return nil, err
 	}
 
 	foreeTx, err := p.txProcessor.loadTx(ciTx.ParentTxId, true)
 	if err != nil {
 		dTx.Rollback()
-		//TODO: log err
-		return
+		return nil, err
 	}
 
 	if foreeTx.CurStage != transaction.TxStageInteracCI && foreeTx.CurStageStatus != transaction.TxStatusSent {
 		dTx.Rollback()
-		//TODO: log err
-		return
+		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: ForeeTx `%v` is in stage `%s` at status `%s`", foreeTx.ID, foreeTx.CurStage, foreeTx.CurStageStatus)
 	}
 
 	// Update Foree Tx and CI Tx.
@@ -298,20 +290,17 @@ func (p *CITxProcessor) refreshScotiaStatus(ciTx transaction.InteracCITx) {
 	err = p.interacTxRepo.UpdateInteracCITxById(ctx, *foreeTx.CI)
 	if err != nil {
 		dTx.Rollback()
-		//TODO: log err
-		return
+		return nil, err
 	}
 
 	err = p.foreeTxRepo.UpdateForeeTxById(ctx, *foreeTx)
 	if err != nil {
 		dTx.Rollback()
-		//TODO: log err
-		return
+		return nil, err
 	}
 
 	if err = dTx.Commit(); err != nil {
-		//TODO: log err
-		return
+		return nil, err
 	}
 
 	//TODO: Forward to Txprocessor
