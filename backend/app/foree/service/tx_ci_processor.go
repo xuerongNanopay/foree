@@ -83,7 +83,7 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 	if resp.StatusCode/100 != 2 {
 		//TODO: logging?
 		dTx.Rollback()
-		return nil, fmt.Errorf("scotial request payment error: (httpCode: `%v`, request: `%s`, response: `%s`)", resp.StatusCode, resp.RawRequest, resp.RawResponse)
+		return nil, fmt.Errorf("scotial requestPayment error: (httpCode: `%v`, request: `%s`, response: `%s`)", resp.StatusCode, resp.RawRequest, resp.RawResponse)
 	}
 
 	//TODO: log success
@@ -103,12 +103,12 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 	if statusResp.StatusCode/100 != 2 {
 		//TODO: logging?
 		dTx.Rollback()
-		return nil, fmt.Errorf("scotial payment status error: (httpCode: `%v`, request: `%s`, response: `%s`)", statusResp.StatusCode, statusResp.RawRequest, statusResp.RawResponse)
+		return nil, fmt.Errorf("scotial paymentstatus error: (httpCode: `%v`, request: `%s`, response: `%s`)", statusResp.StatusCode, statusResp.RawRequest, statusResp.RawResponse)
 	}
 
 	if len(statusResp.PaymentStatuses) != 1 {
 		dTx.Rollback()
-		return nil, fmt.Errorf("scotial payment status error: (httpCode: `%v`, request: `%s`, response: `%s`)", statusResp.StatusCode, statusResp.RawRequest, statusResp.RawResponse)
+		return nil, fmt.Errorf("scotial paymentstatus error: (httpCode: `%v`, request: `%s`, response: `%s`)", statusResp.StatusCode, statusResp.RawRequest, statusResp.RawResponse)
 	}
 
 	// Update CI
@@ -227,7 +227,7 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 	return req
 }
 
-func (p *CITxProcessor) getScotiaStatus(ciTx transaction.InteracCITx) (string, error) {
+func (p *CITxProcessor) updateScotiaStatus(ciTx transaction.InteracCITx) (string, error) {
 	detailResp, err := p.scotiaClient.PaymentDetail(scotia.PaymentDetailRequest{
 		PaymentId:  ciTx.ScotiaPaymentId,
 		EndToEndId: ciTx.EndToEndId,
@@ -235,6 +235,15 @@ func (p *CITxProcessor) getScotiaStatus(ciTx transaction.InteracCITx) (string, e
 	if err != nil {
 		return "", err
 	}
+	if detailResp.StatusCode/100 != 2 {
+		return "", fmt.Errorf("scotia paymentdetail error: (httpCode: `%v`, request: `%s`, response: `%s`)", detailResp.StatusCode, detailResp.RawRequest, detailResp.RawResponse)
+	}
+
+	scotiaStatus := detailResp.PaymentDetail.TransactionStatus
+	if scotiaStatus == "" {
+		scotiaStatus = detailResp.PaymentDetail.RequestForPaymentStatus
+	}
+	newStatus := scotiaToInternalStatusMapper(scotiaStatus)
 
 }
 

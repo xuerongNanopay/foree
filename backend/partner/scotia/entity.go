@@ -189,6 +189,7 @@ type PaymentDetailData struct {
 	OriginalCreationDatetime       string        `json:"original_creation_datetime,omitempty"`
 	OriginalEndToEndIdentification string        `json:"original_end_to_end_identification,omitempty"`
 	TransactionStatus              string        `json:"transaction_status,omitempty"`
+	RequestForPaymentStatus        string        `json:"request_for_payment_status,omitempty"`
 	AcceptanceDatetime             string        `json:"acceptance_datetime,omitempty"`
 	ClearingSystemReference        string        `json:"clearing_system_reference,omitempty"`
 	Amount                         ScotiaAmtData `json:"amount,omitempty"`
