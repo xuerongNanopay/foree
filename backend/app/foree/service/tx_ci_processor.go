@@ -375,6 +375,10 @@ func (p *CITxProcessor) Webhook(paymentId string) {
 	p.webhookChan <- ciTx.ParentTxId
 }
 
+func (p *CITxProcessor) RemoveTx(foreeTxId int64) {
+	p.doneChan <- foreeTxId
+}
+
 func scotiaToInternalStatusMapper(scotiaStatus string) transaction.TxStatus {
 	switch scotiaStatus {
 	case "ACCC":
