@@ -39,20 +39,50 @@ type CITxProcessor struct {
 	txSummaryRepo *transaction.TxSummaryRepo
 	txProcessor   *TxProcessor
 	db            *sql.DB
+	fTxs          map[int64]*transaction.ForeeTx
 	doneChan      chan int64
 	startChan     chan transaction.ForeeTx
 	ticker        time.Ticker
 }
 
 func (p *CITxProcessor) start() error {
-	go p.initCron()
+	go p.startProcessor()
 	return nil
 }
 
-func (p *CITxProcessor) initCron() error {
+func (p *CITxProcessor) startProcessor() error {
 	for {
-		time.Sleep(5 * time.Minute)
+		select {
+		case tx := <-p.startChan:
+			_, ok := p.fTxs[tx.ID]
+			if ok {
+				//Log duplicate
+			} else {
+				p.fTxs[tx.ID] = &tx
+			}
+		case foreeTxId := <-p.doneChan:
+			delete(p.fTxs, foreeTxId)
+		case <-p.ticker.C:
+			p.processFTxs()
+		}
 	}
+}
+
+func (p *CITxProcessor) processFTxs() {
+
+}
+
+func (p *CITxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	t, err := p.requestPayment(tx)
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		//TODO: send to wait.
+	}()
+
+	return t, nil
 }
 
 func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
@@ -230,14 +260,15 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 	return req
 }
 
-func (p *CITxProcessor) refreshScotiaStatusAndTryProcess(ciTx transaction.InteracCITx) (*transaction.ForeeTx, error) {
-	if ciTx.Status != transaction.TxStatusSent {
-		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: InteracCITx `%v` is in `%s`", ciTx.ID, ciTx.Status)
+func (p *CITxProcessor) refreshScotiaStatusAndTryProcess(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	if fTx.CI.Status != transaction.TxStatusSent {
+		//TODO: send to cancel
+		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: InteracCITx `%v` is in `%s`", fTx.CI.ID, fTx.CI.Status)
 	}
 
 	detailResp, err := p.scotiaClient.PaymentDetail(scotia.PaymentDetailRequest{
-		PaymentId:  ciTx.ScotiaPaymentId,
-		EndToEndId: ciTx.EndToEndId,
+		PaymentId:  fTx.CI.ScotiaPaymentId,
+		EndToEndId: fTx.CI.EndToEndId,
 	})
 	if err != nil {
 		return nil, err
@@ -254,7 +285,7 @@ func (p *CITxProcessor) refreshScotiaStatusAndTryProcess(ciTx transaction.Intera
 
 	newStatus := scotiaToInternalStatusMapper(scotiaStatus)
 	if newStatus == transaction.TxStatusSent {
-		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: InteracCITx `%v` is still in status `%s`", ciTx.ID, scotiaStatus)
+		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: InteracCITx `%v` is still in status `%s`", fTx.CI.ID, scotiaStatus)
 	}
 
 	dTx, err := p.db.Begin()
@@ -265,19 +296,20 @@ func (p *CITxProcessor) refreshScotiaStatusAndTryProcess(ciTx transaction.Intera
 
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
-	_, err = p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, ciTx.ParentTxId)
+	_, err = p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.CI.ParentTxId)
 	if err != nil {
 		dTx.Rollback()
 		return nil, err
 	}
 
-	foreeTx, err := p.txProcessor.loadTx(ciTx.ParentTxId, true)
+	foreeTx, err := p.txProcessor.loadTx(fTx.CI.ParentTxId, true)
 	if err != nil {
 		dTx.Rollback()
 		return nil, err
 	}
 
 	if foreeTx.CurStage != transaction.TxStageInteracCI && foreeTx.CurStageStatus != transaction.TxStatusSent {
+		//TODO: send to cancel
 		dTx.Rollback()
 		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: ForeeTx `%v` is in stage `%s` at status `%s`", foreeTx.ID, foreeTx.CurStage, foreeTx.CurStageStatus)
 	}
