@@ -375,7 +375,7 @@ func (p *CITxProcessor) Webhook(paymentId string) {
 	p.webhookChan <- ciTx.ParentTxId
 }
 
-func (p *CITxProcessor) RemoveTx(foreeTxId int64) {
+func (p *CITxProcessor) cleanTx(foreeTxId int64) {
 	p.doneChan <- foreeTxId
 }
 
