@@ -171,7 +171,7 @@ func (repo *InteracCITxRepo) GetUniqueInteracCITxByParentTxId(ctx context.Contex
 	return f, nil
 }
 
-func (repo *InteracCITxRepo) GetUniqueInteracCITxByScotiaPaymentId(ctx context.Context, scotiaPaymentId int64) (*InteracCITx, error) {
+func (repo *InteracCITxRepo) GetUniqueInteracCITxByScotiaPaymentId(ctx context.Context, scotiaPaymentId string) (*InteracCITx, error) {
 	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
 
 	var err error

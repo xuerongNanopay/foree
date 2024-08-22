@@ -40,10 +40,13 @@ type CITxProcessor struct {
 	txProcessor   *TxProcessor
 	db            *sql.DB
 	fTxs          map[int64]*transaction.ForeeTx
+	webhookChan   chan int64
 	doneChan      chan int64
 	startChan     chan transaction.ForeeTx
 	ticker        time.Ticker
 }
+
+// Loading from DB at beginning.
 
 func (p *CITxProcessor) start() error {
 	go p.startProcessor()
@@ -62,23 +65,37 @@ func (p *CITxProcessor) startProcessor() error {
 			}
 		case foreeTxId := <-p.doneChan:
 			delete(p.fTxs, foreeTxId)
+		case foreeTxId := <-p.webhookChan:
+			v, ok := p.fTxs[foreeTxId]
+			if !ok {
+				//Log error: transaction no found
+			} else {
+				func() {
+					nTx, err := p.refreshScotiaStatus(*v)
+					if err != nil {
+						//Log error
+						return
+					}
+					p.txProcessor.processTx(*nTx)
+				}()
+			}
 		case <-p.ticker.C:
-			p.refreshFTxs()
+			for _, tx := range p.fTxs {
+				func() {
+					nTx, err := p.refreshScotiaStatus(*tx)
+					if err != nil {
+						//Log error
+						return
+					}
+					p.txProcessor.processTx(*nTx)
+				}()
+			}
 		}
 	}
 }
 
-func (p *CITxProcessor) refreshFTxs() {
-	for _, tx := range p.fTxs {
-		func() {
-			nTx, err := p.refreshScotiaStatus(*tx)
-			if err != nil {
-				//Log error
-				return
-			}
-			p.txProcessor.processTx(*nTx)
-		}()
-	}
+func (p *CITxProcessor) enqueueTx(tx transaction.ForeeTx) {
+	p.startChan <- tx
 }
 
 func (p *CITxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
@@ -87,7 +104,6 @@ func (p *CITxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx,
 		return nil, err
 	}
 
-	// Need another goroutine?
 	p.startChan <- *t
 
 	return t, nil
@@ -348,9 +364,16 @@ func (p *CITxProcessor) refreshScotiaStatus(fTx transaction.ForeeTx) (*transacti
 	return foreeTx, nil
 }
 
-// func (p *CITxProcessor) ProcessCITx(paymentId string) (string, error) {
-
-// }
+func (p *CITxProcessor) Webhook(paymentId string) {
+	ciTx, err := p.interacTxRepo.GetUniqueInteracCITxByScotiaPaymentId(context.TODO(), paymentId)
+	if err != nil {
+		//TODO: Log error
+	}
+	if ciTx == nil {
+		//TODO: Log error
+	}
+	p.webhookChan <- ciTx.ParentTxId
+}
 
 func scotiaToInternalStatusMapper(scotiaStatus string) transaction.TxStatus {
 	switch scotiaStatus {
