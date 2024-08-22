@@ -10,6 +10,7 @@ import (
 	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
+	"xue.io/go-pay/auth"
 	time_util "xue.io/go-pay/util/time"
 )
 
@@ -23,6 +24,7 @@ type TxProcessor struct {
 	txHistoryRepo  *transaction.TxHistoryRepo
 	txSummaryRepo  *transaction.TxSummaryRepo
 	foreeTxRepo    *transaction.ForeeTxRepo
+	userRepo       *auth.UserRepo
 	contactRepo    *account.ContactAccountRepo
 	interacRepo    *account.InteracAccountRepo
 	ciTxProcessor  *CITxProcessor
@@ -189,21 +191,21 @@ func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, er
 
 func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx, error) {
 	ctx := context.Background()
-	foree, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, id)
+	foreeTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	if foree == nil {
+	if foreeTx == nil {
 		return nil, fmt.Errorf("ForeeTx no found with id `%v`", id)
 	}
 
 	// Load CI
-	ci, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, foree.ID)
+	ci, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, foreeTx.ID)
 	if err != nil {
 		return nil, err
 	}
 	if isEmptyCheck && ci == nil {
-		return nil, fmt.Errorf("InteracCITx no found for ForeeTx `%v`", foree.ID)
+		return nil, fmt.Errorf("InteracCITx no found for ForeeTx `%v`", foreeTx.ID)
 	}
 
 	srcInteracAcc, err := p.interacRepo.GetUniqueInteracAccountById(ctx, ci.SrcInteracAccId)
@@ -215,25 +217,25 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	}
 	ci.SrcInteracAcc = srcInteracAcc
 
-	foree.CI = ci
+	foreeTx.CI = ci
 
 	// Load IDM
-	idm, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, foree.ID)
+	idm, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, foreeTx.ID)
 	if err != nil {
 		return nil, err
 	}
 	if isEmptyCheck && idm == nil {
-		return nil, fmt.Errorf("IDMTx no found for ForeeTx `%v`", foree.ID)
+		return nil, fmt.Errorf("IDMTx no found for ForeeTx `%v`", foreeTx.ID)
 	}
-	foree.IDM = idm
+	foreeTx.IDM = idm
 
 	// Load COUT
-	cout, err := p.npbTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, foree.ID)
+	cout, err := p.npbTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, foreeTx.ID)
 	if err != nil {
 		return nil, err
 	}
 	if isEmptyCheck && cout == nil {
-		return nil, fmt.Errorf("NBPCOTx no found for ForeeTx `%v`", foree.ID)
+		return nil, fmt.Errorf("NBPCOTx no found for ForeeTx `%v`", foreeTx.ID)
 	}
 
 	destContactAcc, err := p.contactRepo.GetUniqueContactAccountById(ctx, cout.DestContactAccId)
@@ -244,11 +246,21 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 		return nil, fmt.Errorf("DestContactAcc no found for NBPCOTx `%v`", cout.DestContactAccId)
 	}
 	cout.DestContactAcc = destContactAcc
-	foree.COUT = cout
+	foreeTx.COUT = cout
+
+	// Load User
+	user, err := p.userRepo.GetUniqueUserById(foreeTx.OwnerId)
+	if err != nil {
+		return nil, err
+	}
+	if isEmptyCheck && user == nil {
+		return nil, fmt.Errorf("ForeeTx no found for user `%v`", foreeTx.OwnerId)
+	}
+	foreeTx.Owner = user
 
 	// TODO: fees?, rewards?
 
-	return foree, nil
+	return foreeTx, nil
 }
 
 func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {

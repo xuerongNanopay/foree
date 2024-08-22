@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"xue.io/go-pay/app/foree/transaction"
+	"xue.io/go-pay/partner/idm"
 )
 
 type IDMTxProcessor struct {
@@ -19,6 +20,8 @@ func (p *CITxProcessor) idmTransferValidate(tx transaction.ForeeTx) (*transactio
 	return nil, nil
 }
 
-func (p *CITxProcessor) generateValidateTransferReq(tx transaction.ForeeTx) {
-
+func (p *CITxProcessor) generateValidateTransferReq(tx transaction.ForeeTx) (*idm.IDMRequest, error) {
+	return &idm.IDMRequest{
+		BillingFirstName: "",
+	}, nil
 }

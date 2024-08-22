@@ -364,7 +364,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		InteracAcc:         ciAcc,
 		ContactAcc:         coutAcc,
 		OwnerId:            user.ID,
-		// Owner:              &user,
+		Owner:              &user,
 	}
 
 	if joint != nil {
