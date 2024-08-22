@@ -63,13 +63,22 @@ func (p *CITxProcessor) startProcessor() error {
 		case foreeTxId := <-p.doneChan:
 			delete(p.fTxs, foreeTxId)
 		case <-p.ticker.C:
-			p.processFTxs()
+			p.refreshFTxs()
 		}
 	}
 }
 
-func (p *CITxProcessor) processFTxs() {
-
+func (p *CITxProcessor) refreshFTxs() {
+	for _, tx := range p.fTxs {
+		func() {
+			nTx, err := p.refreshScotiaStatus(*tx)
+			if err != nil {
+				//Log error
+				return
+			}
+			p.txProcessor.processTx(*nTx)
+		}()
+	}
 }
 
 func (p *CITxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
@@ -78,9 +87,8 @@ func (p *CITxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx,
 		return nil, err
 	}
 
-	go func() {
-		//TODO: send to wait.
-	}()
+	// Need another goroutine?
+	p.startChan <- *t
 
 	return t, nil
 }
@@ -260,9 +268,10 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 	return req
 }
 
-func (p *CITxProcessor) refreshScotiaStatusAndTryProcess(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+// The function normally in a goroutine
+func (p *CITxProcessor) refreshScotiaStatus(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	if fTx.CI.Status != transaction.TxStatusSent {
-		//TODO: send to cancel
+		p.doneChan <- fTx.ID
 		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: InteracCITx `%v` is in `%s`", fTx.CI.ID, fTx.CI.Status)
 	}
 
@@ -285,7 +294,7 @@ func (p *CITxProcessor) refreshScotiaStatusAndTryProcess(fTx transaction.ForeeTx
 
 	newStatus := scotiaToInternalStatusMapper(scotiaStatus)
 	if newStatus == transaction.TxStatusSent {
-		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: InteracCITx `%v` is still in status `%s`", fTx.CI.ID, scotiaStatus)
+		return &fTx, nil
 	}
 
 	dTx, err := p.db.Begin()
@@ -302,6 +311,7 @@ func (p *CITxProcessor) refreshScotiaStatusAndTryProcess(fTx transaction.ForeeTx
 		return nil, err
 	}
 
+	//TODO: Need reload?
 	foreeTx, err := p.txProcessor.loadTx(fTx.CI.ParentTxId, true)
 	if err != nil {
 		dTx.Rollback()
@@ -309,7 +319,7 @@ func (p *CITxProcessor) refreshScotiaStatusAndTryProcess(fTx transaction.ForeeTx
 	}
 
 	if foreeTx.CurStage != transaction.TxStageInteracCI && foreeTx.CurStageStatus != transaction.TxStatusSent {
-		//TODO: send to cancel
+		p.doneChan <- fTx.ID
 		dTx.Rollback()
 		return nil, fmt.Errorf("refreshScotiaStatusAndProcess: ForeeTx `%v` is in stage `%s` at status `%s`", foreeTx.ID, foreeTx.CurStage, foreeTx.CurStageStatus)
 	}
@@ -335,7 +345,7 @@ func (p *CITxProcessor) refreshScotiaStatusAndTryProcess(fTx transaction.ForeeTx
 		return nil, err
 	}
 
-	return p.txProcessor.processTx(*foreeTx)
+	return foreeTx, nil
 }
 
 // func (p *CITxProcessor) ProcessCITx(paymentId string) (string, error) {

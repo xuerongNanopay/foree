@@ -605,16 +605,11 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 		return nil, rewardError
 	}
 
-	//TODO: send to processor.
-	//CI
-	//IDM
-	//COUT
-	//Success to return?
-	go t.txProcessor.createAndProcessTx(*foreeTx)
-
 	if err = dTx.Commit(); err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
+
+	go t.txProcessor.createAndProcessTx(*foreeTx)
 
 	return NewTxSummaryDetailDTO(*foreeTx.Summary), nil
 }
