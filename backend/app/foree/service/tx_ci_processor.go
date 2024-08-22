@@ -46,7 +46,7 @@ type CITxProcessor struct {
 	ticker        time.Ticker
 }
 
-// Loading from DB at beginning.
+// Loading from DB at beginning. OR, let foree processor do it.
 
 func (p *CITxProcessor) start() error {
 	go p.startProcessor()
