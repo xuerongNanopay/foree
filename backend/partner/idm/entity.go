@@ -38,7 +38,7 @@ type IDMRequest struct {
 	BillingStreet           string    `json:"bsn,omitempty"`
 	BillingCity             string    `json:"bc,omitempty"`
 	BillingState            string    `json:"bs,omitempty"`
-	BillingPostcode         string    `json:"bz,omitempty"`
+	BillingPostalCode       string    `json:"bz,omitempty"`
 	BillingCountry          string    `json:"bco,omitempty"`
 	ShippingFirstName       string    `json:"sfn,omitempty"`
 	ShippingMiddleName      string    `json:"smn,omitempty"`
@@ -46,7 +46,7 @@ type IDMRequest struct {
 	ShippingStreet          string    `json:"ssn,omitempty"`
 	ShippingCity            string    `json:"sc,omitempty"`
 	ShippingState           string    `json:"ss,omitempty"`
-	ShippingPostcode        string    `json:"sz,omitempty"`
+	ShippingPostalCode      string    `json:"sz,omitempty"`
 	ShippingCountry         string    `json:"sco,omitempty"`
 	DestPhoneNumber         string    `json:"dph,omitempty"`
 	DestACHHash             string    `json:"dpach,omitempty"`
