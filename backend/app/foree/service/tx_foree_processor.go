@@ -38,8 +38,22 @@ func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
 	_, err = p.processTx(*foreeTx)
 	if err != nil {
 		//TODO log
-		return
 	}
+}
+
+func (p *TxProcessor) loadAndProcessTx(foreeId int64) (*transaction.ForeeTx, error) {
+	fTx, err := p.loadTx(foreeId, true)
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		_, err := p.processTx(*fTx)
+		if err != nil {
+			//TODO log
+		}
+	}()
+
 }
 
 // Create CI, COUT, IDM for ForeeTx
@@ -280,7 +294,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 	case transaction.TxStageInteracCI:
 		switch tx.CurStageStatus {
 		case transaction.TxStatusInitial:
-			p.ciTxProcessor.processTx(tx)
+			return p.ciTxProcessor.processTx(tx)
 		case transaction.TxStatusSent:
 			//Check status from scotia API.(Webhook, or cron)
 			//Just do noting waiting for cron
