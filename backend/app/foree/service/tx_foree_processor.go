@@ -54,6 +54,7 @@ func (p *TxProcessor) loadAndProcessTx(foreeId int64) (*transaction.ForeeTx, err
 		}
 	}()
 
+	return fTx, nil
 }
 
 // Create CI, COUT, IDM for ForeeTx
