@@ -32,13 +32,13 @@ type ScotiaProfile struct {
 }
 
 type CITxProcessor struct {
+	db            *sql.DB
 	scotiaProfile ScotiaProfile
 	scotiaClient  scotia.ScotiaClient
 	interacTxRepo *transaction.InteracCITxRepo
 	foreeTxRepo   *transaction.ForeeTxRepo
 	txSummaryRepo *transaction.TxSummaryRepo
 	txProcessor   *TxProcessor
-	db            *sql.DB
 	fTxs          map[int64]*transaction.ForeeTx
 	webhookChan   chan int64
 	doneChan      chan int64
@@ -207,83 +207,6 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 	return &tx, nil
 }
 
-func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.RequestPaymentRequest {
-	expireDate := time.Now().Add(time.Hour * time.Duration(p.scotiaProfile.expireInHours))
-
-	req := &scotia.RequestPaymentRequest{
-		RequestData: &scotia.RequestPaymentRequestData{
-			ProductCode:                    "DOMESTIC",
-			MessageIdentification:          tx.Summary.NBPReference,
-			EndToEndIdentification:         tx.Summary.NBPReference,
-			CreditDebitIndicator:           "CRDT",
-			CreationDatetime:               (*scotia.ScotiaDatetime)(&tx.CreateAt),
-			PaymentExpiryDate:              (*scotia.ScotiaDatetime)(&expireDate),
-			SuppressResponderNotifications: p.scotiaProfile.supressResponderNotifications,
-			ReturnUrl:                      "string",
-			Language:                       "EN",
-			InstructedAmtData: &scotia.ScotiaAmtData{
-				Amount:   scotia.ScotiaAmount(tx.CI.Amt.Amount),
-				Currency: tx.CI.Amt.Currency,
-			},
-			InitiatingParty: &scotia.InitiatingPartyData{
-				Name: p.scotiaProfile.initiatingPartyName,
-				Identification: &scotia.IdentificationData{
-					OrganisationIdentification: &scotia.OrganisationIdentificationData{
-						Other: []scotia.OtherData{
-							{
-								Identification: p.scotiaProfile.interacId,
-								SchemeName: &scotia.SchemeNameData{
-									Code: "BANK",
-								},
-							},
-						},
-					},
-				},
-			},
-			Debtor: &scotia.DebtorData{
-				Name:               tx.CI.SrcInteracAcc.GetLegalName(),
-				CountryOfResidence: p.scotiaProfile.countryOfResidence,
-				ContactDetails: &scotia.ContactDetailsData{
-					EmailAddress: tx.CI.SrcInteracAcc.Email,
-				},
-			},
-			Creditor: &scotia.CreditorData{
-				Name:               p.scotiaProfile.legalName,
-				CountryOfResidence: p.scotiaProfile.countryOfResidence,
-				ContactDetails: &scotia.ContactDetailsData{
-					EmailAddress: p.scotiaProfile.email,
-				},
-			},
-			UltimateCreditor: &scotia.CreditorData{
-				Name:               p.scotiaProfile.legalName,
-				CountryOfResidence: p.scotiaProfile.countryOfResidence,
-				ContactDetails: &scotia.ContactDetailsData{
-					EmailAddress: p.scotiaProfile.email,
-				},
-			},
-			CreditorAccount: &scotia.CreditorAccountData{
-				Identification: p.scotiaProfile.accountNumber,
-				Currency:       p.scotiaProfile.accountCurrency,
-				SchemeName:     "ALIAS_ACCT_NO",
-			},
-			FraudSupplementaryInfo: &scotia.FraudSupplementaryInfoData{
-				CustomerAuthenticationMethod: "PASSWORD",
-			},
-			PaymentCondition: &scotia.PaymentConditionData{
-				AmountModificationAllowed:  p.scotiaProfile.amountModificationAllowed,
-				EarlyPaymentAllowed:        p.scotiaProfile.earlyPaymentAllowed,
-				GuaranteedPaymentRequested: p.scotiaProfile.guaranteedPaymentRequested,
-			},
-			PaymentTypeInformation: &scotia.PaymentTypeInformationData{
-				CategoryPurpose: &scotia.CategoryPurposeData{
-					Code: "CASH",
-				},
-			},
-		},
-	}
-	return req
-}
-
 // The function normally in a goroutine
 func (p *CITxProcessor) refreshScotiaStatus(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	if fTx.CI.Status != transaction.TxStatusSent {
@@ -406,4 +329,81 @@ func scotiaToInternalStatusMapper(scotiaStatus string) transaction.TxStatus {
 	default:
 		return transaction.TxStatusSent
 	}
+}
+
+func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.RequestPaymentRequest {
+	expireDate := time.Now().Add(time.Hour * time.Duration(p.scotiaProfile.expireInHours))
+
+	req := &scotia.RequestPaymentRequest{
+		RequestData: &scotia.RequestPaymentRequestData{
+			ProductCode:                    "DOMESTIC",
+			MessageIdentification:          tx.Summary.NBPReference,
+			EndToEndIdentification:         tx.Summary.NBPReference,
+			CreditDebitIndicator:           "CRDT",
+			CreationDatetime:               (*scotia.ScotiaDatetime)(&tx.CreateAt),
+			PaymentExpiryDate:              (*scotia.ScotiaDatetime)(&expireDate),
+			SuppressResponderNotifications: p.scotiaProfile.supressResponderNotifications,
+			ReturnUrl:                      "string",
+			Language:                       "EN",
+			InstructedAmtData: &scotia.ScotiaAmtData{
+				Amount:   scotia.ScotiaAmount(tx.CI.Amt.Amount),
+				Currency: tx.CI.Amt.Currency,
+			},
+			InitiatingParty: &scotia.InitiatingPartyData{
+				Name: p.scotiaProfile.initiatingPartyName,
+				Identification: &scotia.IdentificationData{
+					OrganisationIdentification: &scotia.OrganisationIdentificationData{
+						Other: []scotia.OtherData{
+							{
+								Identification: p.scotiaProfile.interacId,
+								SchemeName: &scotia.SchemeNameData{
+									Code: "BANK",
+								},
+							},
+						},
+					},
+				},
+			},
+			Debtor: &scotia.DebtorData{
+				Name:               tx.CI.SrcInteracAcc.GetLegalName(),
+				CountryOfResidence: p.scotiaProfile.countryOfResidence,
+				ContactDetails: &scotia.ContactDetailsData{
+					EmailAddress: tx.CI.SrcInteracAcc.Email,
+				},
+			},
+			Creditor: &scotia.CreditorData{
+				Name:               p.scotiaProfile.legalName,
+				CountryOfResidence: p.scotiaProfile.countryOfResidence,
+				ContactDetails: &scotia.ContactDetailsData{
+					EmailAddress: p.scotiaProfile.email,
+				},
+			},
+			UltimateCreditor: &scotia.CreditorData{
+				Name:               p.scotiaProfile.legalName,
+				CountryOfResidence: p.scotiaProfile.countryOfResidence,
+				ContactDetails: &scotia.ContactDetailsData{
+					EmailAddress: p.scotiaProfile.email,
+				},
+			},
+			CreditorAccount: &scotia.CreditorAccountData{
+				Identification: p.scotiaProfile.accountNumber,
+				Currency:       p.scotiaProfile.accountCurrency,
+				SchemeName:     "ALIAS_ACCT_NO",
+			},
+			FraudSupplementaryInfo: &scotia.FraudSupplementaryInfoData{
+				CustomerAuthenticationMethod: "PASSWORD",
+			},
+			PaymentCondition: &scotia.PaymentConditionData{
+				AmountModificationAllowed:  p.scotiaProfile.amountModificationAllowed,
+				EarlyPaymentAllowed:        p.scotiaProfile.earlyPaymentAllowed,
+				GuaranteedPaymentRequested: p.scotiaProfile.guaranteedPaymentRequested,
+			},
+			PaymentTypeInformation: &scotia.PaymentTypeInformationData{
+				CategoryPurpose: &scotia.CategoryPurposeData{
+					Code: "CASH",
+				},
+			},
+		},
+	}
+	return req
 }
