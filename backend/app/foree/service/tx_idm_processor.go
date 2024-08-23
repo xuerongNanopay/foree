@@ -1,16 +1,19 @@
 package service
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
 	"xue.io/go-pay/app/foree/account"
+	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/partner/idm"
 )
 
 type IDMTxProcessor struct {
 	db          *sql.DB
+	foreeTxRepo *transaction.ForeeTxRepo
 	txProcessor *TxProcessor
 	idmClient   idm.IDMClient
 }
@@ -25,6 +28,29 @@ func (p *IDMTxProcessor) idmTransferValidate(tx transaction.ForeeTx) (*transacti
 		return nil, err
 	}
 
+	// Safe check
+	dTx, err := p.db.Begin()
+	if err != nil {
+		dTx.Rollback()
+		//TODO: log err
+		return nil, err
+	}
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+
+	nForeeTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, tx.ID)
+	if err != nil {
+		dTx.Rollback()
+		//TODO: log err
+		return nil, err
+	}
+
+	if nForeeTx.CurStage != transaction.TxStageIDM && nForeeTx.CurStageStatus != transaction.TxStatusInitial {
+		dTx.Rollback()
+		return nil, fmt.Errorf("IDM failed: transaction `%v` is in status `%s` at stage `%s`", nForeeTx.ID, nForeeTx.CurStageStatus, nForeeTx.Status)
+	}
+
 	resp, err := p.idmClient.Transfer(*req)
 	if err != nil {
 		return nil, err
@@ -37,17 +63,18 @@ func (p *IDMTxProcessor) idmTransferValidate(tx transaction.ForeeTx) (*transacti
 	idmStatus := resp.GetResultStatus()
 
 	if idmStatus == "ACCEPT" {
-
+		tx.CurStageStatus = transaction.TxStatusCompleted
+		tx.IDM.Status = transaction.TxStatusCompleted
+		//TODO: log success
 	} else {
-
+		//TODO: log fails
+		tx.CurStageStatus = transaction.TxStatusSuspend
+		tx.IDM.Status = transaction.TxStatusCompleted
 	}
 
 	return nil, nil
 }
 
-// TODO
-// RemitterPOB: "TODO add property",
-// Identification
 func (p *IDMTxProcessor) generateValidateTransferReq(tx transaction.ForeeTx) (*idm.IDMRequest, error) {
 	IsCashPickup := false
 	if tx.COUT.CashOutAcc.Type == account.ContactAccountTypeCash {
