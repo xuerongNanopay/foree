@@ -63,5 +63,12 @@ func (p *CITxProcessor) generateValidateTransferReq(tx transaction.ForeeTx) (*id
 		TransactionCreationTime: tx.CreateAt.UnixMilli(),
 		Amount:                  idm.IDMAmount(tx.SrcAmt.Amount),
 		Currency:                tx.SrcAmt.Currency,
+		PayoutAmount:            idm.IDMAmount(tx.DestAmt.Amount),
+		PayoutCurrency:          tx.DestAmt.Currency,
+		TransactionIdentifier:   fmt.Sprintf("%012d", tx.ID),
+		TransactionRefId:        tx.Summary.NBPReference,
+		Ip:                      tx.Ip,
+		SrcAccountIdentifier:    fmt.Sprintf("%09d", tx.CI.CashInAccId),
+		DestAccountIdentifier:   fmt.Sprintf("%09d", tx.COUT.CashOutAccId),
 	}, nil
 }

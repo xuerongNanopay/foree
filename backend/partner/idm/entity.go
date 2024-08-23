@@ -27,7 +27,6 @@ func (d IDMDate) MarshalJSON() ([]byte, error) {
 }
 
 type IDMRequest struct {
-	UserAccountIdentifier   string    `json:"man,omitempty"`
 	UserEmail               string    `json:"tea,omitempty"`
 	Ip                      string    `json:"ip,omitempty"`
 	PhoneNumber             string    `json:"phn,omitempty"`
@@ -75,6 +74,8 @@ type IDMRequest struct {
 	SRRelationship          string    `json:"memo20,omitempty"` // sender and receiver relationship
 	PurposeOfTransfer       string    `json:"memo15,omitempty"`
 	RemitterOccupation      string    `json:"memo16,omitempty"`
+	SrcAccountIdentifier    string    `json:"man,omitempty"`
+	DestAccountIdentifier   string    `json:"dman,omitempty"`
 }
 
 type ResponseCommon struct {
