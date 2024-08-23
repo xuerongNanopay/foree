@@ -134,5 +134,5 @@ func scanRowIntoIDMCompliance(rows *sql.Rows) (*IDMCompliance, error) {
 		return nil, err
 	}
 
-	return u, nil
+	return i, nil
 }
