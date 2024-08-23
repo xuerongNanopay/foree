@@ -14,7 +14,7 @@ const (
 	sQLNBPCOTxInsert = `
         INSERT INTO nbp_co_tx
         (
-            status, amount, currency, api_reference,  dest_contact_acc_id
+            status, amount, currency, api_reference,  cash_out_acc_id
             parent_tx_id, owner_id
         ) VALUES(?,?,?,?,?,?,?)
     `
@@ -26,7 +26,7 @@ const (
 	sQLNBPCOTxGetUniqueById = `
         SELECT 
             t.id, t.status, t.amount, t.currency, t.api_reference,
-            t.dest_contact_acc_id, t.parent_tx_id, t.owner_id,
+            t.cash_out_acc_id, t.parent_tx_id, t.owner_id,
             t.create_at, t.update_at
         FROM nbp_co_tx t
         where t.id = ?
@@ -35,7 +35,7 @@ const (
 	sQLNBPCOTxGetUniqueByParentTxId = `
         SELECT 
             t.id, t.status, t.amount, t.currency, t.api_reference,
-            t.dest_contact_acc_id, t.parent_tx_id, t.owner_id,
+            t.cash_out_acc_id, t.parent_tx_id, t.owner_id,
             t.create_at, t.update_at
         FROM nbp_co_tx t
         where t.parent_tx_id = ?
@@ -43,16 +43,16 @@ const (
 )
 
 type NBPCOTx struct {
-	ID               int64                   `json:"id"`
-	Status           TxStatus                `json:"status"`
-	Amt              types.AmountData        `json:"amt"`
-	APIReference     string                  `json:"apiReference"`
-	DestContactAccId int64                   `json:"destContactAccId"`
-	DestContactAcc   *account.ContactAccount `json:"destContactAcc"`
-	ParentTxId       int64                   `json:"parentTxId"`
-	OwnerId          int64                   `json:"OwnerId"`
-	CreateAt         time.Time               `json:"createAt"`
-	UpdateAt         time.Time               `json:"updateAt"`
+	ID           int64                   `json:"id"`
+	Status       TxStatus                `json:"status"`
+	Amt          types.AmountData        `json:"amt"`
+	APIReference string                  `json:"apiReference"`
+	CashOutAccId int64                   `json:"CashOutAccId"`
+	CashOutAcc   *account.ContactAccount `json:"CashOutAcc"`
+	ParentTxId   int64                   `json:"parentTxId"`
+	OwnerId      int64                   `json:"OwnerId"`
+	CreateAt     time.Time               `json:"createAt"`
+	UpdateAt     time.Time               `json:"updateAt"`
 }
 
 func NewNBPCOTxRepo(db *sql.DB) *NBPCOTxRepo {
@@ -76,7 +76,7 @@ func (repo *NBPCOTxRepo) InsertNBPCOTx(ctx context.Context, tx NBPCOTx) (int64, 
 			tx.Amt.Amount,
 			tx.Amt.Currency,
 			tx.APIReference,
-			tx.DestContactAccId,
+			tx.CashOutAccId,
 			tx.ParentTxId,
 			tx.OwnerId,
 		)
@@ -87,7 +87,7 @@ func (repo *NBPCOTxRepo) InsertNBPCOTx(ctx context.Context, tx NBPCOTx) (int64, 
 			tx.Amt.Amount,
 			tx.Amt.Currency,
 			tx.APIReference,
-			tx.DestContactAccId,
+			tx.CashOutAccId,
 			tx.ParentTxId,
 			tx.OwnerId,
 		)
@@ -176,7 +176,7 @@ func scanRowIntoNBPCOTx(rows *sql.Rows) (*NBPCOTx, error) {
 		&tx.Amt.Amount,
 		&tx.Amt.Currency,
 		&tx.APIReference,
-		&tx.DestContactAccId,
+		&tx.CashOutAccId,
 		&tx.ParentTxId,
 		&tx.OwnerId,
 		&tx.CreateAt,

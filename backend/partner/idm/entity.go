@@ -34,7 +34,7 @@ type IDMRequest struct {
 	Dob                     *IDMDate  `json:"dob,omitempty"`
 	BillingFirstName        string    `json:"bfn,omitempty"`
 	BillingMiddleName       string    `json:"bmn,omitempty"`
-	BillingLastname         string    `json:"bln,omitempty"`
+	BillingLastName         string    `json:"bln,omitempty"`
 	BillingStreet           string    `json:"bsn,omitempty"`
 	BillingCity             string    `json:"bc,omitempty"`
 	BillingState            string    `json:"bs,omitempty"`
@@ -42,7 +42,7 @@ type IDMRequest struct {
 	BillingCountry          string    `json:"bco,omitempty"`
 	ShippingFirstName       string    `json:"sfn,omitempty"`
 	ShippingMiddleName      string    `json:"smn,omitempty"`
-	ShippingLastname        string    `json:"sln,omitempty"`
+	ShippingLastName        string    `json:"sln,omitempty"`
 	ShippingStreet          string    `json:"ssn,omitempty"`
 	ShippingCity            string    `json:"sc,omitempty"`
 	ShippingState           string    `json:"ss,omitempty"`

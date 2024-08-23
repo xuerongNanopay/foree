@@ -38,7 +38,7 @@ type ForeeRefundTx struct {
 // 	err := rows.Scan(
 // 		&tx.ID,
 // 		&tx.Status,
-// 		&tx.SrcInteracAccId,
+// 		&tx.CashInAccId,
 // 		&tx.DestInteracAccId,
 // 		&tx.Amt.Amount,
 // 		&tx.Amt.Currency,

@@ -86,12 +86,12 @@ func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, er
 	createCI := func() {
 		defer wg.Done()
 		ciId, err := p.interacTxRepo.InsertInteracCITx(ctx, transaction.InteracCITx{
-			Status:          transaction.TxStatusInitial,
-			SrcInteracAccId: tx.CinAccId,
-			EndToEndId:      tx.Summary.NBPReference,
-			Amt:             tx.SrcAmt,
-			ParentTxId:      tx.ID,
-			OwnerId:         tx.OwnerId,
+			Status:      transaction.TxStatusInitial,
+			CashInAccId: tx.CinAccId,
+			EndToEndId:  tx.Summary.NBPReference,
+			Amt:         tx.SrcAmt,
+			ParentTxId:  tx.ID,
+			OwnerId:     tx.OwnerId,
 		})
 		if err != nil {
 			ciErr = err
@@ -139,12 +139,12 @@ func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, er
 	createCout := func() {
 		defer wg.Done()
 		coutId, err := p.npbTxRepo.InsertNBPCOTx(ctx, transaction.NBPCOTx{
-			Status:           transaction.TxStatusInitial,
-			Amt:              tx.SrcAmt,
-			APIReference:     tx.Summary.NBPReference,
-			DestContactAccId: tx.CoutAccId,
-			ParentTxId:       tx.ID,
-			OwnerId:          tx.OwnerId,
+			Status:       transaction.TxStatusInitial,
+			Amt:          tx.SrcAmt,
+			APIReference: tx.Summary.NBPReference,
+			CashOutAccId: tx.CoutAccId,
+			ParentTxId:   tx.ID,
+			OwnerId:      tx.OwnerId,
 		})
 		if err != nil {
 			coutErr = err
@@ -208,14 +208,14 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 		return nil, fmt.Errorf("InteracCITx no found for ForeeTx `%v`", foreeTx.ID)
 	}
 
-	srcInteracAcc, err := p.interacRepo.GetUniqueInteracAccountById(ctx, ci.SrcInteracAccId)
+	CashInAcc, err := p.interacRepo.GetUniqueInteracAccountById(ctx, ci.CashInAccId)
 	if err != nil {
 		return nil, err
 	}
-	if isEmptyCheck && srcInteracAcc == nil {
-		return nil, fmt.Errorf("SrcInteracAcc no found for InteracCITx `%v`", ci.SrcInteracAccId)
+	if isEmptyCheck && CashInAcc == nil {
+		return nil, fmt.Errorf("CashInAcc no found for InteracCITx `%v`", ci.CashInAccId)
 	}
-	ci.SrcInteracAcc = srcInteracAcc
+	ci.CashInAcc = CashInAcc
 
 	foreeTx.CI = ci
 
@@ -238,14 +238,14 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 		return nil, fmt.Errorf("NBPCOTx no found for ForeeTx `%v`", foreeTx.ID)
 	}
 
-	destContactAcc, err := p.contactRepo.GetUniqueContactAccountById(ctx, cout.DestContactAccId)
+	CashOutAcc, err := p.contactRepo.GetUniqueContactAccountById(ctx, cout.CashOutAccId)
 	if err != nil {
 		return nil, err
 	}
-	if isEmptyCheck && destContactAcc == nil {
-		return nil, fmt.Errorf("DestContactAcc no found for NBPCOTx `%v`", cout.DestContactAccId)
+	if isEmptyCheck && CashOutAcc == nil {
+		return nil, fmt.Errorf("CashOutAcc no found for NBPCOTx `%v`", cout.CashOutAccId)
 	}
-	cout.DestContactAcc = destContactAcc
+	cout.CashOutAcc = CashOutAcc
 	foreeTx.COUT = cout
 
 	// Load User

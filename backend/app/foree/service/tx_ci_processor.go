@@ -365,10 +365,10 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 				},
 			},
 			Debtor: &scotia.DebtorData{
-				Name:               tx.CI.SrcInteracAcc.GetLegalName(),
+				Name:               tx.CI.CashInAcc.GetLegalName(),
 				CountryOfResidence: p.scotiaProfile.countryOfResidence,
 				ContactDetails: &scotia.ContactDetailsData{
-					EmailAddress: tx.CI.SrcInteracAcc.Email,
+					EmailAddress: tx.CI.CashInAcc.Email,
 				},
 			},
 			Creditor: &scotia.CreditorData{

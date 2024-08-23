@@ -14,13 +14,13 @@ const (
 	sQLInteracCITxInsert = `
         INSERT INTO interact_ci_tx
         (
-            status, src_interac_acc_id,
+            status, cash_in_acc_id,
             amount, currency, end_to_end_id, parent_tx_id, owner_id
         ) VALUES(?,?,?,?,?,?,?,?)
     `
 	sQLInteracCITxGetUniqueById = `
         SELECT 
-            t.id, t.status, t.src_interac_acc_id,
+            t.id, t.status, t.cash_in_acc_id,
             t.amount, t.currency, t.scotia_payment_id, 
 			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
             t.parent_tx_id, t.owner_id, t.create_at, t.update_at
@@ -30,7 +30,7 @@ const (
     `
 	sQLInteracCITxGetUniqueByParentTxId = `
         SELECT 
-            t.id, t.status, t.src_interac_acc_id,
+            t.id, t.status, t.cash_in_acc_id,
             t.amount, t.currency, t.scotia_payment_id, 
 			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
             t.parent_tx_id, t.owner_id, t.create_at, t.update_at
@@ -39,7 +39,7 @@ const (
     `
 	sQLInteracCITxGetUniqueByScotiaPaymentId = `
 		SELECT 
-			t.id, t.status, t.src_interac_acc_id,
+			t.id, t.status, t.cash_in_acc_id,
 			t.amount, t.currency, t.scotia_payment_id, 
 			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
 			t.parent_tx_id, t.owner_id, t.create_at, t.update_at
@@ -49,7 +49,7 @@ const (
 	`
 	sQLInteracCITxGetAllByStatus = `
 		SELECT 
-			t.id, t.status, t.src_interac_acc_id,
+			t.id, t.status, t.cash_in_acc_id,
 			t.amount, t.currency, t.scotia_payment_id, 
 			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
 			t.parent_tx_id, t.owner_id, t.create_at, t.update_at
@@ -72,8 +72,8 @@ type InteracCITx struct {
 	ScotiaClearingReference string                  `json:"scotiaClearingReference"`
 	PaymentUrl              string                  `json:"paymentUrl"`
 	EndToEndId              string                  `json:"endToEndId"`
-	SrcInteracAccId         int64                   `json:"srcInteracAccId"`
-	SrcInteracAcc           *account.InteracAccount `json:"srcInteracAcc"`
+	CashInAccId             int64                   `json:"CashInAccId"`
+	CashInAcc               *account.InteracAccount `json:"CashInAcc"`
 	Amt                     types.AmountData        `json:"Amt"`
 	ParentTxId              int64                   `json:"parentTxId"`
 	OwnerId                 int64                   `json:"OwnerId"`
@@ -99,7 +99,7 @@ func (repo *InteracCITxRepo) InsertInteracCITx(ctx context.Context, tx InteracCI
 		result, err = dTx.Exec(
 			sQLInteracCITxInsert,
 			tx.Status,
-			tx.SrcInteracAccId,
+			tx.CashInAccId,
 			tx.Amt.Amount,
 			tx.Amt.Currency,
 			tx.EndToEndId,
@@ -110,7 +110,7 @@ func (repo *InteracCITxRepo) InsertInteracCITx(ctx context.Context, tx InteracCI
 		result, err = repo.db.Exec(
 			sQLInteracCITxInsert,
 			tx.Status,
-			tx.SrcInteracAccId,
+			tx.CashInAccId,
 			tx.Amt.Amount,
 			tx.Amt.Currency,
 			tx.EndToEndId,
@@ -257,7 +257,7 @@ func scanRowIntoInteracCITx(rows *sql.Rows) (*InteracCITx, error) {
 	err := rows.Scan(
 		&tx.ID,
 		&tx.Status,
-		&tx.SrcInteracAccId,
+		&tx.CashInAccId,
 		&tx.Amt.Amount,
 		&tx.Amt.Currency,
 		&tx.ScotiaPaymentId,
