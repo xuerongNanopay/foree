@@ -12,20 +12,43 @@ import (
 type IDMTxProcessor struct {
 	db          *sql.DB
 	txProcessor *TxProcessor
+	idmClient   idm.IDMClient
 }
 
 func (p *IDMTxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
 
 }
 
-func (p *CITxProcessor) idmTransferValidate(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *IDMTxProcessor) idmTransferValidate(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	req, err := p.generateValidateTransferReq(tx)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := p.idmClient.Transfer(*req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode/100 != 2 {
+		return nil, err
+	}
+
+	idmStatus := resp.GetResultStatus()
+
+	if idmStatus == "ACCEPT" {
+
+	} else {
+
+	}
+
 	return nil, nil
 }
 
 // TODO
 // RemitterPOB: "TODO add property",
 // Identification
-func (p *CITxProcessor) generateValidateTransferReq(tx transaction.ForeeTx) (*idm.IDMRequest, error) {
+func (p *IDMTxProcessor) generateValidateTransferReq(tx transaction.ForeeTx) (*idm.IDMRequest, error) {
 	IsCashPickup := false
 	if tx.COUT.CashOutAcc.Type == account.ContactAccountTypeCash {
 		IsCashPickup = true
