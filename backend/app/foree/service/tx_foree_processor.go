@@ -349,7 +349,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 	case transaction.TxStageIDM:
 		switch tx.CurStageStatus {
 		case transaction.TxStatusInitial:
-			return p.idmTxProcessor.createAndProcessTx(tx)
+			return p.idmTxProcessor.processTx(tx)
 		case transaction.TxStatusCompleted:
 			//Move to next stage
 			tx.CurStage = transaction.TxStageNBPCO

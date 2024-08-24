@@ -57,24 +57,27 @@ func (p *CITxProcessor) start() error {
 func (p *CITxProcessor) startProcessor() error {
 	for {
 		select {
-		case tx := <-p.startChan:
-			_, ok := p.fTxs[tx.ID]
+		case fTx := <-p.startChan:
+			_, ok := p.fTxs[fTx.ID]
 			if ok {
 				//Log duplicate
 			} else {
-				p.fTxs[tx.ID] = &tx
+				p.fTxs[fTx.ID] = &fTx
 			}
 		case fTxId := <-p.clearChan:
 			delete(p.fTxs, fTxId)
-		case nTx := <-p.forwardChan:
-			_, ok := p.fTxs[nTx.ID]
+		case fTx := <-p.forwardChan:
+			_, ok := p.fTxs[fTx.ID]
 			if !ok {
 				//Log miss
 			} else {
-				delete(p.fTxs, nTx.ID)
+				delete(p.fTxs, fTx.ID)
 			}
 			go func() {
-				p.txProcessor.processTx(nTx)
+				_, err := p.txProcessor.processTx(fTx)
+				if err != nil {
+					//log err
+				}
 			}()
 		case foreeTxId := <-p.webhookChan:
 			v, ok := p.fTxs[foreeTxId]

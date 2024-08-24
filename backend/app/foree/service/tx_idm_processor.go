@@ -19,7 +19,16 @@ type IDMTxProcessor struct {
 	idmClient   idm.IDMClient
 }
 
-func (p *IDMTxProcessor) createAndProcessTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *IDMTxProcessor) forwardFTx(fTx transaction.ForeeTx) {
+	func() {
+		_, err := p.txProcessor.processTx(fTx)
+		if err != nil {
+			//log err
+		}
+	}()
+}
+
+func (p *IDMTxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	return p.idmTransferValidate(tx)
 }
 
