@@ -41,7 +41,7 @@ type CITxProcessor struct {
 	txProcessor   *TxProcessor
 	fTxs          map[int64]*transaction.ForeeTx
 	webhookChan   chan int64
-	doneChan      chan int64
+	clearChan     chan int64
 	startChan     chan transaction.ForeeTx
 	ticker        time.Ticker
 }
@@ -63,7 +63,7 @@ func (p *CITxProcessor) startProcessor() error {
 			} else {
 				p.fTxs[tx.ID] = &tx
 			}
-		case foreeTxId := <-p.doneChan:
+		case foreeTxId := <-p.clearChan:
 			delete(p.fTxs, foreeTxId)
 		case foreeTxId := <-p.webhookChan:
 			v, ok := p.fTxs[foreeTxId]
@@ -129,7 +129,7 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 
 	if nForeeTx.CurStage != transaction.TxStageInteracCI && nForeeTx.CurStageStatus != transaction.TxStatusInitial {
 		dTx.Rollback()
-		return nil, fmt.Errorf("CI failed: transaction `%v` is in status `%s` at stage `%s`", nForeeTx.ID, nForeeTx.CurStageStatus, nForeeTx.Status)
+		return nil, fmt.Errorf("CI failed -- transaction `%v` is in status `%s` at stage `%s`", nForeeTx.ID, nForeeTx.CurStageStatus, nForeeTx.Status)
 	}
 
 	resp, err := p.scotiaClient.RequestPayment(*p.createRequestPaymentReq(tx))
@@ -140,7 +140,7 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 	if resp.StatusCode/100 != 2 {
 		//TODO: logging?
 		dTx.Rollback()
-		return nil, fmt.Errorf("CI failed: scotial requestPayment error: (httpCode: `%v`, request: `%s`, response: `%s`)", resp.StatusCode, resp.RawRequest, resp.RawResponse)
+		return nil, fmt.Errorf("CI failed -- scotial requestPayment error: (httpCode: `%v`, request: `%s`, response: `%s`)", resp.StatusCode, resp.RawRequest, resp.RawResponse)
 	}
 
 	//TODO: log success
@@ -160,12 +160,12 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 	if statusResp.StatusCode/100 != 2 {
 		//TODO: logging?
 		dTx.Rollback()
-		return nil, fmt.Errorf("CI failed: scotial paymentstatus error: (httpCode: `%v`, request: `%s`, response: `%s`)", statusResp.StatusCode, statusResp.RawRequest, statusResp.RawResponse)
+		return nil, fmt.Errorf("CI failed -- scotial paymentstatus error: (httpCode: `%v`, request: `%s`, response: `%s`)", statusResp.StatusCode, statusResp.RawRequest, statusResp.RawResponse)
 	}
 
 	if len(statusResp.PaymentStatuses) != 1 {
 		dTx.Rollback()
-		return nil, fmt.Errorf("CI failed: scotial paymentstatus error: (httpCode: `%v`, request: `%s`, response: `%s`)", statusResp.StatusCode, statusResp.RawRequest, statusResp.RawResponse)
+		return nil, fmt.Errorf("CI failed -- scotial paymentstatus error: (httpCode: `%v`, request: `%s`, response: `%s`)", statusResp.StatusCode, statusResp.RawRequest, statusResp.RawResponse)
 	}
 
 	// Update CI
@@ -210,8 +210,8 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 // The function normally in a goroutine
 func (p *CITxProcessor) refreshScotiaStatus(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	if fTx.CI.Status != transaction.TxStatusSent {
-		p.doneChan <- fTx.ID
-		return nil, fmt.Errorf("CI failed: refreshScotiaStatusAndProcess: InteracCITx `%v` is in `%s`", fTx.CI.ID, fTx.CI.Status)
+		p.clearChan <- fTx.ID
+		return nil, fmt.Errorf("CI failed -- refreshScotiaStatusAndProcess: InteracCITx `%v` is in `%s`", fTx.CI.ID, fTx.CI.Status)
 	}
 
 	detailResp, err := p.scotiaClient.PaymentDetail(scotia.PaymentDetailRequest{
@@ -223,7 +223,7 @@ func (p *CITxProcessor) refreshScotiaStatus(fTx transaction.ForeeTx) (*transacti
 	}
 
 	if detailResp.StatusCode/100 != 2 {
-		return nil, fmt.Errorf("CI failed: refreshScotiaStatusAndProcess: scotia paymentdetail error: (httpCode: `%v`, request: `%s`, response: `%s`)", detailResp.StatusCode, detailResp.RawRequest, detailResp.RawResponse)
+		return nil, fmt.Errorf("CI failed -- refreshScotiaStatusAndProcess: scotia paymentdetail error: (httpCode: `%v`, request: `%s`, response: `%s`)", detailResp.StatusCode, detailResp.RawRequest, detailResp.RawResponse)
 	}
 
 	scotiaStatus := detailResp.PaymentDetail.TransactionStatus
@@ -251,9 +251,9 @@ func (p *CITxProcessor) refreshScotiaStatus(fTx transaction.ForeeTx) (*transacti
 	}
 
 	if curFTx.CurStage != transaction.TxStageInteracCI && curFTx.CurStageStatus != transaction.TxStatusSent {
-		p.doneChan <- fTx.ID
+		p.clearChan <- fTx.ID
 		dTx.Rollback()
-		return nil, fmt.Errorf("CI failed: refreshScotiaStatusAndProcess: ForeeTx `%v` is in stage `%s` at status `%s`", curFTx.ID, curFTx.CurStage, curFTx.CurStageStatus)
+		return nil, fmt.Errorf("CI failed -- refreshScotiaStatusAndProcess: ForeeTx `%v` is in stage `%s` at status `%s`", curFTx.ID, curFTx.CurStage, curFTx.CurStageStatus)
 	}
 
 	// Update Foree Tx and CI Tx.
@@ -292,7 +292,7 @@ func (p *CITxProcessor) Webhook(paymentId string) {
 }
 
 func (p *CITxProcessor) cleanTx(foreeTxId int64) {
-	p.doneChan <- foreeTxId
+	p.clearChan <- foreeTxId
 }
 
 func scotiaToInternalStatusMapper(scotiaStatus string) transaction.TxStatus {
