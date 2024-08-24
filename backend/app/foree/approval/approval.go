@@ -108,6 +108,80 @@ func (repo *ApprovalRepo) UpdateApprovalById(approval Approval) error {
 	return nil
 }
 
+func (repo *ApprovalRepo) GetUniqueApprovalById(id int64) (*Approval, error) {
+	rows, err := repo.db.Query(sQLApprovalGetUniqueById, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var u *Approval
+
+	for rows.Next() {
+		u, err = scanRowIntoApproval(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if u.ID == 0 {
+		return nil, nil
+	}
+
+	return u, nil
+}
+
+func (repo *ApprovalRepo) QueryAllApprovalByTypeWithPagination(t string, limit, offset int) ([]*Approval, error) {
+	rows, err := repo.db.Query(sQLApprovalQueryAllByTypeWithPagination, t, limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	approvals := make([]*Approval, 16)
+	for rows.Next() {
+		p, err := scanRowIntoApproval(rows)
+		if err != nil {
+			return nil, err
+		}
+		approvals = append(approvals, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return approvals, nil
+
+}
+
+func (repo *ApprovalRepo) QueryAllApprovalByTypeAndStatusWithPagination(t, s string, limit, offset int) ([]*Approval, error) {
+	rows, err := repo.db.Query(sQLApprovalQueryAllByTypeAndStatusWithPagination, t, s, limit, offset)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	approvals := make([]*Approval, 16)
+	for rows.Next() {
+		p, err := scanRowIntoApproval(rows)
+		if err != nil {
+			return nil, err
+		}
+		approvals = append(approvals, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return approvals, nil
+
+}
+
 func scanRowIntoApproval(rows *sql.Rows) (*Approval, error) {
 	i := new(Approval)
 	err := rows.Scan(
