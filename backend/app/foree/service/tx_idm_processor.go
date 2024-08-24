@@ -19,8 +19,8 @@ type IDMTxProcessor struct {
 	idmClient   idm.IDMClient
 }
 
-func (p *IDMTxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
-
+func (p *IDMTxProcessor) createAndProcessTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	return p.idmTransferValidate(tx)
 }
 
 func (p *IDMTxProcessor) idmTransferValidate(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
