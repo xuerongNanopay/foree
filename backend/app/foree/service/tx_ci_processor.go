@@ -42,6 +42,7 @@ type CITxProcessor struct {
 	fTxs          map[int64]*transaction.ForeeTx
 	webhookChan   chan int64
 	clearChan     chan int64
+	forwardChan   chan transaction.ForeeTx
 	startChan     chan transaction.ForeeTx
 	ticker        time.Ticker
 }
@@ -63,8 +64,18 @@ func (p *CITxProcessor) startProcessor() error {
 			} else {
 				p.fTxs[tx.ID] = &tx
 			}
-		case foreeTxId := <-p.clearChan:
-			delete(p.fTxs, foreeTxId)
+		case fTxId := <-p.clearChan:
+			delete(p.fTxs, fTxId)
+		case nTx := <-p.forwardChan:
+			_, ok := p.fTxs[nTx.ID]
+			if !ok {
+				//Log miss
+			} else {
+				delete(p.fTxs, nTx.ID)
+			}
+			go func() {
+				p.txProcessor.processTx(nTx)
+			}()
 		case foreeTxId := <-p.webhookChan:
 			v, ok := p.fTxs[foreeTxId]
 			if !ok {
@@ -76,7 +87,10 @@ func (p *CITxProcessor) startProcessor() error {
 						//Log error
 						return
 					}
-					p.txProcessor.processTx(*nTx)
+
+					if nTx.CurStageStatus != v.CurStageStatus {
+						p.forwardChan <- *nTx
+					}
 				}()
 			}
 		case <-p.ticker.C:
@@ -87,7 +101,9 @@ func (p *CITxProcessor) startProcessor() error {
 						//Log error
 						return
 					}
-					p.txProcessor.processTx(*nTx)
+					if nTx.CurStageStatus != tx.CurStageStatus {
+						p.forwardChan <- *nTx
+					}
 				}()
 			}
 		}
