@@ -110,12 +110,16 @@ func (p *CITxProcessor) startProcessor() error {
 	}
 }
 
-func (p *CITxProcessor) enqueueTx(tx transaction.ForeeTx) {
-	p.startChan <- tx
+func (p *CITxProcessor) startTx(fTx transaction.ForeeTx) {
+	p.startChan <- fTx
 }
 
-func (p *CITxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	t, err := p.requestPayment(tx)
+func (p *CITxProcessor) forwardTx(fTx transaction.ForeeTx) {
+	p.forwardChan <- fTx
+}
+
+func (p *CITxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	t, err := p.requestPayment(fTx)
 	if err != nil {
 		return nil, err
 	}
