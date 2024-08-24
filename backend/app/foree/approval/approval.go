@@ -1,6 +1,9 @@
 package approval
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 const (
 	sQLApprovalInsert = `
@@ -63,4 +66,64 @@ type Approval struct {
 	DecidedAt            time.Time      `json:"decidedAt"`
 	CreateAt             time.Time      `json:"createAt"`
 	UpdateAt             time.Time      `json:"updateAt"`
+}
+
+type ApprovalRepo struct {
+	db *sql.DB
+}
+
+func NewApprovalRepo(db *sql.DB) *ApprovalRepo {
+	return &ApprovalRepo{db: db}
+}
+
+func (repo *ApprovalRepo) InsertApproval(approval Approval) (int64, error) {
+	result, err := repo.db.Exec(
+		sQLApprovalInsert,
+		approval.Type,
+		approval.Status,
+		approval.AssociatedEntityName,
+		approval.AssocitateEntityId,
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func (repo *ApprovalRepo) UpdateApprovalById(approval Approval) error {
+	_, err := repo.db.Exec(
+		sQLApprovalUpdate,
+		approval.Status,
+		approval.DecidedBy,
+		approval.DecidedAt,
+		approval.ID,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func scanRowIntoApproval(rows *sql.Rows) (*Approval, error) {
+	i := new(Approval)
+	err := rows.Scan(
+		&i.ID,
+		&i.Type,
+		&i.Status,
+		&i.AssociatedEntityName,
+		&i.AssocitateEntityId,
+		&i.DecidedBy,
+		&i.DecidedAt,
+		&i.CreateAt,
+		&i.UpdateAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return i, nil
 }
