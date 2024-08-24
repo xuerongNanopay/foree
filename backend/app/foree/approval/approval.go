@@ -29,7 +29,8 @@ const (
 			a.associated_entity_id, a.decided_by, a.decided_at,
 			a.create_at, a.update_at
 		FROM approval as a
-		WHERE a.type = ? 
+		WHERE a.type = ?
+		ORDER BY a.create_at DESC
 		LIMIT ? OFFSET ?
 	`
 	sQLApprovalQueryAllByTypeAndStatusWithPagination = `
@@ -39,6 +40,7 @@ const (
 			a.create_at, a.update_at
 		FROM approval as a
 		WHERE a.type = ? AND a.status = ? 
+		ORDER BY a.create_at DESC
 		LIMIT ? OFFSET ?
 	`
 )
