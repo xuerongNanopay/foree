@@ -13,6 +13,7 @@ type TransactionSuperService struct {
 	db            *sql.DB
 	foreeTxRepo   *transaction.ForeeTxRepo
 	ciTxRepo      *transaction.InteracCITxRepo
+	interacTxRepo *transaction.InteracCITxRepo
 	idmTxRepo     *transaction.IdmTxRepo
 	npbTxRepo     *transaction.NBPCOTxRepo
 	ciTxProcessor *CITxProcessor
@@ -58,13 +59,13 @@ func (t *TransactionSuperService) forceCIStatusUpdate(ctx context.Context, fTxId
 	fTx.CI.Status = transaction.TxStatus(newStatus)
 	fTx.CurStageStatus = transaction.TxStatus(newStatus)
 
-	err = p.interacTxRepo.UpdateInteracCITxById(ctx, *fTx.CI)
+	err = t.interacTxRepo.UpdateInteracCITxById(ctx, *fTx.CI)
 	if err != nil {
 		dTx.Rollback()
 		return nil, err
 	}
 
-	err = p.foreeTxRepo.UpdateForeeTxById(ctx, fTx)
+	err = t.foreeTxRepo.UpdateForeeTxById(ctx, *fTx)
 	if err != nil {
 		dTx.Rollback()
 		return nil, err
@@ -74,8 +75,7 @@ func (t *TransactionSuperService) forceCIStatusUpdate(ctx context.Context, fTxId
 		return nil, err
 	}
 
-	return &fTx, nil
-}
+	return fTx, nil
 }
 
 //TODO: ForceCI
