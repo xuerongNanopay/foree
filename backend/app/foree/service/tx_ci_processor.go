@@ -110,11 +110,11 @@ func (p *CITxProcessor) startProcessor() error {
 	}
 }
 
-func (p *CITxProcessor) startTx(fTx transaction.ForeeTx) {
+func (p *CITxProcessor) startFTx(fTx transaction.ForeeTx) {
 	p.startChan <- fTx
 }
 
-func (p *CITxProcessor) forwardTx(fTx transaction.ForeeTx) {
+func (p *CITxProcessor) forwardFTx(fTx transaction.ForeeTx) {
 	p.forwardChan <- fTx
 }
 
