@@ -14,6 +14,7 @@ import (
 type IDMTxProcessor struct {
 	db          *sql.DB
 	foreeTxRepo *transaction.ForeeTxRepo
+	idmTxRepo   *transaction.IdmTxRepo
 	txProcessor *TxProcessor
 	idmClient   idm.IDMClient
 }
@@ -53,26 +54,53 @@ func (p *IDMTxProcessor) idmTransferValidate(tx transaction.ForeeTx) (*transacti
 
 	resp, err := p.idmClient.Transfer(*req)
 	if err != nil {
+		dTx.Rollback()
 		return nil, err
 	}
 
 	if resp.StatusCode/100 != 2 {
+		dTx.Rollback()
 		return nil, err
 	}
 
 	idmStatus := resp.GetResultStatus()
 
 	if idmStatus == "ACCEPT" {
+		//TODO: log success
 		tx.CurStageStatus = transaction.TxStatusCompleted
 		tx.IDM.Status = transaction.TxStatusCompleted
-		//TODO: log success
+		err = p.idmTxRepo.UpdateIDMTxById(ctx, *tx.IDM)
+		if err != nil {
+			dTx.Rollback()
+			return nil, err
+		}
+		err = p.foreeTxRepo.UpdateForeeTxById(ctx, tx)
+		if err != nil {
+			dTx.Rollback()
+			return nil, err
+		}
 	} else {
 		//TODO: log fails
 		tx.CurStageStatus = transaction.TxStatusSuspend
-		tx.IDM.Status = transaction.TxStatusCompleted
+		tx.IDM.Status = transaction.TxStatusSuspend
+		err = p.idmTxRepo.UpdateIDMTxById(ctx, *tx.IDM)
+		if err != nil {
+			dTx.Rollback()
+			return nil, err
+		}
+		err = p.foreeTxRepo.UpdateForeeTxById(ctx, tx)
+		if err != nil {
+			dTx.Rollback()
+			return nil, err
+		}
+		//TODO: generate approval.
 	}
 
-	return nil, nil
+	if err = dTx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return &tx, nil
 }
 
 func (p *IDMTxProcessor) generateValidateTransferReq(tx transaction.ForeeTx) (*idm.IDMRequest, error) {
