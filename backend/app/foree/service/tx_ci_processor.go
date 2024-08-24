@@ -244,37 +244,30 @@ func (p *CITxProcessor) refreshScotiaStatus(fTx transaction.ForeeTx) (*transacti
 
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
-	_, err = p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.CI.ParentTxId)
+	curFTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.CI.ParentTxId)
 	if err != nil {
 		dTx.Rollback()
 		return nil, err
 	}
 
-	//TODO: Need reload?
-	foreeTx, err := p.txProcessor.loadTx(fTx.CI.ParentTxId, true)
-	if err != nil {
-		dTx.Rollback()
-		return nil, err
-	}
-
-	if foreeTx.CurStage != transaction.TxStageInteracCI && foreeTx.CurStageStatus != transaction.TxStatusSent {
+	if curFTx.CurStage != transaction.TxStageInteracCI && curFTx.CurStageStatus != transaction.TxStatusSent {
 		p.doneChan <- fTx.ID
 		dTx.Rollback()
-		return nil, fmt.Errorf("CI failed: refreshScotiaStatusAndProcess: ForeeTx `%v` is in stage `%s` at status `%s`", foreeTx.ID, foreeTx.CurStage, foreeTx.CurStageStatus)
+		return nil, fmt.Errorf("CI failed: refreshScotiaStatusAndProcess: ForeeTx `%v` is in stage `%s` at status `%s`", curFTx.ID, curFTx.CurStage, curFTx.CurStageStatus)
 	}
 
 	// Update Foree Tx and CI Tx.
-	foreeTx.CI.Status = newStatus
-	foreeTx.CI.ScotiaStatus = scotiaStatus
-	foreeTx.CurStageStatus = newStatus
+	fTx.CI.Status = newStatus
+	fTx.CI.ScotiaStatus = scotiaStatus
+	fTx.CurStageStatus = newStatus
 
-	err = p.interacTxRepo.UpdateInteracCITxById(ctx, *foreeTx.CI)
+	err = p.interacTxRepo.UpdateInteracCITxById(ctx, *fTx.CI)
 	if err != nil {
 		dTx.Rollback()
 		return nil, err
 	}
 
-	err = p.foreeTxRepo.UpdateForeeTxById(ctx, *foreeTx)
+	err = p.foreeTxRepo.UpdateForeeTxById(ctx, fTx)
 	if err != nil {
 		dTx.Rollback()
 		return nil, err
@@ -284,7 +277,7 @@ func (p *CITxProcessor) refreshScotiaStatus(fTx transaction.ForeeTx) (*transacti
 		return nil, err
 	}
 
-	return foreeTx, nil
+	return &fTx, nil
 }
 
 func (p *CITxProcessor) Webhook(paymentId string) {

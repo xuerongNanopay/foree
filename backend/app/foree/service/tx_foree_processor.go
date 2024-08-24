@@ -312,22 +312,44 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 		case transaction.TxStatusSent:
 			//Check status from scotia API.(Webhook, or cron)
 			//Just do noting waiting for cron
+			p.ciTxProcessor.enqueueTx(tx)
 		case transaction.TxStatusCompleted:
 			tx.CurStage = transaction.TxStageInteracCI
 			tx.CurStageStatus = transaction.TxStatusInitial
 			return &tx, nil
 		case transaction.TxStatusRejected:
-			//Set to reject
+			tx.Status = transaction.TxStatusRejected
+			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
+			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
+				return nil, err
+			}
+			// Close remaing non-terminated transactions.
+			nT, err := p.closeRemainingTx(ctx, tx)
+			if err != nil {
+				return nil, err
+			}
+			go p.maybeRefund(*nT)
+			return nT, nil
 		case transaction.TxStatusCancelled:
-			// set to cancel
+			tx.Status = transaction.TxStatusCancelled
+			tx.Conclusion = fmt.Sprintf("Cancelled in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
+			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
+				return nil, err
+			}
+			// Close remaing non-terminated transactions.
+			nT, err := p.closeRemainingTx(ctx, tx)
+			if err != nil {
+				return nil, err
+			}
+			go p.maybeRefund(*nT)
+			return nT, nil
 		default:
 			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", tx.ID, tx.CurStageStatus, tx.CurStage)
 		}
 	case transaction.TxStageIDM:
 		switch tx.CurStageStatus {
 		case transaction.TxStatusInitial:
-			//TODO: call send IDMAPI
-			//Set to Send
+			return p.idmTxProcessor.createAndProcessTx(tx)
 		case transaction.TxStatusCompleted:
 			//Move to next stage
 			tx.CurStage = transaction.TxStageNBPCO
