@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/partner/nbp"
 )
@@ -51,8 +52,15 @@ func (p *NBPTxProcessor) buildLoadRemittanceRequest(tx transaction.ForeeTx) (*nb
 		RemitterEmail:      tx.CI.CashInAcc.Email,
 		RemitterContact:    tx.CI.CashInAcc.PhoneNumber,
 		RemitterDOB:        (*nbp.NBPDate)(&tx.Owner.Dob),
-		RemitterAddress:    tx.CI.CashInAcc.Address,
+		RemitterAddress:    generateLoadRemittanceFromInteracAccount(tx.CI.CashInAcc),
 		RemitterIdType:     nbp.RemitterIdTypeOther,
 		// RemitterPOB: tx.Owner,
 	}, nil
+}
+
+func generateLoadRemittanceFromInteracAccount(acc *account.InteracAccount) string {
+	if acc.Address2 == "" {
+		return fmt.Sprintf("%s,%s,%s,%s,%s", acc.Address1, acc.City, acc.Province, acc.PostalCode, acc.Country)
+	}
+	return fmt.Sprintf("%s,%s,%s,%s,%s,%s", acc.Address1, acc.Address2, acc.City, acc.Province, acc.PostalCode, acc.Country)
 }

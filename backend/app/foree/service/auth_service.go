@@ -285,10 +285,15 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 
 	// Create default Interac Account for the user.
 	acc := account.InteracAccount{
-		FirstName:  session.User.FirstName,
-		MiddleName: session.User.MiddleName,
-		LastName:   session.User.LastName,
-		// Address:          generateInteracAddressFromUser(session.User),
+		FirstName:        session.User.FirstName,
+		MiddleName:       session.User.MiddleName,
+		LastName:         session.User.LastName,
+		Address1:         user.Address1,
+		Address2:         user.Address2,
+		City:             user.City,
+		Province:         user.Province,
+		Country:          user.Country,
+		PostalCode:       user.PostalCode,
 		PhoneNumber:      session.User.PhoneNumber,
 		Email:            session.User.Email,
 		OwnerId:          session.User.ID,
