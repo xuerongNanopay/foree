@@ -59,7 +59,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 	}
 
 	// Create EmailPasswd
-	id, err := a.emailPasswordRepo.InsertEmailPasswd(auth.EmailPasswd{
+	id, err := a.emailPasswordRepo.InsertEmailPasswd(ctx, auth.EmailPasswd{
 		Email:      req.Email,
 		Passowrd:   hashedPassowrd,
 		Status:     auth.EPStatusWaitingVerify,
@@ -409,7 +409,7 @@ func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) tra
 	ep := *session.EmailPasswd
 	ep.Passowrd = hashed
 	//TODO: log
-	updateErr := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ep)
+	updateErr := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, ep)
 	if updateErr != nil {
 		return transport.WrapInteralServerError(updateErr)
 	}

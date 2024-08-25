@@ -1,10 +1,13 @@
 package auth
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"math/rand"
 	"time"
+
+	"xue.io/go-pay/constant"
 )
 
 const (
@@ -73,15 +76,32 @@ type EmailPasswdRepo struct {
 	db *sql.DB
 }
 
-func (repo *EmailPasswdRepo) InsertEmailPasswd(ep EmailPasswd) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLEmailPasswdInsert,
-		ep.Email,
-		ep.Passowrd,
-		ep.Status,
-		ep.VerifyCode,
-		ep.UserId,
-	)
+func (repo *EmailPasswdRepo) InsertEmailPasswd(ctx context.Context, ep EmailPasswd) (int64, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLEmailPasswdInsert,
+			ep.Email,
+			ep.Passowrd,
+			ep.Status,
+			ep.VerifyCode,
+			ep.UserId,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLEmailPasswdInsert,
+			ep.Email,
+			ep.Passowrd,
+			ep.Status,
+			ep.VerifyCode,
+			ep.UserId,
+		)
+	}
+
 	if err != nil {
 		return 0, err
 	}
@@ -90,6 +110,23 @@ func (repo *EmailPasswdRepo) InsertEmailPasswd(ep EmailPasswd) (int64, error) {
 		return 0, err
 	}
 	return id, nil
+}
+
+func (repo *EmailPasswdRepo) UpdateEmailPasswdByEmail(ctx context.Context, ep EmailPasswd) error {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+
+	if ok {
+		_, err = dTx.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passowrd, ep.VerifyCode, ep.CodeVerifiedAt, ep.Email)
+	} else {
+		_, err = repo.db.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passowrd, ep.VerifyCode, ep.CodeVerifiedAt, ep.Email)
+	}
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (repo *EmailPasswdRepo) GetUniqueEmailPasswdByEmail(email string) (*EmailPasswd, error) {
@@ -163,14 +200,6 @@ func (repo *EmailPasswdRepo) GetAllEmailPasswdByEmail() ([]*EmailPasswd, error) 
 	}
 
 	return eps, nil
-}
-
-func (repo *EmailPasswdRepo) UpdateEmailPasswdByEmail(ep EmailPasswd) error {
-	_, err := repo.db.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passowrd, ep.VerifyCode, ep.CodeVerifiedAt, ep.Email)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func scanRowIntoEmailPasswd(rows *sql.Rows) (*EmailPasswd, error) {
