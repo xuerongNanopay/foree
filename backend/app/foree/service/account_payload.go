@@ -68,7 +68,7 @@ func (q *CreateContactReq) Validate() *transport.BadRequestError {
 		ret.AddDetails("transferMethod", fmt.Sprintf("invalid transferMethod `%v`", q.TransferMethod))
 	}
 
-	if account.ContactAccountType(q.TransferMethod) != account.ContactAccountTypeCash {
+	if account.ContactAccountType(q.TransferMethod) != foree_constant.ContactAccountTypeCash {
 		if q.BankName == "" {
 			ret.AddDetails("bankName", fmt.Sprintf("invalid bankName `%v`", q.BankName))
 		}

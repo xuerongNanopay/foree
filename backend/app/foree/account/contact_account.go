@@ -72,12 +72,6 @@ const (
 
 type ContactAccountType string
 
-const (
-	ContactAccountTypeCash               ContactAccountType = "CASH"
-	ContactAccountTypeAccountTransfers   ContactAccountType = "ACCOUNT_TRANSFERS"
-	ContactAccountTypeThirdPartyPayments ContactAccountType = "THIRD_PARTY_PAYMENTS"
-)
-
 // TODO: improve security by using hashId.
 type ContactAccount struct {
 	ID                    int64              `json:"id"`

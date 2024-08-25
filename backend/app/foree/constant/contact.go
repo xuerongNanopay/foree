@@ -2,10 +2,16 @@ package foree_constant
 
 import "xue.io/go-pay/app/foree/account"
 
+const (
+	ContactAccountTypeCash               account.ContactAccountType = "CASH"
+	ContactAccountTypeAccountTransfers   account.ContactAccountType = "ACCOUNT_TRANSFERS"
+	ContactAccountTypeThirdPartyPayments account.ContactAccountType = "THIRD_PARTY_PAYMENTS"
+)
+
 var AllowContactAccountType = map[account.ContactAccountType]bool{
-	account.ContactAccountTypeCash:               true,
-	account.ContactAccountTypeAccountTransfers:   true,
-	account.ContactAccountTypeThirdPartyPayments: true,
+	ContactAccountTypeCash:               true,
+	ContactAccountTypeAccountTransfers:   true,
+	ContactAccountTypeThirdPartyPayments: true,
 }
 
 var AllowRelationshipToContactTypes = map[string]bool{

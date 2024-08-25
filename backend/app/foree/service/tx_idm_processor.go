@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"xue.io/go-pay/app/foree/account"
+	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/constant"
 	"xue.io/go-pay/partner/idm"
@@ -115,12 +115,12 @@ func (p *IDMTxProcessor) idmTransferValidate(tx transaction.ForeeTx) (*transacti
 
 func (p *IDMTxProcessor) generateValidateTransferReq(tx transaction.ForeeTx) (*idm.IDMRequest, error) {
 	IsCashPickup := false
-	if tx.COUT.CashOutAcc.Type == account.ContactAccountTypeCash {
+	if tx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
 		IsCashPickup = true
 	}
 
 	beneBankName := ""
-	if tx.COUT.CashOutAcc.Type != account.ContactAccountTypeCash {
+	if tx.COUT.CashOutAcc.Type != foree_constant.ContactAccountTypeCash {
 		beneBankName = tx.COUT.CashOutAcc.InstitutionName
 	}
 

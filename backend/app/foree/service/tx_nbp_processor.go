@@ -67,21 +67,33 @@ func (p *NBPTxProcessor) buildLoadRemittanceRequest(fTx transaction.ForeeTx) (*n
 	}
 
 	transactionDate := time.Now()
-	return &nbp.LoadRemittanceRequest{
-		Amount:             nbp.NBPAmount(fTx.COUT.Amt.Amount),
-		Currency:           fTx.COUT.Amt.Currency,
-		TransactionDate:    (*nbp.NBPDate)(&transactionDate),
-		OriginatingCountry: "Canada",
-		PurposeRemittance:  fTx.TransactionPurpose,
-		RemitterName:       fTx.CI.CashInAcc.GetLegalName(),
-		RemitterEmail:      fTx.CI.CashInAcc.Email,
-		RemitterContact:    fTx.CI.CashInAcc.PhoneNumber,
-		RemitterDOB:        (*nbp.NBPDate)(&fTx.Owner.Dob),
-		RemitterAddress:    generateLoadRemittanceFromInteracAccount(fTx.CI.CashInAcc),
-		RemitterIdType:     mapNBPRemitterIdType(identification.Type),
-		RemitterId:         identification.Value,
-		RemitterPOB:        userExtra.Pob,
-	}, nil
+	lrr := &nbp.LoadRemittanceRequest{
+		Amount:                          nbp.NBPAmount(fTx.COUT.Amt.Amount),
+		Currency:                        fTx.COUT.Amt.Currency,
+		TransactionDate:                 (*nbp.NBPDate)(&transactionDate),
+		OriginatingCountry:              "Canada",
+		PurposeRemittance:               fTx.TransactionPurpose,
+		RemitterName:                    fTx.CI.CashInAcc.GetLegalName(),
+		RemitterEmail:                   fTx.CI.CashInAcc.Email,
+		RemitterContact:                 fTx.CI.CashInAcc.PhoneNumber,
+		RemitterDOB:                     (*nbp.NBPDate)(&fTx.Owner.Dob),
+		RemitterAddress:                 generateLoadRemittanceFromInteracAccount(fTx.CI.CashInAcc),
+		RemitterIdType:                  mapNBPRemitterIdType(identification.Type),
+		RemitterId:                      identification.Value,
+		RemitterPOB:                     userExtra.Pob,
+		BeneficiaryName:                 fTx.COUT.CashOutAcc.GetLegalName(),
+		BeneficiaryAddress:              generateLoadRemittanceFromContactAccount(fTx.COUT.CashOutAcc),
+		BeneficiaryCity:                 fTx.COUT.CashOutAcc.City,
+		RemitterBeneficiaryRelationship: fTx.COUT.CashOutAcc.RelationshipToContact,
+	}
+
+	if fTx.COUT.CashOutAcc.Type != foree_constant.ContactAccountTypeCash {
+		lrr.BeneficiaryBank = fTx.COUT.CashOutAcc.InstitutionName
+		lrr.BeneficiaryAccount = fTx.COUT.CashOutAcc.AccountNumber
+	}
+
+	return lrr, nil
+
 }
 
 func mapNBPRemitterIdType(idType foree_auth.IdentificationType) nbp.RemitterIdType {
@@ -96,6 +108,13 @@ func mapNBPRemitterIdType(idType foree_auth.IdentificationType) nbp.RemitterIdTy
 }
 
 func generateLoadRemittanceFromInteracAccount(acc *account.InteracAccount) string {
+	if acc.Address2 == "" {
+		return fmt.Sprintf("%s,%s,%s,%s,%s", acc.Address1, acc.City, acc.Province, acc.PostalCode, acc.Country)
+	}
+	return fmt.Sprintf("%s,%s,%s,%s,%s,%s", acc.Address1, acc.Address2, acc.City, acc.Province, acc.PostalCode, acc.Country)
+}
+
+func generateLoadRemittanceFromContactAccount(acc *account.ContactAccount) string {
 	if acc.Address2 == "" {
 		return fmt.Sprintf("%s,%s,%s,%s,%s", acc.Address1, acc.City, acc.Province, acc.PostalCode, acc.Country)
 	}
