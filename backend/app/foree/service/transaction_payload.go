@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/app/foree/types"
@@ -136,7 +137,7 @@ func (q *QueryTransactionReq) Validate() *transport.BadRequestError {
 	ret := validateStruct(q, "Invalid query transaction request")
 
 	// Check status
-	_, ok := allowTransactionsStatus[q.Status]
+	_, ok := foree_constant.AllowTransactionsStatus[q.Status]
 	if !ok {
 		ret.AddDetails("status", fmt.Sprintf("invalid status `%v`", q.Status))
 	}

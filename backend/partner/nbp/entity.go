@@ -205,7 +205,7 @@ type LoadRemittanceRequest struct {
 	RemitterAccountNo               string         `json:"remitter_AccountNo,omitempty"`
 	RemitterFatherName              string         `json:"remitter_FatherName,omitempty"`
 	RemitterDOB                     *NBPDate       `json:"remitter_DOB,omitempty"` //yyyy-MM-dd
-	RemitterPOB                     *NBPDate       `json:"remitter_POB,omitempty"`
+	RemitterPOB                     string         `json:"remitter_POB,omitempty"`
 	RemitterNationality             string         `json:"remitter_Nationality,omitempty"`
 	RemitterBeneficiaryRelationship string         `json:"remitter_BeneficiaryRelationship,omitempty"`
 }

@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	fAuth "xue.io/go-pay/app/foree/auth"
+	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
@@ -131,7 +133,7 @@ func (q *CreateUserReq) Validate() *transport.BadRequestError {
 	ret := validateStruct(q, "Invalid user creation request")
 
 	// Age
-	age := q.Dob.Time.Unix() / int64(Second_In_Year)
+	age := q.Dob.Time.Unix() / (int64(time.Hour/time.Second) * 24 * 365)
 
 	if age < 19 || age > 120 {
 		ret.AddDetails("dob", "illegal age")
@@ -153,14 +155,14 @@ func (q *CreateUserReq) Validate() *transport.BadRequestError {
 
 	// Phone number
 	phoneNumber := phoneNumberReplayer.Replace(q.PhoneNumber)
-	ok, _ = regexp.MatchString(NineDigitReg, phoneNumber)
+	ok, _ = regexp.MatchString(foree_constant.NineDigitReg, phoneNumber)
 	if !ok {
 		ret.AddDetails("phoneNumber", fmt.Sprintf("invalid phone number `%v`", q.PhoneNumber))
 	}
 	q.PhoneNumber = phoneNumber
 
 	// Identification type
-	_, ok = allowIdentificationTypes[fAuth.IdentificationType(q.IdentificationType)]
+	_, ok = foree_constant.AllowIdentificationTypes[fAuth.IdentificationType(q.IdentificationType)]
 	if !ok {
 		ret.AddDetails("identificationType", fmt.Sprintf("invalid identificationType `%v`", q.IdentificationType))
 	}

@@ -5,6 +5,8 @@ import (
 	"xue.io/go-pay/app/foree/types"
 )
 
+const DefaultNBPIdPrefix = "NP"
+
 const (
 	DefaultFeeName               string = "FOREE_TX_CAD_FEE"
 	DefaultRoleGroup             string = string(RoleGroupPersonal)

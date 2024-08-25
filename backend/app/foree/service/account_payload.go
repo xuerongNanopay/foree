@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"xue.io/go-pay/app/foree/account"
+	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/auth"
 )
@@ -56,13 +57,13 @@ func (q *CreateContactReq) Validate() *transport.BadRequestError {
 	ret := validateStruct(q, "Invalid create contact request")
 
 	// Check relationship
-	_, ok := allowRelationshipToContactTypes[q.RelationshipToContact]
+	_, ok := foree_constant.AllowRelationshipToContactTypes[q.RelationshipToContact]
 	if !ok {
 		ret.AddDetails("relationshipToContact", fmt.Sprintf("invalid relationshipToContact `%v`", q.RelationshipToContact))
 	}
 
 	// Check transferMethod
-	_, ok = allowContactAccountType[account.ContactAccountType(q.TransferMethod)]
+	_, ok = foree_constant.AllowContactAccountType[account.ContactAccountType(q.TransferMethod)]
 	if !ok {
 		ret.AddDetails("transferMethod", fmt.Sprintf("invalid transferMethod `%v`", q.TransferMethod))
 	}
