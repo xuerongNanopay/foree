@@ -132,6 +132,7 @@ func (p *CITxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx
 	return t, nil
 }
 
+// Scotia APi Call
 func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	dTx, err := p.db.Begin()
 	if err != nil {

@@ -26,10 +26,12 @@ const (
 	AccStatusBusiness             = "BUSINESS"
 )
 
+type PMTMode string
+
 const (
-	pmtModeCash               = "CASH"
-	pmtModeAccountTransfers   = "ACCOUNT_TRANSFERS"
-	pmtModeThirdPartyPayments = "THIRD_PARTY_PAYMENTS"
+	PMTModeCash               PMTMode = "CASH"
+	PMTModeAccountTransfers   PMTMode = "ACCOUNT_TRANSFERS"
+	PMTModeThirdPartyPayments PMTMode = "THIRD_PARTY_PAYMENTS"
 )
 
 type responseGetter interface {
@@ -173,7 +175,7 @@ type LoadRemittanceRequest struct {
 	GlobalId                        string    `json:"Global_Id,omitempty"`
 	Currency                        string    `json:"Currency,omitempty"`
 	Amount                          NBPAmount `json:"Amount,omitempty"` //see: https://stackoverflow.com/questions/61811463/golang-encode-float-to-json-with-specified-precision
-	PmtMode                         string    `json:"Pmt_Mode,omitempty"`
+	PmtMode                         PMTMode   `json:"Pmt_Mode,omitempty"`
 	RemitterName                    string    `json:"Remitter_Name,omitempty"`
 	RemitterAddress                 string    `json:"Remitter_Address,omitempty"`
 	RemitterEmail                   string    `json:"Remitter_Email,omitempty"`
@@ -190,7 +192,7 @@ type LoadRemittanceRequest struct {
 	PurposeRemittance               string    `json:"Purpose_Remittance,omitempty"`
 	BeneficiaryCity                 string    `json:"Beneficiary_City,omitempty"`
 	OriginatingCountry              string    `json:"Originating_Country,omitempty"`
-	TransactionDate                 string    `json:"Transaction_Date,omitempty"` //yyyy-MM-dd
+	TransactionDate                 *NBPDate  `json:"Transaction_Date,omitempty"` //yyyy-MM-dd
 	RemitterAccountNo               string    `json:"remitter_AccountNo,omitempty"`
 	RemitterFatherName              string    `json:"remitter_FatherName,omitempty"`
 	RemitterDOB                     *NBPDate  `json:"remitter_DOB,omitempty"` //yyyy-MM-dd

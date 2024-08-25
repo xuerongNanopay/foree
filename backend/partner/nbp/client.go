@@ -302,17 +302,17 @@ func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiry
 }
 
 func (c *NBPClientImpl) LoadRemittanceCash(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
-	r.PmtMode = pmtModeCash
+	r.PmtMode = PMTModeCash
 	return c.loadRemittance("LoadRemittanceCash", r)
 }
 
 func (c *NBPClientImpl) LoadRemittanceAccounts(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
-	r.PmtMode = pmtModeAccountTransfers
+	r.PmtMode = PMTModeAccountTransfers
 	return c.loadRemittance("LoadRemittanceAccounts", r)
 }
 
 func (c *NBPClientImpl) LoadRemittanceThirdParty(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
-	r.PmtMode = pmtModeThirdPartyPayments
+	r.PmtMode = PMTModeThirdPartyPayments
 	return c.loadRemittance("LoadRemittanceThirdParty", r)
 }
 
