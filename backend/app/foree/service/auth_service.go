@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
-	fAuth "xue.io/go-pay/app/foree/auth"
+	foree_auth "xue.io/go-pay/app/foree/auth"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/auth"
 )
@@ -15,8 +15,9 @@ type AuthService struct {
 	userRepo               *auth.UserRepo
 	emailPasswordRepo      *auth.EmailPasswdRepo
 	permissionRepo         *auth.PermissionRepo
-	userIdentificationRepo *fAuth.UserIdentificationRepo
+	userIdentificationRepo *foree_auth.UserIdentificationRepo
 	interacRepo            *account.InteracAccountRepo
+	userGroupRepo          *auth.UserGroupRepo
 	// emailPasswdRecoverRepo *auth.EmailPasswdRecoverRepo
 }
 
@@ -133,7 +134,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*aut
 	newEP := *session.EmailPasswd
 	newEP.Status = auth.EPStatusActive
 	newEP.CodeVerifiedAt = time.Now()
-	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(newEP)
+	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP)
 	if e != nil {
 		return nil, transport.WrapInteralServerError(e)
 	}
@@ -168,7 +169,7 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 	newEP := *session.EmailPasswd
 	newEP.VerifyCode = auth.GenerateVerifyCode()
 
-	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(newEP)
+	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP)
 	if e != nil {
 		return transport.WrapInteralServerError(e)
 	}
@@ -228,14 +229,14 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	}
 
 	// Create identification(Store Identification first)
-	identification := fAuth.UserIdentification{
-		Status:  fAuth.IdentificationStatusActive,
-		Type:    fAuth.IdentificationType(req.IdentificationType),
+	identification := foree_auth.UserIdentification{
+		Status:  foree_auth.IdentificationStatusActive,
+		Type:    foree_auth.IdentificationType(req.IdentificationType),
 		Value:   req.IdentificationValue,
 		OwnerId: session.User.ID,
 	}
 
-	_, ier := a.userIdentificationRepo.InsertUserIdentification(identification)
+	_, ier := a.userIdentificationRepo.InsertUserIdentification(ctx, identification)
 	if ier != nil {
 		return nil, transport.WrapInteralServerError(ier)
 	}
@@ -267,8 +268,13 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 		return nil, transport.WrapInteralServerError(er)
 	}
 
+	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
+	if er != nil {
+		return nil, transport.WrapInteralServerError(er)
+	}
+
 	// Get Permission.
-	pers, pErr := a.permissionRepo.GetAllPermissionByGroupName(user.Group)
+	pers, pErr := a.permissionRepo.GetAllPermissionByGroupName(userGroup.RoleGroup)
 	if pErr != nil {
 		return nil, transport.WrapInteralServerError(pErr)
 	}
@@ -333,8 +339,13 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 		return nil, transport.NewInteralServerError("User `%v` do not exists", ep.UserId)
 	}
 
+	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
+	if er != nil {
+		return nil, transport.WrapInteralServerError(er)
+	}
+
 	// Load permissions
-	pers, pErr := a.permissionRepo.GetAllPermissionByGroupName(user.Group)
+	pers, pErr := a.permissionRepo.GetAllPermissionByGroupName(userGroup.RoleGroup)
 	if pErr != nil {
 		return nil, transport.WrapInteralServerError(pErr)
 	}

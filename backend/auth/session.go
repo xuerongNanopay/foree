@@ -20,6 +20,7 @@ type Session struct {
 	UserId         int64         `json:"userId"`
 	EmailPasswd    *EmailPasswd  `json:"emailPasswd"`
 	User           *User         `json:"user"`
+	UserGroup      *UserGroup    `json:"userGroup"`
 	Permissions    []*Permission `json:"permission"`
 	UserAgent      string        `json:"userAgent"`
 	Ip             string        `json:"ip"`

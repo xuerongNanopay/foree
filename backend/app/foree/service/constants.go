@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"xue.io/go-pay/app/foree/account"
-	"xue.io/go-pay/app/foree/auth"
+	foree_auth "xue.io/go-pay/app/foree/auth"
 	"xue.io/go-pay/app/foree/transaction"
 )
 
@@ -22,11 +22,11 @@ const NineDigitReg = `^\\d{9}$`
 var phoneNumberReplayer = strings.NewReplacer(" ", "", "(", "", ")", "", "-", "", "+", "")
 var validate = validator.New()
 
-var allowIdentificationTypes = map[auth.IdentificationType]bool{
-	auth.IDTypePassport:      true,
-	auth.IDTypeDriverLicense: true,
-	auth.IDTypeProvincalId:   true,
-	auth.IDTypeNationId:      true,
+var allowIdentificationTypes = map[foree_auth.IdentificationType]bool{
+	foree_auth.IDTypePassport:      true,
+	foree_auth.IDTypeDriverLicense: true,
+	foree_auth.IDTypeProvincalId:   true,
+	foree_auth.IDTypeNationId:      true,
 }
 
 var allowRelationshipToContactTypes = map[string]bool{

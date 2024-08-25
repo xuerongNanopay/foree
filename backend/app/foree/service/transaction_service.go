@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
+	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/app/foree/types"
@@ -25,42 +26,10 @@ type CacheItem[T any] struct {
 	createAt time.Time
 }
 
-const (
-	FeeName           string = "FOREE_TX_CAD_FEE"
-	DefaultForeeGroup string = "FOREE_PERSONAL"
-)
-
-// Group level transaction limit.
-var txLimits = map[string]transaction.TxLimit{
-	"FOREE_PERSONAL": {
-		Name: "foree_personal-group-tx-limit",
-		MinAmt: types.AmountData{
-			Amount:   types.Amount(10.0),
-			Currency: "CAD",
-		},
-		MaxAmt: types.AmountData{
-			Amount:   types.Amount(1000.0),
-			Currency: "CAD",
-		},
-		IsEnable: true,
-	},
-	"FOREE_BO": {
-		Name: "foree_bo-group-tx-limit",
-		MinAmt: types.AmountData{
-			Amount:   types.Amount(2.0),
-			Currency: "CAD",
-		},
-		MaxAmt: types.AmountData{
-			Amount:   types.Amount(1000.0),
-			Currency: "CAD",
-		},
-		IsEnable: true,
-	},
-}
-
 type TransactionService struct {
 	db                *sql.DB
 	authService       *AuthService
+	userGroupRepo     *auth.UserGroupRepo
 	foreeTxRepo       *transaction.ForeeTxRepo
 	txSummaryRepo     *transaction.TxSummaryRepo
 	txQuoteRepo       *transaction.TxQuoteRepo
@@ -144,12 +113,12 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 	}
 
 	//fee
-	fee, err := t.getFee(ctx, FeeName, 2*time.Hour)
+	fee, err := t.getFee(ctx, foree_constant.FeeName, 2*time.Hour)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if fee == nil {
-		return nil, transport.NewInteralServerError("fee `%v` not found", FeeName)
+		return nil, transport.NewInteralServerError("fee `%v` not found", foree_constant.FeeName)
 	}
 
 	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
@@ -297,12 +266,12 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	// existpromo:
 
 	//Fee
-	fee, err := t.getFee(ctx, FeeName, time.Hour)
+	fee, err := t.getFee(ctx, foree_constant.FeeName, time.Hour)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if fee == nil {
-		return nil, transport.NewInteralServerError("fee `%v` not found", FeeName)
+		return nil, transport.NewInteralServerError("fee `%v` not found", foree_constant.FeeName)
 	}
 
 	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
@@ -314,12 +283,17 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		joint.OwnerId = user.ID
 	}
 
-	txLimit, ok := txLimits[user.Group]
-	if !ok {
-		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", user.Group)
+	userGroup, er := t.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
+	if er != nil {
+		return nil, transport.WrapInteralServerError(er)
 	}
 
-	dailyLimit, err := t.getDailyTxLimit(ctx, user)
+	txLimit, ok := foree_constant.TxLimits[foree_constant.TransactionLimitGroup(userGroup.TransactionLimitGroup)]
+	if !ok {
+		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", userGroup.TransactionLimitGroup)
+	}
+
+	dailyLimit, err := t.getDailyTxLimit(ctx, *session)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -446,6 +420,11 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 		return nil, transport.NewInteralServerError("user `%v` do not find foreeTx in quote `%v`", user.ID, req.QuoteId)
 	}
 
+	userGroup, er := t.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
+	if er != nil {
+		return nil, transport.WrapInteralServerError(er)
+	}
+
 	// Start database transaction.
 	dTx, err := t.db.Begin()
 	if err != nil {
@@ -485,12 +464,12 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	var limitErr transport.ForeeError
 	limitChecker := func() {
 		defer wg.Done()
-		txLimit, ok := txLimits[user.Group]
+		txLimit, ok := foree_constant.TxLimits[foree_constant.TransactionLimitGroup(userGroup.TransactionLimitGroup)]
 		if !ok {
-			limitErr = transport.NewInteralServerError("transaction limit no found for group `%v`", user.Group)
+			limitErr = transport.NewInteralServerError("transaction limit no found for group `%v`", userGroup.TransactionLimitGroup)
 		}
 
-		dailyLimit, err := t.getDailyTxLimit(ctx, *user)
+		dailyLimit, err := t.getDailyTxLimit(ctx, *session)
 		if err != nil {
 			limitErr = transport.WrapInteralServerError(err)
 		}
@@ -514,7 +493,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 			foreeTxErr = transport.WrapInteralServerError(err)
 		}
 
-		if _, err := t.addDailyTxLimit(ctx, *user, foreeTx.SrcAmt); err != nil {
+		if _, err := t.addDailyTxLimit(ctx, *session, foreeTx.SrcAmt); err != nil {
 			dTx.Rollback()
 			foreeTxErr = transport.WrapInteralServerError(err)
 		}
@@ -618,21 +597,21 @@ func (t *TransactionService) rollBackTx(tx transaction.ForeeTx) {
 	// log error.
 }
 
-func (t *TransactionService) GetTxLimit(user auth.User) (*transaction.TxLimit, error) {
-	txLimit, ok := txLimits[user.Group]
-	if !ok {
-		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", user.Group)
-	}
-	return &txLimit, nil
-}
+// func (t *TransactionService) GetTxLimit(user auth.User) (*transaction.TxLimit, error) {
+// 	txLimit, ok := foree_constant.TxLimits[userGroup]
+// 	if !ok {
+// 		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", user.Group)
+// 	}
+// 	return &txLimit, nil
+// }
 
-func (t *TransactionService) GetDailyTxLimit(user auth.User) (*transaction.DailyTxLimit, error) {
+func (t *TransactionService) GetDailyTxLimit(session auth.Session) (*transaction.DailyTxLimit, error) {
 	ctx := context.Background()
-	return t.getDailyTxLimit(ctx, user)
+	return t.getDailyTxLimit(ctx, session)
 }
 
-func (t *TransactionService) addDailyTxLimit(ctx context.Context, user auth.User, amt types.AmountData) (*transaction.DailyTxLimit, error) {
-	dailyLimit, err := t.getDailyTxLimit(ctx, user)
+func (t *TransactionService) addDailyTxLimit(ctx context.Context, session auth.Session, amt types.AmountData) (*transaction.DailyTxLimit, error) {
+	dailyLimit, err := t.getDailyTxLimit(ctx, session)
 	if err != nil {
 		return nil, err
 	}
@@ -646,8 +625,8 @@ func (t *TransactionService) addDailyTxLimit(ctx context.Context, user auth.User
 	return dailyLimit, nil
 }
 
-func (t *TransactionService) minusDailyTxLimit(ctx context.Context, user auth.User, amt types.AmountData) (*transaction.DailyTxLimit, error) {
-	dailyLimit, err := t.getDailyTxLimit(ctx, user)
+func (t *TransactionService) minusDailyTxLimit(ctx context.Context, session auth.Session, amt types.AmountData) (*transaction.DailyTxLimit, error) {
+	dailyLimit, err := t.getDailyTxLimit(ctx, session)
 	if err != nil {
 		return nil, err
 	}
@@ -661,9 +640,9 @@ func (t *TransactionService) minusDailyTxLimit(ctx context.Context, user auth.Us
 	return dailyLimit, nil
 }
 
-// I don't case race condition here, cause create transaction will save it.
-func (t *TransactionService) getDailyTxLimit(ctx context.Context, user auth.User) (*transaction.DailyTxLimit, error) {
-	reference := transaction.GenerateDailyTxLimitReference(user.ID)
+// I don't case race condition here, cause create transaction will rescure it.
+func (t *TransactionService) getDailyTxLimit(ctx context.Context, session auth.Session) (*transaction.DailyTxLimit, error) {
+	reference := transaction.GenerateDailyTxLimitReference(session.UserId)
 	dailyLimit, err := t.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, reference)
 	if err != nil {
 		return nil, err
@@ -671,9 +650,9 @@ func (t *TransactionService) getDailyTxLimit(ctx context.Context, user auth.User
 
 	// If not create one.
 	if dailyLimit == nil {
-		txLimit, ok := txLimits[user.Group]
+		txLimit, ok := foree_constant.TxLimits[foree_constant.TransactionLimitGroup(session.UserGroup.TransactionLimitGroup)]
 		if !ok {
-			return nil, fmt.Errorf("transaction limit no found for group `%v`", user.Group)
+			return nil, fmt.Errorf("transaction limit no found for group `%v`", session.UserGroup.TransactionLimitGroup)
 		}
 		dailyLimit = &transaction.DailyTxLimit{
 			Reference: reference,
