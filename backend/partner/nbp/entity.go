@@ -34,6 +34,15 @@ const (
 	PMTModeThirdPartyPayments PMTMode = "THIRD_PARTY_PAYMENTS"
 )
 
+type RemitterIdType string
+
+const (
+	RemitterIdTypePassport       = "PASSPORT_NO"
+	RemitterIdTypeIqama          = "IQAMA_NO"
+	RemitterIdTypeDrivinglicense = "DRIVING_LICENSE"
+	RemitterIdTypeOther          = "OTHER"
+)
+
 type responseGetter interface {
 	GetStatusCode() int
 	GetRawRequest() string
@@ -172,33 +181,33 @@ func (d NBPDate) MarshalJSON() ([]byte, error) {
 
 type LoadRemittanceRequest struct {
 	requestCommon
-	GlobalId                        string    `json:"Global_Id,omitempty"`
-	Currency                        string    `json:"Currency,omitempty"`
-	Amount                          NBPAmount `json:"Amount,omitempty"` //see: https://stackoverflow.com/questions/61811463/golang-encode-float-to-json-with-specified-precision
-	PmtMode                         PMTMode   `json:"Pmt_Mode,omitempty"`
-	RemitterName                    string    `json:"Remitter_Name,omitempty"`
-	RemitterAddress                 string    `json:"Remitter_Address,omitempty"`
-	RemitterEmail                   string    `json:"Remitter_Email,omitempty"`
-	RemitterContact                 string    `json:"Remitter_Contact,omitempty"`
-	RemitterIdType                  string    `json:"Remitter_Id_Type,omitempty"`
-	RemitterId                      string    `json:"Remitter_Id,omitempty"`
-	BeneficiaryName                 string    `json:"Beneficiary_Name,omitempty"`
-	BeneficiaryAddress              string    `json:"Beneficiary_Address,omitempty"`
-	BeneficiaryContact              string    `json:"Beneficiary_Contact,omitempty"`
-	BeneficiaryExpectedId           string    `json:"Beneficiary_Expectedid,omitempty"`
-	BeneficiaryBank                 string    `json:"Beneficiary_Bank,omitempty"`
-	BeneficiaryBranch               string    `json:"Beneficiary_Branch,omitempty"`
-	BeneficiaryAccount              string    `json:"Beneficiary_Account,omitempty"`
-	PurposeRemittance               string    `json:"Purpose_Remittance,omitempty"`
-	BeneficiaryCity                 string    `json:"Beneficiary_City,omitempty"`
-	OriginatingCountry              string    `json:"Originating_Country,omitempty"`
-	TransactionDate                 *NBPDate  `json:"Transaction_Date,omitempty"` //yyyy-MM-dd
-	RemitterAccountNo               string    `json:"remitter_AccountNo,omitempty"`
-	RemitterFatherName              string    `json:"remitter_FatherName,omitempty"`
-	RemitterDOB                     *NBPDate  `json:"remitter_DOB,omitempty"` //yyyy-MM-dd
-	RemitterPOB                     *NBPDate  `json:"remitter_POB,omitempty"`
-	RemitterNationality             string    `json:"remitter_Nationality,omitempty"`
-	RemitterBeneficiaryRelationship string    `json:"remitter_BeneficiaryRelationship,omitempty"`
+	GlobalId                        string         `json:"Global_Id,omitempty"`
+	Currency                        string         `json:"Currency,omitempty"`
+	Amount                          NBPAmount      `json:"Amount,omitempty"` //see: https://stackoverflow.com/questions/61811463/golang-encode-float-to-json-with-specified-precision
+	PmtMode                         PMTMode        `json:"Pmt_Mode,omitempty"`
+	RemitterName                    string         `json:"Remitter_Name,omitempty"`
+	RemitterAddress                 string         `json:"Remitter_Address,omitempty"`
+	RemitterEmail                   string         `json:"Remitter_Email,omitempty"`
+	RemitterContact                 string         `json:"Remitter_Contact,omitempty"`
+	RemitterIdType                  RemitterIdType `json:"Remitter_Id_Type,omitempty"`
+	RemitterId                      string         `json:"Remitter_Id,omitempty"`
+	BeneficiaryName                 string         `json:"Beneficiary_Name,omitempty"`
+	BeneficiaryAddress              string         `json:"Beneficiary_Address,omitempty"`
+	BeneficiaryContact              string         `json:"Beneficiary_Contact,omitempty"`
+	BeneficiaryExpectedId           string         `json:"Beneficiary_Expectedid,omitempty"`
+	BeneficiaryBank                 string         `json:"Beneficiary_Bank,omitempty"`
+	BeneficiaryBranch               string         `json:"Beneficiary_Branch,omitempty"`
+	BeneficiaryAccount              string         `json:"Beneficiary_Account,omitempty"`
+	PurposeRemittance               string         `json:"Purpose_Remittance,omitempty"`
+	BeneficiaryCity                 string         `json:"Beneficiary_City,omitempty"`
+	OriginatingCountry              string         `json:"Originating_Country,omitempty"`
+	TransactionDate                 *NBPDate       `json:"Transaction_Date,omitempty"` //yyyy-MM-dd
+	RemitterAccountNo               string         `json:"remitter_AccountNo,omitempty"`
+	RemitterFatherName              string         `json:"remitter_FatherName,omitempty"`
+	RemitterDOB                     *NBPDate       `json:"remitter_DOB,omitempty"` //yyyy-MM-dd
+	RemitterPOB                     *NBPDate       `json:"remitter_POB,omitempty"`
+	RemitterNationality             string         `json:"remitter_Nationality,omitempty"`
+	RemitterBeneficiaryRelationship string         `json:"remitter_BeneficiaryRelationship,omitempty"`
 }
 
 type NBPIds []string

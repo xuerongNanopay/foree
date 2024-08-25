@@ -137,7 +137,7 @@ func (p *IDMTxProcessor) generateValidateTransferReq(tx transaction.ForeeTx) (*i
 		PhoneNumber:             tx.CI.CashInAcc.PhoneNumber,
 		UserEmail:               tx.CI.CashInAcc.Email,
 		Dob:                     (*idm.IDMDate)(&tx.Owner.Dob),
-		Nationality:             tx.Owner.Nationality,
+		Nationality:             "TODO",
 		SrcDigitalAccNOHash:     tx.CI.CashInAcc.AccountHash,
 		ShippingFirstName:       tx.COUT.CashOutAcc.FirstName,
 		ShippingMiddleName:      tx.COUT.CashOutAcc.MiddleName,

@@ -52,5 +52,7 @@ func (p *NBPTxProcessor) buildLoadRemittanceRequest(tx transaction.ForeeTx) (*nb
 		RemitterContact:    tx.CI.CashInAcc.PhoneNumber,
 		RemitterDOB:        (*nbp.NBPDate)(&tx.Owner.Dob),
 		RemitterAddress:    tx.CI.CashInAcc.Address,
+		RemitterIdType:     nbp.RemitterIdTypeOther,
+		// RemitterPOB: tx.Owner,
 	}, nil
 }

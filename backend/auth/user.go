@@ -9,32 +9,32 @@ const (
 	sQLUserInsert = `
 		INSERT INTO users
 		(	group, status, first_name, middle_name, 
-			last_name, age, dob, nationality, Address1, 
-			Address2, city, province, country, postal_code, phone_number,
-			email
-		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+			last_name, age, dob, 
+			address1, address2, city, province, country, postal_code, 
+			phone_number, email
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	sQLUserUpdateById = `
 		UPDATE users SET 
 			status = ?, first_name = ?, middle_name = ?, 
-			last_name = ?, age = ?, dob = ?, nationality = ?, Address1 = ?, 
-			Address2 = ?, city = ?, province = ?, country = ?, postal_code = ?, phone_number = ?,
+			last_name = ?, age = ?, dob = ?, address1 = ?, 
+			address2 = ?, city = ?, province = ?, country = ?, postal_code = ?, phone_number = ?,
 			email = ?
 		WHERE id = ?
 	`
 	sQLUserGetAll = `
 		SELECT 
 			u.id, u.group, u.status, u.first_name, u.middle_name, 
-			u.last_name, u.age, u.dob, u.nationality, u.Address1, 
-			u.Address2, u.city, u.province, u.country, u.postal_code, u.phone_number,
+			u.last_name, u.age, u.dob, u.address1, 
+			u.address2, u.city, u.province, u.country, u.postal_code, u.phone_number,
 			u.email, u.avatar_url, u.create_at, u.update_at
 		FROM users as u 
 	`
 	sQLUserGetUniqueById = `
 		SELECT 
 			u.id, u.group, u.status, u.first_name, u.middle_name, 
-			u.last_name, u.age, u.dob, u.nationality, u.Address1, 
-			u.Address2, u.city, u.province, u.country, u.postal_code, u.phone_number,
+			u.last_name, u.age, u.dob, u.address1, 
+			u.address2, u.city, u.province, u.country, u.postal_code, u.phone_number,
 			u.email, u.avatar_url, u.create_at, u.update_at
 		FROM users as u 
 		WHERE u.id = ?
@@ -59,7 +59,6 @@ type User struct {
 	LastName    string     `json:"lastName"`
 	Age         int        `json:"age"`
 	Dob         time.Time  `json:"dob"`
-	Nationality string     `json:"nationality"`
 	Address1    string     `json:"address1"`
 	Address2    string     `json:"address2"`
 	City        string     `json:"city"`
@@ -92,7 +91,6 @@ func (repo *UserRepo) UpdateUserById(u User) error {
 		u.LastName,
 		u.Age,
 		u.Dob,
-		u.Nationality,
 		u.Address1,
 		u.Address2,
 		u.City,
@@ -119,7 +117,6 @@ func (repo *UserRepo) InsertUser(user User) (int64, error) {
 		user.LastName,
 		user.Age,
 		user.Dob,
-		user.Nationality,
 		user.Address1,
 		user.Address2,
 		user.City,
@@ -199,7 +196,6 @@ func scanRowIntoUser(rows *sql.Rows) (*User, error) {
 		&u.LastName,
 		&u.Age,
 		&u.Dob,
-		&u.Nationality,
 		&u.Address1,
 		&u.Address2,
 		&u.City,

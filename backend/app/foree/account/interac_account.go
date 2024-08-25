@@ -14,10 +14,11 @@ const (
 		INSERT INTO interac_accounts
 		(
 			status, first_name, middle_name, last_name,
-			address, phone_number, email, 
+			address1, address2, city, province, country, postal_code,
+			phone_number, email, 
 			institution_name, branch_number, account_number,
 			owner_id, latest_acitvity_at
-		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	sQLInteracAccountUpdateActiveByIdAndOwner = `
 		UPDATE interac_accounts SET 
@@ -26,42 +27,38 @@ const (
 	`
 	sQLInteracAccountGetUniqueById = `
 		SELECT 
-			a.id, a.first_name, a.middle_name,
-			a.last_name, a.address, a.phone_number, a.email, 
-			a.institution_name, a.branch_number, a.account_number,
-			a.owner_id, a.status, 
-			a.latest_acitvity_at, a.create_at, a.update_at
+			a.id, a.first_name, a.middle_name, a.last_name, 
+			a.address1, a.address2, a.city, a.province, a.country, a.postal_code,
+			a.phone_number, a.email, a.institution_name, a.branch_number, a.account_number,
+			a.owner_id, a.status, a.latest_acitvity_at, a.create_at, a.update_at
 		FROM interac_accounts a
 		where a.id = ?
 	`
 	sQLInteracAccountGetUniqueActiveByOwnerAndId = `
 		SELECT 
-			a.id, a.first_name, a.middle_name,
-			a.last_name, a.address, a.phone_number, a.email, 
-			a.institution_name, a.branch_number, a.account_number,
-			a.owner_id, a.status, 
-			a.latest_acitvity_at, a.create_at, a.update_at
+			a.id, a.first_name, a.middle_name, a.last_name, 
+			a.address1, a.address2, a.city, a.province, a.country, a.postal_code,
+			a.phone_number, a.email, a.institution_name, a.branch_number, a.account_number,
+			a.owner_id, a.status, a.latest_acitvity_at, a.create_at, a.update_at
 		FROM interac_accounts a
 		where a.owner_id = ? AND a.id = ? AND a.status = ACTIVE
 	`
 	sQLInteracAccountGetUniqueActiveForUPdateByOwnerAndId = `
 		SELECT 
-			a.id, a.first_name, a.middle_name,
-			a.last_name, a.address, a.phone_number, a.email, 
-			a.institution_name, a.branch_number, a.account_number,
-			a.owner_id, a.status, 
-			a.latest_acitvity_at, a.create_at, a.update_at
+			a.id, a.first_name, a.middle_name, a.last_name, 
+			a.address1, a.address2, a.city, a.province, a.country, a.postal_code,
+			a.phone_number, a.email, a.institution_name, a.branch_number, a.account_number,
+			a.owner_id, a.status, a.latest_acitvity_at, a.create_at, a.update_at
 		FROM interac_accounts a
 		where a.owner_id = ? AND a.id = ? AND a.status = ACTIVE
 		FOR UPDATE
 	`
 	sQLInteracAccountGetAllActiveByOwnerId = `
 		SELECT 
-			a.id, a.first_name, a.middle_name,
-			a.last_name, a.address, a.phone_number, a.email, 
-			a.institution_name, a.branch_number, a.account_number,
-			a.owner_id, a.status, 
-			a.create_at, a.update_at
+			a.id, a.first_name, a.middle_name, a.last_name, 
+			a.address1, a.address2, a.city, a.province, a.country, a.postal_code,
+			a.phone_number, a.email, a.institution_name, a.branch_number, a.account_number,
+			a.owner_id, a.status, a.latest_acitvity_at, a.create_at, a.update_at
 		FROM interac_accounts a
 		where a.owner_id = ? AND a.status = ACTIVE
 		ORDER BY a.latest_acitvity_at DESC
@@ -73,7 +70,12 @@ type InteracAccount struct {
 	FirstName        string        `json:"firstName"`
 	MiddleName       string        `json:"middleName"`
 	LastName         string        `json:"lastName"`
-	Address          string        `json:"address"`
+	Address1         string        `json:"address1"`
+	Address2         string        `json:"address2"`
+	City             string        `json:"city"`
+	Province         string        `json:"province"`
+	Country          string        `json:"country"`
+	PostalCode       string        `json:"postalCode"`
 	PhoneNumber      string        `json:"phoneNumber"`
 	Email            string        `json:"email"`
 	InstitutionName  string        `json:"institutionName"`
@@ -115,7 +117,12 @@ func (repo *InteracAccountRepo) InsertInteracAccount(ctx context.Context, acc In
 			acc.FirstName,
 			acc.MiddleName,
 			acc.LastName,
-			acc.Address,
+			acc.Address1,
+			acc.Address2,
+			acc.City,
+			acc.Province,
+			acc.Country,
+			acc.PostalCode,
 			acc.PhoneNumber,
 			acc.Email,
 			acc.InstitutionName,
@@ -131,7 +138,12 @@ func (repo *InteracAccountRepo) InsertInteracAccount(ctx context.Context, acc In
 			acc.FirstName,
 			acc.MiddleName,
 			acc.LastName,
-			acc.Address,
+			acc.Address1,
+			acc.Address2,
+			acc.City,
+			acc.Province,
+			acc.Country,
+			acc.PostalCode,
 			acc.PhoneNumber,
 			acc.Email,
 			acc.InstitutionName,
@@ -294,7 +306,12 @@ func scanRowIntoInteracAccount(rows *sql.Rows) (*InteracAccount, error) {
 		&u.FirstName,
 		&u.MiddleName,
 		&u.LastName,
-		&u.Address,
+		&u.Address1,
+		&u.Address2,
+		&u.City,
+		&u.Province,
+		&u.Country,
+		&u.PostalCode,
 		&u.PhoneNumber,
 		&u.Email,
 		&u.InstitutionName,

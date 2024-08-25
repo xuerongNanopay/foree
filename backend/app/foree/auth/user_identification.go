@@ -30,27 +30,29 @@ type UserIdentificationStatus string
 
 const (
 	IdentificationStatusAwaitApprove UserIdentificationStatus = "AWAIT_APPROVE"
-	IdentificationStatusApproved     UserIdentificationStatus = "APPROVED"
-	IdentificationStatusDisable      UserIdentificationStatus = "Disable"
+	IdentificationStatusActive       UserIdentificationStatus = "ACTIVE"
+	IdentificationStatusExpired      UserIdentificationStatus = "EXPIRED"
+	IdentificationStatusDisabled     UserIdentificationStatus = "Disabled"
 )
 
 type IdentificationType string
 
 const (
-	IDTypePassport      = "PASSPORT"
-	IDTypeDriverLicense = "DRIVER_LICENSE"
-	IDTypeProvincalId   = "PROVINCIAL_ID"
-	IDTypeNationId      = "NATIONAL_ID"
+	IDTypePassport      IdentificationType = "PASSPORT"
+	IDTypeDriverLicense IdentificationType = "DRIVER_LICENSE"
+	IDTypeProvincalId   IdentificationType = "PROVINCIAL_ID"
+	IDTypeNationId      IdentificationType = "NATIONAL_ID"
 )
 
 type UserIdentification struct {
-	ID       int64                    `json:"id"`
-	Status   UserIdentificationStatus `json:"status"`
-	Type     IdentificationType       `json:"type"`
-	Value    string                   `json:"value"`
-	OwnerId  int64                    `json:"ownerId"`
-	CreateAt time.Time                `json:"createAt"`
-	UpdateAt time.Time                `json:"updateAt"`
+	ID        int64                    `json:"id"`
+	Status    UserIdentificationStatus `json:"status"`
+	Type      IdentificationType       `json:"type"`
+	Value     string                   `json:"value"`
+	ExpiredAt time.Time                `json:"expiredAt"`
+	OwnerId   int64                    `json:"ownerId"`
+	CreateAt  time.Time                `json:"createAt"`
+	UpdateAt  time.Time                `json:"updateAt"`
 }
 
 func NewUserIdentificationRepo(db *sql.DB) *UserIdentificationRepo {

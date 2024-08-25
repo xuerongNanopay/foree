@@ -230,7 +230,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 
 	// Create identification(Store Identification first)
 	identification := fAuth.UserIdentification{
-		Status:  fAuth.IdentificationStatusApproved,
+		Status:  fAuth.IdentificationStatusActive,
 		Type:    fAuth.IdentificationType(req.IdentificationType),
 		Value:   req.IdentificationValue,
 		OwnerId: session.User.ID,
@@ -248,7 +248,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	newUser.LastName = req.LastName
 	newUser.Age = req.Age
 	newUser.Dob = req.Dob.Time
-	newUser.Nationality = req.Nationality
+	// newUser.Nationality = req.Nationality
 	newUser.Address1 = req.Address1
 	newUser.Address2 = req.Address2
 	newUser.City = req.City
@@ -285,10 +285,10 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 
 	// Create default Interac Account for the user.
 	acc := account.InteracAccount{
-		FirstName:        session.User.FirstName,
-		MiddleName:       session.User.MiddleName,
-		LastName:         session.User.LastName,
-		Address:          generateInteracAddressFromUser(session.User),
+		FirstName:  session.User.FirstName,
+		MiddleName: session.User.MiddleName,
+		LastName:   session.User.LastName,
+		// Address:          generateInteracAddressFromUser(session.User),
 		PhoneNumber:      session.User.PhoneNumber,
 		Email:            session.User.Email,
 		OwnerId:          session.User.ID,
