@@ -6,6 +6,7 @@ import (
 
 	"xue.io/go-pay/app/foree/account"
 	foree_auth "xue.io/go-pay/app/foree/auth"
+	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/auth"
 )
@@ -268,6 +269,13 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 		return nil, transport.WrapInteralServerError(er)
 	}
 
+	//Create userGroup
+	_, er = a.userGroupRepo.InsertUserGroup(ctx, auth.UserGroup{
+		RoleGroup:             foree_constant.DefaultRoleGroup,
+		TransactionLimitGroup: foree_constant.DefaultTransactionLimitGroup,
+		OwnerId:               user.ID,
+	})
+
 	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
 	if er != nil {
 		return nil, transport.WrapInteralServerError(er)
@@ -282,7 +290,10 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	// Update session.
 	newSession := *session
 	newSession.User = user
+	newSession.UserId = user.ID
 	newSession.Permissions = pers
+	newSession.UserGroup = userGroup
+
 	updateSession, sessionErr := a.sessionRepo.UpdateSession(newSession)
 	if sessionErr != nil {
 		return nil, transport.WrapInteralServerError(sessionErr)
@@ -354,6 +365,7 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 	newSession := auth.Session{
 		User:        user,
 		UserId:      user.ID,
+		UserGroup:   userGroup,
 		EmailPasswd: ep,
 		Permissions: pers,
 	}

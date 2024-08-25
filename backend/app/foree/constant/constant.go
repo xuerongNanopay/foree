@@ -5,6 +5,12 @@ import (
 	"xue.io/go-pay/app/foree/types"
 )
 
+const (
+	DefaultFeeName               string = "FOREE_TX_CAD_FEE"
+	DefaultRoleGroup             string = string(RoleGroupPersonal)
+	DefaultTransactionLimitGroup string = string(TLPersonal1k)
+)
+
 type RoleGroup string
 
 const (
@@ -21,11 +27,6 @@ const (
 	TLPersonal3k TransactionLimitGroup = "TRANSACTION_PERSONAL_LIMIT_3K"
 	TLBO         TransactionLimitGroup = "TRANSACTION_BO_LIMIT"
 	TLAdmin      TransactionLimitGroup = "TRANSACTION_ADMIN_LIMIT"
-)
-
-const (
-	FeeName           string = "FOREE_TX_CAD_FEE"
-	DefaultForeeGroup string = "FOREE_PERSONAL"
 )
 
 // Group level transaction limit.

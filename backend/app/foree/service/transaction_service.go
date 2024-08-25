@@ -113,12 +113,12 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 	}
 
 	//fee
-	fee, err := t.getFee(ctx, foree_constant.FeeName, 2*time.Hour)
+	fee, err := t.getFee(ctx, foree_constant.DefaultFeeName, 2*time.Hour)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if fee == nil {
-		return nil, transport.NewInteralServerError("fee `%v` not found", foree_constant.FeeName)
+		return nil, transport.NewInteralServerError("fee `%v` not found", foree_constant.DefaultFeeName)
 	}
 
 	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
@@ -266,12 +266,12 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	// existpromo:
 
 	//Fee
-	fee, err := t.getFee(ctx, foree_constant.FeeName, time.Hour)
+	fee, err := t.getFee(ctx, foree_constant.DefaultFeeName, time.Hour)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if fee == nil {
-		return nil, transport.NewInteralServerError("fee `%v` not found", foree_constant.FeeName)
+		return nil, transport.NewInteralServerError("fee `%v` not found", foree_constant.DefaultFeeName)
 	}
 
 	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
