@@ -72,8 +72,6 @@ type User struct {
 	AvatarUrl   string     `json:"avatarUrl"`
 	CreateAt    time.Time  `json:"createAt"`
 	UpdateAt    time.Time  `json:"updateAt"`
-	// OccupationId int64      `json:"-"`
-	// Occupation   string     `json:"occupation"`
 }
 
 func NewUserRepo(db *sql.DB) *UserRepo {
