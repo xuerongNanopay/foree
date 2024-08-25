@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
-	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/types"
+	"xue.io/go-pay/constant"
 )
 
 const (

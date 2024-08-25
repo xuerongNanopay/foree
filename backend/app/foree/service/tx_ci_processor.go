@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
+	"xue.io/go-pay/constant"
 	"xue.io/go-pay/partner/scotia"
 )
 

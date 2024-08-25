@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"time"
 
-	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/types"
+	"xue.io/go-pay/constant"
 )
 
 const (

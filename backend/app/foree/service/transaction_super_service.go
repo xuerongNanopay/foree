@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
+	"xue.io/go-pay/constant"
 )
 
 type TransactionSuperService struct {

@@ -1,18 +1,21 @@
 package auth
 
 import (
+	"context"
 	"database/sql"
 	"time"
+
+	"xue.io/go-pay/constant"
 )
 
 const (
 	sQLUserInsert = `
 		INSERT INTO users
-		(	group, status, first_name, middle_name, 
+		(	status, first_name, middle_name, 
 			last_name, age, dob, 
 			address1, address2, city, province, country, postal_code, 
 			phone_number, email
-		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	sQLUserUpdateById = `
 		UPDATE users SET 
@@ -24,7 +27,7 @@ const (
 	`
 	sQLUserGetAll = `
 		SELECT 
-			u.id, u.group, u.status, u.first_name, u.middle_name, 
+			u.id, u.status, u.first_name, u.middle_name, 
 			u.last_name, u.age, u.dob, u.address1, 
 			u.address2, u.city, u.province, u.country, u.postal_code, u.phone_number,
 			u.email, u.avatar_url, u.create_at, u.update_at
@@ -32,7 +35,7 @@ const (
 	`
 	sQLUserGetUniqueById = `
 		SELECT 
-			u.id, u.group, u.status, u.first_name, u.middle_name, 
+			u.id, u.status, u.first_name, u.middle_name, 
 			u.last_name, u.age, u.dob, u.address1, 
 			u.address2, u.city, u.province, u.country, u.postal_code, u.phone_number,
 			u.email, u.avatar_url, u.create_at, u.update_at
@@ -52,7 +55,6 @@ const (
 
 type User struct {
 	ID          int64      `json:"id"`
-	Group       string     `json:"group"`
 	Status      UserStatus `json:"status"`
 	FirstName   string     `json:"firstName"`
 	MiddleName  string     `json:"middleName"`
@@ -82,50 +84,50 @@ type UserRepo struct {
 	db *sql.DB
 }
 
-func (repo *UserRepo) UpdateUserById(u User) error {
-	_, err := repo.db.Exec(
-		sQLUserUpdateById,
-		u.Status,
-		u.FirstName,
-		u.MiddleName,
-		u.LastName,
-		u.Age,
-		u.Dob,
-		u.Address1,
-		u.Address2,
-		u.City,
-		u.Province,
-		u.Country,
-		u.PostalCode,
-		u.PhoneNumber,
-		u.Email,
-		u.ID,
-	)
-	if err != nil {
-		return err
-	}
-	return nil
-}
+func (repo *UserRepo) InsertUser(ctx context.Context, user User) (int64, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
 
-func (repo *UserRepo) InsertUser(user User) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLUserInsert,
-		user.Group,
-		user.Status,
-		user.FirstName,
-		user.MiddleName,
-		user.LastName,
-		user.Age,
-		user.Dob,
-		user.Address1,
-		user.Address2,
-		user.City,
-		user.Province,
-		user.Country,
-		user.PostalCode,
-		user.PhoneNumber,
-		user.Email,
-	)
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLUserInsert,
+			user.Status,
+			user.FirstName,
+			user.MiddleName,
+			user.LastName,
+			user.Age,
+			user.Dob,
+			user.Address1,
+			user.Address2,
+			user.City,
+			user.Province,
+			user.Country,
+			user.PostalCode,
+			user.PhoneNumber,
+			user.Email,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLUserInsert,
+			user.Status,
+			user.FirstName,
+			user.MiddleName,
+			user.LastName,
+			user.Age,
+			user.Dob,
+			user.Address1,
+			user.Address2,
+			user.City,
+			user.Province,
+			user.Country,
+			user.PostalCode,
+			user.PhoneNumber,
+			user.Email,
+		)
+	}
+
 	if err != nil {
 		return 0, err
 	}
@@ -134,6 +136,57 @@ func (repo *UserRepo) InsertUser(user User) (int64, error) {
 		return 0, err
 	}
 	return id, nil
+}
+
+func (repo *UserRepo) UpdateUserById(ctx context.Context, u User) error {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+
+	if ok {
+		_, err = dTx.Exec(
+			sQLUserUpdateById,
+			u.Status,
+			u.FirstName,
+			u.MiddleName,
+			u.LastName,
+			u.Age,
+			u.Dob,
+			u.Address1,
+			u.Address2,
+			u.City,
+			u.Province,
+			u.Country,
+			u.PostalCode,
+			u.PhoneNumber,
+			u.Email,
+			u.ID,
+		)
+	} else {
+		_, err = repo.db.Exec(
+			sQLUserUpdateById,
+			u.Status,
+			u.FirstName,
+			u.MiddleName,
+			u.LastName,
+			u.Age,
+			u.Dob,
+			u.Address1,
+			u.Address2,
+			u.City,
+			u.Province,
+			u.Country,
+			u.PostalCode,
+			u.PhoneNumber,
+			u.Email,
+			u.ID,
+		)
+	}
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (repo *UserRepo) GetUniqueUserById(id int64) (*User, error) {
@@ -189,7 +242,6 @@ func scanRowIntoUser(rows *sql.Rows) (*User, error) {
 	u := new(User)
 	err := rows.Scan(
 		&u.ID,
-		&u.Group,
 		&u.Status,
 		&u.FirstName,
 		&u.MiddleName,

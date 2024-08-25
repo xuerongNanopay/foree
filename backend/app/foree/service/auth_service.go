@@ -40,10 +40,9 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 	}
 
 	// Create User
-	userId, err := a.userRepo.InsertUser(auth.User{
+	userId, err := a.userRepo.InsertUser(ctx, auth.User{
 		Status: auth.UserStatusInitial,
 		Email:  req.Email,
-		Group:  UserGroup,
 	})
 
 	if err != nil {
@@ -257,7 +256,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	newUser.PostalCode = req.PostalCode
 	newUser.PhoneNumber = req.PhoneNumber
 
-	updateErr := a.userRepo.UpdateUserById(newUser)
+	updateErr := a.userRepo.UpdateUserById(ctx, newUser)
 
 	if updateErr != nil {
 		return nil, transport.WrapInteralServerError(updateErr)
