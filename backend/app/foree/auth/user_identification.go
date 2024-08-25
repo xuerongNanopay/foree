@@ -1,26 +1,29 @@
 package auth
 
 import (
+	"context"
 	"database/sql"
 	"time"
+
+	"xue.io/go-pay/constant"
 )
 
 const (
 	sQLUserIdentificationInsert = `
 		INSERT INTO user_identifications
 		(	
-			status, type, value, owner_id
-		) VALUES (?,?,?,?)
+			status, type, value, link1, link2, owner_id
+		) VALUES (?,?,?,?,?,?)
 	`
-	sQLUserIdentificationUpdateStatusById = `
+	sQLUserIdentificationUpdateStatusByOwnerId = `
 		UPDATE user_identifications SET 
-			status = ?
-		WHERE id = ?
+			status = ?, link1 = ? , link2 = ?
+		WHERE owner_id = ?
 	`
-	sQLUserIdentificationGetAllByUserId = `
+	sQLUserIdentificationGetAllByOwnerId = `
 		SELECT 
-			u.id, u.status, u.type, u.value, u.owner_id,
-			u.create_at, u.update_at
+			u.id, u.status, u.type, u.value, u.link1, u.link2,
+			u.owner_id, u.create_at, u.update_at
 		FROM user_identifications as u 
 		WHERE u.owner_id = ?
 	`
@@ -49,6 +52,8 @@ type UserIdentification struct {
 	Status    UserIdentificationStatus `json:"status"`
 	Type      IdentificationType       `json:"type"`
 	Value     string                   `json:"value"`
+	Link1     string                   `json:"link1"`
+	Link2     string                   `json:"link2"`
 	ExpiredAt time.Time                `json:"expiredAt"`
 	OwnerId   int64                    `json:"ownerId"`
 	CreateAt  time.Time                `json:"createAt"`
@@ -63,14 +68,33 @@ type UserIdentificationRepo struct {
 	db *sql.DB
 }
 
-func (repo *UserIdentificationRepo) InsertUserIdentification(uid UserIdentification) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLUserIdentificationInsert,
-		uid.Status,
-		uid.Type,
-		uid.Value,
-		uid.OwnerId,
-	)
+func (repo *UserIdentificationRepo) InsertUserIdentification(ctx context.Context, uid UserIdentification) (int64, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLUserIdentificationInsert,
+			uid.Status,
+			uid.Type,
+			uid.Value,
+			uid.Link1,
+			uid.Link2,
+			uid.OwnerId,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLUserIdentificationInsert,
+			uid.Status,
+			uid.Type,
+			uid.Value,
+			uid.Link1,
+			uid.Link2,
+			uid.OwnerId,
+		)
+	}
 	if err != nil {
 		return 0, err
 	}
@@ -81,11 +105,13 @@ func (repo *UserIdentificationRepo) InsertUserIdentification(uid UserIdentificat
 	return id, nil
 }
 
-func (repo *UserIdentificationRepo) UpdateUserStatusById(uid UserIdentification) error {
+func (repo *UserIdentificationRepo) UpdateUserStatusByOwnerId(uid UserIdentification) error {
 	_, err := repo.db.Exec(
-		sQLUserIdentificationUpdateStatusById,
+		sQLUserIdentificationUpdateStatusByOwnerId,
 		uid.Status,
-		uid.ID,
+		uid.Link1,
+		uid.Link2,
+		uid.OwnerId,
 	)
 	if err != nil {
 		return err
@@ -93,8 +119,8 @@ func (repo *UserIdentificationRepo) UpdateUserStatusById(uid UserIdentification)
 	return nil
 }
 
-func (repo *UserIdentificationRepo) GetAllUserIdentificationByUserId(userId int64) ([]*UserIdentification, error) {
-	rows, err := repo.db.Query(sQLUserIdentificationGetAllByUserId)
+func (repo *UserIdentificationRepo) GetAllUserIdentificationByOwnerId(ownerId int64) ([]*UserIdentification, error) {
+	rows, err := repo.db.Query(sQLUserIdentificationGetAllByOwnerId, ownerId)
 
 	if err != nil {
 		return nil, err
@@ -125,6 +151,8 @@ func scanRowIntoUserIdentification(rows *sql.Rows) (*UserIdentification, error) 
 		&u.Status,
 		&u.Type,
 		&u.Value,
+		&u.Link1,
+		&u.Link2,
 		&u.OwnerId,
 		&u.CreateAt,
 		&u.UpdateAt,
