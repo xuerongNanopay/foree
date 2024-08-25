@@ -37,10 +37,10 @@ const (
 type RemitterIdType string
 
 const (
-	RemitterIdTypePassport       = "PASSPORT_NO"
-	RemitterIdTypeIqama          = "IQAMA_NO"
-	RemitterIdTypeDrivinglicense = "DRIVING_LICENSE"
-	RemitterIdTypeOther          = "OTHER"
+	RemitterIdTypePassport       RemitterIdType = "PASSPORT_NO"
+	RemitterIdTypeIqama          RemitterIdType = "IQAMA_NO"
+	RemitterIdTypeDrivinglicense RemitterIdType = "DRIVING_LICENSE"
+	RemitterIdTypeOther          RemitterIdType = "OTHER"
 )
 
 type responseGetter interface {

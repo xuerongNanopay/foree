@@ -7,6 +7,7 @@ import (
 
 	"xue.io/go-pay/app/foree/account"
 	foree_auth "xue.io/go-pay/app/foree/auth"
+	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/partner/nbp"
 )
@@ -48,14 +49,22 @@ func (p *NBPTxProcessor) buildLoadRemittanceRequest(fTx transaction.ForeeTx) (*n
 	if err != nil {
 		return nil, err
 	}
-	ids, err := p.userIdentificationRepo.GetAllUserIdentificationByOwnerId(fTx.OwnerId)
+	identifications, err := p.userIdentificationRepo.GetAllUserIdentificationByOwnerId(fTx.OwnerId)
 	if err != nil {
 		return nil, err
 	}
 
-	var id *foree_auth.UserIdentification = nil
+	var identification *foree_auth.UserIdentification = nil
 
-	// for
+	for _, v := range identifications {
+		if v.Status == foree_auth.IdentificationStatusActive {
+			identification = v
+		}
+	}
+
+	if identification == nil {
+		return nil, fmt.Errorf("NBPTxProcessor -- user `%v` do not find a proper identification", fTx.OwnerId)
+	}
 
 	transactionDate := time.Now()
 	return &nbp.LoadRemittanceRequest{
@@ -69,9 +78,21 @@ func (p *NBPTxProcessor) buildLoadRemittanceRequest(fTx transaction.ForeeTx) (*n
 		RemitterContact:    fTx.CI.CashInAcc.PhoneNumber,
 		RemitterDOB:        (*nbp.NBPDate)(&fTx.Owner.Dob),
 		RemitterAddress:    generateLoadRemittanceFromInteracAccount(fTx.CI.CashInAcc),
-		RemitterIdType:     nbp.RemitterIdTypeOther,
+		RemitterIdType:     mapNBPRemitterIdType(identification.Type),
+		RemitterId:         identification.Value,
 		RemitterPOB:        userExtra.Pob,
 	}, nil
+}
+
+func mapNBPRemitterIdType(idType foree_auth.IdentificationType) nbp.RemitterIdType {
+	switch idType {
+	case foree_constant.IDTypePassport:
+		return nbp.RemitterIdTypePassport
+	case foree_constant.IDTypeDriverLicense:
+		return nbp.RemitterIdTypeDrivinglicense
+	default:
+		return nbp.RemitterIdTypeOther
+	}
 }
 
 func generateLoadRemittanceFromInteracAccount(acc *account.InteracAccount) string {
