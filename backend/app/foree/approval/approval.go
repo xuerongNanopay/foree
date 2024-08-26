@@ -15,13 +15,13 @@ const (
 	`
 	sQLApprovalUpdate = `
 		UPDATE approval SET
-			status = ?, decided_by = ?, decided_at = ?
+			status = ?, concluded_by = ?, concluded_at = ?
 		WHERE id = ?
 	`
 	sQLApprovalGetUniqueById = `
 		SELECT
 			a.id, a.type, a.status, a.associated_entity_name,
-			a.associated_entity_id, a.decided_by, a.decided_at,
+			a.associated_entity_id, a.concluded_by, a.concluded_at,
 			a.create_at, a.update_at
 		FROM approval as a
 		WHERE a.id = ?
@@ -29,7 +29,7 @@ const (
 	sQLApprovalQueryAllByTypeWithPagination = `
 		SELECT
 			a.id, a.type, a.status, a.associated_entity_name,
-			a.associated_entity_id, a.decided_by, a.decided_at,
+			a.associated_entity_id, a.concluded_by, a.concluded_at,
 			a.create_at, a.update_at
 		FROM approval as a
 		WHERE a.type = ?
@@ -39,7 +39,7 @@ const (
 	sQLApprovalQueryAllByTypeAndStatusWithPagination = `
 		SELECT
 			a.id, a.type, a.status, a.associated_entity_name,
-			a.associated_entity_id, a.decided_by, a.decided_at,
+			a.associated_entity_id, a.concluded_by, a.concluded_at,
 			a.create_at, a.update_at
 		FROM approval as a
 		WHERE a.type = ? AND a.status = ? 
@@ -51,9 +51,9 @@ const (
 type ApprovalStatus string
 
 const (
-	ApprovalStatusPending  ApprovalStatus = "PENDING"
+	ApprovalStatusOpen     ApprovalStatus = "OPEN"
 	ApprovalStatusApproved ApprovalStatus = "APPROVED"
-	ApprovalStatusRejected ApprovalStatus = "Rejected"
+	ApprovalStatusRejected ApprovalStatus = "REJECTED"
 )
 
 type Approval struct {
@@ -62,8 +62,8 @@ type Approval struct {
 	Status               ApprovalStatus `json:"status"`
 	AssociatedEntityName string         `json:"associatedEntityName"`
 	AssocitateEntityId   int64          `json:"associtateEntityId"`
-	DecidedBy            int64          `json:"decidedBy"`
-	DecidedAt            time.Time      `json:"decidedAt"`
+	ConcludedBy          int64          `json:"concludedBy"`
+	ConcludedAt          time.Time      `json:"concludedAt"`
 	CreateAt             time.Time      `json:"createAt"`
 	UpdateAt             time.Time      `json:"updateAt"`
 }
@@ -98,8 +98,8 @@ func (repo *ApprovalRepo) UpdateApprovalById(approval Approval) error {
 	_, err := repo.db.Exec(
 		sQLApprovalUpdate,
 		approval.Status,
-		approval.DecidedBy,
-		approval.DecidedAt,
+		approval.ConcludedBy,
+		approval.ConcludedAt,
 		approval.ID,
 	)
 	if err != nil {
@@ -190,8 +190,8 @@ func scanRowIntoApproval(rows *sql.Rows) (*Approval, error) {
 		&i.Status,
 		&i.AssociatedEntityName,
 		&i.AssocitateEntityId,
-		&i.DecidedBy,
-		&i.DecidedAt,
+		&i.ConcludedBy,
+		&i.ConcludedAt,
 		&i.CreateAt,
 		&i.UpdateAt,
 	)
