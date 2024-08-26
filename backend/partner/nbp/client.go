@@ -183,122 +183,106 @@ func (c *NBPClientImpl) updateToken() error {
 }
 
 func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
-	// This API is not very important.
-	// Normally, caller will handle retry.
-	resp, err := c.retry(1, 0, func() (responseGetter, error) {
-		url := fmt.Sprintf("%s/BankList", c.config.GetBaseUrl())
+	url := fmt.Sprintf("%s/BankList", c.config.GetBaseUrl())
 
-		r := requestCommon{
-			Token:      c.auth.token,
-			AgencyCode: c.config.GetAgencyCode(),
-		}
+	r := requestCommon{
+		Token:      c.auth.token,
+		AgencyCode: c.config.GetAgencyCode(),
+	}
 
-		rawReqeust, err := json.Marshal(r)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		resp, err := c.httpClient.Do(req)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-		defer resp.Body.Close()
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		ret := &BankListResponse{
-			ResponseCommon: ResponseCommon{
-				StatusCode:  resp.StatusCode,
-				RawRequest:  string(rawReqeust),
-				RawResponse: string(body),
-			},
-		}
-
-		if resp.StatusCode != 200 && resp.StatusCode != 400 {
-			return ret, nil
-		}
-
-		derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
-		if derr != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-		return ret, nil
-	})
-
+	rawReqeust, err := json.Marshal(r)
 	if err != nil {
+		//Unlikely; Fatal
 		return nil, err
 	}
-	return resp.(*BankListResponse), nil
+
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	ret := &BankListResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:  resp.StatusCode,
+			RawRequest:  string(rawReqeust),
+			RawResponse: string(body),
+		},
+	}
+
+	if resp.StatusCode != 200 && resp.StatusCode != 400 {
+		return ret, nil
+	}
+
+	derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+	if derr != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	return ret, nil
 }
 
 func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryResponse, error) {
-	//Only retry twice, and sleep interval in 4 sec.
-	resp, err := c.retry(2, 4, func() (responseGetter, error) {
-		url := fmt.Sprintf("%s/AccountEnquiry", c.config.GetBaseUrl())
+	url := fmt.Sprintf("%s/AccountEnquiry", c.config.GetBaseUrl())
 
-		r.Token = c.auth.token
-		r.AgencyCode = c.config.GetAgencyCode()
+	r.Token = c.auth.token
+	r.AgencyCode = c.config.GetAgencyCode()
 
-		rawReqeust, err := json.Marshal(r)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		resp, err := c.httpClient.Do(req)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-		defer resp.Body.Close()
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		ret := &AccountEnquiryResponse{
-			ResponseCommon: ResponseCommon{
-				StatusCode:  resp.StatusCode,
-				RawRequest:  string(rawReqeust),
-				RawResponse: string(body),
-			},
-		}
-
-		if resp.StatusCode != 200 && resp.StatusCode != 400 {
-			return ret, nil
-		}
-
-		derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
-		if derr != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-		return ret, nil
-	})
-
+	rawReqeust, err := json.Marshal(r)
 	if err != nil {
+		//Unlikely; Fatal
 		return nil, err
 	}
-	return resp.(*AccountEnquiryResponse), nil
+
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	ret := &AccountEnquiryResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:  resp.StatusCode,
+			RawRequest:  string(rawReqeust),
+			RawResponse: string(body),
+		},
+	}
+
+	if resp.StatusCode != 200 && resp.StatusCode != 400 {
+		return ret, nil
+	}
+
+	derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+	if derr != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	return ret, nil
+
 }
 
 func (c *NBPClientImpl) LoadRemittanceCash(r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
@@ -317,269 +301,200 @@ func (c *NBPClientImpl) LoadRemittanceThirdParty(r LoadRemittanceRequest) (*Load
 }
 
 func (c *NBPClientImpl) loadRemittance(endpoint string, r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
-	attempts := 3
-	if c.config.GetAuthAttempts() > attempts {
-		attempts = c.config.GetAuthAttempts()
-	}
-	//At least retry 3 times, and sleep interval is 30 seconds.
-	resp, err := c.retry(attempts, 30, func() (responseGetter, error) {
-		url := fmt.Sprintf("%s/%s", c.config.GetBaseUrl(), endpoint)
-		r.Token = c.auth.token
-		r.AgencyCode = c.config.GetAgencyCode()
+	url := fmt.Sprintf("%s/%s", c.config.GetBaseUrl(), endpoint)
+	r.Token = c.auth.token
+	r.AgencyCode = c.config.GetAgencyCode()
 
-		rawReqeust, err := json.Marshal(r)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		resp, err := c.httpClient.Do(req)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-		defer resp.Body.Close()
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		ret := &LoadRemittanceResponse{
-			ResponseCommon: ResponseCommon{
-				StatusCode:  resp.StatusCode,
-				RawRequest:  string(rawReqeust),
-				RawResponse: string(body),
-			},
-		}
-
-		if resp.StatusCode != 200 && resp.StatusCode != 400 {
-			return ret, nil
-		}
-
-		derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
-		if derr != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-		return ret, nil
-	})
-
+	rawReqeust, err := json.Marshal(r)
 	if err != nil {
+		//Unlikely; Fatal
 		return nil, err
 	}
-	return resp.(*LoadRemittanceResponse), nil
+
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	ret := &LoadRemittanceResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:  resp.StatusCode,
+			RawRequest:  string(rawReqeust),
+			RawResponse: string(body),
+		},
+	}
+
+	if resp.StatusCode != 200 && resp.StatusCode != 400 {
+		return ret, nil
+	}
+
+	derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+	if derr != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	return ret, nil
 }
 
 func (c *NBPClientImpl) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error) {
-	resp, err := c.retry(1, 0, func() (responseGetter, error) {
-		url := fmt.Sprintf("%s/TransactionStatusByIds", c.config.GetBaseUrl())
+	url := fmt.Sprintf("%s/TransactionStatusByIds", c.config.GetBaseUrl())
 
-		r.Token = c.auth.token
-		r.AgencyCode = c.config.GetAgencyCode()
+	r.Token = c.auth.token
+	r.AgencyCode = c.config.GetAgencyCode()
 
-		rawReqeust, err := json.Marshal(r)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		resp, err := c.httpClient.Do(req)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-		defer resp.Body.Close()
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		ret := &TransactionStatusByIdsResponse{
-			ResponseCommon: ResponseCommon{
-				StatusCode:  resp.StatusCode,
-				RawRequest:  string(rawReqeust),
-				RawResponse: string(body),
-			},
-		}
-
-		if resp.StatusCode != 200 && resp.StatusCode != 400 {
-			return ret, nil
-		}
-
-		derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
-		if derr != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-		return ret, nil
-	})
-
+	rawReqeust, err := json.Marshal(r)
 	if err != nil {
+		//Unlikely; Fatal
 		return nil, err
 	}
-	return resp.(*TransactionStatusByIdsResponse), nil
+
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	ret := &TransactionStatusByIdsResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:  resp.StatusCode,
+			RawRequest:  string(rawReqeust),
+			RawResponse: string(body),
+		},
+	}
+
+	if resp.StatusCode != 200 && resp.StatusCode != 400 {
+		return ret, nil
+	}
+
+	derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+	if derr != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	return ret, nil
 }
 
 func (c *NBPClientImpl) TransactionStatusByDate(r TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error) {
-	resp, err := c.retry(1, 0, func() (responseGetter, error) {
-		url := fmt.Sprintf("%s/TransactionStatus", c.config.GetBaseUrl())
+	url := fmt.Sprintf("%s/TransactionStatus", c.config.GetBaseUrl())
 
-		r.Token = c.auth.token
-		r.AgencyCode = c.config.GetAgencyCode()
+	r.Token = c.auth.token
+	r.AgencyCode = c.config.GetAgencyCode()
 
-		rawReqeust, err := json.Marshal(r)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		resp, err := c.httpClient.Do(req)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-		defer resp.Body.Close()
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		ret := &TransactionStatusByDateResponse{
-			ResponseCommon: ResponseCommon{
-				StatusCode:  resp.StatusCode,
-				RawRequest:  string(rawReqeust),
-				RawResponse: string(body),
-			},
-		}
-
-		if resp.StatusCode != 200 && resp.StatusCode != 400 {
-			return ret, nil
-		}
-
-		derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
-		if derr != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-		return ret, nil
-	})
-
+	rawReqeust, err := json.Marshal(r)
 	if err != nil {
+		//Unlikely; Fatal
 		return nil, err
 	}
-	return resp.(*TransactionStatusByDateResponse), nil
+
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	ret := &TransactionStatusByDateResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:  resp.StatusCode,
+			RawRequest:  string(rawReqeust),
+			RawResponse: string(body),
+		},
+	}
+
+	if resp.StatusCode != 200 && resp.StatusCode != 400 {
+		return ret, nil
+	}
+
+	derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+	if derr != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	return ret, nil
 }
 
 func (c *NBPClientImpl) CancelTransaction(r CancelTransactionRequest) (*CancelTransactionResponse, error) {
-	attempts := 3
-	if c.config.GetAuthAttempts() > attempts {
-		attempts = c.config.GetAuthAttempts()
-	}
+	url := fmt.Sprintf("%s/CancelTransaction", c.config.GetBaseUrl())
 
-	resp, err := c.retry(attempts, 30, func() (responseGetter, error) {
-		url := fmt.Sprintf("%s/CancelTransaction", c.config.GetBaseUrl())
+	r.Token = c.auth.token
+	r.AgencyCode = c.config.GetAgencyCode()
 
-		r.Token = c.auth.token
-		r.AgencyCode = c.config.GetAgencyCode()
-
-		rawReqeust, err := json.Marshal(r)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		resp, err := c.httpClient.Do(req)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-		defer resp.Body.Close()
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-
-		ret := &CancelTransactionResponse{
-			ResponseCommon: ResponseCommon{
-				StatusCode:  resp.StatusCode,
-				RawRequest:  string(rawReqeust),
-				RawResponse: string(body),
-			},
-		}
-
-		if resp.StatusCode != 200 && resp.StatusCode != 400 {
-			return ret, nil
-		}
-
-		derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
-		if derr != nil {
-			//Unlikely; Fatal
-			return nil, err
-		}
-		return ret, nil
-	})
-
+	rawReqeust, err := json.Marshal(r)
 	if err != nil {
+		//Unlikely; Fatal
 		return nil, err
 	}
-	return resp.(*CancelTransactionResponse), nil
-}
 
-func (c *NBPClientImpl) retry(attempts int, sleepInSecond time.Duration, f func() (responseGetter, error)) (responseGetter, error) {
-	if attempts < 1 {
-		attempts = 1
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rawReqeust))
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
 	}
 
-	var tokenErr error
-	for i := 0; i < attempts; i++ {
-		tokenErr = c.updateToken()
-		if tokenErr != nil {
-			if i < attempts-1 {
-				time.Sleep(sleepInSecond * time.Second)
-			}
-		} else {
-			r, err := f()
-			if err != nil {
-				return r, err
-			}
-
-			if r.GetResponseCode() == "401" {
-				if i < attempts-1 {
-					time.Sleep(sleepInSecond * time.Second)
-				}
-			} else {
-				return r, nil
-			}
-
-		}
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
 	}
-	return nil, tokenErr
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+
+	ret := &CancelTransactionResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode:  resp.StatusCode,
+			RawRequest:  string(rawReqeust),
+			RawResponse: string(body),
+		},
+	}
+
+	if resp.StatusCode != 200 && resp.StatusCode != 400 {
+		return ret, nil
+	}
+
+	derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
+	if derr != nil {
+		//Unlikely; Fatal
+		return nil, err
+	}
+	return ret, nil
 }
