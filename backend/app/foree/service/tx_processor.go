@@ -29,6 +29,7 @@ type TxProcessor struct {
 	interacRepo    *account.InteracAccountRepo
 	ciTxProcessor  *CITxProcessor
 	idmTxProcessor *IDMTxProcessor
+	nbpTxProcessor *NBPTxProcessor
 }
 
 func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
@@ -376,10 +377,9 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 	case transaction.TxStageNBPCO:
 		switch tx.CurStageStatus {
 		case transaction.TxStatusInitial:
-			//TODO: call send NBP API
+			return p.nbpTxProcessor.processTx(tx)
 		case transaction.TxStatusSent:
-			//Check status from NBP API.
-			//Or just wait for clone
+			return p.nbpTxProcessor.waitFTx(tx)
 		case transaction.TxStatusCompleted:
 			tx.Status = transaction.TxStatusCompleted
 			tx.Conclusion = fmt.Sprintf("Complete at %s.", time_util.NowInToronto().Format(time.RFC3339))
@@ -438,6 +438,11 @@ func (p *TxProcessor) closeRemainingTx(ctx context.Context, tx transaction.Foree
 		//TODO: Log warn
 		return &tx, nil
 	}
+}
+
+func (p *TxProcessor) updateTxSummary(ctx context.Context, fTx transaction.ForeeTx) {
+	// txSummary := *fTx.Summary
+
 }
 
 func (p *TxProcessor) recordTxHistory(h transaction.TxHistory) {
