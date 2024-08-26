@@ -19,12 +19,8 @@ type IDMTxProcessor struct {
 	idmClient   idm.IDMClient
 }
 
-func (p *IDMTxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	return p.idmTransferValidate(tx)
-}
-
 // IDM API called
-func (p *IDMTxProcessor) idmTransferValidate(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *IDMTxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	req, err := p.generateValidateTransferReq(tx)
 	if err != nil {
 		return nil, err

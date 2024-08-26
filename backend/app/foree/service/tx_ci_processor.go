@@ -118,19 +118,8 @@ func (p *CITxProcessor) waitFTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, 
 	return &fTx, nil
 }
 
-func (p *CITxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	t, err := p.requestPayment(fTx)
-	if err != nil {
-		return nil, err
-	}
-
-	p.waitChan <- *t
-
-	return t, nil
-}
-
 // Scotia APi Call
-func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *CITxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	dTx, err := p.db.Begin()
 	if err != nil {
 		dTx.Rollback()
@@ -141,7 +130,7 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
 
 	// Lock transaction and safety check.
-	nForeeTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, tx.ID)
+	nForeeTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.ID)
 	if err != nil {
 		dTx.Rollback()
 		//TODO: log err
@@ -153,7 +142,7 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 		return nil, fmt.Errorf("CITxProcessor -- transaction `%v` is in status `%s` at stage `%s`", nForeeTx.ID, nForeeTx.CurStageStatus, nForeeTx.Status)
 	}
 
-	resp, err := p.scotiaClient.RequestPayment(*p.createRequestPaymentReq(tx))
+	resp, err := p.scotiaClient.RequestPayment(*p.createRequestPaymentReq(fTx))
 	if err != nil {
 		return nil, err
 	}
@@ -166,12 +155,12 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 
 	//TODO: log success
 
-	tx.CI.ScotiaPaymentId = resp.Data.PaymentId
+	fTx.CI.ScotiaPaymentId = resp.Data.PaymentId
 
 	// Get url payment link
 	statusResp, err := p.scotiaClient.PaymentStatus(scotia.PaymentStatusRequest{
-		PaymentId:  tx.CI.ScotiaPaymentId,
-		EndToEndId: tx.CI.EndToEndId,
+		PaymentId:  fTx.CI.ScotiaPaymentId,
+		EndToEndId: fTx.CI.EndToEndId,
 	})
 	if err != nil {
 		dTx.Rollback()
@@ -190,32 +179,32 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 	}
 
 	// Update CI
-	tx.CI.PaymentUrl = statusResp.PaymentStatuses[0].GatewayUrl
-	tx.CI.ScotiaPaymentId = resp.Data.PaymentId
-	tx.CI.Status = transaction.TxStatusSent
-	tx.CI.ScotiaClearingReference = resp.Data.ClearingSystemReference
+	fTx.CI.PaymentUrl = statusResp.PaymentStatuses[0].GatewayUrl
+	fTx.CI.ScotiaPaymentId = resp.Data.PaymentId
+	fTx.CI.Status = transaction.TxStatusSent
+	fTx.CI.ScotiaClearingReference = resp.Data.ClearingSystemReference
 
 	// Update Foree
-	tx.CurStageStatus = transaction.TxStatusSent
-	tx.CI.ScotiaPaymentId = resp.Data.PaymentId
+	fTx.CurStageStatus = transaction.TxStatusSent
+	fTx.CI.ScotiaPaymentId = resp.Data.PaymentId
 
 	// Update summary
-	tx.Summary.Status = transaction.TxSummaryStatusAwaitPayment
-	tx.Summary.PaymentUrl = statusResp.PaymentStatuses[0].GatewayUrl
+	fTx.Summary.Status = transaction.TxSummaryStatusAwaitPayment
+	fTx.Summary.PaymentUrl = statusResp.PaymentStatuses[0].GatewayUrl
 
-	err = p.interacTxRepo.UpdateInteracCITxById(ctx, *tx.CI)
+	err = p.interacTxRepo.UpdateInteracCITxById(ctx, *fTx.CI)
 	if err != nil {
 		dTx.Rollback()
 		return nil, err
 	}
 
-	err = p.foreeTxRepo.UpdateForeeTxById(ctx, tx)
+	err = p.foreeTxRepo.UpdateForeeTxById(ctx, fTx)
 	if err != nil {
 		dTx.Rollback()
 		return nil, err
 	}
 
-	err = p.txSummaryRepo.UpdateTxSummaryById(ctx, *tx.Summary)
+	err = p.txSummaryRepo.UpdateTxSummaryById(ctx, *fTx.Summary)
 	if err != nil {
 		dTx.Rollback()
 		return nil, err
@@ -225,7 +214,9 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 		return nil, err
 	}
 
-	return &tx, nil
+	p.waitChan <- fTx
+
+	return &fTx, nil
 }
 
 // The function normally in a goroutine
