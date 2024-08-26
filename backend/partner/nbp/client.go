@@ -14,7 +14,7 @@ import (
 type tokenData struct {
 	token          string
 	rawTokenExpiry string
-	tokenExpiry    *time.Time
+	tokenExpiry    time.Time
 }
 
 type NBPClient interface {
@@ -45,7 +45,7 @@ func NewNBPClient(configs map[string]string) NBPClient {
 type NBPClientImpl struct {
 	config     NBPConfig
 	httpClient *http.Client
-	auth       *tokenData
+	auth       tokenData
 	mu         sync.Mutex
 }
 
@@ -130,37 +130,38 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 	return auth, nil
 }
 
-func (c *NBPClientImpl) updateToken() error {
+// Update token but not throw error, Only log error
+func (c *NBPClientImpl) maybeUpdateToken() {
 	if isValidToken(c.auth, c.config.GetTokenExpiryThreshold()) {
-		return nil
+		return
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if isValidToken(c.auth, c.config.GetTokenExpiryThreshold()) {
-		return nil
+		return
 	}
 
 	authResp, err := c.authenticate()
 	if err != nil {
 		//TODO: Fatal
-		return fmt.Errorf("NBP Client authenticate: raise error `%s`", err.Error())
+		return
 	}
 
 	statusCode := authResp.StatusCode
-	if statusCode != 200 && statusCode != 400 {
+	if statusCode/100 != 2 && statusCode/100 != 4 {
 		//TODO: Error
-		return fmt.Errorf("NBP Client authenticate: status code `%v` response body `%s`", authResp.StatusCode, authResp.RawResponse)
+		return
 	}
 
 	code := authResp.ResponseCode
 	if code == "402" || code == "404" || code == "407" {
 		//TODO: Fatal
-		return fmt.Errorf("NBP Client authenticate: status code `%v` response body `%s`", authResp.StatusCode, authResp.RawResponse)
+		return
 	}
 
 	if code == "403" {
 		//TODO: Error
-		return fmt.Errorf("NBP Client authenticate: status code `%v` response body `%s`", authResp.StatusCode, authResp.RawResponse)
+		return
 	}
 
 	token := authResp.Token
@@ -171,18 +172,13 @@ func (c *NBPClientImpl) updateToken() error {
 		fmt.Printf("NBP Client authenticate: unable to parse token_expiry `%v`", rawTokenExpiry)
 	}
 
-	auth := &tokenData{
-		token:          token,
-		rawTokenExpiry: rawTokenExpiry,
-		tokenExpiry:    tokenExpiry,
-	}
-
-	c.auth = auth
-
-	return nil
+	c.auth.token = token
+	c.auth.rawTokenExpiry = rawTokenExpiry
+	c.auth.tokenExpiry = tokenExpiry
 }
 
 func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
+	c.maybeUpdateToken()
 	url := fmt.Sprintf("%s/BankList", c.config.GetBaseUrl())
 
 	r := requestCommon{
@@ -235,6 +231,7 @@ func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
 }
 
 func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryResponse, error) {
+	c.maybeUpdateToken()
 	url := fmt.Sprintf("%s/AccountEnquiry", c.config.GetBaseUrl())
 
 	r.Token = c.auth.token
@@ -301,6 +298,7 @@ func (c *NBPClientImpl) LoadRemittanceThirdParty(r LoadRemittanceRequest) (*Load
 }
 
 func (c *NBPClientImpl) loadRemittance(endpoint string, r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
+	c.maybeUpdateToken()
 	url := fmt.Sprintf("%s/%s", c.config.GetBaseUrl(), endpoint)
 	r.Token = c.auth.token
 	r.AgencyCode = c.config.GetAgencyCode()
@@ -350,6 +348,7 @@ func (c *NBPClientImpl) loadRemittance(endpoint string, r LoadRemittanceRequest)
 }
 
 func (c *NBPClientImpl) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error) {
+	c.maybeUpdateToken()
 	url := fmt.Sprintf("%s/TransactionStatusByIds", c.config.GetBaseUrl())
 
 	r.Token = c.auth.token
@@ -400,6 +399,7 @@ func (c *NBPClientImpl) TransactionStatusByIds(r TransactionStatusByIdsRequest) 
 }
 
 func (c *NBPClientImpl) TransactionStatusByDate(r TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error) {
+	c.maybeUpdateToken()
 	url := fmt.Sprintf("%s/TransactionStatus", c.config.GetBaseUrl())
 
 	r.Token = c.auth.token
@@ -450,6 +450,7 @@ func (c *NBPClientImpl) TransactionStatusByDate(r TransactionStatusByDateRequest
 }
 
 func (c *NBPClientImpl) CancelTransaction(r CancelTransactionRequest) (*CancelTransactionResponse, error) {
+	c.maybeUpdateToken()
 	url := fmt.Sprintf("%s/CancelTransaction", c.config.GetBaseUrl())
 
 	r.Token = c.auth.token

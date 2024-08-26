@@ -4,19 +4,19 @@ import "time"
 
 const PAKISTAN_STANDARD_TIME_ZONE = "+05:00"
 
-func parseTokenExpiryDate(rawExpiry string) (*time.Time, error) {
+func parseTokenExpiryDate(rawExpiry string) (time.Time, error) {
 	pkTime := rawExpiry + PAKISTAN_STANDARD_TIME_ZONE
 
 	t, err := time.Parse(time.RFC3339, pkTime)
 	if err != nil {
-		return nil, err
+		return t, err
 	}
 
-	return &t, nil
+	return t, nil
 }
 
-func isValidToken(auth *tokenData, threshold int64) bool {
-	if auth == nil || auth.token == "" || auth.tokenExpiry == nil {
+func isValidToken(auth tokenData, threshold int64) bool {
+	if auth.token == "" || auth.tokenExpiry.IsZero() {
 		return false
 	}
 

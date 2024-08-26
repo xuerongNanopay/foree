@@ -49,39 +49,32 @@ func TestParseTokenExpiryDate(t *testing.T) {
 
 func TestIsTokenAvailable(t *testing.T) {
 
-	t.Run("nil authCache should return false", func(t *testing.T) {
-		var cache *tokenData
-		if !isValidToken(cache, 0) {
-			t.Errorf("nil tokenData expect false, but got true")
-		}
-	})
-
 	t.Run("empty token should return false", func(t *testing.T) {
-		cache := &tokenData{}
+		cache := tokenData{}
 
-		if !isValidToken(cache, 0) {
+		if isValidToken(cache, 0) != false {
 			t.Errorf("empty token expect false, but got true")
 		}
 	})
 
 	t.Run("2100-6-04T00:00:000UTC should return true", func(t *testing.T) {
 		d := time.Date(2100, time.June, 4, 0, 0, 0, 0, time.UTC)
-		cache := &tokenData{
+		cache := tokenData{
 			token:       "dummy",
-			tokenExpiry: &d,
+			tokenExpiry: d,
 		}
-		if !isValidToken(cache, 0) {
+		if isValidToken(cache, 0) != true {
 			t.Errorf("2100-6-04T00:00:000UTC expect true, but got false")
 		}
 	})
 
-	t.Run("1989-6-04T00:00:000UTC should return true", func(t *testing.T) {
+	t.Run("1989-6-04T00:00:000UTC should return false", func(t *testing.T) {
 		d := time.Date(1989, time.June, 4, 0, 0, 0, 0, time.UTC)
-		cache := &tokenData{
+		cache := tokenData{
 			token:       "dummy",
-			tokenExpiry: &d,
+			tokenExpiry: d,
 		}
-		if !isValidToken(cache, 0) {
+		if isValidToken(cache, 0) != false {
 			t.Errorf("1989-6-04T00:00:000UTC expect false, but got true")
 		}
 	})
