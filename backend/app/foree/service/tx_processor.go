@@ -293,76 +293,76 @@ func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, e
 
 }
 
-func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	if tx.Status == transaction.TxStatusInitial {
-		tx.Status = transaction.TxStatusProcessing
-		tx.CurStage = transaction.TxStageInteracCI
-		tx.CurStageStatus = transaction.TxStatusInitial
-		return &tx, nil
+func (p *TxProcessor) doProcessTx(ctx context.Context, fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	if fTx.Status == transaction.TxStatusInitial {
+		fTx.Status = transaction.TxStatusProcessing
+		fTx.CurStage = transaction.TxStageInteracCI
+		fTx.CurStageStatus = transaction.TxStatusInitial
+		return &fTx, nil
 	}
-	if tx.Status == transaction.TxStatusCompleted || tx.Status == transaction.TxStatusCancelled || tx.Status == transaction.TxStatusRejected {
+	if fTx.Status == transaction.TxStatusCompleted || fTx.Status == transaction.TxStatusCancelled || fTx.Status == transaction.TxStatusRejected {
 		//TODO: log warn.
-		return &tx, nil
+		return &fTx, nil
 	}
 
-	switch tx.CurStage {
+	switch fTx.CurStage {
 	case transaction.TxStageInteracCI:
-		switch tx.CurStageStatus {
+		switch fTx.CurStageStatus {
 		case transaction.TxStatusInitial:
-			return p.ciTxProcessor.processTx(tx)
+			return p.ciTxProcessor.processTx(fTx)
 		case transaction.TxStatusSent:
-			return p.ciTxProcessor.waitFTx(tx)
+			return p.ciTxProcessor.waitFTx(fTx)
 		case transaction.TxStatusCompleted:
-			tx.CurStage = transaction.TxStageIDM
-			tx.CurStageStatus = transaction.TxStatusInitial
-			return &tx, nil
+			fTx.CurStage = transaction.TxStageIDM
+			fTx.CurStageStatus = transaction.TxStatusInitial
+			return &fTx, nil
 		case transaction.TxStatusRejected:
-			tx.Status = transaction.TxStatusRejected
-			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
-			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
+			fTx.Status = transaction.TxStatusRejected
+			fTx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", fTx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
+			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
 				return nil, err
 			}
 			// Close remaing non-terminated transactions.
-			nT, err := p.closeRemainingTx(ctx, tx)
+			nT, err := p.closeRemainingTx(ctx, fTx)
 			if err != nil {
 				return nil, err
 			}
 			go p.maybeRefund(*nT)
 			return nT, nil
 		case transaction.TxStatusCancelled:
-			tx.Status = transaction.TxStatusCancelled
-			tx.Conclusion = fmt.Sprintf("Cancelled in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
-			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
+			fTx.Status = transaction.TxStatusCancelled
+			fTx.Conclusion = fmt.Sprintf("Cancelled in `%s` at %s", fTx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
+			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
 				return nil, err
 			}
 			// Close remaing non-terminated transactions.
-			nT, err := p.closeRemainingTx(ctx, tx)
+			nT, err := p.closeRemainingTx(ctx, fTx)
 			if err != nil {
 				return nil, err
 			}
 			go p.maybeRefund(*nT)
 			return nT, nil
 		default:
-			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", tx.ID, tx.CurStageStatus, tx.CurStage)
+			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", fTx.ID, fTx.CurStageStatus, fTx.CurStage)
 		}
 	case transaction.TxStageIDM:
-		switch tx.CurStageStatus {
+		switch fTx.CurStageStatus {
 		case transaction.TxStatusInitial:
-			return p.idmTxProcessor.processTx(tx)
+			return p.idmTxProcessor.processTx(fTx)
 		case transaction.TxStatusCompleted:
 			//Move to next stage
-			tx.CurStage = transaction.TxStageNBPCO
-			tx.CurStageStatus = transaction.TxStatusInitial
-			return &tx, nil
+			fTx.CurStage = transaction.TxStageNBPCO
+			fTx.CurStageStatus = transaction.TxStatusInitial
+			return &fTx, nil
 		case transaction.TxStatusRejected:
 			// Set to ForeeTx to terminal status.
-			tx.Status = transaction.TxStatusRejected
-			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
-			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
+			fTx.Status = transaction.TxStatusRejected
+			fTx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", fTx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
+			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
 				return nil, err
 			}
 			// Close remaing non-terminated transactions.
-			nT, err := p.closeRemainingTx(ctx, tx)
+			nT, err := p.closeRemainingTx(ctx, fTx)
 			if err != nil {
 				return nil, err
 			}
@@ -372,52 +372,52 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 			//Wait to approve
 			//Log warn?
 		default:
-			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", tx.ID, tx.CurStageStatus, tx.CurStage)
+			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", fTx.ID, fTx.CurStageStatus, fTx.CurStage)
 		}
 	case transaction.TxStageNBPCO:
-		switch tx.CurStageStatus {
+		switch fTx.CurStageStatus {
 		case transaction.TxStatusInitial:
-			return p.nbpTxProcessor.processTx(tx)
+			return p.nbpTxProcessor.processTx(fTx)
 		case transaction.TxStatusSent:
-			return p.nbpTxProcessor.waitFTx(tx)
+			return p.nbpTxProcessor.waitFTx(fTx)
 		case transaction.TxStatusCompleted:
-			tx.Status = transaction.TxStatusCompleted
-			tx.Conclusion = fmt.Sprintf("Complete at %s.", time_util.NowInToronto().Format(time.RFC3339))
-			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
+			fTx.Status = transaction.TxStatusCompleted
+			fTx.Conclusion = fmt.Sprintf("Complete at %s.", time_util.NowInToronto().Format(time.RFC3339))
+			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
 				return nil, err
 			}
-			return &tx, nil
-			// set tx sum to complete
+			return &fTx, nil
+			// set fTx sum to complete
 		case transaction.TxStatusRejected:
-			tx.Status = transaction.TxStatusRejected
-			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
-			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
+			fTx.Status = transaction.TxStatusRejected
+			fTx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", fTx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
+			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
 				return nil, err
 			}
-			go p.maybeRefund(tx)
-			return &tx, nil
+			go p.maybeRefund(fTx)
+			return &fTx, nil
 		case transaction.TxStatusCancelled:
-			tx.Status = transaction.TxStatusCancelled
-			tx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", tx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
-			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, tx); err != nil {
+			fTx.Status = transaction.TxStatusCancelled
+			fTx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", fTx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
+			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
 				return nil, err
 			}
-			go p.maybeRefund(tx)
-			return &tx, nil
+			go p.maybeRefund(fTx)
+			return &fTx, nil
 		default:
-			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", tx.ID, tx.CurStageStatus, tx.CurStage)
+			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", fTx.ID, fTx.CurStageStatus, fTx.CurStage)
 		}
 	default:
-		return nil, fmt.Errorf("transaction `%v` in unknown stage `%s`", tx.ID, tx.CurStage)
+		return nil, fmt.Errorf("transaction `%v` in unknown stage `%s`", fTx.ID, fTx.CurStage)
 	}
-	return &tx, nil
+	return &fTx, nil
 }
 
-func (p *TxProcessor) closeRemainingTx(ctx context.Context, tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	switch tx.CurStage {
+func (p *TxProcessor) closeRemainingTx(ctx context.Context, fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	switch fTx.CurStage {
 	case transaction.TxStageInteracCI:
-		idm := tx.IDM
-		co := tx.COUT
+		idm := fTx.IDM
+		co := fTx.COUT
 		idm.Status = transaction.TxStatusClosed
 		co.Status = transaction.TxStatusClosed
 		if err := p.idmTxRepo.UpdateIDMTxById(ctx, *idm); err != nil {
@@ -426,22 +426,39 @@ func (p *TxProcessor) closeRemainingTx(ctx context.Context, tx transaction.Foree
 		if err := p.npbTxRepo.UpdateNBPCOTxById(ctx, *co); err != nil {
 			return nil, err
 		}
-		return &tx, nil
+		return &fTx, nil
 	case transaction.TxStageIDM:
-		co := tx.COUT
+		co := fTx.COUT
 		co.Status = transaction.TxStatusClosed
 		if err := p.npbTxRepo.UpdateNBPCOTxById(ctx, *co); err != nil {
 			return nil, err
 		}
-		return &tx, nil
+		return &fTx, nil
 	default:
 		//TODO: Log warn
-		return &tx, nil
+		return &fTx, nil
 	}
 }
 
 func (p *TxProcessor) updateTxSummary(ctx context.Context, fTx transaction.ForeeTx) {
-	// txSummary := *fTx.Summary
+	txSummary := *fTx.Summary
+
+	if fTx.Status == transaction.TxStatusInitial {
+		txSummary.Status = transaction.TxSummaryStatusInitial
+	} else if fTx.Status == transaction.TxStatusProcessing {
+		if fTx.CurStage == transaction.TxStageInteracCI && fTx.CurStageStatus == transaction.TxStatusSent {
+			txSummary.Status = transaction.TxSummaryStatusAwaitPayment
+		} else {
+			txSummary.Status = transaction.TxSummaryStatusInProgress
+		}
+	} else if fTx.Status == transaction.TxStatusCompleted {
+		txSummary.Status = transaction.TxSummaryStatusCompleted
+	} else if fTx.Status == transaction.TxStatusCancelled || fTx.Status == transaction.TxStatusRejected {
+		//TODO: check refund.
+		txSummary.Status = transaction.TxSummaryStatusCancelled
+	} else {
+		//TODO: log error
+	}
 
 }
 
@@ -451,21 +468,21 @@ func (p *TxProcessor) recordTxHistory(h transaction.TxHistory) {
 	}
 }
 
-func (p *TxProcessor) maybeRefund(tx transaction.ForeeTx) {
+func (p *TxProcessor) maybeRefund(fTx transaction.ForeeTx) {
 	//TODO: implement
 }
 
 // TODO: change argement to id.
-func (p *TxProcessor) approveIDM(ctx context.Context, tx transaction.ForeeTx) {
-	if tx.CurStage == transaction.TxStageIDM && tx.CurStageStatus == transaction.TxStatusSuspend {
+func (p *TxProcessor) approveIDM(ctx context.Context, fTx transaction.ForeeTx) {
+	if fTx.CurStage == transaction.TxStageIDM && fTx.CurStageStatus == transaction.TxStatusSuspend {
 
 	}
 	//TODO: implement
 }
 
 // TODO: change argement to id.
-func (p *TxProcessor) rejectIDM(ctx context.Context, tx transaction.ForeeTx) {
-	if tx.CurStage == transaction.TxStageIDM && tx.CurStageStatus == transaction.TxStatusSuspend {
+func (p *TxProcessor) rejectIDM(ctx context.Context, fTx transaction.ForeeTx) {
+	if fTx.CurStage == transaction.TxStageIDM && fTx.CurStageStatus == transaction.TxStatusSuspend {
 
 	}
 }
