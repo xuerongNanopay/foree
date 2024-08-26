@@ -1,6 +1,9 @@
 package ticket
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 type TicketStatus string
 
@@ -21,4 +24,12 @@ type Ticket struct {
 	ConcludedAt time.Time    `json:"concludedAt"`
 	CreateAt    time.Time    `json:"createAt"`
 	UpdateAt    time.Time    `json:"updateAt"`
+}
+
+type TicketRepo struct {
+	db *sql.DB
+}
+
+func NewTicketRepo(db *sql.DB) *TicketRepo {
+	return &TicketRepo{db: db}
 }
