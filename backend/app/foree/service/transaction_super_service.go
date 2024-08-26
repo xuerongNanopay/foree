@@ -75,7 +75,8 @@ func (t *TransactionSuperService) forceCIStatusUpdate(ctx context.Context, fTxId
 	if err = dTx.Commit(); err != nil {
 		return nil, err
 	}
-	t.ciTxProcessor.forwardFTx(*fTx)
+
+	t.txProcessor.processTx(*fTx)
 	return fTx, nil
 }
 

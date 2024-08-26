@@ -310,9 +310,9 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 		case transaction.TxStatusInitial:
 			return p.ciTxProcessor.processTx(tx)
 		case transaction.TxStatusSent:
-			p.ciTxProcessor.waitFTx(tx)
+			return p.ciTxProcessor.waitFTx(tx)
 		case transaction.TxStatusCompleted:
-			tx.CurStage = transaction.TxStageInteracCI
+			tx.CurStage = transaction.TxStageIDM
 			tx.CurStageStatus = transaction.TxStatusInitial
 			return &tx, nil
 		case transaction.TxStatusRejected:

@@ -33,20 +33,26 @@ type NBPTxProcessor struct {
 }
 
 func (p *NBPTxProcessor) start() error {
-	// go p.startProcessor()
+	go p.startProcessor()
 	return nil
 }
 
-func (p *NBPTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	// t, err := p.pushPayment(fTx)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	return nil, nil
+func (p *NBPTxProcessor) startProcessor() {
+	for {
+		select {
+		case fTx := <-p.waitChan:
+			_, ok := p.waitFTxs[fTx.ID]
+			if ok {
+				//Log duplicate
+			} else {
+				p.waitFTxs[fTx.ID] = &fTx
+			}
+		}
+	}
 }
 
 // We don't use transaction here, case NBP can check duplicate.
-func (p *NBPTxProcessor) pushPayment(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *NBPTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	// Safe check.
 	if fTx.CurStage != transaction.TxStageNBPCO && fTx.CurStageStatus != transaction.TxStatusInitial {
 		return nil, fmt.Errorf("NBPTxProcessor -- transaction `%v` is in status `%s` at stage `%s`", fTx.ID, fTx.CurStageStatus, fTx.Status)
