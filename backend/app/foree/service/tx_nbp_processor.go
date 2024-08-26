@@ -40,6 +40,23 @@ func (p *NBPTxProcessor) start() error {
 func (p *NBPTxProcessor) startProcessor() {
 	for {
 		select {
+		case fTx := <-p.retryChan:
+			_, ok := p.retryFTxs[fTx.ID]
+			if ok {
+				//Log duplicate
+			} else {
+				p.retryFTxs[fTx.ID] = &fTx
+			}
+		case fTx := <-p.retryTicker.C:
+			for k, fTx := range p.retryFTxs {
+				func() {
+					_, err := p.txProcessor.processTx(*fTx)
+					if err != nil {
+						//TODO: log error
+					}
+				}()
+				delete(p.retryFTxs, k)
+			}
 		case fTx := <-p.waitChan:
 			_, ok := p.waitFTxs[fTx.ID]
 			if ok {
@@ -102,6 +119,14 @@ func (p *NBPTxProcessor) startProcessor() {
 	}
 }
 
+func (p *NBPTxProcessor) waitFTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	if fTx.CurStage != transaction.TxStageInteracCI && fTx.CurStageStatus != transaction.TxStatusSent {
+		return nil, fmt.Errorf("NBPTxProcessor -- waitFTx -- ForeeTx `%v` is in stage `%s` at status `%s`", fTx.ID, fTx.CurStage, fTx.CurStageStatus)
+	}
+	p.waitChan <- fTx
+	return &fTx, nil
+}
+
 // We don't use transaction here, case NBP can check duplicate.
 func (p *NBPTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	// Safe check.
@@ -141,12 +166,21 @@ func (p *NBPTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeT
 		//TODO: log err
 		return nil, err
 	}
+
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+	curFTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.CI.ParentTxId)
+	if err != nil {
+		dTx.Rollback()
+		return nil, err
+	}
+
+	if curFTx.CurStage != transaction.TxStageNBPCO && (curFTx.CurStageStatus != transaction.TxStatusInitial || ) {
+		dTx.Rollback()
+		return nil, fmt.Errorf("NBPTxProcessor -- processTx -- ForeeTx `%v` is in stage `%s` at status `%s`", curFTx.ID, curFTx.CurStage, curFTx.CurStageStatus)
+	}
 
 	if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
-		fTx.COUT.Status = transaction.TxStatusPending
-		fTx.CurStageStatus = transaction.TxStatusPending
 	} else if resp.StatusCode/100 == 2 || resp.ResponseCode == "405" {
 		fTx.COUT.Status = transaction.TxStatusSent
 		fTx.CurStageStatus = transaction.TxStatusSent
@@ -200,7 +234,7 @@ func (p *NBPTxProcessor) refreshNBPStatus(fTx transaction.ForeeTx, nbpStatus str
 		return nil, err
 	}
 
-	if curFTx.CurStage != transaction.TxStageInteracCI && curFTx.CurStageStatus != transaction.TxStatusSent {
+	if curFTx.CurStage != transaction.TxStageNBPCO && curFTx.CurStageStatus != transaction.TxStatusSent {
 		dTx.Rollback()
 		p.clearChan <- fTx.ID
 		return nil, fmt.Errorf("NBPTxProcessor -- refreshNBPStatus -- ForeeTx `%v` is in stage `%s` at status `%s`", curFTx.ID, curFTx.CurStage, curFTx.CurStageStatus)

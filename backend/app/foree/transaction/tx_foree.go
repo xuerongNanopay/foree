@@ -63,7 +63,6 @@ type TxStatus string
 
 const (
 	TxStatusInitial    TxStatus = "INITIAL"
-	TxStatusPending    TxStatus = "PENDING"
 	TxStatusProcessing TxStatus = "PROCESSING"
 	TxStatusSuspend    TxStatus = "SUSPEND"
 	TxStatusSent       TxStatus = "SENT"

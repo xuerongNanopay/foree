@@ -77,8 +77,10 @@ func (t *TransactionSuperService) forceCIStatusUpdate(ctx context.Context, fTxId
 	}
 
 	go func() {
-		//log: error
-		t.txProcessor.processTx(*fTx)
+		_, err := t.txProcessor.processTx(*fTx)
+		if err != nil {
+			//log: error
+		}
 	}()
 	return fTx, nil
 }
@@ -141,8 +143,10 @@ func (t *TransactionSuperService) idmStatusUpdate(ctx context.Context, fTxId int
 	}
 
 	go func() {
-		//log: error
-		t.txProcessor.processTx(*fTx)
+		_, err := t.txProcessor.processTx(*fTx)
+		if err != nil {
+			//log: error
+		}
 	}()
 
 	return fTx, nil
