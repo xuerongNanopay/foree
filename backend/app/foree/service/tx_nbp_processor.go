@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -9,6 +10,7 @@ import (
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
+	"xue.io/go-pay/constant"
 	"xue.io/go-pay/partner/nbp"
 )
 
@@ -16,13 +18,18 @@ type NBPTxProcessor struct {
 	db                     *sql.DB
 	foreeTxRepo            *transaction.ForeeTxRepo
 	txProcessor            *TxProcessor
-	idmTxRepo              *transaction.IdmTxRepo
+	nbpTxRepo              *transaction.NBPCOTxRepo
 	nbpClient              nbp.NBPClient
 	userExtraRepo          *foree_auth.UserExtraRepo
 	userIdentificationRepo *foree_auth.UserIdentificationRepo
 	retryFTxs              map[int64]*transaction.ForeeTx
 	waitFTxs               map[int64]*transaction.ForeeTx
-	retryChan
+	retryChan              chan transaction.ForeeTx
+	waitChan               chan transaction.ForeeTx
+	forwardChan            chan transaction.ForeeTx
+	retryTicker            time.Ticker
+	checkStatusTicker      time.Ticker
+	clearChan              chan int64
 }
 
 func (p *NBPTxProcessor) start() error {
@@ -63,7 +70,7 @@ func (p *NBPTxProcessor) pushPayment(fTx transaction.ForeeTx) (*transaction.Fore
 			return nil, err
 		}
 		//Retry case: 5xx, 401, 403
-		if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
+		if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" || resp.ResponseCode == "406" {
 			time.Sleep(15 * time.Second)
 		} else {
 			break
@@ -71,15 +78,49 @@ func (p *NBPTxProcessor) pushPayment(fTx transaction.ForeeTx) (*transaction.Fore
 
 	}
 
+	dTx, err := p.db.Begin()
+	if err != nil {
+		dTx.Rollback()
+		//TODO: log err
+		return nil, err
+	}
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+
 	if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
-
+		fTx.COUT.Status = transaction.TxStatusPending
+		fTx.CurStageStatus = transaction.TxStatusPending
+	} else if resp.StatusCode/100 == 2 || resp.ResponseCode == "405" {
+		fTx.COUT.Status = transaction.TxStatusSent
+		fTx.CurStageStatus = transaction.TxStatusSent
+	} else {
+		fTx.COUT.Status = transaction.TxStatusRejected
+		fTx.CurStageStatus = transaction.TxStatusRejected
 	}
 
-	if resp.ResponseCode == "405" {
-
+	err = p.nbpTxRepo.UpdateNBPCOTxById(ctx, *fTx.COUT)
+	if err != nil {
+		dTx.Rollback()
+		return nil, err
 	}
-	//Specia case: 405
-	return nil, nil
+
+	err = p.foreeTxRepo.UpdateForeeTxById(ctx, fTx)
+	if err != nil {
+		dTx.Rollback()
+		return nil, err
+	}
+
+	if err = dTx.Commit(); err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
+		p.retryChan <- fTx
+	} else if resp.StatusCode/100 == 2 || resp.ResponseCode == "405" {
+		p.waitChan <- fTx
+	}
+
+	return &fTx, nil
 }
 
 func (p *NBPTxProcessor) sendPaymentWithMode(r nbp.LoadRemittanceRequest, mode nbp.PMTMode) (*nbp.LoadRemittanceResponse, error) {
@@ -119,6 +160,7 @@ func (p *NBPTxProcessor) buildLoadRemittanceRequest(fTx transaction.ForeeTx) (*n
 
 	transactionDate := time.Now()
 	lrr := &nbp.LoadRemittanceRequest{
+		GlobalId:                        fTx.COUT.APIReference,
 		Amount:                          nbp.NBPAmount(fTx.COUT.Amt.Amount),
 		Currency:                        fTx.COUT.Amt.Currency,
 		TransactionDate:                 (*nbp.NBPDate)(&transactionDate),
