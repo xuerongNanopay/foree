@@ -440,6 +440,7 @@ func (p *TxProcessor) closeRemainingTx(ctx context.Context, fTx transaction.Fore
 	}
 }
 
+// TODO: reDesign.
 func (p *TxProcessor) updateTxSummary(ctx context.Context, fTx transaction.ForeeTx) {
 	txSummary := *fTx.Summary
 
@@ -460,6 +461,14 @@ func (p *TxProcessor) updateTxSummary(ctx context.Context, fTx transaction.Foree
 		//TODO: log error
 	}
 
+	if txSummary.Status != fTx.Summary.Status {
+		err := p.txSummaryRepo.UpdateTxSummaryById(ctx, txSummary)
+		if err != nil {
+			//TODO: log
+			//return
+		}
+	}
+
 }
 
 func (p *TxProcessor) recordTxHistory(h transaction.TxHistory) {
@@ -470,19 +479,4 @@ func (p *TxProcessor) recordTxHistory(h transaction.TxHistory) {
 
 func (p *TxProcessor) maybeRefund(fTx transaction.ForeeTx) {
 	//TODO: implement
-}
-
-// TODO: change argement to id.
-func (p *TxProcessor) approveIDM(ctx context.Context, fTx transaction.ForeeTx) {
-	if fTx.CurStage == transaction.TxStageIDM && fTx.CurStageStatus == transaction.TxStatusSuspend {
-
-	}
-	//TODO: implement
-}
-
-// TODO: change argement to id.
-func (p *TxProcessor) rejectIDM(ctx context.Context, fTx transaction.ForeeTx) {
-	if fTx.CurStage == transaction.TxStageIDM && fTx.CurStageStatus == transaction.TxStatusSuspend {
-
-	}
 }
