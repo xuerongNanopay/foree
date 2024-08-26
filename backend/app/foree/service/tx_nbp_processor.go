@@ -50,7 +50,11 @@ func (p *NBPTxProcessor) pushPayment(fTx transaction.ForeeTx) (*transaction.Fore
 	if err != nil {
 		return nil, err
 	}
+
 	resp, error := p.sendPaymentWithMode(*req, mode)
+
+	//Retry case: 5xx, 401, 403
+	//Specia case: 405
 	return nil, nil
 }
 
