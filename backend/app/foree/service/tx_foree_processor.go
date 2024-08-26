@@ -310,9 +310,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 		case transaction.TxStatusInitial:
 			return p.ciTxProcessor.processTx(tx)
 		case transaction.TxStatusSent:
-			//Check status from scotia API.(Webhook, or cron)
-			//Just do noting waiting for cron
-			p.ciTxProcessor.startFTx(tx)
+			p.ciTxProcessor.waitFTx(tx)
 		case transaction.TxStatusCompleted:
 			tx.CurStage = transaction.TxStageInteracCI
 			tx.CurStageStatus = transaction.TxStatusInitial

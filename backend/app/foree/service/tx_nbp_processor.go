@@ -22,12 +22,35 @@ type NBPTxProcessor struct {
 	userIdentificationRepo *foree_auth.UserIdentificationRepo
 }
 
-func (p *NBPTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	return nil, nil
+func (p *NBPTxProcessor) start() error {
+	// go p.startProcessor()
+	return nil
 }
 
-func (p *NBPTxProcessor) sendPayment(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *NBPTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	t, err := p.pushPayment(fTx)
+	if err != nil {
+		return nil, err
+	}
 
+}
+
+// We don't use transaction here, case NBP can check duplicate.
+func (p *NBPTxProcessor) pushPayment(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+	// Safe check.
+	if fTx.CurStage != transaction.TxStageNBPCO && fTx.CurStageStatus != transaction.TxStatusInitial {
+		return nil, fmt.Errorf("NBPTxProcessor -- transaction `%v` is in status `%s` at stage `%s`", fTx.ID, fTx.CurStageStatus, fTx.Status)
+	}
+
+	req, err := p.buildLoadRemittanceRequest(fTx)
+	if err != nil {
+		return nil, err
+	}
+	mode, err := mapNBPMode(fTx.COUT.CashOutAcc.Type)
+	if err != nil {
+		return nil, err
+	}
+	resp, error := p.sendPaymentWithMode(*req, mode)
 	return nil, nil
 }
 
