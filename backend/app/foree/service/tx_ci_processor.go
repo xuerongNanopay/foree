@@ -230,9 +230,6 @@ func (p *CITxProcessor) requestPayment(tx transaction.ForeeTx) (*transaction.For
 
 // The function normally in a goroutine
 func (p *CITxProcessor) refreshScotiaStatus(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	if fTx.CI.Status != transaction.TxStatusSent {
-		return nil, fmt.Errorf("CITxProcessor -- refreshScotiaStatusAndProcess -- InteracCITx `%v` is in `%s`", fTx.CI.ID, fTx.CI.Status)
-	}
 
 	detailResp, err := p.scotiaClient.PaymentDetail(scotia.PaymentDetailRequest{
 		PaymentId:  fTx.CI.ScotiaPaymentId,
