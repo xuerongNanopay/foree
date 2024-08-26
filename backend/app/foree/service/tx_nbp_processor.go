@@ -20,6 +20,9 @@ type NBPTxProcessor struct {
 	nbpClient              nbp.NBPClient
 	userExtraRepo          *foree_auth.UserExtraRepo
 	userIdentificationRepo *foree_auth.UserIdentificationRepo
+	retryFTxs              map[int64]*transaction.ForeeTx
+	waitFTxs               map[int64]*transaction.ForeeTx
+	retryChan
 }
 
 func (p *NBPTxProcessor) start() error {
@@ -28,11 +31,11 @@ func (p *NBPTxProcessor) start() error {
 }
 
 func (p *NBPTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	t, err := p.pushPayment(fTx)
-	if err != nil {
-		return nil, err
-	}
-
+	// t, err := p.pushPayment(fTx)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	return nil, nil
 }
 
 // We don't use transaction here, case NBP can check duplicate.
@@ -51,9 +54,30 @@ func (p *NBPTxProcessor) pushPayment(fTx transaction.ForeeTx) (*transaction.Fore
 		return nil, err
 	}
 
-	resp, error := p.sendPaymentWithMode(*req, mode)
+	var resp *nbp.LoadRemittanceResponse
 
-	//Retry case: 5xx, 401, 403
+	// Retry 5 times with 15 second interval.
+	for i := 0; i < 5; i++ {
+		resp, err = p.sendPaymentWithMode(*req, mode)
+		if err != nil {
+			return nil, err
+		}
+		//Retry case: 5xx, 401, 403
+		if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
+			time.Sleep(15 * time.Second)
+		} else {
+			break
+		}
+
+	}
+
+	if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
+
+	}
+
+	if resp.ResponseCode == "405" {
+
+	}
 	//Specia case: 405
 	return nil, nil
 }

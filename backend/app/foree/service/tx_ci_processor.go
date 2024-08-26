@@ -39,7 +39,7 @@ type CITxProcessor struct {
 	foreeTxRepo   *transaction.ForeeTxRepo
 	txSummaryRepo *transaction.TxSummaryRepo
 	txProcessor   *TxProcessor
-	fTxs          map[int64]*transaction.ForeeTx
+	waitFTxs      map[int64]*transaction.ForeeTx
 	webhookChan   chan int64
 	clearChan     chan int64
 	forwardChan   chan transaction.ForeeTx
@@ -58,20 +58,20 @@ func (p *CITxProcessor) startProcessor() error {
 	for {
 		select {
 		case fTx := <-p.waitChan:
-			_, ok := p.fTxs[fTx.ID]
+			_, ok := p.waitFTxs[fTx.ID]
 			if ok {
 				//Log duplicate
 			} else {
-				p.fTxs[fTx.ID] = &fTx
+				p.waitFTxs[fTx.ID] = &fTx
 			}
 		case fTxId := <-p.clearChan:
-			delete(p.fTxs, fTxId)
+			delete(p.waitFTxs, fTxId)
 		case fTx := <-p.forwardChan:
-			_, ok := p.fTxs[fTx.ID]
+			_, ok := p.waitFTxs[fTx.ID]
 			if !ok {
 				//Log miss
 			} else {
-				delete(p.fTxs, fTx.ID)
+				delete(p.waitFTxs, fTx.ID)
 			}
 			go func() {
 				_, err := p.txProcessor.processTx(fTx)
@@ -80,7 +80,7 @@ func (p *CITxProcessor) startProcessor() error {
 				}
 			}()
 		case foreeTxId := <-p.webhookChan:
-			v, ok := p.fTxs[foreeTxId]
+			v, ok := p.waitFTxs[foreeTxId]
 			if !ok {
 				//Log error: transaction no found
 			} else {
@@ -97,7 +97,7 @@ func (p *CITxProcessor) startProcessor() error {
 				}()
 			}
 		case <-p.ticker.C:
-			for _, tx := range p.fTxs {
+			for _, tx := range p.waitFTxs {
 				func() {
 					nTx, err := p.refreshScotiaStatus(*tx)
 					if err != nil {

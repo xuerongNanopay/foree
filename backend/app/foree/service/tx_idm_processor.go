@@ -68,14 +68,7 @@ func (p *IDMTxProcessor) idmTransferValidate(tx transaction.ForeeTx) (*transacti
 		return nil, err
 	}
 
-	if resp.StatusCode/100 != 2 {
-		dTx.Rollback()
-		return nil, err
-	}
-
-	idmStatus := resp.GetResultStatus()
-
-	if idmStatus == "ACCEPT" {
+	if resp.StatusCode/100 == 2 && resp.GetResultStatus() == "ACCEPT" {
 		//TODO: log success
 		tx.CurStageStatus = transaction.TxStatusCompleted
 		tx.IDM.Status = transaction.TxStatusCompleted

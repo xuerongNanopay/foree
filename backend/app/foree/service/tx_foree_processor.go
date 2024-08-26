@@ -377,6 +377,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, tx transaction.ForeeTx) (
 		switch tx.CurStageStatus {
 		case transaction.TxStatusInitial:
 			//TODO: call send NBP API
+		case transaction.TxStatusPending:
 		case transaction.TxStatusSent:
 			//Check status from NBP API.
 			//Or just wait for clone
