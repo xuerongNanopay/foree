@@ -47,7 +47,7 @@ func (p *NBPTxProcessor) startProcessor() {
 			} else {
 				p.retryFTxs[fTx.ID] = &fTx
 			}
-		case fTx := <-p.retryTicker.C:
+		case <-p.retryTicker.C:
 			for k, fTx := range p.retryFTxs {
 				func() {
 					_, err := p.txProcessor.processTx(*fTx)
@@ -175,7 +175,7 @@ func (p *NBPTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeT
 		return nil, err
 	}
 
-	if curFTx.CurStage != transaction.TxStageNBPCO && (curFTx.CurStageStatus != transaction.TxStatusInitial || ) {
+	if curFTx.CurStage != transaction.TxStageNBPCO && curFTx.CurStageStatus != transaction.TxStatusInitial {
 		dTx.Rollback()
 		return nil, fmt.Errorf("NBPTxProcessor -- processTx -- ForeeTx `%v` is in stage `%s` at status `%s`", curFTx.ID, curFTx.CurStage, curFTx.CurStageStatus)
 	}
