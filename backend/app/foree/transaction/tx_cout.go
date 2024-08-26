@@ -14,7 +14,7 @@ const (
 	sQLNBPCOTxInsert = `
         INSERT INTO nbp_co_tx
         (
-            status, amount, currency, api_reference,  cash_out_acc_id
+            status, amount, currency, nbp_reference,  cash_out_acc_id
             parent_tx_id, owner_id
         ) VALUES(?,?,?,?,?,?,?)
     `
@@ -25,7 +25,7 @@ const (
     `
 	sQLNBPCOTxGetUniqueById = `
         SELECT 
-            t.id, t.status, t.amount, t.currency, t.api_reference,
+            t.id, t.status, t.amount, t.currency, t.nbp_reference,
             t.cash_out_acc_id, t.parent_tx_id, t.owner_id,
             t.create_at, t.update_at
         FROM nbp_co_tx t
@@ -34,7 +34,7 @@ const (
     `
 	sQLNBPCOTxGetUniqueByParentTxId = `
         SELECT 
-            t.id, t.status, t.amount, t.currency, t.api_reference,
+            t.id, t.status, t.amount, t.currency, t.nbp_reference,
             t.cash_out_acc_id, t.parent_tx_id, t.owner_id,
             t.create_at, t.update_at
         FROM nbp_co_tx t
@@ -46,7 +46,7 @@ type NBPCOTx struct {
 	ID           int64                   `json:"id"`
 	Status       TxStatus                `json:"status"`
 	Amt          types.AmountData        `json:"amt"`
-	APIReference string                  `json:"apiReference"`
+	NBPReference string                  `json:"nbpReference"`
 	CashOutAccId int64                   `json:"CashOutAccId"`
 	CashOutAcc   *account.ContactAccount `json:"CashOutAcc"`
 	ParentTxId   int64                   `json:"parentTxId"`
@@ -75,7 +75,7 @@ func (repo *NBPCOTxRepo) InsertNBPCOTx(ctx context.Context, tx NBPCOTx) (int64, 
 			tx.Status,
 			tx.Amt.Amount,
 			tx.Amt.Currency,
-			tx.APIReference,
+			tx.NBPReference,
 			tx.CashOutAccId,
 			tx.ParentTxId,
 			tx.OwnerId,
@@ -86,7 +86,7 @@ func (repo *NBPCOTxRepo) InsertNBPCOTx(ctx context.Context, tx NBPCOTx) (int64, 
 			tx.Status,
 			tx.Amt.Amount,
 			tx.Amt.Currency,
-			tx.APIReference,
+			tx.NBPReference,
 			tx.CashOutAccId,
 			tx.ParentTxId,
 			tx.OwnerId,
@@ -175,7 +175,7 @@ func scanRowIntoNBPCOTx(rows *sql.Rows) (*NBPCOTx, error) {
 		&tx.Status,
 		&tx.Amt.Amount,
 		&tx.Amt.Currency,
-		&tx.APIReference,
+		&tx.NBPReference,
 		&tx.CashOutAccId,
 		&tx.ParentTxId,
 		&tx.OwnerId,

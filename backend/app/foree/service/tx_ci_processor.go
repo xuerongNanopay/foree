@@ -41,6 +41,7 @@ type CITxProcessor struct {
 	txProcessor   *TxProcessor
 	waitFTxs      map[int64]*transaction.ForeeTx
 	webhookChan   chan int64
+	clearChan     chan int64
 	forwardChan   chan transaction.ForeeTx
 	waitChan      chan transaction.ForeeTx
 	ticker        time.Ticker
@@ -76,6 +77,8 @@ func (p *CITxProcessor) startProcessor() {
 					//log err
 				}
 			}()
+		case foreeTxId := <-p.clearChan:
+			delete(p.waitFTxs, foreeTxId)
 		case foreeTxId := <-p.webhookChan:
 			v, ok := p.waitFTxs[foreeTxId]
 			if !ok {
@@ -260,6 +263,7 @@ func (p *CITxProcessor) refreshScotiaStatus(fTx transaction.ForeeTx) (*transacti
 
 	if curFTx.CurStage != transaction.TxStageInteracCI && curFTx.CurStageStatus != transaction.TxStatusSent {
 		dTx.Rollback()
+		p.clearChan <- fTx.ID
 		return nil, fmt.Errorf("CITxProcessor -- refreshScotiaStatusAndProcess -- ForeeTx `%v` is in stage `%s` at status `%s`", curFTx.ID, curFTx.CurStage, curFTx.CurStageStatus)
 	}
 

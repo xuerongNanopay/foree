@@ -47,6 +47,57 @@ func (p *NBPTxProcessor) startProcessor() {
 			} else {
 				p.waitFTxs[fTx.ID] = &fTx
 			}
+		case fTx := <-p.forwardChan:
+			_, ok := p.waitFTxs[fTx.ID]
+			if !ok {
+				//Log miss
+			} else {
+				delete(p.waitFTxs, fTx.ID)
+			}
+			go func() {
+				_, err := p.txProcessor.processTx(fTx)
+				if err != nil {
+					//log err
+				}
+			}()
+		case foreeTxId := <-p.clearChan:
+			delete(p.waitFTxs, foreeTxId)
+		case <-p.checkStatusTicker.C:
+			req := nbp.TransactionStatusByIdsRequest{
+				Ids: nbp.NBPIds{},
+			}
+			for _, tx := range p.waitFTxs {
+				req.Ids = append(req.Ids, tx.COUT.NBPReference)
+			}
+
+			resp, err := p.nbpClient.TransactionStatusByIds(req)
+			if err != nil {
+				//TODO: Log
+				return
+			}
+			m := make(map[string]nbp.TransactionStatus, len(resp.TransactionStatuses))
+			for _, v := range resp.TransactionStatuses {
+				m[v.GlobalId] = v
+			}
+
+			for _, fTx := range p.waitFTxs {
+				func() {
+					s, ok := m[fTx.COUT.NBPReference]
+					if !ok {
+						//log: error
+						return
+					}
+					nTx, err := p.refreshNBPStatus(*fTx, s.Status)
+					if err != nil {
+						//Log error
+						return
+					}
+
+					if nTx.CurStageStatus != fTx.CurStageStatus {
+						p.forwardChan <- *nTx
+					}
+				}()
+			}
 		}
 	}
 }
@@ -129,6 +180,54 @@ func (p *NBPTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeT
 	return &fTx, nil
 }
 
+func (p *NBPTxProcessor) refreshNBPStatus(fTx transaction.ForeeTx, nbpStatus string) (*transaction.ForeeTx, error) {
+	newStatus := nbpToInternalStatusMapper(nbpStatus)
+	if newStatus == transaction.TxStatusSent {
+		return &fTx, nil
+	}
+
+	dTx, err := p.db.Begin()
+	if err != nil {
+		dTx.Rollback()
+		return nil, err
+	}
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+	curFTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.CI.ParentTxId)
+	if err != nil {
+		dTx.Rollback()
+		return nil, err
+	}
+
+	if curFTx.CurStage != transaction.TxStageInteracCI && curFTx.CurStageStatus != transaction.TxStatusSent {
+		dTx.Rollback()
+		p.clearChan <- fTx.ID
+		return nil, fmt.Errorf("NBPTxProcessor -- refreshNBPStatus -- ForeeTx `%v` is in stage `%s` at status `%s`", curFTx.ID, curFTx.CurStage, curFTx.CurStageStatus)
+	}
+
+	fTx.COUT.Status = newStatus
+	fTx.CurStageStatus = newStatus
+
+	err = p.nbpTxRepo.UpdateNBPCOTxById(ctx, *fTx.COUT)
+	if err != nil {
+		dTx.Rollback()
+		return nil, err
+	}
+
+	err = p.foreeTxRepo.UpdateForeeTxById(ctx, fTx)
+	if err != nil {
+		dTx.Rollback()
+		return nil, err
+	}
+
+	if err = dTx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return &fTx, nil
+}
+
 func (p *NBPTxProcessor) sendPaymentWithMode(r nbp.LoadRemittanceRequest, mode nbp.PMTMode) (*nbp.LoadRemittanceResponse, error) {
 	switch mode {
 	case nbp.PMTModeCash:
@@ -166,7 +265,7 @@ func (p *NBPTxProcessor) buildLoadRemittanceRequest(fTx transaction.ForeeTx) (*n
 
 	transactionDate := time.Now()
 	lrr := &nbp.LoadRemittanceRequest{
-		GlobalId:                        fTx.COUT.APIReference,
+		GlobalId:                        fTx.COUT.NBPReference,
 		Amount:                          nbp.NBPAmount(fTx.COUT.Amt.Amount),
 		Currency:                        fTx.COUT.Amt.Currency,
 		TransactionDate:                 (*nbp.NBPDate)(&transactionDate),
@@ -193,6 +292,21 @@ func (p *NBPTxProcessor) buildLoadRemittanceRequest(fTx transaction.ForeeTx) (*n
 
 	return lrr, nil
 
+}
+
+func nbpToInternalStatusMapper(nbpStatus string) transaction.TxStatus {
+	switch nbpStatus {
+	case "REJECTED":
+		fallthrough
+	case "ERROR":
+		return transaction.TxStatusRejected
+	case "PAID":
+		return transaction.TxStatusCompleted
+	case "CANCELLED":
+		return transaction.TxStatusCancelled
+	default:
+		return transaction.TxStatusSent
+	}
 }
 
 func mapNBPMode(accType account.ContactAccountType) (nbp.PMTMode, error) {

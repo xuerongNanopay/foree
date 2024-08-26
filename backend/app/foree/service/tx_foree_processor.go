@@ -141,7 +141,7 @@ func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, er
 		coutId, err := p.npbTxRepo.InsertNBPCOTx(ctx, transaction.NBPCOTx{
 			Status:       transaction.TxStatusInitial,
 			Amt:          tx.SrcAmt,
-			APIReference: tx.Summary.NBPReference,
+			NBPReference: tx.Summary.NBPReference,
 			CashOutAccId: tx.CoutAccId,
 			ParentTxId:   tx.ID,
 			OwnerId:      tx.OwnerId,

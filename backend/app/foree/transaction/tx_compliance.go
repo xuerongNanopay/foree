@@ -17,19 +17,19 @@ const (
     `
 	sQLIDMTxUpdateById = `
         UPDATE idm_tx SET 
-            status = ?, api_reference = ?, t.idm_result = ?
+            status = ?, idm_reference = ?, t.idm_result = ?
         WHERE id = ?
     `
 	sQLIDMTxGetUniqueById = `
         SELECT 
-            t.id, t.status, t.ip, t.user_agent, t.api_reference, t.idm_result
+            t.id, t.status, t.ip, t.user_agent, t.idm_reference, t.idm_result
             t.parent_tx_id, t.owner_id, t.create_at, t.update_at
         FROM idm_tx t
         where t.id = ?
     `
 	sQLIDMTxGetUniqueByParentTxId = `
         SELECT 
-            t.id, t.status, t.ip, t.user_agent, t.api_reference, t.idm_result
+            t.id, t.status, t.ip, t.user_agent, t.idm_reference, t.idm_result
             t.parent_tx_id, t.owner_id, t.create_at, t.update_at
         FROM idm_tx t
         where t.parent_tx_id = ?
@@ -63,7 +63,7 @@ type IDMTx struct {
 	Status       TxStatus
 	Ip           string    `json:"ip"`
 	UserAgent    string    `json:"userAgent"`
-	APIReference string    `json:"apiReference"`
+	IDMReference string    `json:"idmReference"`
 	IDMResult    string    `json:"idmResult"`
 	ParentTxId   int64     `json:"parentTxId"`
 	OwnerId      int64     `json:"ownerId"`
@@ -133,10 +133,10 @@ func (repo *IdmTxRepo) UpdateIDMTxById(ctx context.Context, tx IDMTx) error {
 	var err error
 
 	if ok {
-		_, err = dTx.Exec(sQLIDMTxUpdateById, tx.Status, tx.APIReference, tx.IDMResult, tx.ID)
+		_, err = dTx.Exec(sQLIDMTxUpdateById, tx.Status, tx.IDMReference, tx.IDMResult, tx.ID)
 
 	} else {
-		_, err = repo.db.Exec(sQLIDMTxUpdateById, tx.Status, tx.APIReference, tx.IDMResult, tx.ID)
+		_, err = repo.db.Exec(sQLIDMTxUpdateById, tx.Status, tx.IDMReference, tx.IDMResult, tx.ID)
 	}
 
 	if err != nil {
@@ -200,7 +200,7 @@ func scanRowIntoIDMTx(rows *sql.Rows) (*IDMTx, error) {
 		&tx.Status,
 		&tx.Ip,
 		&tx.UserAgent,
-		&tx.APIReference,
+		&tx.IDMReference,
 		&tx.ParentTxId,
 		&tx.OwnerId,
 		&tx.CreateAt,
