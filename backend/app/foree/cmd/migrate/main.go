@@ -19,7 +19,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	configPath := filepath.Join(ex, "../migrations")
+	configPath := filepath.Join(ex, "../migrations/")
 
 	db, err := newMySQLStorage(mysqlCfg.Config{
 		User:                 foree_config.Envs.DBUser,
@@ -36,24 +36,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(configPath)
-	fmt.Println(foree_config.Envs)
-
 	driver, err := mysql.WithInstance(db, &mysql.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("AAA")
+
 	m, err := migrate.NewWithDatabaseInstance(
-		configPath,
+		fmt.Sprintf("%s//%s", "file://", configPath),
 		foree_config.Envs.DBName,
 		driver,
 	)
-	fmt.Println("AAA")
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("AAA")
 	cmd := os.Args[(len(os.Args) - 1)]
 	if cmd == "up" {
 		if err := m.Up(); err != nil && err != migrate.ErrNoChange {
@@ -69,7 +64,6 @@ func main() {
 }
 
 func newMySQLStorage(cfg mysqlCfg.Config) (*sql.DB, error) {
-	fmt.Println(cfg.FormatDSN())
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
 		return nil, err
