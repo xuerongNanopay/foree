@@ -25,6 +25,7 @@ type TxProcessor struct {
 	txSummaryRepo       *transaction.TxSummaryRepo
 	foreeTxRepo         *transaction.ForeeTxRepo
 	interacRefundTxRepo *transaction.InteracRefundTxRepo
+	rewardRepo          *transaction.RewardRepo
 	userRepo            *auth.UserRepo
 	contactRepo         *account.ContactAccountRepo
 	interacRepo         *account.InteracAccountRepo
@@ -328,7 +329,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, fTx transaction.ForeeTx) 
 			if err != nil {
 				return nil, err
 			}
-			go p.maybeRefund(*nT)
+			go p.MaybeRefund(ctx, *nT)
 			return nT, nil
 		case transaction.TxStatusCancelled:
 			fTx.Status = transaction.TxStatusCancelled
@@ -341,7 +342,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, fTx transaction.ForeeTx) 
 			if err != nil {
 				return nil, err
 			}
-			go p.maybeRefund(*nT)
+			go p.MaybeRefund(ctx, *nT)
 			return nT, nil
 		default:
 			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", fTx.ID, fTx.CurStageStatus, fTx.CurStage)
@@ -367,7 +368,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, fTx transaction.ForeeTx) 
 			if err != nil {
 				return nil, err
 			}
-			go p.maybeRefund(*nT)
+			go p.MaybeRefund(ctx, *nT)
 			return nT, nil
 		case transaction.TxStatusSuspend:
 			//Wait to approve
@@ -387,15 +388,15 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, fTx transaction.ForeeTx) 
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
 				return nil, err
 			}
+			go p.RedeemReward(ctx, fTx)
 			return &fTx, nil
-			// set fTx sum to complete
 		case transaction.TxStatusRejected:
 			fTx.Status = transaction.TxStatusRejected
 			fTx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", fTx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
 				return nil, err
 			}
-			go p.maybeRefund(fTx)
+			go p.MaybeRefund(ctx, fTx)
 			return &fTx, nil
 		case transaction.TxStatusCancelled:
 			fTx.Status = transaction.TxStatusCancelled
@@ -403,7 +404,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, fTx transaction.ForeeTx) 
 			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
 				return nil, err
 			}
-			go p.maybeRefund(fTx)
+			go p.MaybeRefund(ctx, fTx)
 			return &fTx, nil
 		default:
 			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", fTx.ID, fTx.CurStageStatus, fTx.CurStage)
@@ -460,13 +461,14 @@ func (p *TxProcessor) updateTxSummary(ctx context.Context, fTx transaction.Foree
 		txSummary.Status = transaction.TxSummaryStatusCancelled
 	} else {
 		//TODO: log error
+		return
 	}
 
 	if txSummary.Status != fTx.Summary.Status {
 		err := p.txSummaryRepo.UpdateTxSummaryById(ctx, txSummary)
 		if err != nil {
 			//TODO: log
-			//return
+			return
 		}
 	}
 
@@ -478,6 +480,89 @@ func (p *TxProcessor) recordTxHistory(h transaction.TxHistory) {
 	}
 }
 
-func (p *TxProcessor) maybeRefund(fTx transaction.ForeeTx) {
-	//TODO: implement
+func (p *TxProcessor) RedeemReward(ctx context.Context, fTx transaction.ForeeTx) {
+	dTx, err := p.db.Begin()
+	if err != nil {
+		dTx.Rollback()
+		//TODO: log err
+		return
+	}
+
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+	rewards, err := p.rewardRepo.GetAllRewardByAppliedTransactionId(ctx, fTx.ID)
+	if err != nil {
+		dTx.Rollback()
+		//TODO: Log error
+		return
+	}
+
+	for _, v := range rewards {
+		v.Status = transaction.RewardStatusRedeemed
+		err := p.rewardRepo.UpdateRewardTxById(ctx, *v)
+		if err != nil {
+			dTx.Rollback()
+			//TODO: Log error
+			return
+		}
+	}
+
+	if err = dTx.Commit(); err != nil {
+		//TODO: Log error
+		return
+	}
+}
+
+func (p *TxProcessor) MaybeRefund(ctx context.Context, fTx transaction.ForeeTx) {
+	dTx, err := p.db.Begin()
+	if err != nil {
+		dTx.Rollback()
+		//TODO: log err
+		return
+	}
+
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+	rewards, err := p.rewardRepo.GetAllRewardByAppliedTransactionId(ctx, fTx.ID)
+	if err != nil {
+		dTx.Rollback()
+		//TODO: Log error
+		return
+	}
+
+	// Refund rewards.
+	for _, v := range rewards {
+		v.Status = transaction.RewardStatusDelete
+		err := p.rewardRepo.UpdateRewardTxById(ctx, *v)
+		if err != nil {
+			dTx.Rollback()
+			//TODO: Log error
+			return
+		}
+		v.Status = transaction.RewardStatusActive
+		_, err = p.rewardRepo.InsertReward(ctx, *v)
+		if err != nil {
+			dTx.Rollback()
+			//TODO: Log error
+			return
+		}
+	}
+
+	// Create refund transaction
+	if fTx.CI.Status == transaction.TxStatusCompleted {
+		_, err := p.interacRefundTxRepo.InsertInteracRefundTx(ctx, transaction.InteracRefundTx{
+			Status:             transaction.RefundTxStatusInitial,
+			RefundInteracAccId: fTx.CI.ID,
+			ParentTxId:         fTx.ID,
+			OwnerId:            fTx.OwnerId,
+		})
+		if err != nil {
+			dTx.Rollback()
+			//TODO: Log error
+			return
+		}
+	}
+
+	if err = dTx.Commit(); err != nil {
+		//TODO: Log error
+		return
+	}
 }

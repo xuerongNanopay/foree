@@ -40,9 +40,8 @@ const (
 type RefundTxStatus string
 
 const (
-	RefundTxStatusInitial   RefundTxStatus = "INITIAL"
-	RefundTxStatusRefunding RefundTxStatus = "REFUNDING"
-	RefundTxStatusRefunded  RefundTxStatus = "REFUNDED"
+	RefundTxStatusInitial  RefundTxStatus = "INITIAL"
+	RefundTxStatusRefunded RefundTxStatus = "REFUNDED"
 )
 
 type InteracRefundTx struct {
