@@ -1,7 +1,7 @@
 /*
 Copyright © 2024 NAME HERE xuerong@nanopay.net
 */
-package cli
+package foree_cli
 
 import (
 	"os"
