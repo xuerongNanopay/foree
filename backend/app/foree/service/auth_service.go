@@ -134,7 +134,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*aut
 	// VerifyEmail and update EmailPasswd.
 	newEP := *session.EmailPasswd
 	newEP.Status = auth.EPStatusActive
-	newEP.CodeVerifiedAt = time.Now()
+	// newEP.CodeVerifiedAt = time.Now()
 	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP)
 	if e != nil {
 		return nil, transport.WrapInteralServerError(e)

@@ -18,13 +18,13 @@ const (
 	`
 	sQLEmailPasswdUpdateByEmail = `
 		UPDATE email_passwd SET 
-			status = ?, password = ?, verify_code = ?, code_verified_at = ?
+			status = ?, password = ?, verify_code = ?, code_expired_at = ?
 		WHERE email = ?
 	`
 	sQLEmailPasswdGetUniqueById = `
 	SELECT 
 		u.id, u.email, u.password, u.status,
-		u.verify_code, u.code_verified_at,
+		u.verify_code, u.code_expired_at,
 		u.user_id, u.create_at, u.update_at
 	FROM email_passwd as u 
 	WHERE u.id = ?
@@ -32,7 +32,7 @@ const (
 	sQLEmailPasswdGetUniqueByEmail = `
 		SELECT 
 			u.id, u.email, u.password, u.status,
-			u.verify_code, u.code_verified_at,
+			u.verify_code, u.code_expired_at,
 			u.user_id, u.create_at, u.update_at
 		FROM email_passwd as u 
 		WHERE u.email = ?
@@ -40,7 +40,7 @@ const (
 	sQLEmailPasswdGetAll = `
 		SELECT 
 			u.id, u.email, u.password, u.status,
-			u.verify_code, u.code_verified_at,
+			u.verify_code, u.code_expired_at,
 			u.user_id, u.create_at, u.update_at
 		FROM email_passwd as u
 	`
@@ -57,15 +57,15 @@ const (
 )
 
 type EmailPasswd struct {
-	ID             int64             `json:"id"`
-	Status         EmailPasswdStatus `json:"status"`
-	Email          string            `json:"email"`
-	Passowrd       string            `json:"-"`
-	VerifyCode     string            `json:"-"`
-	CodeVerifiedAt time.Time         `json:"codeVerifiedAt"`
-	UserId         int64             `json:"userId"`
-	CreateAt       time.Time         `json:"createAt"`
-	UpdateAt       time.Time         `json:"updateAt"`
+	ID                  int64             `json:"id"`
+	Status              EmailPasswdStatus `json:"status"`
+	Email               string            `json:"email"`
+	Passowrd            string            `json:"-"`
+	VerifyCode          string            `json:"-"`
+	VerifyCodeExpiredAt time.Time         `json:"codeExpiredAt"`
+	UserId              int64             `json:"userId"`
+	CreateAt            time.Time         `json:"createAt"`
+	UpdateAt            time.Time         `json:"updateAt"`
 }
 
 func NewEmailPasswdRepo(db *sql.DB) *EmailPasswdRepo {
@@ -118,9 +118,9 @@ func (repo *EmailPasswdRepo) UpdateEmailPasswdByEmail(ctx context.Context, ep Em
 	var err error
 
 	if ok {
-		_, err = dTx.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passowrd, ep.VerifyCode, ep.CodeVerifiedAt, ep.Email)
+		_, err = dTx.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passowrd, ep.VerifyCode, ep.VerifyCodeExpiredAt, ep.Email)
 	} else {
-		_, err = repo.db.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passowrd, ep.VerifyCode, ep.CodeVerifiedAt, ep.Email)
+		_, err = repo.db.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passowrd, ep.VerifyCode, ep.VerifyCodeExpiredAt, ep.Email)
 	}
 
 	if err != nil {
@@ -210,7 +210,7 @@ func scanRowIntoEmailPasswd(rows *sql.Rows) (*EmailPasswd, error) {
 		&p.Passowrd,
 		&p.Status,
 		&p.VerifyCode,
-		&p.CodeVerifiedAt,
+		&p.VerifyCodeExpiredAt,
 		&p.UserId,
 		&p.CreateAt,
 		&p.UpdateAt,
