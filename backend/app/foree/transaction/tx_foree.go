@@ -107,21 +107,21 @@ type ForeeTx struct {
 	CreateAt           time.Time        `json:"createAt,omitempty"`
 	UpdateAt           time.Time        `json:"updateAt,omitempty"`
 
-	Ip          string                  `json:"ip,omitempty"`
-	UserAgent   string                  `json:"userAgent,omitempty"`
-	Owner       *auth.User              `json:"ower,omitempty"`
-	InteracAcc  *account.InteracAccount `json:"interacAcc,omitempty"`
-	ContactAcc  *account.ContactAccount `json:"contactAcc,omitempty"`
-	FeeJointIds []int64                 `json:"feeJointIds,omitempty"`
-	Fees        []*FeeJoint             `json:"fees,omitempty"`
-	RewardIds   []int64                 `json:"rewardIds,omitempty"`
-	Rewards     []*Reward               `json:"rewards,omitempty"`
-	CI          *InteracCITx            `json:"ci,omitempty"`
-	IDM         *IDMTx                  `json:"idm,omitempty"`
-	COUT        *NBPCOTx                `json:"cout,omitempty"`
-	Summary     *TxSummary              `json:"summary,omitempty"`
-	RefundTx    *ForeeRefundTx          `json:"refundTx,omitempty"`
-	History     []*TxHistory            `json:"history,omitempty"`
+	Ip              string                  `json:"ip,omitempty"`
+	UserAgent       string                  `json:"userAgent,omitempty"`
+	Owner           *auth.User              `json:"ower,omitempty"`
+	InteracAcc      *account.InteracAccount `json:"interacAcc,omitempty"`
+	ContactAcc      *account.ContactAccount `json:"contactAcc,omitempty"`
+	FeeJointIds     []int64                 `json:"feeJointIds,omitempty"`
+	Fees            []*FeeJoint             `json:"fees,omitempty"`
+	RewardIds       []int64                 `json:"rewardIds,omitempty"`
+	Rewards         []*Reward               `json:"rewards,omitempty"`
+	CI              *InteracCITx            `json:"ci,omitempty"`
+	IDM             *IDMTx                  `json:"idm,omitempty"`
+	COUT            *NBPCOTx                `json:"cout,omitempty"`
+	Summary         *TxSummary              `json:"summary,omitempty"`
+	InteracRefundTx *InteracRefundTx        `json:"refundTx,omitempty"`
+	History         []*TxHistory            `json:"history,omitempty"`
 }
 
 func NewForeeTxRepo(db *sql.DB) *ForeeTxRepo {
