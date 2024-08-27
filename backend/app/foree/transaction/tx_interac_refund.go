@@ -1,10 +1,12 @@
 package transaction
 
 import (
+	"context"
 	"database/sql"
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
+	"xue.io/go-pay/constant"
 )
 
 const (
@@ -14,7 +16,7 @@ const (
 			status, refund_interac_acc_id, parent_tx_id, owner_id
 		) VALUES(?,?,?,?)
 	`
-	sQLInteracRefundTxUpdate = `
+	sQLInteracRefundTxUpdateById = `
 		UPDATE interac_refund_tx SET
 			status = ?
 		where id = ?
@@ -44,43 +46,91 @@ const (
 )
 
 type InteracRefundTx struct {
-	ID                 int64                   `json:"id"`
-	Status             RefundTxStatus          `json:"status"`
-	RefundInteracAccId int64                   `json:"refundInteracAccId"`
-	RefundInteracAcc   *account.InteracAccount `json:"refundInteracAcc"`
-	ParentTxId         int64                   `json:"parentTxId"`
-	OwnerId            int64                   `json:"ownerId"`
-	CreateAt           time.Time               `json:"createAt"`
-	UpdateAt           time.Time               `json:"updateAt"`
+	ID                 int64          `json:"id"`
+	Status             RefundTxStatus `json:"status"`
+	RefundInteracAccId int64          `json:"refundInteracAccId"`
+	ParentTxId         int64          `json:"parentTxId"`
+	OwnerId            int64          `json:"ownerId"`
+	CreateAt           time.Time      `json:"createAt"`
+	UpdateAt           time.Time      `json:"updateAt"`
+
+	RefundInteracAcc *account.InteracAccount `json:"refundInteracAcc"`
 }
 
-func NewForeeRefundTxRepo(db *sql.DB) *ForeeRefundTxRepo {
-	return &ForeeRefundTxRepo{db: db}
+func NewInteracRefundTxRepo(db *sql.DB) *InteracRefundTxRepo {
+	return &InteracRefundTxRepo{db: db}
 }
 
-type ForeeRefundTxRepo struct {
+type InteracRefundTxRepo struct {
 	db *sql.DB
 }
 
-// func scanRowIntoInteracCITx(rows *sql.Rows) (*InteracCITx, error) {
-// 	tx := new(InteracCITx)
-// 	err := rows.Scan(
-// 		&tx.ID,
-// 		&tx.Status,
-// 		&tx.CashInAccId,
-// 		&tx.DestInteracAccId,
-// 		&tx.Amt.Amount,
-// 		&tx.Amt.Currency,
-// 		&tx.APIReference,
-// 		&tx.Url,
-// 		&tx.ParentTxId,
-// 		&tx.OwnerId,
-// 		&tx.CreateAt,
-// 		&tx.UpdateAt,
-// 	)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (repo *InteracRefundTxRepo) InsertInteracRefundTx(ctx context.Context, tx InteracRefundTx) (int64, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
 
-// 	return tx, nil
-// }
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLInteracRefundTxInsert,
+			tx.Status,
+			tx.RefundInteracAccId,
+			tx.ParentTxId,
+			tx.OwnerId,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLInteracRefundTxInsert,
+			tx.Status,
+			tx.RefundInteracAccId,
+			tx.ParentTxId,
+			tx.OwnerId,
+		)
+	}
+
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func (repo *InteracRefundTxRepo) UpdateInteracRefundTxById(ctx context.Context, tx InteracRefundTx) error {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+
+	if ok {
+		_, err = dTx.Exec(sQLInteracRefundTxUpdateById, tx.Status, tx.ID)
+
+	} else {
+		_, err = repo.db.Exec(sQLInteracRefundTxUpdateById, tx.Status, tx.ID)
+
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func scanRowInteracRefundTx(rows *sql.Rows) (*InteracRefundTx, error) {
+	tx := new(InteracRefundTx)
+	err := rows.Scan(
+		&tx.ID,
+		&tx.Status,
+		&tx.RefundInteracAccId,
+		&tx.ParentTxId,
+		&tx.OwnerId,
+		&tx.CreateAt,
+		&tx.UpdateAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return tx, nil
+}
