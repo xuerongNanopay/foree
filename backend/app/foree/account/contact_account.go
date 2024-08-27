@@ -15,67 +15,65 @@ const (
 	sQLContactAccountInsert = `
 		INSERT INTO contact_accounts
 		(
-			hash_id, status, type, first_name, middle_name,
+			status, type, first_name, middle_name,
 			last_name, address1, address2, city, province,
 			country, postal_code, phone_number, institution_name, branch_number, account_number,
-			account_hash, relationship_to_contact, owner_id, latest_acitvity_at
+			account_hash, relationship_to_contact, owner_id, latest_activity_at
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	sQLContactAccountUpdateActiveByIdAndOwner = `
 		UPDATE contact_accounts SET 
-			status = ?, latest_acitvity_at = ?
-		WHERE id = ? AND a.owner_id = ? AND a.status = ACTIVE
+			status = ?, latest_activity_at = ?
+		WHERE id = ? AND a.owner_id = ? AND a.status = "ACTIVE"
 	`
 	sQLContactAccountGetUniqueById = `
 		SELECT 
-			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
+			a.id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
 			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
-			a.account_hash, a.relationship_to_contact, a.owner_id
-			a.latest_acitvity_at, a.create_at, a.update_at
+			a.account_hash, a.relationship_to_contact, a.owner_id,
+			a.latest_activity_at, a.create_at, a.update_at
 		FROM contact_accounts a
 		where a.id = ?
 	`
 	sQLContactAccountGetActiveUniqueByOwnerAndId = `
 		SELECT 
-			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
+			a.id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
 			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
-			a.account_hash, a.relationship_to_contact, a.owner_id
-			a.latest_acitvity_at, a.create_at, a.update_at
+			a.account_hash, a.relationship_to_contact, a.owner_id,
+			a.latest_activity_at, a.create_at, a.update_at
 		FROM contact_accounts a
-		where a.owner_id = ? AND a.id = ? AND a.status = ACTIVE
+		where a.owner_id = ? AND a.id = ? AND a.status = "ACTIVE"
 	`
 	sQLContactAccountGetAllActiveByOwnerId = `
 		SELECT 
-			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
+			a.id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
 			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
-			a.account_hash, a.relationship_to_contact, a.owner_id
-			a.latest_acitvity_at, a.create_at, a.update_at
+			a.account_hash, a.relationship_to_contact, a.owner_id,
+			a.latest_activity_at, a.create_at, a.update_at
 		FROM contact_accounts a
-		where a.owner_id = ? AND a.status = ACTIVE
-		ORDER BY a.latest_acitvity_at DESC
+		where a.owner_id = ? AND a.status = "ACTIVE"
+		ORDER BY a.latest_activity_at DESC
 	`
 	sQLContactAccountQueryActiveByOwnerId = `
 		SELECT 
-			a.id, a.hash_id, a.status, a.type, a.first_name, a.middle_name,
+			a.id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
 			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
-			a.account_hash, a.relationship_to_contact, a.owner_id
-			a.latest_acitvity_at, a.create_at, a.update_at
+			a.account_hash, a.relationship_to_contact, a.owner_id,
+			a.latest_activity_at, a.create_at, a.update_at
 		FROM contact_accounts a
-		where a.owner_id = ? AND a.status = ACTIVE
+		where a.owner_id = ? AND a.status = "ACTIVE"
 		LIMIT ? OFFSET ?
 	`
 )
 
 type ContactAccountType string
 
-// TODO: improve security by using hashId.
 type ContactAccount struct {
 	ID                    int64              `json:"id"`
-	HashId                string             `json:"hashId"`
 	Status                AccountStatus      `json:"status"`
 	Type                  ContactAccountType `json:"type"`
 	FirstName             string             `json:"firstName"`
@@ -142,7 +140,6 @@ func (repo *ContactAccountRepo) InsertContactAccount(ctx context.Context, acc Co
 	if ok {
 		result, err = dTx.Exec(
 			sQLContactAccountInsert,
-			acc.HashId,
 			acc.Status,
 			acc.Type,
 			acc.FirstName,
@@ -166,7 +163,6 @@ func (repo *ContactAccountRepo) InsertContactAccount(ctx context.Context, acc Co
 	} else {
 		result, err = repo.db.Exec(
 			sQLContactAccountInsert,
-			acc.HashId,
 			acc.Status,
 			acc.Type,
 			acc.FirstName,
@@ -333,7 +329,6 @@ func scanRowIntoContactAccount(rows *sql.Rows) (*ContactAccount, error) {
 	u := new(ContactAccount)
 	err := rows.Scan(
 		&u.ID,
-		&u.HashId,
 		&u.Status,
 		&u.Type,
 		&u.FirstName,
