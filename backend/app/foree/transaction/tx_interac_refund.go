@@ -13,14 +13,13 @@ import (
 
 type ForeeRefundTx struct {
 	ID                 int64                   `json:"id"`
-	ParentTxId         int64                   `json:"parentTxId"`
-	OwnerId            int64                   `json:"ownerId"`
-	RefundType         string                  `json:"refundType"`
 	Status             string                  `json:"status"`
-	IsRefunded         bool                    `json:"isRefunded"`
-	RefundAt           time.Time               `json:"refundAt"`
+	RefundType         string                  `json:"refundType"`
 	RefundInteracAccId int64                   `json:"refundInteracAccId"`
 	RefundInteracAcc   *account.InteracAccount `json:"refundInteracAcc"`
+	RefundAt           time.Time               `json:"refundAt"`
+	ParentTxId         int64                   `json:"parentTxId"`
+	OwnerId            int64                   `json:"ownerId"`
 	CreateAt           time.Time               `json:"createAt"`
 	UpdateAt           time.Time               `json:"updateAt"`
 }
