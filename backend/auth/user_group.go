@@ -10,8 +10,7 @@ import (
 
 const (
 	sQLUserGroupInsert = `
-		INSERT INTO user_group
-		(
+		INSERT INTO user_group(
 			role_group, transaction_limit_group, owner_id
 		) VALUES(?,?,?)
 	`

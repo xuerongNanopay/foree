@@ -10,8 +10,8 @@ import (
 
 const (
 	sQLUserInsert = `
-		INSERT INTO users
-		(	status, first_name, middle_name, 
+		INSERT INTO users(	
+			status, first_name, middle_name, 
 			last_name, age, dob, 
 			address1, address2, city, province, country, postal_code, 
 			phone_number, email

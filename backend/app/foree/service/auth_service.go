@@ -66,7 +66,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 		Passwd:     hashedPasswd,
 		Status:     auth.EPStatusWaitingVerify,
 		VerifyCode: auth.GenerateVerifyCode(),
-		UserId:     user.ID,
+		OwnerId:    user.ID,
 	})
 
 	if err != nil {
@@ -342,12 +342,12 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 	}
 
 	// Load user(user must exist, but not necessary to be active)
-	user, err := a.userRepo.GetUniqueUserById(ep.UserId)
+	user, err := a.userRepo.GetUniqueUserById(ep.OwnerId)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if user == nil {
-		return nil, transport.NewInteralServerError("User `%v` do not exists", ep.UserId)
+		return nil, transport.NewInteralServerError("User `%v` do not exists", ep.OwnerId)
 	}
 
 	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
