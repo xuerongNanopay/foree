@@ -12,8 +12,8 @@ type Config struct {
 	PublicHost             string
 	Port                   string
 	DBUser                 string
-	DBPassword             string
-	DBAddress              string
+	DBPasswd               string
+	DBAddr                 string
 	DBName                 string
 	JWTExpirationInSeconds int64
 	JWTSecret              string
@@ -31,9 +31,9 @@ func initConfig() Config {
 		PublicHost: getEnv("PUBLIC_HOST", "http://localhost"),
 		Port:       getEnv("PORT", "8080"),
 		DBUser:     getEnv("DB_USER", "root"),
-		DBPassword: getEnv("DB_PASSWORD", "123456"),
-		DBAddress:  fmt.Sprintf("%s:%s", getEnv("DB_HOST", "127.0.0.1"), getEnv("DB_PORT", "3306")),
-		DBName:     getEnv("DB_NAME", "foree"),
+		DBPasswd:   getEnv("DB_PASSWD", ""),
+		DBAddr:     fmt.Sprintf("%s:%s", getEnv("DB_HOST", "127.0.0.1"), getEnv("DB_PORT", "3306")),
+		DBName:     getEnv("DB_NAME", ""),
 	}
 }
 
