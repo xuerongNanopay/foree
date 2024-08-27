@@ -18,33 +18,33 @@ const (
 	`
 	sQLEmailPasswdUpdateByEmail = `
 		UPDATE email_passwd SET 
-			status = ?, passwd = ?, verify_code = ?, code_expired_at = ?, retrieve_token = ?, retrieve_token_expired_at = ?
+			status = ?, passwd = ?, verify_code = ?, verify_code_expired_at = ?, retrieve_token = ?, retrieve_token_expired_at = ?
 		WHERE email = ?
 	`
 	sQLEmailPasswdGetUniqueById = `
 		SELECT 
 			u.id, u.email, u.passwd, u.status,
-			u.verify_code, u.code_expired_at,
+			u.verify_code, u.verify_code_expired_at,
 			u.retrieve_token, u.retrieve_token_expired_at,
-			u.owner_id, u.create_at, u.update_at
+			u.owner_id, u.created_at, u.updated_at
 		FROM email_passwd as u 
 		WHERE u.id = ?
 `
 	sQLEmailPasswdGetUniqueByEmail = `
 		SELECT 
 			u.id, u.email, u.passwd, u.status,
-			u.verify_code, u.code_expired_at,
+			u.verify_code, u.verify_code_expired_at,
 			u.retrieve_token, u.retrieve_token_expired_at,
-			u.owner_id, u.create_at, u.update_at
+			u.owner_id, u.created_at, u.updated_at
 		FROM email_passwd as u 
 		WHERE u.email = ?
 	`
 	sQLEmailPasswdGetAll = `
 		SELECT 
 			u.id, u.email, u.passwd, u.status,
-			u.verify_code, u.code_expired_at,
+			u.verify_code, u.verify_code_expired_at,
 			u.retrieve_token, u.retrieve_token_expired_at,
-			u.owner_id, u.create_at, u.update_at
+			u.owner_id, u.created_at, u.updated_at
 		FROM email_passwd as u
 	`
 )
@@ -65,12 +65,12 @@ type EmailPasswd struct {
 	Email                  string            `json:"email"`
 	Passwd                 string            `json:"-"`
 	VerifyCode             string            `json:"-"`
-	VerifyCodeExpiredAt    time.Time         `json:"codeExpiredAt"`
+	VerifyCodeExpiredAt    time.Time         `json:"verifyCodeExpiredAt"`
 	RetrieveToken          string            `json:"-"`
 	RetrieveTokenExpiredAt time.Time         `json:"retrieveTokenExpiredAt"`
 	OwnerId                int64             `json:"ownerId"`
-	CreateAt               time.Time         `json:"createAt"`
-	UpdateAt               time.Time         `json:"updateAt"`
+	CreatedAt              time.Time         `json:"createdAt"`
+	UpdatedAt              time.Time         `json:"updatedAt"`
 }
 
 func NewEmailPasswdRepo(db *sql.DB) *EmailPasswdRepo {
@@ -237,8 +237,8 @@ func scanRowIntoEmailPasswd(rows *sql.Rows) (*EmailPasswd, error) {
 		&p.RetrieveToken,
 		&p.RetrieveTokenExpiredAt,
 		&p.OwnerId,
-		&p.CreateAt,
-		&p.UpdateAt,
+		&p.CreatedAt,
+		&p.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
