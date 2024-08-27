@@ -23,7 +23,7 @@ type AuthService struct {
 }
 
 // Any error should return 503
-
+// TODO: DB Transaction.
 func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session, transport.ForeeError) {
 	// Check if email already exists.
 	oldEmail, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
@@ -36,7 +36,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 	}
 
 	// Hashing password.
-	hashedPassowrd, err := auth.HashPassword(req.Password)
+	hashedPasswd, err := auth.HashPassword(req.Password)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -63,7 +63,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 	// Create EmailPasswd
 	id, err := a.emailPasswordRepo.InsertEmailPasswd(ctx, auth.EmailPasswd{
 		Email:      req.Email,
-		Passowrd:   hashedPassowrd,
+		Passwd:     hashedPasswd,
 		Status:     auth.EPStatusWaitingVerify,
 		VerifyCode: auth.GenerateVerifyCode(),
 		UserId:     user.ID,
@@ -336,7 +336,7 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 		return nil, transport.NewFormError("Invaild signup", "email", "Invalid email")
 	}
 
-	ok := auth.ComparePasswords(req.Password, []byte(ep.Passowrd))
+	ok := auth.ComparePasswords(req.Password, []byte(ep.Passwd))
 	if !ok {
 		return nil, transport.NewFormError("Invaild signup", "password", "Invalid password")
 	}
@@ -430,7 +430,7 @@ func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) tra
 		return transport.WrapInteralServerError(hErr)
 	}
 	ep := *session.EmailPasswd
-	ep.Passowrd = hashed
+	ep.Passwd = hashed
 	//TODO: log
 	updateErr := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, ep)
 	if updateErr != nil {

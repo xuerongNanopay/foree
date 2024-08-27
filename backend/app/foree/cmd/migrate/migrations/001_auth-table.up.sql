@@ -29,3 +29,9 @@ CREATE TABLE IF NOT EXISTS user_group(
 
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS email_passwd(
+    `id` SERIAL PRIMARY KEY,
+    `status` VARCHAR(32),
+    `email` VARCHAR(255) UNIQUE KEY NOT NULL,
+)

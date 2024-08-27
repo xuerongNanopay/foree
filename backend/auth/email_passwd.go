@@ -13,17 +13,17 @@ import (
 const (
 	sQLEmailPasswdInsert = `
 		INSERT INTO email_passwd
-		(	u.email, u.password, u.status, u.verify_code, u.user_id
+		(	u.email, u.passwd, u.status, u.verify_code, u.user_id
 		) VALUES (?,?,?,?)
 	`
 	sQLEmailPasswdUpdateByEmail = `
 		UPDATE email_passwd SET 
-			status = ?, password = ?, verify_code = ?, code_expired_at = ?
+			status = ?, passwd = ?, verify_code = ?, code_expired_at = ?
 		WHERE email = ?
 	`
 	sQLEmailPasswdGetUniqueById = `
 	SELECT 
-		u.id, u.email, u.password, u.status,
+		u.id, u.email, u.passwd, u.status,
 		u.verify_code, u.code_expired_at,
 		u.user_id, u.create_at, u.update_at
 	FROM email_passwd as u 
@@ -31,7 +31,7 @@ const (
 `
 	sQLEmailPasswdGetUniqueByEmail = `
 		SELECT 
-			u.id, u.email, u.password, u.status,
+			u.id, u.email, u.passwd, u.status,
 			u.verify_code, u.code_expired_at,
 			u.user_id, u.create_at, u.update_at
 		FROM email_passwd as u 
@@ -39,7 +39,7 @@ const (
 	`
 	sQLEmailPasswdGetAll = `
 		SELECT 
-			u.id, u.email, u.password, u.status,
+			u.id, u.email, u.passwd, u.status,
 			u.verify_code, u.code_expired_at,
 			u.user_id, u.create_at, u.update_at
 		FROM email_passwd as u
@@ -60,7 +60,7 @@ type EmailPasswd struct {
 	ID                  int64             `json:"id"`
 	Status              EmailPasswdStatus `json:"status"`
 	Email               string            `json:"email"`
-	Passowrd            string            `json:"-"`
+	Passwd              string            `json:"-"`
 	VerifyCode          string            `json:"-"`
 	VerifyCodeExpiredAt time.Time         `json:"codeExpiredAt"`
 	UserId              int64             `json:"userId"`
@@ -86,7 +86,7 @@ func (repo *EmailPasswdRepo) InsertEmailPasswd(ctx context.Context, ep EmailPass
 		result, err = dTx.Exec(
 			sQLEmailPasswdInsert,
 			ep.Email,
-			ep.Passowrd,
+			ep.Passwd,
 			ep.Status,
 			ep.VerifyCode,
 			ep.UserId,
@@ -95,7 +95,7 @@ func (repo *EmailPasswdRepo) InsertEmailPasswd(ctx context.Context, ep EmailPass
 		result, err = repo.db.Exec(
 			sQLEmailPasswdInsert,
 			ep.Email,
-			ep.Passowrd,
+			ep.Passwd,
 			ep.Status,
 			ep.VerifyCode,
 			ep.UserId,
@@ -118,9 +118,9 @@ func (repo *EmailPasswdRepo) UpdateEmailPasswdByEmail(ctx context.Context, ep Em
 	var err error
 
 	if ok {
-		_, err = dTx.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passowrd, ep.VerifyCode, ep.VerifyCodeExpiredAt, ep.Email)
+		_, err = dTx.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passwd, ep.VerifyCode, ep.VerifyCodeExpiredAt, ep.Email)
 	} else {
-		_, err = repo.db.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passowrd, ep.VerifyCode, ep.VerifyCodeExpiredAt, ep.Email)
+		_, err = repo.db.Exec(sQLEmailPasswdUpdateByEmail, ep.Status, ep.Passwd, ep.VerifyCode, ep.VerifyCodeExpiredAt, ep.Email)
 	}
 
 	if err != nil {
@@ -207,7 +207,7 @@ func scanRowIntoEmailPasswd(rows *sql.Rows) (*EmailPasswd, error) {
 	err := rows.Scan(
 		&p.ID,
 		&p.Email,
-		&p.Passowrd,
+		&p.Passwd,
 		&p.Status,
 		&p.VerifyCode,
 		&p.VerifyCodeExpiredAt,
@@ -227,15 +227,15 @@ func GenerateVerifyCode() string {
 }
 
 // TODO
-func HashPassword(password string) (string, error) {
-	// hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func HashPassword(passwd string) (string, error) {
+	// hash, err := bcrypt.GenerateFromPassword([]byte(passwd), bcrypt.DefaultCost)
 
 	// if err != nil {
 	// 	return "", err
 	// }
 
 	// return string(hash), nil
-	return password, nil
+	return passwd, nil
 }
 
 // TODO
