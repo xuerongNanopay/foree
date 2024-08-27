@@ -58,6 +58,10 @@ func main() {
 		if err := m.Down(); err != nil && err != migrate.ErrNoChange {
 			log.Fatal(err)
 		}
+	} else if cmd == "force" {
+		if err := m.Down(); err != nil && err != migrate.ErrNoChange {
+			log.Fatal(err)
+		}
 	} else {
 		log.Fatalf("unknow cmd `%v`", cmd)
 	}
