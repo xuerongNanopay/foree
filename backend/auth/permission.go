@@ -6,61 +6,60 @@ import (
 	"time"
 )
 
-const (
-	sQLPermissionByGroupName = `
-		SELECT 
-			p.name, p.description
-		FROM permissions as p
-		INNER JOIN group_permission_joint as gpt ON p.name = gpt.permission_name
-		WHERE gpt.is_enable = true and gpt.group_name = ?
-	`
-)
-
 // ReadOnly
 // Super: *::*::*
 // app::service::methods
-type Group struct {
-	Name        string       `json:"name"`
-	Description string       `json:"description"`
-	CreateAt    time.Time    `json:"createAt"`
-	UpdateAt    time.Time    `json:"updateAt"`
-	Permissions []Permission `json:"permissions"`
+// type Role struct {
+// 	Name        string       `json:"name"`
+// 	Description string       `json:"description"`
+// 	CreatedAt   time.Time    `json:"createdAt"`
+// 	UpdatedAt   time.Time    `json:"updatedAt"`
+// 	Permissions []Permission `json:"permissions"`
+// }
+
+// type Permission struct {
+// 	ID          string    `json:"name"`
+// 	Description string    `json:"description"`
+// 	CreatedAt   time.Time `json:"createdAt"`
+// 	UpdatedAt   time.Time `json:"updatedAt"`
+// }
+
+const (
+	sQLRolePermissionGetAllEnabledByRoleName = `
+		SELECT 
+			r.role_name, r.permission, r.is_enable, r.created_at, r.update_at
+		FROM role_permission as r
+		WHERE r.is_enable = true and r.role_name = ?
+	`
+)
+
+type RolePermission struct {
+	RoleName   string    `json:"roleName"`
+	Permission string    `json:"permission"`
+	IsEnable   bool      `json:"isEnable"`
+	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
-type Permission struct {
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	CreateAt    time.Time `json:"createAt"`
-	UpdateAt    time.Time `json:"updateAt"`
+func NewRolePermission(db *sql.DB) *RolePermissionRepo {
+	return &RolePermissionRepo{db: db}
 }
 
-type GroupPermissionJoint struct {
-	GroupName      string    `json:"groupName"`
-	PermissionName string    `json:"permissionName"`
-	IsEnable       bool      `json:"isEnable"`
-	CreateAt       time.Time `json:"createAt"`
-	UpdateAt       time.Time `json:"updateAt"`
-}
-
-func NewPermission(db *sql.DB) *PermissionRepo {
-	return &PermissionRepo{db: db}
-}
-
-type PermissionRepo struct {
+type RolePermissionRepo struct {
 	db *sql.DB
 }
 
-func (repo *PermissionRepo) GetAllPermissionByGroupName(groupName string) ([]*Permission, error) {
-	rows, err := repo.db.Query(sQLPermissionByGroupName)
+func (repo *RolePermissionRepo) GetAllEnabledRolePermissionByRoleName(roleName string) ([]*RolePermission, error) {
+	rows, err := repo.db.Query(sQLRolePermissionGetAllEnabledByRoleName, roleName)
 
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	ps := make([]*Permission, 16)
+	ps := make([]*RolePermission, 16)
 	for rows.Next() {
-		p, err := scanRowIntoPermission(rows)
+		p, err := scanRowIntoRolePermission(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -74,11 +73,14 @@ func (repo *PermissionRepo) GetAllPermissionByGroupName(groupName string) ([]*Pe
 	return ps, nil
 }
 
-func scanRowIntoPermission(rows *sql.Rows) (*Permission, error) {
-	p := new(Permission)
+func scanRowIntoRolePermission(rows *sql.Rows) (*RolePermission, error) {
+	p := new(RolePermission)
 	err := rows.Scan(
-		&p.Name,
-		&p.Description,
+		&p.RoleName,
+		&p.Permission,
+		&p.IsEnable,
+		&p.CreatedAt,
+		&p.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

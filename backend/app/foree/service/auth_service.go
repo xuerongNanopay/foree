@@ -15,7 +15,7 @@ type AuthService struct {
 	sessionRepo            *auth.SessionRepo
 	userRepo               *auth.UserRepo
 	emailPasswordRepo      *auth.EmailPasswdRepo
-	permissionRepo         *auth.PermissionRepo
+	rolePermissionRepo     *auth.RolePermissionRepo
 	userIdentificationRepo *foree_auth.UserIdentificationRepo
 	interacRepo            *account.InteracAccountRepo
 	userGroupRepo          *auth.UserGroupRepo
@@ -282,7 +282,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	}
 
 	// Get Permission.
-	pers, pErr := a.permissionRepo.GetAllPermissionByGroupName(userGroup.RoleGroup)
+	rolePermissions, pErr := a.rolePermissionRepo.GetAllEnabledRolePermissionByRoleName(userGroup.RoleGroup)
 	if pErr != nil {
 		return nil, transport.WrapInteralServerError(pErr)
 	}
@@ -291,7 +291,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	newSession := *session
 	newSession.User = user
 	newSession.UserId = user.ID
-	newSession.Permissions = pers
+	newSession.RolePermissions = rolePermissions
 	newSession.UserGroup = userGroup
 
 	updateSession, sessionErr := a.sessionRepo.UpdateSession(newSession)
@@ -356,18 +356,18 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 	}
 
 	// Load permissions
-	pers, pErr := a.permissionRepo.GetAllPermissionByGroupName(userGroup.RoleGroup)
+	pers, pErr := a.rolePermissionRepo.GetAllEnabledRolePermissionByRoleName(userGroup.RoleGroup)
 	if pErr != nil {
 		return nil, transport.WrapInteralServerError(pErr)
 	}
 
 	// Load Ip and User agent, and create session
 	newSession := auth.Session{
-		User:        user,
-		UserId:      user.ID,
-		UserGroup:   userGroup,
-		EmailPasswd: ep,
-		Permissions: pers,
+		User:            user,
+		UserId:          user.ID,
+		UserGroup:       userGroup,
+		EmailPasswd:     ep,
+		RolePermissions: pers,
 	}
 
 	ip, ok := ctx.Value("ip").(string)
@@ -445,8 +445,8 @@ func (a *AuthService) Authorize(ctx context.Context, sessionId string, permissio
 	if err != nil {
 		return nil, err
 	}
-	for _, p := range session.Permissions {
-		ok := auth.IsPermissionGrand(permission, p.Name)
+	for _, p := range session.RolePermissions {
+		ok := auth.IsPermissionGrand(permission, p.Permission)
 		if ok {
 			return session, nil
 		}

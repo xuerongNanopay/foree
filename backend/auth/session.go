@@ -16,17 +16,17 @@ import (
 // }
 
 type Session struct {
-	ID             string        `json:"id"`
-	UserId         int64         `json:"userId"`
-	EmailPasswd    *EmailPasswd  `json:"emailPasswd"`
-	User           *User         `json:"user"`
-	UserGroup      *UserGroup    `json:"userGroup"`
-	Permissions    []*Permission `json:"permission"`
-	UserAgent      string        `json:"userAgent"`
-	Ip             string        `json:"ip"`
-	LatestActiveAt time.Time     `json:"latestActiveAt"`
-	ExpireAt       time.Time     `json:"expireAt"`
-	CreateAt       time.Time     `json:"createAt"`
+	ID              string            `json:"id"`
+	UserId          int64             `json:"userId"`
+	EmailPasswd     *EmailPasswd      `json:"emailPasswd"`
+	User            *User             `json:"user"`
+	UserGroup       *UserGroup        `json:"userGroup"`
+	RolePermissions []*RolePermission `json:"rolePermissions"`
+	UserAgent       string            `json:"userAgent"`
+	Ip              string            `json:"ip"`
+	LatestActiveAt  time.Time         `json:"latestActiveAt"`
+	ExpireAt        time.Time         `json:"expireAt"`
+	CreateAt        time.Time         `json:"createAt"`
 }
 
 // 13 buckets, 1024 sesson of each bucket, and 12 hours session expiry
