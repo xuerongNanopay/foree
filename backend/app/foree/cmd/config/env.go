@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/joho/godotenv"
 )
@@ -22,11 +23,15 @@ type Config struct {
 var Envs = initConfig()
 
 func initConfig() Config {
-	err := godotenv.Load("../deploy/.local_env")
+	ex, err := os.Executable()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		panic(err)
 	}
-
+	configPath := filepath.Join(ex, "../../deploy/.local_env")
+	err = godotenv.Load(configPath)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return Config{
 		PublicHost: getEnv("PUBLIC_HOST", "http://localhost"),
 		Port:       getEnv("PORT", "8080"),
