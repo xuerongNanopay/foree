@@ -117,6 +117,54 @@ func (repo *InteracRefundTxRepo) UpdateInteracRefundTxById(ctx context.Context, 
 	return nil
 }
 
+func (repo *InteracRefundTxRepo) GetUniqueInteracRefundTxByParentTxId(ctx context.Context, parentTxId int64) (*InteracRefundTx, error) {
+	rows, err := repo.db.Query(sQLInteracRefundTxGetUniqueByParentTxId, parentTxId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *InteracRefundTx
+
+	for rows.Next() {
+		f, err = scanRowInteracRefundTx(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func (repo *InteracRefundTxRepo) GetUniqueInteracRefundTxById(ctx context.Context, id int64) (*InteracRefundTx, error) {
+	rows, err := repo.db.Query(sQLInteracRefundTxGetUniqueById, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *InteracRefundTx
+
+	for rows.Next() {
+		f, err = scanRowInteracRefundTx(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
 func scanRowInteracRefundTx(rows *sql.Rows) (*InteracRefundTx, error) {
 	tx := new(InteracRefundTx)
 	err := rows.Scan(
