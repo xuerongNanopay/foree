@@ -31,6 +31,49 @@ CREATE TABLE IF NOT EXISTS user_group(
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
 
+CREATE TABLE IF NOT EXISTS user_extra(
+    `id` SERIAL PRIMARY KEY,
+    `pob` VARCHAR(64),
+    `cor` VARCHAR(64),
+    `nationality` VARCHAR(64),
+    `occupation_category` VARCHAR(64),
+    `occupation_name` VARCHAR(128),
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS user_identifications(
+    `id` SERIAL PRIMARY KEY,
+    `status` VARCHAR(32),
+    `type` VARCHAR(32),
+    `value` VARCHAR(64),
+    `link1` VARCHAR(256),
+    `link2` VARCHAR(256),
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS referral(
+    `id` SERIAL PRIMARY KEY,
+    `referral_type` VARCHAR(32),
+    `referral_value` VARCHAR(256),
+    `referral_code` VARCHAR(256),
+    `referrer_id` BIGINT UNSIGNED NOT NULL,
+    `referee_id` BIGINT UNSIGNED,
+    `accept_at` DATETIME,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (referrer_id) REFERENCES users(id),
+    FOREIGN KEY (referee_id) REFERENCES users(id)
+);
+
 CREATE TABLE IF NOT EXISTS email_passwd(
     `id` SERIAL PRIMARY KEY,
     `status` VARCHAR(32) NOT NULL,
@@ -173,47 +216,4 @@ CREATE TABLE IF NOT EXISTS rewards(
     `expire_at` DATETIME,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS user_extra(
-    `id` SERIAL PRIMARY KEY,
-    `pob` VARCHAR(64),
-    `cor` VARCHAR(64),
-    `nationality` VARCHAR(64),
-    `occupation_category` VARCHAR(64),
-    `occupation_name` VARCHAR(128),
-    `owner_id` BIGINT UNSIGNED NOT NULL,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (owner_id) REFERENCES users(id)
-);
-
-CREATE TABLE IF NOT EXISTS user_identifications(
-    `id` SERIAL PRIMARY KEY,
-    `status` VARCHAR(32),
-    `type` VARCHAR(32),
-    `value` VARCHAR(64),
-    `link1` VARCHAR(256),
-    `link2` VARCHAR(256),
-    `owner_id` BIGINT UNSIGNED NOT NULL,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (owner_id) REFERENCES users(id)
-);
-
-CREATE TABLE IF NOT EXISTS referral(
-    `id` SERIAL PRIMARY KEY,
-    `referral_type` VARCHAR(32),
-    `referral_value` VARCHAR(256),
-    `referral_code` VARCHAR(256),
-    `referrer_id` BIGINT UNSIGNED NOT NULL,
-    `referee_id` BIGINT UNSIGNED,
-    `accept_at` DATETIME,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (referrer_id) REFERENCES users(id),
-    FOREIGN KEY (referee_id) REFERENCES users(id)
 );
