@@ -217,3 +217,31 @@ CREATE TABLE IF NOT EXISTS rewards(
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS foree_tx(
+    `id` SERIAL PRIMARY KEY,
+    `type` VARCHAR(64),
+    `status` VARCHAR(32),
+    `cin_acc_id` BIGINT UNSIGNED NOT NULL,
+    `cout_acc_id` BIGINT UNSIGNED NOT NULL,
+    `rate` DECIMAL(7, 2) NOT NULL,
+    `src_amount` DECIMAL(8, 2) NOT NULL,
+    `src_currency` CHAR(3) NOT NULL,
+    `dest_amount` DECIMAL(8, 2) NOT NULL,
+    `dest_currency` CHAR(3) NOT NULL,
+    `total_fee_amount` DECIMAL(8, 2) NOT NULL,
+    `total_fee_currency` CHAR(3) NOT NULL,
+    `total_reward_amount` DECIMAL(8, 2) NOT NULL,
+    `total_reward_currency` CHAR(3) NOT NULL,
+    `total_amount` DECIMAL(8, 2) NOT NULL,
+    `total_currency` CHAR(3) NOT NULL,
+    `cur_stage` VARCHAR(64) NOT NULL,
+    `cur_stage_status` VARCHAR(32) NOT NULL,
+    `transaction_purpose` VARCHAR(256) NOT NULL,
+    `conclusion` VARCHAR(256) NOT NULL,
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);

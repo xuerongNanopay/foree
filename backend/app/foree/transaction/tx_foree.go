@@ -29,7 +29,7 @@ const (
 	`
 	sQLForeeTxGetById = `
 	    SELECT 
-            t.id, t.type, t.status, t.rate
+            t.id, t.type, t.status, t.rate,
 			t.cin_acc_id, t.cout_acc_id,
             t.src_amount, t.src_currency, 
             t.dest_amount, t.dest_currency,
@@ -43,7 +43,7 @@ const (
 	`
 	sQLForeeTxGetForUpdateById = `
 		SELECT 
-			t.id, t.type, t.status, t.rate
+			t.id, t.type, t.status, t.rate,
 			t.cin_acc_id, t.cout_acc_id,
 			t.src_amount, t.src_currency, 
 			t.dest_amount, t.dest_currency,
