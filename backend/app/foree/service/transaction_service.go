@@ -113,12 +113,12 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 	}
 
 	//fee
-	fee, err := t.getFee(ctx, foree_constant.DefaultFeeName, 2*time.Hour)
+	fee, err := t.getFee(ctx, foree_constant.DefaultFeeGroup, 2*time.Hour)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if fee == nil {
-		return nil, transport.NewInteralServerError("fee `%v` not found", foree_constant.DefaultFeeName)
+		return nil, transport.NewInteralServerError("fee `%v` not found", foree_constant.DefaultFeeGroup)
 	}
 
 	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
@@ -153,16 +153,16 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 	}, nil
 }
 
-func (t *TransactionService) getFee(ctx context.Context, feeName string, validIn time.Duration) (*transaction.Fee, error) {
+func (t *TransactionService) getFee(ctx context.Context, feeGroup string, validIn time.Duration) (*transaction.Fee, error) {
 	t.feeCacheRWLock.RLock()
-	feeCache, ok := t.feeCache[feeName]
+	feeCache, ok := t.feeCache[feeGroup]
 	t.feeCacheRWLock.RUnlock()
 
 	if ok && feeCache.createdAt.Add(validIn).After(time.Now()) {
 		return &feeCache.item, nil
 	}
 
-	fee, err := t.feeRepo.GetUniqueFeeByName(ctx, feeName)
+	fee, err := t.feeRepo.GetUniqueFeeByName(ctx, feeGroup)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +174,7 @@ func (t *TransactionService) getFee(ctx context.Context, feeName string, validIn
 	}
 	defer t.feeCacheRWLock.Unlock()
 
-	t.feeCache[feeName] = CacheItem[transaction.Fee]{
+	t.feeCache[feeGroup] = CacheItem[transaction.Fee]{
 		item:      *fee,
 		createdAt: time.Now(),
 	}
@@ -266,12 +266,13 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	// existpromo:
 
 	//Fee
-	fee, err := t.getFee(ctx, foree_constant.DefaultFeeName, time.Hour)
+	fee, err := t.getFee(ctx, session.UserGroup.FeeGroup, time.Hour)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
+	//TODO: need?
 	if fee == nil {
-		return nil, transport.NewInteralServerError("fee `%v` not found", foree_constant.DefaultFeeName)
+		return nil, transport.NewInteralServerError("fee `%v` not found", session.UserGroup.FeeGroup)
 	}
 
 	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})

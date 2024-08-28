@@ -11,17 +11,17 @@ import (
 const (
 	sQLUserGroupInsert = `
 		INSERT INTO user_group(
-			role_group, transaction_limit_group, owner_id
+			role_group, transaction_limit_group, fee_group, owner_id
 		) VALUES(?,?,?)
 	`
 	sQLUserGoupUpdate = `
 		UPDATE user_group SET
-			role_group = ?, transaction_limit_group = ?
+			role_group = ?, transaction_limit_group = ?, fee_group = ?
 		WHERE owner_id = ?
 	`
 	sQLUserGroupGetUniqueByOwnerId = `
 		SELECT
-			u.id, u.role_group, u.transaction_limit_group,
+			u.id, u.role_group, u.transaction_limit_group, u.fee_group,
 			u.owner_id, u.created_at, u.updated_at
 		FROM user_group as u
 		WHERE u.owner_id = ?
@@ -32,6 +32,7 @@ type UserGroup struct {
 	ID                    int64     `json:"id"`
 	RoleGroup             string    `json:"roleGroup"`
 	TransactionLimitGroup string    `json:"transactionLimitGroup"`
+	FeeGroup              string    `json:"feeGroup"`
 	OwnerId               int64     `json:"ownerId"`
 	CreatedAt             time.Time `json:"createdAt"`
 	UpdateAt              time.Time `json:"updatedAt"`
@@ -56,6 +57,7 @@ func (repo *UserGroupRepo) InsertUserGroup(ctx context.Context, ug UserGroup) (i
 			sQLUserGroupInsert,
 			ug.RoleGroup,
 			ug.TransactionLimitGroup,
+			ug.FeeGroup,
 			ug.OwnerId,
 		)
 	} else {
@@ -63,6 +65,7 @@ func (repo *UserGroupRepo) InsertUserGroup(ctx context.Context, ug UserGroup) (i
 			sQLUserGroupInsert,
 			ug.RoleGroup,
 			ug.TransactionLimitGroup,
+			ug.FeeGroup,
 			ug.OwnerId,
 		)
 	}
@@ -87,6 +90,7 @@ func (repo *UserGroupRepo) UpdateUserById(ctx context.Context, ug UserGroup) err
 			sQLUserGoupUpdate,
 			ug.RoleGroup,
 			ug.TransactionLimitGroup,
+			ug.FeeGroup,
 			ug.OwnerId,
 		)
 	} else {
@@ -94,6 +98,7 @@ func (repo *UserGroupRepo) UpdateUserById(ctx context.Context, ug UserGroup) err
 			sQLUserGoupUpdate,
 			ug.RoleGroup,
 			ug.TransactionLimitGroup,
+			ug.FeeGroup,
 			ug.OwnerId,
 		)
 	}
@@ -134,6 +139,7 @@ func scanRowIntoUserGroup(rows *sql.Rows) (*UserGroup, error) {
 		&u.ID,
 		&u.RoleGroup,
 		&u.TransactionLimitGroup,
+		&u.FeeGroup,
 		&u.OwnerId,
 		&u.CreatedAt,
 		&u.UpdateAt,

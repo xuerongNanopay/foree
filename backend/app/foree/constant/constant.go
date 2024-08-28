@@ -8,7 +8,7 @@ import (
 const DefaultNBPIdPrefix = "NP"
 
 const (
-	DefaultFeeName               string = "FOREE_TX_CAD_FEE"
+	DefaultFeeGroup              string = "FOREE_PERSONAL_FEE"
 	DefaultRoleGroup             string = string(RoleGroupPersonal)
 	DefaultTransactionLimitGroup string = string(TLPersonal1k)
 )

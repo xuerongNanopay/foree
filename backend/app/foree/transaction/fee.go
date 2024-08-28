@@ -14,15 +14,15 @@ import (
 const (
 	sQLFeeGetAll = `
 		SELECT
-			f.name, f.description, f.type, f.condition,
+			f.name, f.description, f.fee_group, f.type, f.condition,
 			f.condition_amount, f.condition_currency,
 			f.ratio, f.is_apply_in_condition_amount_only
 			f.is_enable, f.created_at, f.updated_at
 		FROM fees as f
 	`
-	sQLFeeGetUniqueByName = `
+	sQLFeeGetUniqueByFeeGroup = `
 		SELECT
-			f.name, f.description, f.type, f.condition,
+			f.name, f.description, f.fee_group, f.type, f.condition,
 			f.condition_amount, f.condition_currency,
 			f.ratio, f.is_apply_in_condition_amount_only
 			f.is_enable, f.created_at, f.updated_at
@@ -32,13 +32,13 @@ const (
 	sQLFeeJointInsert = `
 		INSERT INTO fees
 		(
-			feeName, description, amount, currency,
+			fee_name, description, amount, currency,
 			transaction_id, owner_id
 		) VALUES(?,?,?,?,?,?)
 	`
 	sQLFeeJointGetByTransactionId = `
 		SELECT
-			f.feeName, f.description, f.amount, f.currency,
+			f.fee_name, f.description, f.amount, f.currency,
 			f.transaction_id, f.owner_id, f.created_at, f.updated_at
 		FROM fee_joint as f
 		Where f.transaction_id = ?
@@ -63,6 +63,7 @@ const (
 type Fee struct {
 	Name                      string           `json:"name"`
 	Description               string           `json:"description"`
+	FeeGroup                  string           `json:"feeGroup"`
 	Type                      FeeType          `json:"type"`
 	Condition                 FeeOperator      `json:"condition"`
 	ConditionAmt              types.AmountData `json:"conditionAmt"`
@@ -162,7 +163,7 @@ type FeeJointRepo struct {
 }
 
 func (repo *FeeRepo) GetUniqueFeeByName(ctx context.Context, name string) (*Fee, error) {
-	rows, err := repo.db.Query(sQLFeeGetUniqueByName, name)
+	rows, err := repo.db.Query(sQLFeeGetUniqueByFeeGroup, name)
 
 	if err != nil {
 		return nil, err
@@ -275,6 +276,7 @@ func scanRowIntoFee(rows *sql.Rows) (*Fee, error) {
 	err := rows.Scan(
 		&u.Name,
 		&u.Description,
+		&u.FeeGroup,
 		&u.Type,
 		&u.Condition,
 		&u.ConditionAmt.Amount,
