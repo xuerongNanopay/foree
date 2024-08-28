@@ -18,6 +18,12 @@ const (
             amount, currency, end_to_end_id, parent_tx_id, owner_id
         ) VALUES(?,?,?,?,?,?,?,?)
     `
+	sQLInteracCITxUpdateById = `
+		UPDATE interact_ci_tx SET 
+			status = ?, scotia_payment_id = ?, scotia_status = ?,
+			scotia_clearing_reference = ?, payment_url = ?
+		WHERE id = ?
+	`
 	sQLInteracCITxGetUniqueById = `
         SELECT 
             t.id, t.status, t.cash_in_acc_id,
@@ -45,7 +51,6 @@ const (
 			t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
 		FROM interact_ci_tx t
 		where t.scotia_payment_id = ?
-		FOR UPDATE
 	`
 	sQLInteracCITxGetAllByStatus = `
 		SELECT 
@@ -56,12 +61,6 @@ const (
 		FROM interact_ci_tx t
 		where t.status = ?
 	`
-	sQLInteracCITxUpdateById = `
-        UPDATE interact_ci_tx SET 
-            status = ?, scotia_payment_id = ?, scotia_status = ?,
-			scotia_clearing_reference = ?, payment_url = ?
-        WHERE id = ?
-    `
 )
 
 type InteracCITx struct {

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
+	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/constant"
 )
 
@@ -13,8 +14,8 @@ const (
 	sQLInteracRefundTxInsert = `
 		INSERT INTO interac_refund_tx
 		(
-			status, refund_interac_acc_id, parent_tx_id, owner_id
-		) VALUES(?,?,?,?)
+			status, refund_interac_acc_id, refund_amount, refund_currency, parent_tx_id, owner_id
+		) VALUES(?,?,?,?,?,?)
 	`
 	sQLInteracRefundTxUpdateById = `
 		UPDATE interac_refund_tx SET
@@ -23,15 +24,15 @@ const (
 	`
 	sQLInteracRefundTxGetUniqueById = `
 		SELECT
-			t.id, t.status, t.refund_interac_acc_id, t.parent_tx_id,
-			t.owner_id, t.created_at, t.updated_at
+			t.id, t.status, t.refund_interac_acc_id, refund_amount, refund_currency,
+			t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
 		FROM interac_refund_tx as t
 		WHERE t.id = ?
 	`
 	sQLInteracRefundTxGetUniqueByParentTxId = `
 		SELECT
-			t.id, t.status, t.refund_interac_acc_id, t.parent_tx_id,
-			t.owner_id, t.created_at, t.updated_at
+			t.id, t.status, t.refund_interac_acc_id, refund_amount, refund_currency,
+			t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
 		FROM interac_refund_tx as t
 		WHERE t.parent_tx_id = ?
 	`
@@ -45,13 +46,14 @@ const (
 )
 
 type InteracRefundTx struct {
-	ID                 int64          `json:"id"`
-	Status             RefundTxStatus `json:"status"`
-	RefundInteracAccId int64          `json:"refundInteracAccId"`
-	ParentTxId         int64          `json:"parentTxId"`
-	OwnerId            int64          `json:"ownerId"`
-	CreatedAt          time.Time      `json:"createdAt"`
-	UpdatedAt          time.Time      `json:"updatedAt"`
+	ID                 int64            `json:"id"`
+	Status             RefundTxStatus   `json:"status"`
+	RefundInteracAccId int64            `json:"refundInteracAccId"`
+	RefundAmt          types.AmountData `json:"refundAmt"`
+	ParentTxId         int64            `json:"parentTxId"`
+	OwnerId            int64            `json:"ownerId"`
+	CreatedAt          time.Time        `json:"createdAt"`
+	UpdatedAt          time.Time        `json:"updatedAt"`
 
 	RefundInteracAcc *account.InteracAccount `json:"refundInteracAcc"`
 }
@@ -75,6 +77,8 @@ func (repo *InteracRefundTxRepo) InsertInteracRefundTx(ctx context.Context, tx I
 			sQLInteracRefundTxInsert,
 			tx.Status,
 			tx.RefundInteracAccId,
+			tx.RefundAmt.Amount,
+			tx.RefundAmt.Currency,
 			tx.ParentTxId,
 			tx.OwnerId,
 		)
@@ -83,6 +87,8 @@ func (repo *InteracRefundTxRepo) InsertInteracRefundTx(ctx context.Context, tx I
 			sQLInteracRefundTxInsert,
 			tx.Status,
 			tx.RefundInteracAccId,
+			tx.RefundAmt.Amount,
+			tx.RefundAmt.Currency,
 			tx.ParentTxId,
 			tx.OwnerId,
 		)
@@ -170,6 +176,8 @@ func scanRowInteracRefundTx(rows *sql.Rows) (*InteracRefundTx, error) {
 		&tx.ID,
 		&tx.Status,
 		&tx.RefundInteracAccId,
+		&tx.RefundAmt.Amount,
+		&tx.RefundAmt.Currency,
 		&tx.ParentTxId,
 		&tx.OwnerId,
 		&tx.CreatedAt,

@@ -253,7 +253,7 @@ CREATE TABLE IF NOT EXISTS idm_tx(
     `user_agent` VARCHAR(256),
     `idm_reference` VARCHAR(64),
     `idm_result` VARCHAR(64),
-    `parent_tx_id` BIGINT UNSIGNED NOT NULL,
+    `parent_tx_id` BIGINT UNSIGNED NOT NULL UNIQUE,
     `owner_id` BIGINT UNSIGNED NOT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -269,6 +269,41 @@ CREATE TABLE IF NOT EXISTS idm_compliance(
     `idm_result` VARCHAR(64),
     `request_json` VARCHAR(1024),
     `response_json` VARCHAR(4096),
+    `parent_tx_id` BIGINT UNSIGNED NOT NULL UNIQUE,
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id),
+    FOREIGN KEY (parent_tx_id) REFERENCES foree_tx(id)
+);
+
+CREATE TABLE IF NOT EXISTS interact_ci_tx(
+    `id` SERIAL PRIMARY KEY,
+    `status` VARCHAR(64),
+    `cash_in_acc_id` BIGINT UNSIGNED NOT NULL,
+    `amount` DECIMAL(8, 2) NOT NULL,
+    `currency` CHAR(3) NOT NULL,
+    `scotia_payment_id` VARCHAR(128),
+    `scotia_status` VARCHAR(64),
+    `scotia_clearing_reference` VARCHAR(128),
+    `payment_url` VARCHAR(256),
+    `end_to_end_id` VARCHAR(128),
+    `parent_tx_id` BIGINT UNSIGNED NOT NULL UNIQUE,
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id),
+    FOREIGN KEY (parent_tx_id) REFERENCES foree_tx(id)
+);
+
+CREATE TABLE IF NOT EXISTS interac_refund_tx(
+    `id` SERIAL PRIMARY KEY,
+    `status` VARCHAR(64),
+    `refund_interac_acc_id` BIGINT UNSIGNED NOT NULL,
+    `refund_amount` DECIMAL(8, 2) NOT NULL,
+    `refund_currency` CHAR(3) NOT NULL,
     `parent_tx_id` BIGINT UNSIGNED NOT NULL,
     `owner_id` BIGINT UNSIGNED NOT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
