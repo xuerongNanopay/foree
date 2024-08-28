@@ -568,7 +568,7 @@ func (p *TxProcessor) MaybeRefund(ctx context.Context, fTx transaction.ForeeTx) 
 	}
 
 	// Refund limit.
-	reference := transaction.GenerateDailyTxLimitReference(fTx.ID)
+	reference := transaction.GenerateDailyTxLimitReference(fTx.OwnerId)
 	dailyLimit, err := p.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, reference)
 	if err != nil {
 		dTx.Rollback()

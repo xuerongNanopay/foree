@@ -16,8 +16,8 @@ const (
 		INSERT INTO daily_tx_limit
 		(
 			reference, used_amount, used_currency,
-			max_amount, max_currency
-		) VALUES (?,?,?,?,?)
+			max_amount, max_currency, owner_id
+		) VALUES (?,?,?,?,?,?)
 	`
 	sQLDailyTxLimitUpdateByReference = `
         UPDATE daily_tx_limit SET 
@@ -27,7 +27,7 @@ const (
 	sQLDailyTxLimitGetUniqueByReference = `
 		SELECT
 			t.id, t.reference, t.used_amount, t.used_currency,
-			t.max_amount, t.max_currency,
+			t.max_amount, t.max_currency, t.owner_id,
 			t.created_at, t.updated_at
 		FROM daily_tx_limit t
 		WHERE reference = ?
@@ -42,6 +42,7 @@ type DailyTxLimit struct {
 	Reference string           `json:"reference"`
 	UsedAmt   types.AmountData `json:"usedAmt"`
 	MaxAmt    types.AmountData `json:"maxAmt"`
+	OwnerId   int64            `json:"ownerId"`
 	CreatedAt time.Time        `json:"createdAt"`
 	UpdatedAt time.Time        `json:"updatedAt"`
 }
@@ -68,6 +69,7 @@ func (repo *DailyTxLimitRepo) InsertDailyTxLimit(ctx context.Context, tx DailyTx
 			tx.UsedAmt.Currency,
 			tx.MaxAmt.Amount,
 			tx.MaxAmt.Currency,
+			tx.OwnerId,
 		)
 	} else {
 		result, err = repo.db.Exec(
@@ -77,6 +79,7 @@ func (repo *DailyTxLimitRepo) InsertDailyTxLimit(ctx context.Context, tx DailyTx
 			tx.UsedAmt.Currency,
 			tx.MaxAmt.Amount,
 			tx.MaxAmt.Currency,
+			tx.OwnerId,
 		)
 	}
 
@@ -139,6 +142,7 @@ func scanRowIntoDailyTxLimit(rows *sql.Rows) (*DailyTxLimit, error) {
 		&tx.UsedAmt.Currency,
 		&tx.MaxAmt.Amount,
 		&tx.MaxAmt.Currency,
+		&tx.OwnerId,
 		&tx.CreatedAt,
 		&tx.UpdatedAt,
 	)

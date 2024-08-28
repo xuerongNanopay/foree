@@ -665,6 +665,7 @@ func (t *TransactionService) getDailyTxLimit(ctx context.Context, session auth.S
 				Amount:   txLimit.MaxAmt.Amount,
 				Currency: txLimit.MaxAmt.Currency,
 			},
+			OwnerId: session.UserId,
 		}
 		_, err := t.dailyTxLimiteRepo.InsertDailyTxLimit(ctx, *dailyLimit)
 		if err != nil {

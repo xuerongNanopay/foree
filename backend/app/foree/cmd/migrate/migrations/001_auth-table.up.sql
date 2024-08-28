@@ -106,3 +106,17 @@ CREATE TABLE IF NOT EXISTS interac_accounts(
 
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS daily_tx_limit(
+    `id` SERIAL PRIMARY KEY,
+    `reference` VARCHAR(64) NOT NULL,
+    `used_amount` DECIMAL(10, 2) NOT NULL,
+    `used_currency` CHAR(3) NOT NULL,
+    `max_amount` DECIMAL(10, 2) NOT NULL,
+    `max_currency` CHAR(3) NOT NULL,
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
