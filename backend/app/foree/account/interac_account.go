@@ -23,7 +23,7 @@ const (
 	sQLInteracAccountUpdateActiveByIdAndOwner = `
 		UPDATE interac_accounts SET 
 			status = ?, latest_activity_at = ?
-		WHERE id = ? AND a.owner_id = ? AND a.status = "ACTIVE"
+		WHERE id = ? AND a.owner_id = ? AND a.status = 'ACTIVE'
 	`
 	sQLInteracAccountGetUniqueById = `
 		SELECT 
@@ -41,7 +41,7 @@ const (
 			a.phone_number, a.email, a.institution_name, a.branch_number, a.account_number,
 			a.owner_id, a.latest_activity_at, a.created_at, a.updated_at
 		FROM interac_accounts a
-		where a.owner_id = ? AND a.id = ? AND a.status = "ACTIVE"
+		where a.owner_id = ? AND a.id = ? AND a.status = 'ACTIVE'
 	`
 	sQLInteracAccountGetUniqueActiveForUPdateByOwnerAndId = `
 		SELECT 
@@ -50,7 +50,7 @@ const (
 			a.phone_number, a.email, a.institution_name, a.branch_number, a.account_number,
 			a.owner_id, a.latest_activity_at, a.created_at, a.updated_at
 		FROM interac_accounts a
-		where a.owner_id = ? AND a.id = ? AND a.status = "ACTIVE"
+		where a.owner_id = ? AND a.id = ? AND a.status = 'ACTIVE'
 		FOR UPDATE
 	`
 	sQLInteracAccountGetAllActiveByOwnerId = `
@@ -60,7 +60,7 @@ const (
 			a.phone_number, a.email, a.institution_name, a.branch_number, a.account_number,
 			a.owner_id, a.latest_activity_at, a.created_at, a.updated_at
 		FROM interac_accounts a
-		where a.owner_id = ? AND a.status = "ACTIVE"
+		where a.owner_id = ? AND a.status = 'ACTIVE'
 		ORDER BY a.latest_activity_at DESC
 	`
 )

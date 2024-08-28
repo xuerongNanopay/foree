@@ -24,7 +24,7 @@ const (
 	sQLContactAccountUpdateActiveByIdAndOwner = `
 		UPDATE contact_accounts SET 
 			status = ?, latest_activity_at = ?
-		WHERE id = ? AND a.owner_id = ? AND a.status = "ACTIVE"
+		WHERE id = ? AND a.owner_id = ? AND a.status = 'ACTIVE'
 	`
 	sQLContactAccountGetUniqueById = `
 		SELECT 
@@ -44,7 +44,7 @@ const (
 			a.account_hash, a.relationship_to_contact, a.owner_id,
 			a.latest_activity_at, a.created_at, a.updated_at
 		FROM contact_accounts a
-		where a.owner_id = ? AND a.id = ? AND a.status = "ACTIVE"
+		where a.owner_id = ? AND a.id = ? AND a.status = 'ACTIVE'
 	`
 	sQLContactAccountGetAllActiveByOwnerId = `
 		SELECT 
@@ -54,7 +54,7 @@ const (
 			a.account_hash, a.relationship_to_contact, a.owner_id,
 			a.latest_activity_at, a.created_at, a.updated_at
 		FROM contact_accounts a
-		where a.owner_id = ? AND a.status = "ACTIVE"
+		where a.owner_id = ? AND a.status = 'ACTIVE'
 		ORDER BY a.latest_activity_at DESC
 	`
 	sQLContactAccountQueryActiveByOwnerId = `
@@ -65,7 +65,7 @@ const (
 			a.account_hash, a.relationship_to_contact, a.owner_id,
 			a.latest_activity_at, a.created_at, a.updated_at
 		FROM contact_accounts a
-		where a.owner_id = ? AND a.status = "ACTIVE"
+		where a.owner_id = ? AND a.status = 'ACTIVE'
 		LIMIT ? OFFSET ?
 	`
 )
