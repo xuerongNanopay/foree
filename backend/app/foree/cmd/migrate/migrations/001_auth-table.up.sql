@@ -150,3 +150,27 @@ CREATE TABLE IF NOT EXISTS fee_joint(
     #FOREIGN KEY ON transaction
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS rate(
+    `id` CHAR(7) PRIMARY KEY UNIQUE NOT NULL,
+    `src_amount` DECIMAL(7, 2) NOT NULL,
+    `src_currency` CHAR(3) NOT NULL,
+    `dest_amount` DECIMAL(7, 2) NOT NULL,
+    `dest_currency` CHAR(3) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS rewards(
+    `id` SERIAL PRIMARY KEY,
+    `status` VARCHAR(32) NOT NULL,
+    `type` VARCHAR(32) NOT NULL,
+    `description` VARCHAR(256),
+    `amount` DECIMAL(7, 2) NOT NULL,
+    `currency` CHAR(3) NOT NULL,
+    `applied_transaction_id` BIGINT UNSIGNED,
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `expire_at` DATETIME,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

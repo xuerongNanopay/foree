@@ -44,7 +44,7 @@ const (
 			r.status, r.owner_id, r.applied_transaction_id,
 			r.expire_at, f.created_at, f.updated_at
 		FROM rewards as r
-		Where r.owner_id = ? AND r.status = ACTIVE
+		Where r.owner_id = ? AND r.status = 'ACTIVE'
 	`
 )
 
