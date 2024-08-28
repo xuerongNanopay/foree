@@ -543,7 +543,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	createFeeJoint := func() {
 		defer wg.Done()
 		for _, feeJoin := range foreeTx.Fees {
-			feeJoin.TransactionId = foreeTxID
+			feeJoin.ParentTxId = foreeTxID
 			_, err := t.feeJointRepo.InsertFeeJoint(ctx, *feeJoin)
 			if err != nil {
 				feeJointError = transport.WrapInteralServerError(err)

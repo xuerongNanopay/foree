@@ -33,15 +33,15 @@ const (
 		INSERT INTO fees
 		(
 			fee_name, description, amount, currency,
-			transaction_id, owner_id
+			parent_tx_id, owner_id
 		) VALUES(?,?,?,?,?,?)
 	`
-	sQLFeeJointGetByTransactionId = `
+	sQLFeeJointGetByParentTxId = `
 		SELECT
-			f.fee_name, f.description, f.amount, f.currency,
-			f.transaction_id, f.owner_id, f.created_at, f.updated_at
+			f.id, f.fee_name, f.description, f.amount, f.currency,
+			f.parent_tx_id, f.owner_id, f.created_at, f.updated_at
 		FROM fee_joint as f
-		Where f.transaction_id = ?
+		Where f.parent_tx_id = ?
 	`
 )
 
@@ -136,14 +136,14 @@ func applyFeeOperator(op FeeOperator) (func(l, r types.Amount) bool, error) {
 }
 
 type FeeJoint struct {
-	ID            int64            `json:"id"`
-	FeeName       string           `json:"feeName"`
-	Description   string           `json:"description"`
-	Amt           types.AmountData `json:"amt"`
-	TransactionId int64            `json:"transactionId"`
-	OwnerId       int64            `json:"ownerId"`
-	CreatedAt     time.Time        `json:"createdAt"`
-	UpdatedAt     time.Time        `json:"updatedAt"`
+	ID          int64            `json:"id"`
+	FeeName     string           `json:"feeName"`
+	Description string           `json:"description"`
+	Amt         types.AmountData `json:"amt"`
+	ParentTxId  int64            `json:"parentTxId"`
+	OwnerId     int64            `json:"ownerId"`
+	CreatedAt   time.Time        `json:"createdAt"`
+	UpdatedAt   time.Time        `json:"updatedAt"`
 }
 
 func NewFeeRepo(db *sql.DB) *FeeRepo {
@@ -223,7 +223,7 @@ func (repo *FeeJointRepo) InsertFeeJoint(ctx context.Context, feeJoint FeeJoint)
 			feeJoint.Description,
 			feeJoint.Amt.Amount,
 			feeJoint.Amt.Currency,
-			feeJoint.TransactionId,
+			feeJoint.ParentTxId,
 			feeJoint.OwnerId,
 		)
 	} else {
@@ -233,7 +233,7 @@ func (repo *FeeJointRepo) InsertFeeJoint(ctx context.Context, feeJoint FeeJoint)
 			feeJoint.Description,
 			feeJoint.Amt.Amount,
 			feeJoint.Amt.Currency,
-			feeJoint.TransactionId,
+			feeJoint.ParentTxId,
 			feeJoint.OwnerId,
 		)
 	}
@@ -247,8 +247,8 @@ func (repo *FeeJointRepo) InsertFeeJoint(ctx context.Context, feeJoint FeeJoint)
 	return id, nil
 }
 
-func (repo *FeeJointRepo) GetAllFeeJointbyTransactionId(transactionId int64) ([]*FeeJoint, error) {
-	rows, err := repo.db.Query(sQLFeeJointGetByTransactionId, transactionId)
+func (repo *FeeJointRepo) GetAllFeeJointbyParentTxId(transactionId int64) ([]*FeeJoint, error) {
+	rows, err := repo.db.Query(sQLFeeJointGetByParentTxId, transactionId)
 
 	if err != nil {
 		return nil, err
@@ -302,7 +302,7 @@ func scanRowIntoFeeJoint(rows *sql.Rows) (*FeeJoint, error) {
 		&u.Description,
 		&u.Amt.Amount,
 		&u.Amt.Currency,
-		&u.TransactionId,
+		&u.ParentTxId,
 		&u.OwnerId,
 		&u.CreatedAt,
 		&u.UpdatedAt,

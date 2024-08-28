@@ -120,3 +120,33 @@ CREATE TABLE IF NOT EXISTS daily_tx_limit(
 
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS fees(
+    `name` VARCHAR(128) NOT NULL UNIQUE PRIMARY KEY,
+    `description` VARCHAR(256),
+    `fee_group` VARCHAR(128) NOT NULL,
+    `type` VARCHAR(64) NOT NULL,
+    `condition` VARCHAR(16) NOT NULL,
+    `condition_amount` DECIMAL(5, 2) NOT NULL,
+    `condition_currency` CHAR(3) NOT NULL,
+    `ratio` DECIMAL(5, 2) NOT NULL,
+    `is_apply_in_condition_amount_only` BOOL DEFAULT FALSE,
+    `is_enable` BOOL DEFAULT TRUE,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS fee_joint(
+    `id` SERIAL PRIMARY KEY,
+    `fee_name` VARCHAR(128) NOT NULL,
+    `description` VARCHAR(256),
+    `amount` DECIMAL(7, 2) NOT NULL,
+    `currency` CHAR(3) NOT NULL,
+    `parent_tx_id` BIGINT UNSIGNED NOT NULL,
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    #FOREIGN KEY ON transaction
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
