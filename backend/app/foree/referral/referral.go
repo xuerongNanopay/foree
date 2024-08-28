@@ -18,29 +18,29 @@ const (
 	sQLReferralInsert = `
 		INSERT INTO referral
 		(	
-			referral_type, referral_value, referral_code, referrer_id, referree_id
+			referral_type, referral_value, referral_code, referrer_id, referee_id
 		) VALUES (?,?,?,?,?)
 	`
 	sQLReferralUpdateByReferralCode = `
 		UPDATE referral SET 
-			referree_id = ?, accept_at = ?
+			referee_id = ?, accept_at = ?
 		WHERE referral_code = ?
 	`
 	sQLReferralGetUniqueByReferralCode = `
 		SELECT 
 			r.id, r.referral_type, r.referral_value, r.referral_code, 
-			r.referrer_id, r.referree_id, r.accept_at
+			r.referrer_id, r.referee_id, r.accept_at,
 			r.created_at, r.updated_at
 		FROM referral as r
 		WHERE r.referral_code = ?
 	`
-	sQLReferralGetUniqueByReferreeId = `
+	sQLReferralGetUniqueByRefereeId = `
 		SELECT 
 			r.id, r.referral_type, r.referral_value, r.referral_code, 
-			r.referrer_id, r.referree_id, r.accept_at
+			r.referrer_id, r.referee_id, r.accept_at,
 			r.created_at, r.updated_at
 		FROM referral as r
-		WHERE r.referree_id = ?
+		WHERE r.referee_id = ?
 	`
 )
 
@@ -50,7 +50,7 @@ type Referral struct {
 	ReferralValue string       `json:"referralValue"`
 	ReferralCode  string       `json:"referralCode"`
 	ReferrerId    int64        `json:"referrerId"`
-	ReferreeId    int64        `json:"referreeId"`
+	RefereeId     int64        `json:"refereeId"`
 	AcceptAt      time.Time    `json:"acceptAt"`
 	CreatedAt     time.Time    `json:"createdAt"`
 	UpdatedAt     time.Time    `json:"updatedAt"`
@@ -71,7 +71,7 @@ func (repo *ReferralRepo) InsertReferral(r Referral) (int64, error) {
 		r.ReferralValue,
 		r.ReferralCode,
 		r.ReferrerId,
-		r.ReferreeId,
+		r.RefereeId,
 	)
 	if err != nil {
 		return 0, err
@@ -86,7 +86,7 @@ func (repo *ReferralRepo) InsertReferral(r Referral) (int64, error) {
 func (repo *ReferralRepo) UpdateReferralByReferralCode(r Referral) error {
 	_, err := repo.db.Exec(
 		sQLReferralUpdateByReferralCode,
-		r.ReferreeId,
+		r.RefereeId,
 		r.AcceptAt,
 		r.ID,
 	)
@@ -120,8 +120,8 @@ func (repo *ReferralRepo) GetUniqueReferralByReferralCode(referralCode string) (
 	return f, nil
 }
 
-func (repo *ReferralRepo) GetUniqueReferralByReferreeId(referreeId string) (*Referral, error) {
-	rows, err := repo.db.Query(sQLReferralGetUniqueByReferreeId, referreeId)
+func (repo *ReferralRepo) GetUniqueReferralByRefereeId(refereeId string) (*Referral, error) {
+	rows, err := repo.db.Query(sQLReferralGetUniqueByRefereeId, refereeId)
 
 	if err != nil {
 		return nil, err
@@ -152,7 +152,7 @@ func scanRowIntoReferral(rows *sql.Rows) (*Referral, error) {
 		&u.ReferralValue,
 		&u.ReferralCode,
 		&u.ReferrerId,
-		&u.ReferreeId,
+		&u.RefereeId,
 		&u.AcceptAt,
 		&u.CreatedAt,
 		&u.UpdatedAt,

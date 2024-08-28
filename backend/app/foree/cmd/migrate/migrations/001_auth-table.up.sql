@@ -202,3 +202,18 @@ CREATE TABLE IF NOT EXISTS user_identifications(
 
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS referral(
+    `id` SERIAL PRIMARY KEY,
+    `referral_type` VARCHAR(32),
+    `referral_value` VARCHAR(256),
+    `referral_code` VARCHAR(256),
+    `referrer_id` BIGINT UNSIGNED NOT NULL,
+    `referee_id` BIGINT UNSIGNED,
+    `accept_at` DATETIME,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (referrer_id) REFERENCES users(id),
+    FOREIGN KEY (referee_id) REFERENCES users(id)
+);
