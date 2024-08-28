@@ -37,24 +37,25 @@ const (
 	sQLIDMComplianceInsert = `
         INSERT INTO idm_compliance
         (
-            idm_tx_id, idm_http_status_code, idm_result, request_json, response_json
-        ) VALUES(?,?,?,?,?)
+            idm_tx_id, idm_http_status_code, idm_result, 
+			request_json, response_json, parent_tx_id, owner_id
+        ) VALUES(?,?,?,?,?,?,?)
     `
 	sQLIDMComplianceGetUniqueById = `
         SELECT 
             c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
-            c.request_json, c.response_json,
+            c.request_json, c.response_json, c.parent_tx_id, c.owner_id,
             c.created_at, c.updated_at
         FROM idm_tx c
         where c.id = ?
     `
-	sQLIDMComplianceGetUniqueByIDMTxId = `
+	sQLIDMComplianceGetUniqueByParentTxId = `
         SELECT 
             c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
-            c.request_json, c.response_json,
+            c.request_json, c.response_json, c.parent_tx_id, c.owner_id,
             c.created_at, c.updated_at
         FROM idm_tx c
-        where c.idm_tx_id = ?
+        where c.parent_tx_id = ?
     `
 )
 
@@ -79,6 +80,8 @@ type IDMCompliance struct {
 	IDMResult         string    `json:"idmResult"`
 	RequestJson       string    `json:"requestJson"`
 	ResponseJson      string    `json:"responseJson"`
+	ParentTxId        int64     `json:"parentTxId"`
+	OwnerId           int64     `json:"ownerId"`
 	CreatedAt         time.Time `json:"createdAt"`
 	UpdatedAt         time.Time `json:"updatedAt"`
 }
@@ -222,14 +225,35 @@ type IDMComplianceRepo struct {
 }
 
 func (repo *IDMComplianceRepo) InsertIDMComplance(ctx context.Context, c IDMCompliance) (int64, error) {
-	result, err := repo.db.Exec(
-		sQLIDMComplianceInsert,
-		c.IDMTxId,
-		c.IDMHttpStatusCode,
-		c.IDMResult,
-		c.RequestJson,
-		c.ResponseJson,
-	)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.Exec(
+			sQLIDMComplianceInsert,
+			c.IDMTxId,
+			c.IDMHttpStatusCode,
+			c.IDMResult,
+			c.RequestJson,
+			c.ResponseJson,
+			c.ParentTxId,
+			c.OwnerId,
+		)
+	} else {
+		result, err = repo.db.Exec(
+			sQLIDMComplianceInsert,
+			c.IDMTxId,
+			c.IDMHttpStatusCode,
+			c.IDMResult,
+			c.RequestJson,
+			c.ResponseJson,
+			c.ParentTxId,
+			c.OwnerId,
+		)
+	}
+
 	if err != nil {
 		return 0, err
 	}
@@ -265,7 +289,7 @@ func (repo *IDMComplianceRepo) GetUniqueIDMComplianceById(ctx context.Context, i
 }
 
 func (repo *IDMComplianceRepo) GetUniqueIDMComplianceByIDMTxId(ctx context.Context, idmTxId int64) (*IDMCompliance, error) {
-	rows, err := repo.db.Query(sQLIDMComplianceGetUniqueByIDMTxId, idmTxId)
+	rows, err := repo.db.Query(sQLIDMComplianceGetUniqueByParentTxId, idmTxId)
 
 	if err != nil {
 		return nil, err
@@ -297,6 +321,8 @@ func scanRowIntoIDMCompliance(rows *sql.Rows) (*IDMCompliance, error) {
 		&c.IDMResult,
 		&c.RequestJson,
 		&c.ResponseJson,
+		&c.ParentTxId,
+		&c.OwnerId,
 		&c.CreatedAt,
 		&c.UpdatedAt,
 	)
