@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS contact_accounts(
     `account_hash`VARCHAR(256),
     `relationship_to_contact`VARCHAR(128),
     `latest_activity_at` DATETIME,
-    `owner_id` BIGINT UNSIGNED NOT NULL UNIQUE,
+    `owner_id` BIGINT UNSIGNED NOT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
