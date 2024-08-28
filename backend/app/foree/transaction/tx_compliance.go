@@ -22,14 +22,14 @@ const (
     `
 	sQLIDMTxGetUniqueById = `
         SELECT 
-            t.id, t.status, t.ip, t.user_agent, t.idm_reference, t.idm_result
+            t.id, t.status, t.ip, t.user_agent, t.idm_reference, t.idm_result,
             t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
         FROM idm_tx t
         where t.id = ?
     `
 	sQLIDMTxGetUniqueByParentTxId = `
         SELECT 
-            t.id, t.status, t.ip, t.user_agent, t.idm_reference, t.idm_result
+            t.id, t.status, t.ip, t.user_agent, t.idm_reference, t.idm_result,
             t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
         FROM idm_tx t
         where t.parent_tx_id = ?
@@ -46,7 +46,7 @@ const (
             c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
             c.request_json, c.response_json, c.parent_tx_id, c.owner_id,
             c.created_at, c.updated_at
-        FROM idm_tx c
+        FROM idm_compliance c
         where c.id = ?
     `
 	sQLIDMComplianceGetUniqueByParentTxId = `
@@ -54,7 +54,7 @@ const (
             c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
             c.request_json, c.response_json, c.parent_tx_id, c.owner_id,
             c.created_at, c.updated_at
-        FROM idm_tx c
+        FROM idm_compliance c
         where c.parent_tx_id = ?
     `
 )

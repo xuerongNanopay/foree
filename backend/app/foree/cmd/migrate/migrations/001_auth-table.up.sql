@@ -245,3 +245,35 @@ CREATE TABLE IF NOT EXISTS foree_tx(
 
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS idm_tx(
+    `id` SERIAL PRIMARY KEY,
+    `status` VARCHAR(64),
+    `ip` VARCHAR(16),
+    `user_agent` VARCHAR(256),
+    `idm_reference` VARCHAR(64),
+    `idm_result` VARCHAR(64),
+    `parent_tx_id` BIGINT UNSIGNED NOT NULL,
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id),
+    FOREIGN KEY (parent_tx_id) REFERENCES foree_tx(id)
+);
+
+CREATE TABLE IF NOT EXISTS idm_compliance(
+    `id` SERIAL PRIMARY KEY,
+    `idm_tx_id` BIGINT UNSIGNED NOT NULL,
+    `idm_http_status_code` int,
+    `idm_result` VARCHAR(64),
+    `request_json` VARCHAR(1024),
+    `response_json` VARCHAR(4096),
+    `parent_tx_id` BIGINT UNSIGNED NOT NULL,
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id),
+    FOREIGN KEY (parent_tx_id) REFERENCES foree_tx(id)
+);
