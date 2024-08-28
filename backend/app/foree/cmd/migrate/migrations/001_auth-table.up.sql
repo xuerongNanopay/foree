@@ -80,3 +80,28 @@ CREATE TABLE IF NOT EXISTS contact_accounts(
 
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS interac_accounts(
+    `id` SERIAL PRIMARY KEY,
+    `status` VARCHAR(32) NOT NULL,
+    `first_name` VARCHAR(256) NOT NULL,
+    `middle_name` VARCHAR(256),
+    `last_name` VARCHAR(256) NOT NULL,
+    `address1` VARCHAR(256) NOT NULL,
+    `address2` VARCHAR(256),
+    `city` VARCHAR(64) NOT NULL,
+    `province` VARCHAR(64) NOT NULL,
+    `country` VARCHAR(64) NOT NULL,
+    `postal_code` VARCHAR(16) NOT NULL,
+    `phone_number` VARCHAR(32),
+    `email` VARCHAR(256) NOT NULL,
+    `institution_name` VARCHAR(128),
+    `branch_number` VARCHAR(64),
+    `account_number`VARCHAR(128),
+    `latest_activity_at` DATETIME,
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
