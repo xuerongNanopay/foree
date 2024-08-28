@@ -22,7 +22,7 @@ const (
 		SELECT
 			a.id, a.type, a.status, a.associated_entity_name,
 			a.associated_entity_id, a.concluded_by, a.concluded_at,
-			a.create_at, a.update_at
+			a.created_at, a.updated_at
 		FROM approval as a
 		WHERE a.id = ?
 	`
@@ -30,20 +30,20 @@ const (
 		SELECT
 			a.id, a.type, a.status, a.associated_entity_name,
 			a.associated_entity_id, a.concluded_by, a.concluded_at,
-			a.create_at, a.update_at
+			a.created_at, a.updated_at
 		FROM approval as a
 		WHERE a.type = ?
-		ORDER BY a.create_at DESC
+		ORDER BY a.created_at DESC
 		LIMIT ? OFFSET ?
 	`
 	sQLApprovalQueryAllByTypeAndStatusWithPagination = `
 		SELECT
 			a.id, a.type, a.status, a.associated_entity_name,
 			a.associated_entity_id, a.concluded_by, a.concluded_at,
-			a.create_at, a.update_at
+			a.created_at, a.updated_at
 		FROM approval as a
 		WHERE a.type = ? AND a.status = ? 
-		ORDER BY a.create_at DESC
+		ORDER BY a.created_at DESC
 		LIMIT ? OFFSET ?
 	`
 )
@@ -64,8 +64,8 @@ type Approval struct {
 	AssocitateEntityId   int64          `json:"associtateEntityId"`
 	ConcludedBy          int64          `json:"concludedBy"`
 	ConcludedAt          time.Time      `json:"concludedAt"`
-	CreateAt             time.Time      `json:"createAt"`
-	UpdateAt             time.Time      `json:"updateAt"`
+	CreatedAt            time.Time      `json:"createdAt"`
+	UpdateAt             time.Time      `json:"updatedAt"`
 }
 
 type ApprovalRepo struct {
@@ -192,7 +192,7 @@ func scanRowIntoApproval(rows *sql.Rows) (*Approval, error) {
 		&i.AssocitateEntityId,
 		&i.ConcludedBy,
 		&i.ConcludedAt,
-		&i.CreateAt,
+		&i.CreatedAt,
 		&i.UpdateAt,
 	)
 	if err != nil {

@@ -27,7 +27,7 @@ const (
         SELECT 
             t.id, t.status, t.amount, t.currency, t.nbp_reference,
             t.cash_out_acc_id, t.parent_tx_id, t.owner_id,
-            t.create_at, t.update_at
+            t.created_at, t.updated_at
         FROM nbp_co_tx t
         where t.id = ?
 
@@ -36,7 +36,7 @@ const (
         SELECT 
             t.id, t.status, t.amount, t.currency, t.nbp_reference,
             t.cash_out_acc_id, t.parent_tx_id, t.owner_id,
-            t.create_at, t.update_at
+            t.created_at, t.updated_at
         FROM nbp_co_tx t
         where t.parent_tx_id = ?
     `
@@ -51,8 +51,8 @@ type NBPCOTx struct {
 	CashOutAcc   *account.ContactAccount `json:"CashOutAcc"`
 	ParentTxId   int64                   `json:"parentTxId"`
 	OwnerId      int64                   `json:"OwnerId"`
-	CreateAt     time.Time               `json:"createAt"`
-	UpdateAt     time.Time               `json:"updateAt"`
+	CreatedAt    time.Time               `json:"createdAt"`
+	UpdateAt     time.Time               `json:"updatedAt"`
 }
 
 func NewNBPCOTxRepo(db *sql.DB) *NBPCOTxRepo {
@@ -179,7 +179,7 @@ func scanRowIntoNBPCOTx(rows *sql.Rows) (*NBPCOTx, error) {
 		&tx.CashOutAccId,
 		&tx.ParentTxId,
 		&tx.OwnerId,
-		&tx.CreateAt,
+		&tx.CreatedAt,
 		&tx.UpdateAt,
 	)
 	if err != nil {

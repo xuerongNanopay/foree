@@ -23,7 +23,7 @@ const (
 	sQLUserIdentificationGetAllByOwnerId = `
 		SELECT 
 			u.id, u.status, u.type, u.value, u.link1, u.link2,
-			u.owner_id, u.create_at, u.update_at
+			u.owner_id, u.created_at, u.updated_at
 		FROM user_identifications as u 
 		WHERE u.owner_id = ?
 	`
@@ -56,8 +56,8 @@ type UserIdentification struct {
 	Link2     string                   `json:"link2"`
 	ExpiredAt time.Time                `json:"expiredAt"`
 	OwnerId   int64                    `json:"ownerId"`
-	CreateAt  time.Time                `json:"createAt"`
-	UpdateAt  time.Time                `json:"updateAt"`
+	CreatedAt time.Time                `json:"createdAt"`
+	UpdateAt  time.Time                `json:"updatedAt"`
 }
 
 func NewUserIdentificationRepo(db *sql.DB) *UserIdentificationRepo {
@@ -154,7 +154,7 @@ func scanRowIntoUserIdentification(rows *sql.Rows) (*UserIdentification, error) 
 		&u.Link1,
 		&u.Link2,
 		&u.OwnerId,
-		&u.CreateAt,
+		&u.CreatedAt,
 		&u.UpdateAt,
 	)
 	if err != nil {

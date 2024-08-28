@@ -16,11 +16,11 @@ import (
 // Current we store it in memory. In the futurn, can be redis....
 
 type TxQuote struct {
-	ID       string    `json:"id"`
-	Tx       *ForeeTx  `json:"tx"`
-	OwerId   int64     `json:"owerId"`
-	ExpireAt time.Time `json:"expireAt"`
-	CreateAt time.Time `json:"createAt"`
+	ID        string    `json:"id"`
+	Tx        *ForeeTx  `json:"tx"`
+	OwerId    int64     `json:"owerId"`
+	ExpireAt  time.Time `json:"expireAt"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 // set to 512
@@ -46,7 +46,7 @@ type TxQuoteRepo struct {
 }
 
 func (repo *TxQuoteRepo) InsertTxQuote(ctx context.Context, tx TxQuote) (string, error) {
-	tx.CreateAt = time.Now()
+	tx.CreatedAt = time.Now()
 	tx.ExpireAt = time.Now().Add(time.Duration(time.Minute * time.Duration(repo.expireInMinute)))
 	repo.rwLock.Lock()
 	defer repo.rwLock.Unlock()

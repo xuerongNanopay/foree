@@ -30,7 +30,7 @@ const (
 		SELECT 
 			r.id, r.referral_type, r.referral_value, r.referral_code, 
 			r.referrer_id, r.referree_id, r.accept_at
-			r.create_at, r.update_at
+			r.created_at, r.updated_at
 		FROM referral as r
 		WHERE r.referral_code = ?
 	`
@@ -38,7 +38,7 @@ const (
 		SELECT 
 			r.id, r.referral_type, r.referral_value, r.referral_code, 
 			r.referrer_id, r.referree_id, r.accept_at
-			r.create_at, r.update_at
+			r.created_at, r.updated_at
 		FROM referral as r
 		WHERE r.referree_id = ?
 	`
@@ -52,8 +52,8 @@ type Referral struct {
 	ReferrerId    int64        `json:"referrerId"`
 	ReferreeId    int64        `json:"referreeId"`
 	AcceptAt      time.Time    `json:"acceptAt"`
-	CreateAt      time.Time    `json:"createAt"`
-	UpdateAt      time.Time    `json:"updateAt"`
+	CreatedAt     time.Time    `json:"createdAt"`
+	UpdateAt      time.Time    `json:"updatedAt"`
 }
 
 func NewReferralRepo(db *sql.DB) *ReferralRepo {
@@ -154,7 +154,7 @@ func scanRowIntoReferral(rows *sql.Rows) (*Referral, error) {
 		&u.ReferrerId,
 		&u.ReferreeId,
 		&u.AcceptAt,
-		&u.CreateAt,
+		&u.CreatedAt,
 		&u.UpdateAt,
 	)
 	if err != nil {

@@ -27,7 +27,7 @@ import (
 const (
 	sQLRolePermissionGetAllEnabledByRoleName = `
 		SELECT 
-			r.role_name, r.permission, r.is_enable, r.created_at, r.update_at
+			r.role_name, r.permission, r.is_enable, r.created_at, r.updated_at
 		FROM role_permission as r
 		WHERE r.is_enable = true and r.role_name = ?
 	`

@@ -22,8 +22,8 @@ var (
 )
 
 type CacheItem[T any] struct {
-	item     T
-	createAt time.Time
+	item      T
+	createdAt time.Time
 }
 
 type TransactionService struct {
@@ -73,7 +73,7 @@ func (t *TransactionService) getRate(ctx context.Context, src, dest string, vali
 	rateCache, ok := t.rateCache[rateId]
 	t.rateCacheRWLock.RUnlock()
 
-	if ok && rateCache.createAt.Add(validIn).After(time.Now()) {
+	if ok && rateCache.createdAt.Add(validIn).After(time.Now()) {
 		return &rateCache.item, nil
 	}
 
@@ -90,8 +90,8 @@ func (t *TransactionService) getRate(ctx context.Context, src, dest string, vali
 	defer t.rateCacheRWLock.Unlock()
 
 	t.rateCache[rateId] = CacheItem[transaction.Rate]{
-		item:     *rate,
-		createAt: time.Now(),
+		item:      *rate,
+		createdAt: time.Now(),
 	}
 	return rate, nil
 }
@@ -158,7 +158,7 @@ func (t *TransactionService) getFee(ctx context.Context, feeName string, validIn
 	feeCache, ok := t.feeCache[feeName]
 	t.feeCacheRWLock.RUnlock()
 
-	if ok && feeCache.createAt.Add(validIn).After(time.Now()) {
+	if ok && feeCache.createdAt.Add(validIn).After(time.Now()) {
 		return &feeCache.item, nil
 	}
 
@@ -175,8 +175,8 @@ func (t *TransactionService) getFee(ctx context.Context, feeName string, validIn
 	defer t.feeCacheRWLock.Unlock()
 
 	t.feeCache[feeName] = CacheItem[transaction.Fee]{
-		item:     *fee,
-		createAt: time.Now(),
+		item:      *fee,
+		createdAt: time.Now(),
 	}
 	return fee, nil
 }

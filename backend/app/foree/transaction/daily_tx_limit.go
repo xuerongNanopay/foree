@@ -28,7 +28,7 @@ const (
 		SELECT
 			t.id, t.reference, t.used_amount, t.used_currency,
 			t.max_amount, t.max_currency,
-			t.create_at, t.update_at
+			t.created_at, t.updated_at
 		FROM daily_tx_limit t
 		WHERE reference = ?
 	`
@@ -42,8 +42,8 @@ type DailyTxLimit struct {
 	Reference string           `json:"reference"`
 	UsedAmt   types.AmountData `json:"usedAmt"`
 	MaxAmt    types.AmountData `json:"maxAmt"`
-	CreateAt  time.Time        `json:"createAt"`
-	UpdateAt  time.Time        `json:"updateAt"`
+	CreatedAt time.Time        `json:"createdAt"`
+	UpdateAt  time.Time        `json:"updatedAt"`
 }
 
 func NewDailyTxLimitRepo(db *sql.DB) *DailyTxLimitRepo {
@@ -139,7 +139,7 @@ func scanRowIntoDailyTxLimit(rows *sql.Rows) (*DailyTxLimit, error) {
 		&tx.UsedAmt.Currency,
 		&tx.MaxAmt.Amount,
 		&tx.MaxAmt.Currency,
-		&tx.CreateAt,
+		&tx.CreatedAt,
 		&tx.UpdateAt,
 	)
 	if err != nil {

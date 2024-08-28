@@ -26,7 +26,7 @@ const (
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
-			r.expire_at, f.create_at, f.update_at
+			r.expire_at, f.created_at, f.updated_at
 		FROM rewards as r
 		Where r.id = ?
 	`
@@ -34,7 +34,7 @@ const (
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
-			r.expire_at, f.create_at, f.update_at
+			r.expire_at, f.created_at, f.updated_at
 		FROM rewards as r
 		Where r.applied_transaction_id = ?
 	`
@@ -42,7 +42,7 @@ const (
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
-			r.expire_at, f.create_at, f.update_at
+			r.expire_at, f.created_at, f.updated_at
 		FROM rewards as r
 		Where r.owner_id = ? AND r.status = ACTIVE
 	`
@@ -75,8 +75,8 @@ type Reward struct {
 	OwnerId              int64            `json:"ownerId"`
 	AppliedTransactionId int64            `json:"appliedTransactionId"`
 	ExpireAt             time.Time        `json:"expireAt"`
-	CreateAt             time.Time        `json:"createAt"`
-	UpdateAt             time.Time        `json:"updateAt"`
+	CreatedAt            time.Time        `json:"createdAt"`
+	UpdateAt             time.Time        `json:"updatedAt"`
 }
 
 func NewRewardRepo(db *sql.DB) *RewardRepo {
@@ -224,7 +224,7 @@ func scanRowIntoReward(rows *sql.Rows) (*Reward, error) {
 		&u.OwnerId,
 		&u.AppliedTransactionId,
 		&u.ExpireAt,
-		&u.CreateAt,
+		&u.CreatedAt,
 		&u.UpdateAt,
 	)
 	if err != nil {

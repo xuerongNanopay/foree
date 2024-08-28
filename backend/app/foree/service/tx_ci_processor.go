@@ -340,7 +340,7 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 			MessageIdentification:          tx.Summary.NBPReference,
 			EndToEndIdentification:         tx.Summary.NBPReference,
 			CreditDebitIndicator:           "CRDT",
-			CreationDatetime:               (*scotia.ScotiaDatetime)(&tx.CreateAt),
+			CreationDatetime:               (*scotia.ScotiaDatetime)(&tx.CreatedAt),
 			PaymentExpiryDate:              (*scotia.ScotiaDatetime)(&expireDate),
 			SuppressResponderNotifications: p.scotiaProfile.supressResponderNotifications,
 			ReturnUrl:                      "string",

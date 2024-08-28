@@ -14,19 +14,19 @@ const (
 		SELECT
 			l.name, l.min_amt_amount, l.min_amt_currency,
 			l.max_amt_amount, l.max_amt_currency,, l.is_enable,
-			l.create_at, l.update_at
+			l.created_at, l.updated_at
 		FROM tx_limit l
 		where l.name = ?
 	`
 )
 
 type TxLimit struct {
-	Name     string           `json:"name"`
-	MinAmt   types.AmountData `json:"minLimit"`
-	MaxAmt   types.AmountData `json:"maxLimit"`
-	IsEnable bool             `json:"isEnable"`
-	CreateAt time.Time        `json:"createAt"`
-	UpdateAt time.Time        `json:"updateAt"`
+	Name      string           `json:"name"`
+	MinAmt    types.AmountData `json:"minLimit"`
+	MaxAmt    types.AmountData `json:"maxLimit"`
+	IsEnable  bool             `json:"isEnable"`
+	CreatedAt time.Time        `json:"createdAt"`
+	UpdateAt  time.Time        `json:"updatedAt"`
 }
 
 func (l *TxLimit) IsViolateLimit(amt types.AmountData) bool {
@@ -86,7 +86,7 @@ func scanRowIntoTxLimit(rows *sql.Rows) (*TxLimit, error) {
 		&l.MaxAmt.Amount,
 		&l.MaxAmt.Currency,
 		&l.IsEnable,
-		&l.CreateAt,
+		&l.CreatedAt,
 		&l.UpdateAt,
 	)
 	if err != nil {

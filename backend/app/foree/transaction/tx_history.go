@@ -18,7 +18,7 @@ const (
 	sQLTxHistoryGetAllByParentTxId = `
         SELECT
             h.id, h.stage, h.status, h.extra_info,
-            h.parent_tx_id, h.owner_id, h.create_at
+            h.parent_tx_id, h.owner_id, h.created_at
         FROM tx_history h
         where h.parent_tx_id = ?
     `
@@ -31,7 +31,7 @@ type TxHistory struct {
 	ExtraInfo  string    `json:"extraInfo"`
 	ParentTxId int64     `json:"parentTxId"`
 	OwnerId    int64     `json:"ownerId"`
-	CreateAt   time.Time `json:"createAt"`
+	CreatedAt  time.Time `json:"createdAt"`
 }
 
 func NewTxHistory(tx *ForeeTx, extraInfo string) *TxHistory {
@@ -41,7 +41,7 @@ func NewTxHistory(tx *ForeeTx, extraInfo string) *TxHistory {
 		ExtraInfo:  extraInfo,
 		ParentTxId: tx.ID,
 		OwnerId:    tx.OwnerId,
-		CreateAt:   time.Now(),
+		CreatedAt:  time.Now(),
 	}
 }
 
@@ -122,7 +122,7 @@ func scanRowIntoTxHistory(rows *sql.Rows) (*TxHistory, error) {
 		&tx.ExtraInfo,
 		&tx.ParentTxId,
 		&tx.OwnerId,
-		&tx.CreateAt,
+		&tx.CreatedAt,
 	)
 	if err != nil {
 		return nil, err

@@ -25,7 +25,7 @@ const (
 	sQLUserExtraGetUniqueByOwnerId = `
 		SELECT
 			u.id, u.pob, u.cor, u.nationality, u.occupation_category,
-			u.occupation_name, u.owner_id, u.create_at, u.update_at
+			u.occupation_name, u.owner_id, u.created_at, u.updated_at
 		FROM user_extra as u
 		WHERE u.owner_id = ?
 	`
@@ -39,8 +39,8 @@ type UserExtra struct {
 	OccupationCategory string    `json:"occupationCategory"`
 	OccupationName     string    `json:"occupationName"`
 	OwnerId            int64     `json:"ownerId"`
-	CreateAt           time.Time `json:"createAt"`
-	UpdateAt           time.Time `json:"updateAt"`
+	CreatedAt          time.Time `json:"createdAt"`
+	UpdateAt           time.Time `json:"updatedAt"`
 }
 
 func NewUserExtraRepo(db *sql.DB) *UserExtraRepo {
@@ -156,7 +156,7 @@ func scanRowIntoUserExtra(rows *sql.Rows) (*UserExtra, error) {
 		&u.OccupationCategory,
 		&u.OccupationName,
 		&u.OwnerId,
-		&u.CreateAt,
+		&u.CreatedAt,
 		&u.UpdateAt,
 	)
 	if err != nil {

@@ -26,7 +26,7 @@ type Session struct {
 	Ip              string            `json:"ip"`
 	LatestActiveAt  time.Time         `json:"latestActiveAt"`
 	ExpireAt        time.Time         `json:"expireAt"`
-	CreateAt        time.Time         `json:"createAt"`
+	CreatedAt       time.Time         `json:"createdAt"`
 }
 
 // 13 buckets, 1024 sesson of each bucket, and 12 hours session expiry
@@ -66,7 +66,7 @@ type SessionRepo struct {
 }
 
 func (repo *SessionRepo) InsertSession(session Session) (string, error) {
-	session.CreateAt = time.Now()
+	session.CreatedAt = time.Now()
 	session.LatestActiveAt = time.Now()
 	session.ExpireAt = time.Now().Add(time.Duration(time.Hour * time.Duration(repo.expireInHour)))
 

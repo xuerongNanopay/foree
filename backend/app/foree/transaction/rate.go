@@ -28,7 +28,7 @@ const (
 	    SELECT 
             r.id, r.src_amount, r.src_currency,
 			r.dest_amount, r.dest_currency, 
-			r.create_at, r.update_at
+			r.created_at, r.updated_at
         FROM rate r
         where t.id = ?
 	`
@@ -36,11 +36,11 @@ const (
 
 // ID format: {src_currency}-{dest_currency}
 type Rate struct {
-	ID       string           `json:"id"`
-	SrcAmt   types.AmountData `json:"srcAmt"`
-	DestAmt  types.AmountData `json:"destAmt"`
-	CreateAt time.Time        `json:"createAt"`
-	UpdateAt time.Time        `json:"updateAt"`
+	ID        string           `json:"id"`
+	SrcAmt    types.AmountData `json:"srcAmt"`
+	DestAmt   types.AmountData `json:"destAmt"`
+	CreatedAt time.Time        `json:"createdAt"`
+	UpdateAt  time.Time        `json:"updatedAt"`
 }
 
 func NewRateRepo(db *sql.DB) *RateRepo {
@@ -110,7 +110,7 @@ func scanRowIntoRate(rows *sql.Rows) (*Rate, error) {
 		&u.SrcAmt.Currency,
 		&u.DestAmt.Amount,
 		&u.DestAmt.Currency,
-		&u.CreateAt,
+		&u.CreatedAt,
 		&u.UpdateAt,
 	)
 	if err != nil {

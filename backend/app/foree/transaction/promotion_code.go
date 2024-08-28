@@ -13,7 +13,7 @@ const (
 	sQLPromoCodeGetUniqueByCode = `
 		SELECT
 			P.code, p.description, p.min_amount, p.min_currency, p.limit_per_acc,
-			p.is_enable, p.start_time, p.end_time, p.create_at, p.update_at
+			p.is_enable, p.start_time, p.end_time, p.created_at, p.updated_at
 		FROM promo_codes as p
 		Where p.code = ?
 	`
@@ -27,8 +27,8 @@ type PromoCode struct {
 	IsEnable    bool             `json:"isEnable"`
 	StartTime   time.Time        `json:"startTime"`
 	EndTime     time.Time        `json:"endTime"`
-	CreateAt    time.Time        `json:"createAt"`
-	UpdateAt    time.Time        `json:"updateAt"`
+	CreatedAt   time.Time        `json:"createdAt"`
+	UpdateAt    time.Time        `json:"updatedAt"`
 }
 
 func (p *PromoCode) IsValid() bool {
@@ -87,7 +87,7 @@ func scanRowIntoPromoCode(rows *sql.Rows) (*PromoCode, error) {
 		&p.IsEnable,
 		&p.StartTime,
 		&p.EndTime,
-		&p.CreateAt,
+		&p.CreatedAt,
 		&p.UpdateAt,
 	)
 	if err != nil {
@@ -112,7 +112,7 @@ const (
 	sQLPromoCodeJointGetAllActiveByOwnerAndPromoCode = `
 		SELECT
 			j.id, j.status, j.promo_code, j.owner_id,
-			j.transaction_id, f.create_at, f.update_at
+			j.transaction_id, f.created_at, f.updated_at
 		FROM promo_code_joint as j
 		WHERE j.owner_id = ? AND j.promo_code = ? AND j.status = INITIAL AND j.status = REDEEMED
 	`
@@ -132,8 +132,8 @@ type PromoCodeJoint struct {
 	PromoCode     string               `json:"promoCode"`
 	OwnerId       int64                `json:"ownerId"`
 	TransactionId int64                `json:"transactionId"`
-	CreateAt      time.Time            `json:"createAt"`
-	UpdateAt      time.Time            `json:"updateAt"`
+	CreatedAt     time.Time            `json:"createdAt"`
+	UpdateAt      time.Time            `json:"updatedAt"`
 }
 
 func NewPromoCodeJointRepo(db *sql.DB) *PromoCodeJointRepo {
@@ -226,7 +226,7 @@ func scanRowIntoPromoCodeJoint(rows *sql.Rows) (*PromoCodeJoint, error) {
 		&p.PromoCode,
 		&p.OwnerId,
 		&p.TransactionId,
-		&p.CreateAt,
+		&p.CreatedAt,
 		&p.UpdateAt,
 	)
 	if err != nil {

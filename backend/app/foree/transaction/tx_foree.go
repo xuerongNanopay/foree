@@ -37,7 +37,7 @@ const (
             t.total_reward_amount, t.total_reward_currency, 
             t.total_amount, t.total_currency,
 			t.cur_stage, t.cur_stage_status, t.transaction_purpose, t.conclusion,
-            t.owner_id, t.create_at, t.update_at
+            t.owner_id, t.created_at, t.updated_at
         FROM foree_tx t
         where t.id = ?
 	`
@@ -51,7 +51,7 @@ const (
 			t.total_reward_amount, t.total_reward_currency, 
 			t.total_amount, t.total_currency,
 			t.cur_stage, t.cur_stage_status, t.transaction_purpose, t.conclusion,
-			t.owner_id, t.create_at, t.update_at
+			t.owner_id, t.created_at, t.updated_at
 		FROM foree_tx t
 		where t.id = ?
 		FOR UPDATE
@@ -104,8 +104,8 @@ type ForeeTx struct {
 	TransactionPurpose string           `json:"transactionPurpose,omitempty"`
 	Conclusion         string           `json:"conclusion,omitempty"`
 	OwnerId            int64            `json:"ownerId,omitempty"`
-	CreateAt           time.Time        `json:"createAt,omitempty"`
-	UpdateAt           time.Time        `json:"updateAt,omitempty"`
+	CreatedAt          time.Time        `json:"createdAt,omitempty"`
+	UpdateAt           time.Time        `json:"updatedAt,omitempty"`
 
 	Ip              string                  `json:"ip,omitempty"`
 	UserAgent       string                  `json:"userAgent,omitempty"`
@@ -295,7 +295,7 @@ func scanRowIntoForeeTx(rows *sql.Rows) (*ForeeTx, error) {
 		&tx.TransactionPurpose,
 		&tx.Conclusion,
 		&tx.OwnerId,
-		&tx.CreateAt,
+		&tx.CreatedAt,
 		&tx.UpdateAt,
 	)
 	if err != nil {

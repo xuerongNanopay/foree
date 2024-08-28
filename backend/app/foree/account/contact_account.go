@@ -32,7 +32,7 @@ const (
 			a.last_name, a.address1, a.address2, a.city, a.province,
 			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
 			a.account_hash, a.relationship_to_contact, a.owner_id,
-			a.latest_activity_at, a.create_at, a.update_at
+			a.latest_activity_at, a.created_at, a.updated_at
 		FROM contact_accounts a
 		where a.id = ?
 	`
@@ -42,7 +42,7 @@ const (
 			a.last_name, a.address1, a.address2, a.city, a.province,
 			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
 			a.account_hash, a.relationship_to_contact, a.owner_id,
-			a.latest_activity_at, a.create_at, a.update_at
+			a.latest_activity_at, a.created_at, a.updated_at
 		FROM contact_accounts a
 		where a.owner_id = ? AND a.id = ? AND a.status = "ACTIVE"
 	`
@@ -52,7 +52,7 @@ const (
 			a.last_name, a.address1, a.address2, a.city, a.province,
 			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
 			a.account_hash, a.relationship_to_contact, a.owner_id,
-			a.latest_activity_at, a.create_at, a.update_at
+			a.latest_activity_at, a.created_at, a.updated_at
 		FROM contact_accounts a
 		where a.owner_id = ? AND a.status = "ACTIVE"
 		ORDER BY a.latest_activity_at DESC
@@ -63,7 +63,7 @@ const (
 			a.last_name, a.address1, a.address2, a.city, a.province,
 			a.country, a.postal_code, a.phone_number, a.institution_name, a.branch_number, a.account_number,
 			a.account_hash, a.relationship_to_contact, a.owner_id,
-			a.latest_activity_at, a.create_at, a.update_at
+			a.latest_activity_at, a.created_at, a.updated_at
 		FROM contact_accounts a
 		where a.owner_id = ? AND a.status = "ACTIVE"
 		LIMIT ? OFFSET ?
@@ -93,8 +93,8 @@ type ContactAccount struct {
 	RelationshipToContact string             `json:"relationshipToContact"`
 	OwnerId               int64              `json:"owerId"`
 	LatestActivityAt      time.Time          `json:"latestActivityAt"`
-	CreateAt              time.Time          `json:"createAt"`
-	UpdateAt              time.Time          `json:"updateAt"`
+	CreatedAt             time.Time          `json:"createdAt"`
+	UpdateAt              time.Time          `json:"updatedAt"`
 }
 
 func (c *ContactAccount) GetLegalName() string {
@@ -348,7 +348,7 @@ func scanRowIntoContactAccount(rows *sql.Rows) (*ContactAccount, error) {
 		&u.RelationshipToContact,
 		&u.OwnerId,
 		&u.LatestActivityAt,
-		&u.CreateAt,
+		&u.CreatedAt,
 		&u.UpdateAt,
 	)
 	if err != nil {

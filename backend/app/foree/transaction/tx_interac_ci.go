@@ -23,7 +23,7 @@ const (
             t.id, t.status, t.cash_in_acc_id,
             t.amount, t.currency, t.scotia_payment_id, 
 			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
-            t.parent_tx_id, t.owner_id, t.create_at, t.update_at
+            t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
         FROM interact_ci_tx t
         where t.id = ?
 
@@ -33,7 +33,7 @@ const (
             t.id, t.status, t.cash_in_acc_id,
             t.amount, t.currency, t.scotia_payment_id, 
 			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
-            t.parent_tx_id, t.owner_id, t.create_at, t.update_at
+            t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
         FROM interact_ci_tx t
         where t.parent_tx_id = ?
     `
@@ -42,7 +42,7 @@ const (
 			t.id, t.status, t.cash_in_acc_id,
 			t.amount, t.currency, t.scotia_payment_id, 
 			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
-			t.parent_tx_id, t.owner_id, t.create_at, t.update_at
+			t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
 		FROM interact_ci_tx t
 		where t.scotia_payment_id = ?
 		FOR UPDATE
@@ -52,7 +52,7 @@ const (
 			t.id, t.status, t.cash_in_acc_id,
 			t.amount, t.currency, t.scotia_payment_id, 
 			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
-			t.parent_tx_id, t.owner_id, t.create_at, t.update_at
+			t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
 		FROM interact_ci_tx t
 		where t.status = ?
 	`
@@ -77,8 +77,8 @@ type InteracCITx struct {
 	Amt                     types.AmountData        `json:"Amt"`
 	ParentTxId              int64                   `json:"parentTxId"`
 	OwnerId                 int64                   `json:"OwnerId"`
-	CreateAt                time.Time               `json:"createAt"`
-	UpdateAt                time.Time               `json:"updateAt"`
+	CreatedAt               time.Time               `json:"createdAt"`
+	UpdateAt                time.Time               `json:"updatedAt"`
 }
 
 func NewInteracCITxRepo(db *sql.DB) *InteracCITxRepo {
@@ -267,7 +267,7 @@ func scanRowIntoInteracCITx(rows *sql.Rows) (*InteracCITx, error) {
 		&tx.EndToEndId,
 		&tx.ParentTxId,
 		&tx.OwnerId,
-		&tx.CreateAt,
+		&tx.CreatedAt,
 		&tx.UpdateAt,
 	)
 	if err != nil {

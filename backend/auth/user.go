@@ -30,7 +30,7 @@ const (
 			u.id, u.status, u.first_name, u.middle_name, 
 			u.last_name, u.age, u.dob, u.address1, 
 			u.address2, u.city, u.province, u.country, u.postal_code, u.phone_number,
-			u.email, u.avatar_url, u.create_at, u.update_at
+			u.email, u.avatar_url, u.created_at, u.updated_at
 		FROM users as u 
 	`
 	sQLUserGetUniqueById = `
@@ -38,7 +38,7 @@ const (
 			u.id, u.status, u.first_name, u.middle_name, 
 			u.last_name, u.age, u.dob, u.address1, 
 			u.address2, u.city, u.province, u.country, u.postal_code, u.phone_number,
-			u.email, u.avatar_url, u.create_at, u.update_at
+			u.email, u.avatar_url, u.created_at, u.updated_at
 		FROM users as u 
 		WHERE u.id = ?
 	`
@@ -70,8 +70,8 @@ type User struct {
 	PhoneNumber string     `json:"phoneNumber"`
 	Email       string     `json:"email"`
 	AvatarUrl   string     `json:"avatarUrl"`
-	CreateAt    time.Time  `json:"createAt"`
-	UpdateAt    time.Time  `json:"updateAt"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	UpdateAt    time.Time  `json:"updatedAt"`
 }
 
 func NewUserRepo(db *sql.DB) *UserRepo {
@@ -255,7 +255,7 @@ func scanRowIntoUser(rows *sql.Rows) (*User, error) {
 		&u.PhoneNumber,
 		&u.Email,
 		&u.AvatarUrl,
-		&u.CreateAt,
+		&u.CreatedAt,
 		&u.UpdateAt,
 	)
 	if err != nil {

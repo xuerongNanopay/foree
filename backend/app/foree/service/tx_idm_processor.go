@@ -128,7 +128,7 @@ func (p *IDMTxProcessor) generateValidateTransferReq(tx transaction.ForeeTx) (*i
 		DestPhoneNumber:         tx.COUT.CashOutAcc.PhoneNumber,
 		SRRelationship:          tx.COUT.CashOutAcc.RelationshipToContact,
 		PurposeOfTransfer:       tx.TransactionPurpose,
-		TransactionCreationTime: tx.CreateAt.UnixMilli(),
+		TransactionCreationTime: tx.CreatedAt.UnixMilli(),
 		Amount:                  idm.IDMAmount(tx.SrcAmt.Amount),
 		Currency:                tx.SrcAmt.Currency,
 		PayoutAmount:            idm.IDMAmount(tx.DestAmt.Amount),

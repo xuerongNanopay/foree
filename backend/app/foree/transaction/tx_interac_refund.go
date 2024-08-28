@@ -24,14 +24,14 @@ const (
 	sQLInteracRefundTxGetUniqueById = `
 		SELECT
 			t.id, t.status, t.refund_interac_acc_id, t.parent_tx_id,
-			t.owner_id, t.create_at, t.update_at
+			t.owner_id, t.created_at, t.updated_at
 		FROM interac_refund_tx as t
 		WHERE t.id = ?
 	`
 	sQLInteracRefundTxGetUniqueByParentTxId = `
 		SELECT
 			t.id, t.status, t.refund_interac_acc_id, t.parent_tx_id,
-			t.owner_id, t.create_at, t.update_at
+			t.owner_id, t.created_at, t.updated_at
 		FROM interac_refund_tx as t
 		WHERE t.parent_tx_id = ?
 	`
@@ -50,8 +50,8 @@ type InteracRefundTx struct {
 	RefundInteracAccId int64          `json:"refundInteracAccId"`
 	ParentTxId         int64          `json:"parentTxId"`
 	OwnerId            int64          `json:"ownerId"`
-	CreateAt           time.Time      `json:"createAt"`
-	UpdateAt           time.Time      `json:"updateAt"`
+	CreatedAt          time.Time      `json:"createdAt"`
+	UpdateAt           time.Time      `json:"updatedAt"`
 
 	RefundInteracAcc *account.InteracAccount `json:"refundInteracAcc"`
 }
@@ -172,7 +172,7 @@ func scanRowInteracRefundTx(rows *sql.Rows) (*InteracRefundTx, error) {
 		&tx.RefundInteracAccId,
 		&tx.ParentTxId,
 		&tx.OwnerId,
-		&tx.CreateAt,
+		&tx.CreatedAt,
 		&tx.UpdateAt,
 	)
 	if err != nil {

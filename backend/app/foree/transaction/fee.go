@@ -17,7 +17,7 @@ const (
 			f.name, f.description, f.type, f.condition,
 			f.condition_amount, f.condition_currency,
 			f.ratio, f.is_apply_in_condition_amount_only
-			f.is_enable, f.create_at, f.update_at
+			f.is_enable, f.created_at, f.updated_at
 		FROM fees as f
 	`
 	sQLFeeGetUniqueByName = `
@@ -25,7 +25,7 @@ const (
 			f.name, f.description, f.type, f.condition,
 			f.condition_amount, f.condition_currency,
 			f.ratio, f.is_apply_in_condition_amount_only
-			f.is_enable, f.create_at, f.update_at
+			f.is_enable, f.created_at, f.updated_at
 		FROM fees as f
 		Where f.name = ?
 	`
@@ -39,7 +39,7 @@ const (
 	sQLFeeJointGetByTransactionId = `
 		SELECT
 			f.feeName, f.description, f.amount, f.currency,
-			f.transaction_id, f.owner_id, f.create_at, f.update_at
+			f.transaction_id, f.owner_id, f.created_at, f.updated_at
 		FROM fee_joint as f
 		Where f.transaction_id = ?
 	`
@@ -69,8 +69,8 @@ type Fee struct {
 	Ratio                     types.Amount     `json:"ratio"`
 	IsApplyInConditionAmtOnly bool             `json:"isApplyInConditionAmtOnly"` //TODO: support in future.
 	IsEnable                  bool             `json:"isEnable"`
-	CreateAt                  time.Time        `json:"createAt"`
-	UpdateAt                  time.Time        `json:"updateAt"`
+	CreatedAt                 time.Time        `json:"createdAt"`
+	UpdateAt                  time.Time        `json:"updatedAt"`
 }
 
 func (f *Fee) MaybeApplyFee(amt types.AmountData) (*FeeJoint, error) {
@@ -141,8 +141,8 @@ type FeeJoint struct {
 	Amt           types.AmountData `json:"amt"`
 	TransactionId int64            `json:"transactionId"`
 	OwnerId       int64            `json:"ownerId"`
-	CreateAt      time.Time        `json:"createAt"`
-	UpdateAt      time.Time        `json:"updateAt"`
+	CreatedAt     time.Time        `json:"createdAt"`
+	UpdateAt      time.Time        `json:"updatedAt"`
 }
 
 func NewFeeRepo(db *sql.DB) *FeeRepo {
@@ -282,7 +282,7 @@ func scanRowIntoFee(rows *sql.Rows) (*Fee, error) {
 		&u.Ratio,
 		&u.IsApplyInConditionAmtOnly,
 		&u.IsEnable,
-		&u.CreateAt,
+		&u.CreatedAt,
 		&u.UpdateAt,
 	)
 	if err != nil {
@@ -302,7 +302,7 @@ func scanRowIntoFeeJoint(rows *sql.Rows) (*FeeJoint, error) {
 		&u.Amt.Currency,
 		&u.TransactionId,
 		&u.OwnerId,
-		&u.CreateAt,
+		&u.CreatedAt,
 		&u.UpdateAt,
 	)
 	if err != nil {

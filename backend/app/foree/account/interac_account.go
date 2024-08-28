@@ -17,51 +17,51 @@ const (
 			address1, address2, city, province, country, postal_code,
 			phone_number, email, 
 			institution_name, branch_number, account_number,
-			owner_id, latest_acitvity_at
+			owner_id, latest_activity_at
 		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	sQLInteracAccountUpdateActiveByIdAndOwner = `
 		UPDATE interac_accounts SET 
-			status = ?, latest_acitvity_at = ?
-		WHERE id = ? AND a.owner_id = ? AND a.status = ACTIVE
+			status = ?, latest_activity_at = ?
+		WHERE id = ? AND a.owner_id = ? AND a.status = "ACTIVE"
 	`
 	sQLInteracAccountGetUniqueById = `
 		SELECT 
-			a.id, a.first_name, a.middle_name, a.last_name, 
+			a.id, a.status, a.first_name, a.middle_name, a.last_name, 
 			a.address1, a.address2, a.city, a.province, a.country, a.postal_code,
 			a.phone_number, a.email, a.institution_name, a.branch_number, a.account_number,
-			a.owner_id, a.status, a.latest_acitvity_at, a.create_at, a.update_at
+			a.owner_id, a.latest_activity_at, a.created_at, a.updated_at
 		FROM interac_accounts a
 		where a.id = ?
 	`
 	sQLInteracAccountGetUniqueActiveByOwnerAndId = `
 		SELECT 
-			a.id, a.first_name, a.middle_name, a.last_name, 
+			a.id, a.status, a.first_name, a.middle_name, a.last_name, 
 			a.address1, a.address2, a.city, a.province, a.country, a.postal_code,
 			a.phone_number, a.email, a.institution_name, a.branch_number, a.account_number,
-			a.owner_id, a.status, a.latest_acitvity_at, a.create_at, a.update_at
+			a.owner_id, a.latest_activity_at, a.created_at, a.updated_at
 		FROM interac_accounts a
-		where a.owner_id = ? AND a.id = ? AND a.status = ACTIVE
+		where a.owner_id = ? AND a.id = ? AND a.status = "ACTIVE"
 	`
 	sQLInteracAccountGetUniqueActiveForUPdateByOwnerAndId = `
 		SELECT 
-			a.id, a.first_name, a.middle_name, a.last_name, 
+			a.id, a.status, a.first_name, a.middle_name, a.last_name, 
 			a.address1, a.address2, a.city, a.province, a.country, a.postal_code,
 			a.phone_number, a.email, a.institution_name, a.branch_number, a.account_number,
-			a.owner_id, a.status, a.latest_acitvity_at, a.create_at, a.update_at
+			a.owner_id, a.latest_activity_at, a.created_at, a.updated_at
 		FROM interac_accounts a
-		where a.owner_id = ? AND a.id = ? AND a.status = ACTIVE
+		where a.owner_id = ? AND a.id = ? AND a.status = "ACTIVE"
 		FOR UPDATE
 	`
 	sQLInteracAccountGetAllActiveByOwnerId = `
 		SELECT 
-			a.id, a.first_name, a.middle_name, a.last_name, 
+			a.id, a.status, a.first_name, a.middle_name, a.last_name, 
 			a.address1, a.address2, a.city, a.province, a.country, a.postal_code,
 			a.phone_number, a.email, a.institution_name, a.branch_number, a.account_number,
-			a.owner_id, a.status, a.latest_acitvity_at, a.create_at, a.update_at
+			a.owner_id, a.latest_activity_at, a.created_at, a.updated_at
 		FROM interac_accounts a
-		where a.owner_id = ? AND a.status = ACTIVE
-		ORDER BY a.latest_acitvity_at DESC
+		where a.owner_id = ? AND a.status = "ACTIVE"
+		ORDER BY a.latest_activity_at DESC
 	`
 )
 
@@ -85,8 +85,8 @@ type InteracAccount struct {
 	OwnerId          int64         `json:"ownerId"`
 	Status           AccountStatus `json:"status"`
 	LatestActivityAt time.Time     `json:"latestActivityAt"`
-	CreateAt         time.Time     `json:"createAt"`
-	UpdateAt         time.Time     `json:"updateAt"`
+	CreatedAt        time.Time     `json:"createdAt"`
+	UpdateAt         time.Time     `json:"updatedAt"`
 }
 
 func (c *InteracAccount) GetLegalName() string {
@@ -303,6 +303,7 @@ func scanRowIntoInteracAccount(rows *sql.Rows) (*InteracAccount, error) {
 	u := new(InteracAccount)
 	err := rows.Scan(
 		&u.ID,
+		&u.Status,
 		&u.FirstName,
 		&u.MiddleName,
 		&u.LastName,
@@ -318,9 +319,8 @@ func scanRowIntoInteracAccount(rows *sql.Rows) (*InteracAccount, error) {
 		&u.BranchNumber,
 		&u.AccountNumber,
 		&u.OwnerId,
-		&u.Status,
 		&u.LatestActivityAt,
-		&u.CreateAt,
+		&u.CreatedAt,
 		&u.UpdateAt,
 	)
 	if err != nil {

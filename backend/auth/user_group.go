@@ -22,7 +22,7 @@ const (
 	sQLUserGroupGetUniqueByOwnerId = `
 		SELECT
 			u.id, u.role_group, u.transaction_limit_group,
-			u.owner_id, u.create_at, u.update_at
+			u.owner_id, u.created_at, u.updated_at
 		FROM user_group as u
 		WHERE u.owner_id = ?
 	`
@@ -33,8 +33,8 @@ type UserGroup struct {
 	RoleGroup             string    `json:"roleGroup"`
 	TransactionLimitGroup string    `json:"transactionLimitGroup"`
 	OwnerId               int64     `json:"ownerId"`
-	CreateAt              time.Time `json:"createAt"`
-	UpdateAt              time.Time `json:"updateAt"`
+	CreatedAt             time.Time `json:"createdAt"`
+	UpdateAt              time.Time `json:"updatedAt"`
 }
 
 func NewUserGroupRepo(db *sql.DB) *UserGroupRepo {
@@ -135,7 +135,7 @@ func scanRowIntoUserGroup(rows *sql.Rows) (*UserGroup, error) {
 		&u.RoleGroup,
 		&u.TransactionLimitGroup,
 		&u.OwnerId,
-		&u.CreateAt,
+		&u.CreatedAt,
 		&u.UpdateAt,
 	)
 	if err != nil {

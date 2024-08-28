@@ -10,7 +10,7 @@ const (
 	sQLConditionGetUniqueByName = `
 		SELECT 
 			p.name, p.limit, p.start_time, p.end_time,
-			p.is_enable, p.create_at, p.update_at
+			p.is_enable, p.created_at, p.updated_at
 		FROM conditions as p
 		WHERE p.name = ?
 	`
@@ -22,8 +22,8 @@ type Condition struct {
 	StartTime time.Time `json:"startTime"`
 	EndTime   time.Time `json:"endTime"`
 	IsEnable  bool      `json:"isEnable"`
-	CreateAt  time.Time `json:"createAt"`
-	UpdateAt  time.Time `json:"updateAt"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdateAt  time.Time `json:"updatedAt"`
 }
 
 func (c *Condition) Fulfill() bool {
@@ -83,7 +83,7 @@ func scanRowIntoCondition(rows *sql.Rows) (*Condition, error) {
 		&u.StartTime,
 		&u.EndTime,
 		&u.IsEnable,
-		&u.CreateAt,
+		&u.CreatedAt,
 		&u.UpdateAt,
 	)
 	if err != nil {

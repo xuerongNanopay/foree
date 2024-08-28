@@ -208,7 +208,7 @@ type TxSummaryDTO struct {
 	TotalAmount     string                      `json:"totalAmount,omitempty"`
 	TotalCurrency   string                      `json:"totalCurrency,omitempty"`
 	IsCancelAllowed bool                        `json:"isCancelAllowed,omitempty"`
-	CreateAt        time.Time                   `json:"createAt,omitempty"`
+	CreatedAt       time.Time                   `json:"createdAt,omitempty"`
 }
 
 func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
@@ -221,7 +221,7 @@ func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
 		TotalAmount:     tx.Rate,
 		TotalCurrency:   tx.TotalCurrency,
 		IsCancelAllowed: tx.IsCancelAllowed,
-		CreateAt:        tx.CreateAt,
+		CreatedAt:       tx.CreatedAt,
 	}
 }
 
@@ -245,7 +245,7 @@ type TxSummaryDetailDTO struct {
 	RewardAmount    types.Amount                `json:"rewardAmount,omitempty"`
 	RewardCurrency  string                      `json:"rewardCurrency,omitempty"`
 	IsCancelAllowed bool                        `json:"isCancelAllowed,omitempty"`
-	CreateAt        time.Time                   `json:"createAt,omitempty"`
+	CreatedAt       time.Time                   `json:"createdAt,omitempty"`
 }
 
 func NewTxSummaryDetailDTO(tx transaction.TxSummary) *TxSummaryDetailDTO {
@@ -269,7 +269,7 @@ func NewTxSummaryDetailDTO(tx transaction.TxSummary) *TxSummaryDetailDTO {
 		RewardAmount:    tx.RewardAmount,
 		RewardCurrency:  tx.RewardCurrency,
 		IsCancelAllowed: tx.IsCancelAllowed,
-		CreateAt:        tx.CreateAt,
+		CreatedAt:       tx.CreatedAt,
 	}
 }
 

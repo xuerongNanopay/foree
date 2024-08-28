@@ -23,14 +23,14 @@ const (
 	sQLIDMTxGetUniqueById = `
         SELECT 
             t.id, t.status, t.ip, t.user_agent, t.idm_reference, t.idm_result
-            t.parent_tx_id, t.owner_id, t.create_at, t.update_at
+            t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
         FROM idm_tx t
         where t.id = ?
     `
 	sQLIDMTxGetUniqueByParentTxId = `
         SELECT 
             t.id, t.status, t.ip, t.user_agent, t.idm_reference, t.idm_result
-            t.parent_tx_id, t.owner_id, t.create_at, t.update_at
+            t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
         FROM idm_tx t
         where t.parent_tx_id = ?
     `
@@ -44,7 +44,7 @@ const (
         SELECT 
             c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
             c.request_json, c.response_json,
-            c.create_at, c.update_at
+            c.created_at, c.updated_at
         FROM idm_tx c
         where c.id = ?
     `
@@ -52,7 +52,7 @@ const (
         SELECT 
             c.id, c.idm_tx_id, c.idm_http_status_code, c.idm_result, 
             c.request_json, c.response_json,
-            c.create_at, c.update_at
+            c.created_at, c.updated_at
         FROM idm_tx c
         where c.idm_tx_id = ?
     `
@@ -67,8 +67,8 @@ type IDMTx struct {
 	IDMResult    string    `json:"idmResult"`
 	ParentTxId   int64     `json:"parentTxId"`
 	OwnerId      int64     `json:"ownerId"`
-	CreateAt     time.Time `json:"createAt"`
-	UpdateAt     time.Time `json:"updateAt"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdateAt     time.Time `json:"updatedAt"`
 }
 
 // Large object.
@@ -79,8 +79,8 @@ type IDMCompliance struct {
 	IDMResult         string    `json:"idmResult"`
 	RequestJson       string    `json:"requestJson"`
 	ResponseJson      string    `json:"responseJson"`
-	CreateAt          time.Time `json:"createAt"`
-	UpdateAt          time.Time `json:"updateAt"`
+	CreatedAt         time.Time `json:"createdAt"`
+	UpdateAt          time.Time `json:"updatedAt"`
 }
 
 func NewIdmTxRepo(db *sql.DB) *IdmTxRepo {
@@ -203,7 +203,7 @@ func scanRowIntoIDMTx(rows *sql.Rows) (*IDMTx, error) {
 		&tx.IDMReference,
 		&tx.ParentTxId,
 		&tx.OwnerId,
-		&tx.CreateAt,
+		&tx.CreatedAt,
 		&tx.UpdateAt,
 	)
 	if err != nil {
@@ -297,7 +297,7 @@ func scanRowIntoIDMCompliance(rows *sql.Rows) (*IDMCompliance, error) {
 		&c.IDMResult,
 		&c.RequestJson,
 		&c.ResponseJson,
-		&c.CreateAt,
+		&c.CreatedAt,
 		&c.UpdateAt,
 	)
 	if err != nil {

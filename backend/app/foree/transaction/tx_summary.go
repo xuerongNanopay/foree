@@ -50,7 +50,7 @@ const (
             t.fee_amount, t.fee_currency, 
             t.reward_amount, t.reward_currency, 
             t.nbp_reference, t.is_cancel_allowed, t.parent_tx_id, t.owner_id, 
-            t.create_at, t.update_at
+            t.created_at, t.updated_at
         FROM tx_summary t
         where t.owner_id = ? and t.id = ?
     `
@@ -64,7 +64,7 @@ const (
             t.fee_amount, t.fee_currency, 
             t.reward_amount, t.reward_currency, 
             t.nbp_reference, t.is_cancel_allowed, t.parent_tx_id, t.owner_id, 
-            t.create_at, t.update_at
+            t.created_at, t.updated_at
         FROM tx_summary t
         where t.ParentTxId = ?
     `
@@ -78,10 +78,10 @@ const (
 	        t.fee_amount, t.fee_currency,
 	        t.reward_amount, t.reward_currency,
 	        t.nbp_reference, t.is_cancel_allowed, t.parent_tx_id, t.owner_id,
-	        t.create_at, t.update_at
+	        t.created_at, t.updated_at
 	    FROM tx_summary t
 	    where t.owner_id = ?
-	    ORDER BY t.create_at DESC
+	    ORDER BY t.created_at DESC
 	    LIMIT ? OFFSET ?
 	`
 	sQLTxSummaryQueryByOwnerId = `
@@ -94,10 +94,10 @@ const (
 	        t.fee_amount, t.fee_currency,
 	        t.reward_amount, t.reward_currency,
 	        t.nbp_reference, t.is_cancel_allowed, t.parent_tx_id, t.owner_id,
-	        t.create_at, t.update_at
+	        t.created_at, t.updated_at
 	    FROM tx_summary t
 	    where t.owner_id = ? AND t.status = ?
-	    ORDER BY t.create_at DESC
+	    ORDER BY t.created_at DESC
 	    LIMIT ? OFFSET ?
 	`
 )
@@ -127,8 +127,8 @@ type TxSummary struct {
 	IsCancelAllowed bool            `json:"isCancelAllowed"`
 	ParentTxId      int64           `json:"parentTxd"`
 	OwnerId         int64           `json:"owerId"`
-	CreateAt        time.Time       `json:"createAt"`
-	UpdateAt        time.Time       `json:"updateAt"`
+	CreatedAt       time.Time       `json:"createdAt"`
+	UpdateAt        time.Time       `json:"updatedAt"`
 }
 
 func NewTxSummaryRepo(db *sql.DB) *TxSummaryRepo {
@@ -348,7 +348,7 @@ func scanRowIntoTxSummary(rows *sql.Rows) (*TxSummary, error) {
 		&tx.IsCancelAllowed,
 		&tx.ParentTxId,
 		&tx.OwnerId,
-		&tx.CreateAt,
+		&tx.CreatedAt,
 		&tx.UpdateAt,
 	)
 	if err != nil {
