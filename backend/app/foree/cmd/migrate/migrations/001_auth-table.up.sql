@@ -215,13 +215,59 @@ CREATE TABLE IF NOT EXISTS rewards(
     `owner_id` BIGINT UNSIGNED NOT NULL,
     `expire_at` DATETIME,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS user_extra(
+    `id` SERIAL PRIMARY KEY,
+    `pob` VARCHAR(64),
+    `cor` VARCHAR(64),
+    `nationality` VARCHAR(64),
+    `occupation_category` VARCHAR(64),
+    `occupation_name` VARCHAR(128),
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS user_identifications(
+    `id` SERIAL PRIMARY KEY,
+    `status` VARCHAR(32) NOT NULL,
+    `type` VARCHAR(32),
+    `value` VARCHAR(64),
+    `link1` VARCHAR(256),
+    `link2` VARCHAR(256),
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
+
+
+CREATE TABLE IF NOT EXISTS referral(
+    `id` SERIAL PRIMARY KEY,
+    `referral_type` VARCHAR(32),
+    `referral_value` VARCHAR(256),
+    `referral_code` VARCHAR(256),
+    `referrer_id` BIGINT UNSIGNED NOT NULL,
+    `referee_id` BIGINT UNSIGNED,
+    `accept_at` DATETIME,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (referrer_id) REFERENCES users(id),
+    FOREIGN KEY (referee_id) REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS foree_tx(
     `id` SERIAL PRIMARY KEY,
-    `type` VARCHAR(64),
-    `status` VARCHAR(32),
+    `type` VARCHAR(64) NOT NULL,
+    `status` VARCHAR(32) NOT NULL,
     `cin_acc_id` BIGINT UNSIGNED NOT NULL,
     `cout_acc_id` BIGINT UNSIGNED NOT NULL,
     `rate` DECIMAL(7, 2) NOT NULL,
@@ -248,7 +294,7 @@ CREATE TABLE IF NOT EXISTS foree_tx(
 
 CREATE TABLE IF NOT EXISTS idm_tx(
     `id` SERIAL PRIMARY KEY,
-    `status` VARCHAR(64),
+    `status` VARCHAR(64) NOT NULL,
     `ip` VARCHAR(16),
     `user_agent` VARCHAR(256),
     `idm_reference` VARCHAR(64),
@@ -280,7 +326,7 @@ CREATE TABLE IF NOT EXISTS idm_compliance(
 
 CREATE TABLE IF NOT EXISTS interact_ci_tx(
     `id` SERIAL PRIMARY KEY,
-    `status` VARCHAR(64),
+    `status` VARCHAR(64) NOT NULL,
     `cash_in_acc_id` BIGINT UNSIGNED NOT NULL,
     `amount` DECIMAL(8, 2) NOT NULL,
     `currency` CHAR(3) NOT NULL,
@@ -300,7 +346,7 @@ CREATE TABLE IF NOT EXISTS interact_ci_tx(
 
 CREATE TABLE IF NOT EXISTS interac_refund_tx(
     `id` SERIAL PRIMARY KEY,
-    `status` VARCHAR(64),
+    `status` VARCHAR(64) NOT NULL,
     `refund_interac_acc_id` BIGINT UNSIGNED NOT NULL,
     `refund_amount` DECIMAL(8, 2) NOT NULL,
     `refund_currency` CHAR(3) NOT NULL,
