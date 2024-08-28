@@ -25,7 +25,7 @@ type Ticket struct {
 	ConcludedBy          int64        `json:"concludedBy"`
 	ConcludedAt          time.Time    `json:"concludedAt"`
 	CreatedAt            time.Time    `json:"createdAt"`
-	UpdateAt             time.Time    `json:"updatedAt"`
+	UpdatedAt            time.Time    `json:"updatedAt"`
 }
 
 type TicketRepo struct {

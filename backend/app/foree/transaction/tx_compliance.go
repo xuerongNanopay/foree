@@ -68,7 +68,7 @@ type IDMTx struct {
 	ParentTxId   int64     `json:"parentTxId"`
 	OwnerId      int64     `json:"ownerId"`
 	CreatedAt    time.Time `json:"createdAt"`
-	UpdateAt     time.Time `json:"updatedAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
 // Large object.
@@ -80,7 +80,7 @@ type IDMCompliance struct {
 	RequestJson       string    `json:"requestJson"`
 	ResponseJson      string    `json:"responseJson"`
 	CreatedAt         time.Time `json:"createdAt"`
-	UpdateAt          time.Time `json:"updatedAt"`
+	UpdatedAt         time.Time `json:"updatedAt"`
 }
 
 func NewIdmTxRepo(db *sql.DB) *IdmTxRepo {
@@ -204,7 +204,7 @@ func scanRowIntoIDMTx(rows *sql.Rows) (*IDMTx, error) {
 		&tx.ParentTxId,
 		&tx.OwnerId,
 		&tx.CreatedAt,
-		&tx.UpdateAt,
+		&tx.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -298,7 +298,7 @@ func scanRowIntoIDMCompliance(rows *sql.Rows) (*IDMCompliance, error) {
 		&c.RequestJson,
 		&c.ResponseJson,
 		&c.CreatedAt,
-		&c.UpdateAt,
+		&c.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

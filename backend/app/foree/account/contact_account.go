@@ -94,7 +94,7 @@ type ContactAccount struct {
 	OwnerId               int64              `json:"owerId"`
 	LatestActivityAt      time.Time          `json:"latestActivityAt"`
 	CreatedAt             time.Time          `json:"createdAt"`
-	UpdateAt              time.Time          `json:"updatedAt"`
+	UpdatedAt             time.Time          `json:"updatedAt"`
 }
 
 func (c *ContactAccount) GetLegalName() string {
@@ -349,7 +349,7 @@ func scanRowIntoContactAccount(rows *sql.Rows) (*ContactAccount, error) {
 		&u.OwnerId,
 		&u.LatestActivityAt,
 		&u.CreatedAt,
-		&u.UpdateAt,
+		&u.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

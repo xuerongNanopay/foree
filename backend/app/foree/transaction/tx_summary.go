@@ -128,7 +128,7 @@ type TxSummary struct {
 	ParentTxId      int64           `json:"parentTxd"`
 	OwnerId         int64           `json:"owerId"`
 	CreatedAt       time.Time       `json:"createdAt"`
-	UpdateAt        time.Time       `json:"updatedAt"`
+	UpdatedAt       time.Time       `json:"updatedAt"`
 }
 
 func NewTxSummaryRepo(db *sql.DB) *TxSummaryRepo {
@@ -349,7 +349,7 @@ func scanRowIntoTxSummary(rows *sql.Rows) (*TxSummary, error) {
 		&tx.ParentTxId,
 		&tx.OwnerId,
 		&tx.CreatedAt,
-		&tx.UpdateAt,
+		&tx.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

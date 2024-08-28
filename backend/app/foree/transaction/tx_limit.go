@@ -26,7 +26,7 @@ type TxLimit struct {
 	MaxAmt    types.AmountData `json:"maxLimit"`
 	IsEnable  bool             `json:"isEnable"`
 	CreatedAt time.Time        `json:"createdAt"`
-	UpdateAt  time.Time        `json:"updatedAt"`
+	UpdatedAt time.Time        `json:"updatedAt"`
 }
 
 func (l *TxLimit) IsViolateLimit(amt types.AmountData) bool {
@@ -87,7 +87,7 @@ func scanRowIntoTxLimit(rows *sql.Rows) (*TxLimit, error) {
 		&l.MaxAmt.Currency,
 		&l.IsEnable,
 		&l.CreatedAt,
-		&l.UpdateAt,
+		&l.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

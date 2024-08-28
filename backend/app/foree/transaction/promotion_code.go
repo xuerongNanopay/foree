@@ -28,7 +28,7 @@ type PromoCode struct {
 	StartTime   time.Time        `json:"startTime"`
 	EndTime     time.Time        `json:"endTime"`
 	CreatedAt   time.Time        `json:"createdAt"`
-	UpdateAt    time.Time        `json:"updatedAt"`
+	UpdatedAt   time.Time        `json:"updatedAt"`
 }
 
 func (p *PromoCode) IsValid() bool {
@@ -88,7 +88,7 @@ func scanRowIntoPromoCode(rows *sql.Rows) (*PromoCode, error) {
 		&p.StartTime,
 		&p.EndTime,
 		&p.CreatedAt,
-		&p.UpdateAt,
+		&p.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ type PromoCodeJoint struct {
 	OwnerId       int64                `json:"ownerId"`
 	TransactionId int64                `json:"transactionId"`
 	CreatedAt     time.Time            `json:"createdAt"`
-	UpdateAt      time.Time            `json:"updatedAt"`
+	UpdatedAt     time.Time            `json:"updatedAt"`
 }
 
 func NewPromoCodeJointRepo(db *sql.DB) *PromoCodeJointRepo {
@@ -227,7 +227,7 @@ func scanRowIntoPromoCodeJoint(rows *sql.Rows) (*PromoCodeJoint, error) {
 		&p.OwnerId,
 		&p.TransactionId,
 		&p.CreatedAt,
-		&p.UpdateAt,
+		&p.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

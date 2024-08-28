@@ -106,7 +106,7 @@ type ForeeTx struct {
 	Conclusion         string           `json:"conclusion,omitempty"`
 	OwnerId            int64            `json:"ownerId,omitempty"`
 	CreatedAt          time.Time        `json:"createdAt,omitempty"`
-	UpdateAt           time.Time        `json:"updatedAt,omitempty"`
+	UpdatedAt          time.Time        `json:"updatedAt,omitempty"`
 
 	Ip              string                  `json:"ip,omitempty"`
 	UserAgent       string                  `json:"userAgent,omitempty"`
@@ -297,7 +297,7 @@ func scanRowIntoForeeTx(rows *sql.Rows) (*ForeeTx, error) {
 		&tx.Conclusion,
 		&tx.OwnerId,
 		&tx.CreatedAt,
-		&tx.UpdateAt,
+		&tx.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

@@ -57,7 +57,7 @@ type UserIdentification struct {
 	ExpiredAt time.Time                `json:"expiredAt"`
 	OwnerId   int64                    `json:"ownerId"`
 	CreatedAt time.Time                `json:"createdAt"`
-	UpdateAt  time.Time                `json:"updatedAt"`
+	UpdatedAt time.Time                `json:"updatedAt"`
 }
 
 func NewUserIdentificationRepo(db *sql.DB) *UserIdentificationRepo {
@@ -155,7 +155,7 @@ func scanRowIntoUserIdentification(rows *sql.Rows) (*UserIdentification, error) 
 		&u.Link2,
 		&u.OwnerId,
 		&u.CreatedAt,
-		&u.UpdateAt,
+		&u.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

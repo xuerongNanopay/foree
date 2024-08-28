@@ -51,7 +51,7 @@ type InteracRefundTx struct {
 	ParentTxId         int64          `json:"parentTxId"`
 	OwnerId            int64          `json:"ownerId"`
 	CreatedAt          time.Time      `json:"createdAt"`
-	UpdateAt           time.Time      `json:"updatedAt"`
+	UpdatedAt          time.Time      `json:"updatedAt"`
 
 	RefundInteracAcc *account.InteracAccount `json:"refundInteracAcc"`
 }
@@ -173,7 +173,7 @@ func scanRowInteracRefundTx(rows *sql.Rows) (*InteracRefundTx, error) {
 		&tx.ParentTxId,
 		&tx.OwnerId,
 		&tx.CreatedAt,
-		&tx.UpdateAt,
+		&tx.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

@@ -40,7 +40,7 @@ type UserExtra struct {
 	OccupationName     string    `json:"occupationName"`
 	OwnerId            int64     `json:"ownerId"`
 	CreatedAt          time.Time `json:"createdAt"`
-	UpdateAt           time.Time `json:"updatedAt"`
+	UpdatedAt          time.Time `json:"updatedAt"`
 }
 
 func NewUserExtraRepo(db *sql.DB) *UserExtraRepo {
@@ -157,7 +157,7 @@ func scanRowIntoUserExtra(rows *sql.Rows) (*UserExtra, error) {
 		&u.OccupationName,
 		&u.OwnerId,
 		&u.CreatedAt,
-		&u.UpdateAt,
+		&u.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

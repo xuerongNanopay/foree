@@ -86,7 +86,7 @@ type InteracAccount struct {
 	Status           AccountStatus `json:"status"`
 	LatestActivityAt time.Time     `json:"latestActivityAt"`
 	CreatedAt        time.Time     `json:"createdAt"`
-	UpdateAt         time.Time     `json:"updatedAt"`
+	UpdatedAt        time.Time     `json:"updatedAt"`
 }
 
 func (c *InteracAccount) GetLegalName() string {
@@ -321,7 +321,7 @@ func scanRowIntoInteracAccount(rows *sql.Rows) (*InteracAccount, error) {
 		&u.OwnerId,
 		&u.LatestActivityAt,
 		&u.CreatedAt,
-		&u.UpdateAt,
+		&u.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

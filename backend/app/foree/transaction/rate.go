@@ -40,7 +40,7 @@ type Rate struct {
 	SrcAmt    types.AmountData `json:"srcAmt"`
 	DestAmt   types.AmountData `json:"destAmt"`
 	CreatedAt time.Time        `json:"createdAt"`
-	UpdateAt  time.Time        `json:"updatedAt"`
+	UpdatedAt time.Time        `json:"updatedAt"`
 }
 
 func NewRateRepo(db *sql.DB) *RateRepo {
@@ -111,7 +111,7 @@ func scanRowIntoRate(rows *sql.Rows) (*Rate, error) {
 		&u.DestAmt.Amount,
 		&u.DestAmt.Currency,
 		&u.CreatedAt,
-		&u.UpdateAt,
+		&u.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

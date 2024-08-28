@@ -65,7 +65,7 @@ type Approval struct {
 	ConcludedBy          int64          `json:"concludedBy"`
 	ConcludedAt          time.Time      `json:"concludedAt"`
 	CreatedAt            time.Time      `json:"createdAt"`
-	UpdateAt             time.Time      `json:"updatedAt"`
+	UpdatedAt            time.Time      `json:"updatedAt"`
 }
 
 type ApprovalRepo struct {
@@ -193,7 +193,7 @@ func scanRowIntoApproval(rows *sql.Rows) (*Approval, error) {
 		&i.ConcludedBy,
 		&i.ConcludedAt,
 		&i.CreatedAt,
-		&i.UpdateAt,
+		&i.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

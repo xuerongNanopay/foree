@@ -71,7 +71,7 @@ type Fee struct {
 	IsApplyInConditionAmtOnly bool             `json:"isApplyInConditionAmtOnly"` //TODO: support in future.
 	IsEnable                  bool             `json:"isEnable"`
 	CreatedAt                 time.Time        `json:"createdAt"`
-	UpdateAt                  time.Time        `json:"updatedAt"`
+	UpdatedAt                 time.Time        `json:"updatedAt"`
 }
 
 func (f *Fee) MaybeApplyFee(amt types.AmountData) (*FeeJoint, error) {
@@ -143,7 +143,7 @@ type FeeJoint struct {
 	TransactionId int64            `json:"transactionId"`
 	OwnerId       int64            `json:"ownerId"`
 	CreatedAt     time.Time        `json:"createdAt"`
-	UpdateAt      time.Time        `json:"updatedAt"`
+	UpdatedAt     time.Time        `json:"updatedAt"`
 }
 
 func NewFeeRepo(db *sql.DB) *FeeRepo {
@@ -285,7 +285,7 @@ func scanRowIntoFee(rows *sql.Rows) (*Fee, error) {
 		&u.IsApplyInConditionAmtOnly,
 		&u.IsEnable,
 		&u.CreatedAt,
-		&u.UpdateAt,
+		&u.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -305,7 +305,7 @@ func scanRowIntoFeeJoint(rows *sql.Rows) (*FeeJoint, error) {
 		&u.TransactionId,
 		&u.OwnerId,
 		&u.CreatedAt,
-		&u.UpdateAt,
+		&u.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

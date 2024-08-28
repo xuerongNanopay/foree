@@ -71,7 +71,7 @@ type User struct {
 	Email       string     `json:"email"`
 	AvatarUrl   string     `json:"avatarUrl"`
 	CreatedAt   time.Time  `json:"createdAt"`
-	UpdateAt    time.Time  `json:"updatedAt"`
+	UpdatedAt   time.Time  `json:"updatedAt"`
 }
 
 func NewUserRepo(db *sql.DB) *UserRepo {
@@ -256,7 +256,7 @@ func scanRowIntoUser(rows *sql.Rows) (*User, error) {
 		&u.Email,
 		&u.AvatarUrl,
 		&u.CreatedAt,
-		&u.UpdateAt,
+		&u.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

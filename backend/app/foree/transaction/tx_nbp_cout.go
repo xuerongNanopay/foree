@@ -52,7 +52,7 @@ type NBPCOTx struct {
 	ParentTxId   int64                   `json:"parentTxId"`
 	OwnerId      int64                   `json:"OwnerId"`
 	CreatedAt    time.Time               `json:"createdAt"`
-	UpdateAt     time.Time               `json:"updatedAt"`
+	UpdatedAt    time.Time               `json:"updatedAt"`
 }
 
 func NewNBPCOTxRepo(db *sql.DB) *NBPCOTxRepo {
@@ -180,7 +180,7 @@ func scanRowIntoNBPCOTx(rows *sql.Rows) (*NBPCOTx, error) {
 		&tx.ParentTxId,
 		&tx.OwnerId,
 		&tx.CreatedAt,
-		&tx.UpdateAt,
+		&tx.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

@@ -43,7 +43,7 @@ type DailyTxLimit struct {
 	UsedAmt   types.AmountData `json:"usedAmt"`
 	MaxAmt    types.AmountData `json:"maxAmt"`
 	CreatedAt time.Time        `json:"createdAt"`
-	UpdateAt  time.Time        `json:"updatedAt"`
+	UpdatedAt time.Time        `json:"updatedAt"`
 }
 
 func NewDailyTxLimitRepo(db *sql.DB) *DailyTxLimitRepo {
@@ -140,7 +140,7 @@ func scanRowIntoDailyTxLimit(rows *sql.Rows) (*DailyTxLimit, error) {
 		&tx.MaxAmt.Amount,
 		&tx.MaxAmt.Currency,
 		&tx.CreatedAt,
-		&tx.UpdateAt,
+		&tx.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

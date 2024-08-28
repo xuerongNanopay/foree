@@ -53,7 +53,7 @@ type Referral struct {
 	ReferreeId    int64        `json:"referreeId"`
 	AcceptAt      time.Time    `json:"acceptAt"`
 	CreatedAt     time.Time    `json:"createdAt"`
-	UpdateAt      time.Time    `json:"updatedAt"`
+	UpdatedAt     time.Time    `json:"updatedAt"`
 }
 
 func NewReferralRepo(db *sql.DB) *ReferralRepo {
@@ -155,7 +155,7 @@ func scanRowIntoReferral(rows *sql.Rows) (*Referral, error) {
 		&u.ReferreeId,
 		&u.AcceptAt,
 		&u.CreatedAt,
-		&u.UpdateAt,
+		&u.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

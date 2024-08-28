@@ -23,7 +23,7 @@ type Condition struct {
 	EndTime   time.Time `json:"endTime"`
 	IsEnable  bool      `json:"isEnable"`
 	CreatedAt time.Time `json:"createdAt"`
-	UpdateAt  time.Time `json:"updatedAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 func (c *Condition) Fulfill() bool {
@@ -84,7 +84,7 @@ func scanRowIntoCondition(rows *sql.Rows) (*Condition, error) {
 		&u.EndTime,
 		&u.IsEnable,
 		&u.CreatedAt,
-		&u.UpdateAt,
+		&u.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

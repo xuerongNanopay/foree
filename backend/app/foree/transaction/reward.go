@@ -76,7 +76,7 @@ type Reward struct {
 	AppliedTransactionId int64            `json:"appliedTransactionId"`
 	ExpireAt             time.Time        `json:"expireAt"`
 	CreatedAt            time.Time        `json:"createdAt"`
-	UpdateAt             time.Time        `json:"updatedAt"`
+	UpdatedAt            time.Time        `json:"updatedAt"`
 }
 
 func NewRewardRepo(db *sql.DB) *RewardRepo {
@@ -225,7 +225,7 @@ func scanRowIntoReward(rows *sql.Rows) (*Reward, error) {
 		&u.AppliedTransactionId,
 		&u.ExpireAt,
 		&u.CreatedAt,
-		&u.UpdateAt,
+		&u.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
