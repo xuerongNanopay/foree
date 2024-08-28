@@ -26,6 +26,7 @@ type TxProcessor struct {
 	foreeTxRepo         *transaction.ForeeTxRepo
 	interacRefundTxRepo *transaction.InteracRefundTxRepo
 	rewardRepo          *transaction.RewardRepo
+	dailyTxLimiteRepo   *transaction.DailyTxLimitRepo
 	userRepo            *auth.UserRepo
 	contactRepo         *account.ContactAccountRepo
 	interacRepo         *account.InteracAccountRepo
@@ -521,6 +522,26 @@ func (p *TxProcessor) MaybeRefund(ctx context.Context, fTx transaction.ForeeTx) 
 	}
 
 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+
+	foreeTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.ID)
+	if err != nil {
+		dTx.Rollback()
+		//TODO: log err
+		return
+	}
+
+	if foreeTx.Status != transaction.TxStatusCancelled && foreeTx.Status != transaction.TxStatusRejected {
+		dTx.Rollback()
+		//TODO: log err
+		return
+	}
+
+	if foreeTx.CurStage == transaction.TxStageRefund {
+		dTx.Rollback()
+		//TODO: double refund.
+		return
+	}
+
 	rewards, err := p.rewardRepo.GetAllRewardByAppliedTransactionId(ctx, fTx.ID)
 	if err != nil {
 		dTx.Rollback()
@@ -546,6 +567,23 @@ func (p *TxProcessor) MaybeRefund(ctx context.Context, fTx transaction.ForeeTx) 
 		}
 	}
 
+	// Refund limit.
+	reference := transaction.GenerateDailyTxLimitReference(fTx.ID)
+	dailyLimit, err := p.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, reference)
+	if err != nil {
+		dTx.Rollback()
+		//TODO: Log error
+		return
+	}
+
+	dailyLimit.UsedAmt.Amount += fTx.SrcAmt.Amount
+
+	if err := p.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
+		dTx.Rollback()
+		//TODO: Log error
+		return
+	}
+
 	// Create refund transaction
 	if fTx.CI.Status == transaction.TxStatusCompleted {
 		_, err := p.interacRefundTxRepo.InsertInteracRefundTx(ctx, transaction.InteracRefundTx{
@@ -559,6 +597,14 @@ func (p *TxProcessor) MaybeRefund(ctx context.Context, fTx transaction.ForeeTx) 
 			//TODO: Log error
 			return
 		}
+	}
+
+	fTx.CurStage = transaction.TxStageRefund
+
+	if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
+		dTx.Rollback()
+		//TODO: Log error
+		return
 	}
 
 	if err = dTx.Commit(); err != nil {
