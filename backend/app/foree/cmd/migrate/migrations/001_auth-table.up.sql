@@ -174,3 +174,31 @@ CREATE TABLE IF NOT EXISTS rewards(
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS user_extra(
+    `id` SERIAL PRIMARY KEY,
+    `pob` VARCHAR(64),
+    `cor` VARCHAR(64),
+    `nationality` VARCHAR(64),
+    `occupation_category` VARCHAR(64),
+    `occupation_name` VARCHAR(128),
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS user_identifications(
+    `id` SERIAL PRIMARY KEY,
+    `status` VARCHAR(32),
+    `type` VARCHAR(32),
+    `value` VARCHAR(64),
+    `link1` VARCHAR(256),
+    `link2` VARCHAR(256),
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);

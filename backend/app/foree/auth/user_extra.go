@@ -13,7 +13,7 @@ const (
 		INSERT INTO user_extra
 		(
 			pob, cor, nationality, occupation_category, 
-			occupation_name, ower_id
+			occupation_name, owner_id
 		) VALUES(?,?,?,?,?,?)
 	`
 	sQLUserExtraUpdate = `
