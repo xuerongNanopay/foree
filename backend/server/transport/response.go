@@ -15,9 +15,16 @@ package transport
 // 403 Forbidden: The client does not have access rights to the content
 // 503 Service Unavailable
 
-type HTTPResponse struct {
+type HttpResponse struct {
 	StatusCode int    `json:"statusCode"`
 	Message    string `json:"message"`
 	Data       any    `json:"data"`
-	Error      any    `json:"error"`
+}
+
+func NewHttpResponse(statusCode int, message string, data any) *HttpResponse {
+	return &HttpResponse{
+		StatusCode: statusCode,
+		Message:    message,
+		Data:       data,
+	}
 }

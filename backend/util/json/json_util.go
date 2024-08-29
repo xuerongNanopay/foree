@@ -6,9 +6,15 @@ import (
 	"net/http"
 )
 
-func ParseJsonFromHttpRequest(r *http.Request, payload any) error {
+func DeserializeJsonFromHttpRequest(r *http.Request, payload any) error {
 	if r.Body == nil {
 		return fmt.Errorf("missing request body")
 	}
 	return json.NewDecoder(r.Body).Decode(payload)
+}
+
+func SerializeToResponseWriter(w http.ResponseWriter, status int, v any) error {
+	w.WriteHeader(status)
+
+	return json.NewEncoder(w).Encode(v)
 }

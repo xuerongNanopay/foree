@@ -191,6 +191,6 @@ func NewInteralServerError(format string, a ...any) *InteralServerError {
 	return &InteralServerError{
 		StatusCode:    http.StatusInternalServerError,
 		Message:       "Internal Server Error",
-		OriginalError: fmt.Errorf("unable to get user with id: `%v`", a),
+		OriginalError: fmt.Errorf(format, a...),
 	}
 }
