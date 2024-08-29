@@ -17,12 +17,12 @@ func RestGetWrapper[P any, Q any](f func(context.Context, P) (Q, transport.HErro
 
 func RestPostWrapper[P any, Q any](
 	handler func(context.Context, P) (Q, transport.HError),
-	afterHandler func(Q, transport.HError), isAsyncAfter bool,
+	afterHandler func(P, Q, transport.HError), isAsyncAfter bool,
 	customeWriter func(http.ResponseWriter) http.ResponseWriter,
 ) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var req P
 		resp, herr := func() (Q, transport.HError) {
-			var req P
 			if err := json_util.DeserializeJsonFromHttpRequest(r, &req); err != nil {
 				var nilResp Q
 				return nilResp, transport.WrapInteralServerError(err)
@@ -35,9 +35,9 @@ func RestPostWrapper[P any, Q any](
 		}()
 
 		if isAsyncAfter {
-			go afterHandler(resp, herr)
+			go afterHandler(req, resp, herr)
 		} else {
-			afterHandler(resp, herr)
+			afterHandler(req, resp, herr)
 		}
 
 		w.Header().Add("Content-Type", "application/json")
