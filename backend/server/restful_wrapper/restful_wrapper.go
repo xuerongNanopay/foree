@@ -15,7 +15,11 @@ func RestGetWrapper[P any, Q any](f func(context.Context, P) (Q, transport.HErro
 	}
 }
 
-func RestPostWrapper[P any, Q any](handler func(context.Context, P) (Q, transport.HError), afterHandler func(Q, transport.HError), isAsyncAfter bool) func(http.ResponseWriter, *http.Request) {
+func RestPostWrapper[P any, Q any](
+	handler func(context.Context, P) (Q, transport.HError),
+	afterHandler func(Q, transport.HError), isAsyncAfter bool,
+	customeWriter func(http.ResponseWriter) http.ResponseWriter,
+) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		resp, herr := func() (Q, transport.HError) {
 			var req P
@@ -24,7 +28,6 @@ func RestPostWrapper[P any, Q any](handler func(context.Context, P) (Q, transpor
 				return nilResp, transport.WrapInteralServerError(err)
 			}
 
-			//TODO: get session and inject into req
 			sessionId := r.Header.Get("SESSION_ID")
 			reflect_util.SetStringValueIfFieldExist(&req, "SessionId", sessionId)
 
@@ -38,13 +41,18 @@ func RestPostWrapper[P any, Q any](handler func(context.Context, P) (Q, transpor
 		}
 
 		w.Header().Add("Content-Type", "application/json")
+		w = customeWriter(w)
 
+		var err error
 		if herr != nil {
-			w.WriteHeader(herr.GetStatusCode())
-			json_util.SerializeToResponseWriter(w, herr.GetStatusCode(), herr)
+			err = json_util.SerializeToResponseWriter(w, herr.GetStatusCode(), herr)
 		} else {
-			w.WriteHeader(http.StatusOK)
-			json_util.SerializeToResponseWriter(w, http.StatusOK, transport.NewHttpResponse(http.StatusOK, "Success", resp))
+			err = json_util.SerializeToResponseWriter(w, http.StatusOK, transport.NewHttpResponse(http.StatusOK, "Success", resp))
+		}
+
+		if err != nil {
+			//TODO: log error
+			return
 		}
 	}
 }

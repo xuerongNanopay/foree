@@ -188,9 +188,10 @@ func WrapInteralServerError(e error) *InteralServerError {
 }
 
 func NewInteralServerError(format string, a ...any) *InteralServerError {
+	e := fmt.Errorf(format, a...)
 	return &InteralServerError{
 		StatusCode:    http.StatusInternalServerError,
 		Message:       "Internal Server Error",
-		OriginalError: fmt.Errorf(format, a...),
+		OriginalError: e,
 	}
 }
