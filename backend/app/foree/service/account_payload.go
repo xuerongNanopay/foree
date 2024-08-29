@@ -6,8 +6,8 @@ import (
 
 	"xue.io/go-pay/app/foree/account"
 	foree_constant "xue.io/go-pay/app/foree/constant"
-	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/auth"
+	"xue.io/go-pay/server/transport"
 )
 
 func generateInteracAddressFromUser(user *auth.User) string {

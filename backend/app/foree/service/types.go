@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"xue.io/go-pay/app/foree/transport"
+	"xue.io/go-pay/server/transport"
 )
 
 // TODO: testing

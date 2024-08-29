@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
-	"xue.io/go-pay/app/foree/transport"
+	"xue.io/go-pay/server/transport"
 )
 
 type AccountService struct {

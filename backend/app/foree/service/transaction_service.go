@@ -10,10 +10,10 @@ import (
 	"xue.io/go-pay/app/foree/account"
 	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
-	"xue.io/go-pay/app/foree/transport"
 	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
+	"xue.io/go-pay/server/transport"
 )
 
 var (
