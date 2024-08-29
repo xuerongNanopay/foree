@@ -21,12 +21,3 @@ type HTTPResponse struct {
 	Data       any    `json:"data"`
 	Error      any    `json:"error"`
 }
-
-type ForeeRequest interface {
-	TrimSpace()
-	Validate() *BadRequestError
-}
-
-type SessionReq struct {
-	SessionId string
-}
