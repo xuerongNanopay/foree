@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func ParseJSON(r *http.Request, payload any) error {
+func ParseJsonFromHttpRequest(r *http.Request, payload any) error {
 	if r.Body == nil {
 		return fmt.Errorf("missing request body")
 	}
