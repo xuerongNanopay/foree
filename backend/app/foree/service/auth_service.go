@@ -24,7 +24,7 @@ type AuthService struct {
 
 // Any error should return 503
 // TODO: DB Transaction.
-func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session, transport.ForeeError) {
+func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session, transport.HError) {
 	// Check if email already exists.
 	oldEmail, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
 	if err != nil {
@@ -102,7 +102,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 	return session, nil
 }
 
-func (a *AuthService) allowVerifyEmail(sessionId string) (*auth.Session, transport.ForeeError) {
+func (a *AuthService) allowVerifyEmail(sessionId string) (*auth.Session, transport.HError) {
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	if session == nil || session.EmailPasswd == nil {
 		return nil, transport.NewPreconditionRequireError(
@@ -120,7 +120,7 @@ func (a *AuthService) allowVerifyEmail(sessionId string) (*auth.Session, transpo
 	return session, nil
 }
 
-func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*auth.Session, transport.ForeeError) {
+func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*auth.Session, transport.HError) {
 	// Check Allow to VerifyEmail
 	session, err := a.allowVerifyEmail(req.SessionId)
 	if err != nil {
@@ -159,7 +159,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*aut
 	return session, nil
 }
 
-func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.SessionReq) transport.ForeeError {
+func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.SessionReq) transport.HError {
 	// Check Allow to VerifyEmail
 	session, err := a.allowVerifyEmail(req.SessionId)
 	if err != nil {
@@ -196,7 +196,7 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 	return nil
 }
 
-func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transport.ForeeError) {
+func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transport.HError) {
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	if session == nil || session.EmailPasswd == nil {
 		return nil, transport.NewPreconditionRequireError(
@@ -222,7 +222,7 @@ func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transpor
 	return session, nil
 }
 
-func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.Session, transport.ForeeError) {
+func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.Session, transport.HError) {
 	// Check allow to create user
 	session, err := a.allowCreateUser(req.SessionId)
 	if err != nil {
@@ -323,7 +323,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	return updateSession, nil
 }
 
-func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, transport.ForeeError) {
+func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, transport.HError) {
 	// Delete previous token if exists.
 	a.sessionRepo.Delete(req.SessionId)
 
@@ -402,7 +402,7 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 
 // }
 
-func (a *AuthService) Logout(ctx context.Context, session transport.SessionReq) transport.ForeeError {
+func (a *AuthService) Logout(ctx context.Context, session transport.SessionReq) transport.HError {
 	a.sessionRepo.Delete(session.SessionId)
 	return transport.NewPreconditionRequireError(
 		transport.PreconditionRequireMsgLogin,
@@ -410,7 +410,7 @@ func (a *AuthService) Logout(ctx context.Context, session transport.SessionReq) 
 	)
 }
 
-func (a *AuthService) GetUser(ctx context.Context, req transport.SessionReq) (*UserDTO, transport.ForeeError) {
+func (a *AuthService) GetUser(ctx context.Context, req transport.SessionReq) (*UserDTO, transport.HError) {
 	session, sErr := a.VerifySession(ctx, req.SessionId)
 	if sErr != nil {
 		return nil, sErr
@@ -419,7 +419,7 @@ func (a *AuthService) GetUser(ctx context.Context, req transport.SessionReq) (*U
 	return NewUserDTO(session.User), nil
 }
 
-func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) transport.ForeeError {
+func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) transport.HError {
 	session, err := a.VerifySession(ctx, req.SessionId)
 	if err != nil {
 		return err
@@ -439,7 +439,7 @@ func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) tra
 	return nil
 }
 
-func (a *AuthService) Authorize(ctx context.Context, sessionId string, permission string) (*auth.Session, transport.ForeeError) {
+func (a *AuthService) Authorize(ctx context.Context, sessionId string, permission string) (*auth.Session, transport.HError) {
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	err := verifySession(session)
 	if err != nil {
@@ -454,7 +454,7 @@ func (a *AuthService) Authorize(ctx context.Context, sessionId string, permissio
 	return nil, transport.NewForbiddenError(permission)
 }
 
-func (a *AuthService) VerifySession(ctx context.Context, sessionId string) (*auth.Session, transport.ForeeError) {
+func (a *AuthService) VerifySession(ctx context.Context, sessionId string) (*auth.Session, transport.HError) {
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	err := verifySession(session)
 	if err != nil {
@@ -463,7 +463,7 @@ func (a *AuthService) VerifySession(ctx context.Context, sessionId string) (*aut
 	return session, nil
 }
 
-func verifySession(session *auth.Session) transport.ForeeError {
+func verifySession(session *auth.Session) transport.HError {
 	if session == nil || session.EmailPasswd == nil {
 		return transport.NewPreconditionRequireError(
 			transport.PreconditionRequireMsgLogin,

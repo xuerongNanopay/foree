@@ -49,7 +49,7 @@ type TransactionService struct {
 }
 
 // Can be cache for 5 minutes.
-func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*RateDTO, transport.ForeeError) {
+func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*RateDTO, transport.HError) {
 	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, 30*time.Minute)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
@@ -96,7 +96,7 @@ func (t *TransactionService) getRate(ctx context.Context, src, dest string, vali
 	return rate, nil
 }
 
-func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*QuoteTransactionDTO, transport.ForeeError) {
+func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*QuoteTransactionDTO, transport.HError) {
 	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, 30*time.Minute)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
@@ -181,7 +181,7 @@ func (t *TransactionService) getFee(ctx context.Context, feeGroup string, validI
 	return fee, nil
 }
 
-func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionReq) (*QuoteTransactionDTO, transport.ForeeError) {
+func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionReq) (*QuoteTransactionDTO, transport.HError) {
 	session, serr := t.authService.VerifySession(ctx, req.SessionId)
 	if serr != nil {
 		return nil, serr
@@ -404,7 +404,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}, nil
 }
 
-func (t *TransactionService) createTx(ctx context.Context, req CreateTransactionReq) (*TxSummaryDetailDTO, transport.ForeeError) {
+func (t *TransactionService) createTx(ctx context.Context, req CreateTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
 	session, serr := t.authService.VerifySession(ctx, req.SessionId)
 	if serr != nil {
 		return nil, serr
@@ -443,7 +443,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	var wg sync.WaitGroup
 
 	// Recheck rewards
-	var rewardErr transport.ForeeError
+	var rewardErr transport.HError
 	rewardChecker := func() {
 		defer wg.Done()
 		if len(foreeTx.Rewards) == 1 {
@@ -462,7 +462,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	go rewardChecker()
 
 	// Recheck limit
-	var limitErr transport.ForeeError
+	var limitErr transport.HError
 	limitChecker := func() {
 		defer wg.Done()
 		txLimit, ok := foree_constant.TxLimits[foree_constant.TransactionLimitGroup(userGroup.TransactionLimitGroup)]
@@ -484,7 +484,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	go limitChecker()
 
 	// Create foree transaction.
-	var foreeTxErr transport.ForeeError
+	var foreeTxErr transport.HError
 	var foreeTxID int64
 	createForeeTx := func() {
 		defer wg.Done()
@@ -524,7 +524,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	wg = sync.WaitGroup{}
 
 	// Create TxSummary
-	var txSummaryErr transport.ForeeError
+	var txSummaryErr transport.HError
 	createSummaryTx := func() {
 		defer wg.Done()
 		foreeTx.Summary.ParentTxId = foreeTxID
@@ -539,7 +539,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	go createSummaryTx()
 
 	// Create feeJoint
-	var feeJointError transport.ForeeError
+	var feeJointError transport.HError
 	createFeeJoint := func() {
 		defer wg.Done()
 		for _, feeJoin := range foreeTx.Fees {
@@ -555,7 +555,7 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	go createFeeJoint()
 
 	// reward
-	var rewardError transport.ForeeError
+	var rewardError transport.HError
 	updateReward := func() {
 		defer wg.Done()
 		if len(foreeTx.Rewards) == 1 {
@@ -680,14 +680,14 @@ func (t *TransactionService) getDailyTxLimit(ctx context.Context, session auth.S
 	return dailyLimit, nil
 }
 
-func (t *TransactionService) GetSummaryTx(ctx context.Context, req GetTransactionReq) (*TxSummaryDetailDTO, transport.ForeeError) {
+func (t *TransactionService) GetSummaryTx(ctx context.Context, req GetTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
 	return nil, nil
 }
 
-func (t *TransactionService) GetAllSummaryTxs(ctx context.Context, req GetAllTransactionReq) ([]*TxSummaryDTO, transport.ForeeError) {
+func (t *TransactionService) GetAllSummaryTxs(ctx context.Context, req GetAllTransactionReq) ([]*TxSummaryDTO, transport.HError) {
 	return nil, nil
 }
 
-func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTransactionReq) ([]*TxSummaryDTO, transport.ForeeError) {
+func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTransactionReq) ([]*TxSummaryDTO, transport.HError) {
 	return nil, nil
 }

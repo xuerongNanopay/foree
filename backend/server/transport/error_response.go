@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type ForeeError interface {
+type HError interface {
 	GetStatusCode() int
 	GetMessage() string
 	Error() string
