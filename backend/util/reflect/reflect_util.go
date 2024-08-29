@@ -25,3 +25,12 @@ func GetAllFieldNamesOfStruct(o interface{}) []string {
 	}
 	return ret
 }
+
+func ContainField(o interface{}, fieldName string) bool {
+	rType := reflect.ValueOf(o).Elem().Type()
+	if rType.Kind() != reflect.Struct {
+		return false
+	}
+	_, has := rType.FieldByName(fieldName)
+	return has
+}
