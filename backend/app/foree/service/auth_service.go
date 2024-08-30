@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
@@ -12,6 +13,7 @@ import (
 )
 
 type AuthService struct {
+	db                     *sql.DB
 	sessionRepo            *auth.SessionRepo
 	userRepo               *auth.UserRepo
 	emailPasswordRepo      *auth.EmailPasswdRepo
@@ -41,6 +43,12 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 		return nil, transport.WrapInteralServerError(err)
 	}
 
+	dTx, err := a.db.Begin()
+	if err != nil {
+		dTx.Rollback()
+		return nil, transport.WrapInteralServerError(err)
+	}
+
 	// Create User
 	userId, err := a.userRepo.InsertUser(ctx, auth.User{
 		Status: auth.UserStatusInitial,
@@ -48,15 +56,18 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 	})
 
 	if err != nil {
+		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	user, err := a.userRepo.GetUniqueUserById(userId)
 	if err != nil {
+		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if user == nil {
+		dTx.Rollback()
 		return nil, transport.NewInteralServerError("unable to get user with id: `%v`", userId)
 	}
 
@@ -70,17 +81,24 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 	})
 
 	if err != nil {
+		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdById(id)
 
 	if err != nil {
+		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if ep == nil {
+		dTx.Rollback()
 		return nil, transport.NewInteralServerError("unable to get EmailPasswd with id: `%v`", id)
+	}
+
+	if err = dTx.Commit(); err != nil {
+		return nil, transport.WrapInteralServerError(err)
 	}
 
 	sessionId, err := a.sessionRepo.InsertSession(auth.Session{
@@ -229,6 +247,12 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 		return nil, err
 	}
 
+	dTx, dErr := a.db.Begin()
+	if dErr != nil {
+		dTx.Rollback()
+		return nil, transport.WrapInteralServerError(dErr)
+	}
+
 	// Create identification(Store Identification first)
 	identification := foree_auth.UserIdentification{
 		Status:  foree_auth.IdentificationStatusActive,
@@ -239,6 +263,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 
 	_, ier := a.userIdentificationRepo.InsertUserIdentification(ctx, identification)
 	if ier != nil {
+		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(ier)
 	}
 
@@ -261,11 +286,13 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	updateErr := a.userRepo.UpdateUserById(ctx, newUser)
 
 	if updateErr != nil {
+		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(updateErr)
 	}
 
 	user, er := a.userRepo.GetUniqueUserById(newUser.ID)
 	if er != nil {
+		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(er)
 	}
 
@@ -278,7 +305,12 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 
 	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
 	if er != nil {
+		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(er)
+	}
+
+	if err := dTx.Commit(); err != nil {
+		return nil, transport.WrapInteralServerError(err)
 	}
 
 	// Get Permission.
