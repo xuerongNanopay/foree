@@ -68,7 +68,8 @@ func RestGetWrapper[P any, Q any](
 func RestPostWrapper[P any, Q any](
 	handler func(context.Context, P) (Q, transport.HError),
 	beforeResponse func(http.ResponseWriter) http.ResponseWriter,
-	afterRun func(P, Q, transport.HError), isAsyncAfter bool,
+	afterRun func(P, Q, transport.HError),
+	isAsyncAfter bool,
 ) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req P
