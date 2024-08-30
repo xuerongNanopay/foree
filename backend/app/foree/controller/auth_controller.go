@@ -9,6 +9,12 @@ type AuthController struct {
 	authService *service.AuthService
 }
 
+func NewAuthController(authService *service.AuthService) *AuthController {
+	return &AuthController{
+		authService: authService,
+	}
+}
+
 func (c *AuthController) RegisterRouter(router *mux.Router) {
 	// Login
 	router.HandleFunc("/login", simplePostWrapper(c.authService.Login)).Methods("POST")
