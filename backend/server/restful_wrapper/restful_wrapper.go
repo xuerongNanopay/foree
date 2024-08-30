@@ -13,7 +13,7 @@ import (
 func RestGetWrapper[P any, Q any](
 	handler func(context.Context, P) (Q, transport.HError),
 	beforeResponse func(http.ResponseWriter, Q) http.ResponseWriter,
-	afterRun func(P, Q, transport.HError), isAsyncAfter bool,
+	after func(P, Q, transport.HError), isAsyncAfter bool,
 ) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req P
@@ -58,9 +58,9 @@ func RestGetWrapper[P any, Q any](
 		}()
 
 		if isAsyncAfter {
-			go afterRun(req, resp, herr)
+			go after(req, resp, herr)
 		} else {
-			afterRun(req, resp, herr)
+			after(req, resp, herr)
 		}
 	}
 }
@@ -68,7 +68,7 @@ func RestGetWrapper[P any, Q any](
 func RestPostWrapper[P any, Q any](
 	handler func(context.Context, P) (Q, transport.HError),
 	beforeResponse func(http.ResponseWriter, Q) http.ResponseWriter,
-	afterRun func(P, Q, transport.HError),
+	after func(P, Q, transport.HError),
 	isAsyncAfter bool,
 ) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -107,9 +107,9 @@ func RestPostWrapper[P any, Q any](
 		}()
 
 		if isAsyncAfter {
-			go afterRun(req, resp, herr)
+			go after(req, resp, herr)
 		} else {
-			afterRun(req, resp, herr)
+			after(req, resp, herr)
 		}
 	}
 }
