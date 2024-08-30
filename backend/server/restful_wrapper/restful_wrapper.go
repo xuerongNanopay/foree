@@ -12,8 +12,9 @@ import (
 
 func RestGetWrapper[P any, Q any](
 	handler func(context.Context, P) (Q, transport.HError),
-	beforeResponse func(http.ResponseWriter, Q) http.ResponseWriter,
-	after func(P, Q, transport.HError), isAsyncAfter bool,
+	beforeProcess func(*http.Request, P) transport.HError,
+	afterProcess func(http.ResponseWriter, Q, transport.HError) http.ResponseWriter,
+	endFunc func(P, Q, transport.HError), isAsyncAfter bool,
 ) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req P
@@ -33,10 +34,15 @@ func RestGetWrapper[P any, Q any](
 			sessionId := r.Header.Get("SESSION_ID")
 			reflect_util.SetStringValueIfFieldExist(&req, "SessionId", sessionId)
 
-			resp, herr := handler(context.Background(), req)
+			var resp Q
+			var herr transport.HError
+			herr = beforeProcess(r, req)
+			if herr == nil {
+				resp, herr = handler(context.Background(), req)
+			}
+			w = afterProcess(w, resp, herr)
 
 			w.Header().Add("Content-Type", "application/json")
-			w = beforeResponse(w, resp)
 
 			var err error
 			if herr != nil {
@@ -58,17 +64,18 @@ func RestGetWrapper[P any, Q any](
 		}()
 
 		if isAsyncAfter {
-			go after(req, resp, herr)
+			go endFunc(req, resp, herr)
 		} else {
-			after(req, resp, herr)
+			endFunc(req, resp, herr)
 		}
 	}
 }
 
 func RestPostWrapper[P any, Q any](
 	handler func(context.Context, P) (Q, transport.HError),
-	beforeResponse func(http.ResponseWriter, Q) http.ResponseWriter,
-	after func(P, Q, transport.HError),
+	beforeProcess func(*http.Request, P) transport.HError,
+	afterProcess func(http.ResponseWriter, Q, transport.HError) http.ResponseWriter,
+	endFunc func(P, Q, transport.HError),
 	isAsyncAfter bool,
 ) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -82,10 +89,15 @@ func RestPostWrapper[P any, Q any](
 			sessionId := r.Header.Get("SESSION_ID")
 			reflect_util.SetStringValueIfFieldExist(&req, "SessionId", sessionId)
 
-			resp, herr := handler(context.Background(), req)
+			var resp Q
+			var herr transport.HError
+			herr = beforeProcess(r, req)
+			if herr == nil {
+				resp, herr = handler(context.Background(), req)
+			}
+			w = afterProcess(w, resp, herr)
 
 			w.Header().Add("Content-Type", "application/json")
-			w = beforeResponse(w, resp)
 
 			var err error
 			if herr != nil {
@@ -107,9 +119,9 @@ func RestPostWrapper[P any, Q any](
 		}()
 
 		if isAsyncAfter {
-			go after(req, resp, herr)
+			go endFunc(req, resp, herr)
 		} else {
-			after(req, resp, herr)
+			endFunc(req, resp, herr)
 		}
 	}
 }

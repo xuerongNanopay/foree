@@ -594,10 +594,6 @@ func (t *TransactionService) createTx(ctx context.Context, req CreateTransaction
 	return NewTxSummaryDetailDTO(*foreeTx.Summary), nil
 }
 
-func (t *TransactionService) rollBackTx(tx transaction.ForeeTx) {
-	// log error.
-}
-
 // func (t *TransactionService) GetTxLimit(user auth.User) (*transaction.TxLimit, error) {
 // 	txLimit, ok := foree_constant.TxLimits[userGroup]
 // 	if !ok {

@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	foree_constant "xue.io/go-pay/app/foree/constant"
@@ -17,13 +16,7 @@ type FreeQuoteReq struct {
 	DestCurrency string  `json:"DestCurrency" validate:"eq=PKR"`
 }
 
-func (q *FreeQuoteReq) TrimSpace() {
-	q.SrcCurrency = strings.TrimSpace(q.SrcCurrency)
-	q.DestCurrency = strings.TrimSpace(q.DestCurrency)
-}
-
-func (q *FreeQuoteReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q FreeQuoteReq) Validate() *transport.BadRequestError {
 	ret := validateStruct(q, "Invalid free quote request")
 
 	if q.SrcAmount <= 0 {
@@ -48,13 +41,7 @@ type QuoteTransactionReq struct {
 	TransactionPurpose string  `json:"transactionPurpose" validate:"required"`
 }
 
-func (q *QuoteTransactionReq) TrimSpace() {
-	q.SrcCurrency = strings.TrimSpace(q.SrcCurrency)
-	q.DestCurrency = strings.TrimSpace(q.DestCurrency)
-}
-
-func (q *QuoteTransactionReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q QuoteTransactionReq) Validate() *transport.BadRequestError {
 	ret := validateStruct(q, "Invalid quote transaction request")
 
 	//TODO: support promoCode
@@ -73,12 +60,7 @@ type CreateTransactionReq struct {
 	QuoteId string `json:"quoteId" validate:"required"`
 }
 
-func (q *CreateTransactionReq) TrimSpace() {
-	q.QuoteId = strings.TrimSpace(q.QuoteId)
-}
-
-func (q *CreateTransactionReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q CreateTransactionReq) Validate() *transport.BadRequestError {
 	if ret := validateStruct(q, "Invalid create quote request"); len(ret.Details) > 0 {
 		return ret
 	}
@@ -90,11 +72,7 @@ type GetTransactionReq struct {
 	TransactionId int64 `json:"transactionId" validate:"required,gt=0"`
 }
 
-func (q *GetTransactionReq) TrimSpace() {
-}
-
-func (q *GetTransactionReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q GetTransactionReq) Validate() *transport.BadRequestError {
 	if ret := validateStruct(q, "Invalid get transaction request"); len(ret.Details) > 0 {
 		return ret
 	}
@@ -107,12 +85,7 @@ type GetAllTransactionReq struct {
 	Limit  int `json:"limit" validate:"required,gt=0"`
 }
 
-func (q *GetAllTransactionReq) TrimSpace() {
-}
-
-func (q *GetAllTransactionReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
-
+func (q GetAllTransactionReq) Validate() *transport.BadRequestError {
 	ret := validateStruct(q, "Invalid get transactions request")
 
 	if len(ret.Details) > 0 {
@@ -128,11 +101,7 @@ type QueryTransactionReq struct {
 	Limit  int    `json:"limit" validate:"required,gt=0"`
 }
 
-func (q *QueryTransactionReq) TrimSpace() {
-}
-
-func (q *QueryTransactionReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q QueryTransactionReq) Validate() *transport.BadRequestError {
 
 	ret := validateStruct(q, "Invalid query transaction request")
 
@@ -153,11 +122,7 @@ type CancelTransactionReq struct {
 	TransactionId int64 `json:"transactionId" validate:"required,gt=0"`
 }
 
-func (q *CancelTransactionReq) TrimSpace() {
-}
-
-func (q *CancelTransactionReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q CancelTransactionReq) Validate() *transport.BadRequestError {
 	if ret := validateStruct(q, "Invalid cancel transaction request"); len(ret.Details) > 0 {
 		return ret
 	}
@@ -169,13 +134,7 @@ type GetRateReq struct {
 	DestCurrency string `json:"DestCurrency" validate:"eq=PKR"`
 }
 
-func (q *GetRateReq) TrimSpace() {
-	q.SrcCurrency = strings.TrimSpace(q.SrcCurrency)
-	q.DestCurrency = strings.TrimSpace(q.DestCurrency)
-}
-
-func (q *GetRateReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q GetRateReq) Validate() *transport.BadRequestError {
 	ret := validateStruct(q, "Invalid free quote request")
 
 	if len(ret.Details) > 0 {

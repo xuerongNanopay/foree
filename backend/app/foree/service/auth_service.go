@@ -177,11 +177,11 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*aut
 	return session, nil
 }
 
-func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.SessionReq) transport.HError {
+func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.SessionReq) (*auth.Session, transport.HError) {
 	// Check Allow to VerifyEmail
 	session, err := a.allowVerifyEmail(req.SessionId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Change VerifyCode
@@ -190,28 +190,20 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 
 	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP)
 	if e != nil {
-		return transport.WrapInteralServerError(e)
-	}
-
-	ep, e := a.emailPasswordRepo.GetUniqueEmailPasswdById(newEP.ID)
-	if e != nil {
-		return transport.WrapInteralServerError(e)
-	}
-	if ep == nil {
-		return transport.NewInteralServerError("unable to get EmailPasswd with id: `%v`", newEP.ID)
+		return nil, transport.WrapInteralServerError(e)
 	}
 
 	//TODO: send email. by goroutine
 
 	// Update session
 	newSession := *session
-	newSession.EmailPasswd = ep
+	newSession.EmailPasswd = &newEP
 
 	_, e = a.sessionRepo.UpdateSession(newSession)
 	if e != nil {
-		return transport.WrapInteralServerError(e)
+		return nil, transport.WrapInteralServerError(e)
 	}
-	return nil
+	return nil, nil
 }
 
 func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transport.HError) {
@@ -434,9 +426,9 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 
 // }
 
-func (a *AuthService) Logout(ctx context.Context, session transport.SessionReq) transport.HError {
+func (a *AuthService) Logout(ctx context.Context, session transport.SessionReq) (*auth.Session, transport.HError) {
 	a.sessionRepo.Delete(session.SessionId)
-	return transport.NewPreconditionRequireError(
+	return nil, transport.NewPreconditionRequireError(
 		transport.PreconditionRequireMsgLogin,
 		transport.RequireActionLogin,
 	)
@@ -464,6 +456,7 @@ func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) tra
 	ep := *session.EmailPasswd
 	ep.Passwd = hashed
 	//TODO: log
+
 	updateErr := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, ep)
 	if updateErr != nil {
 		return transport.WrapInteralServerError(updateErr)

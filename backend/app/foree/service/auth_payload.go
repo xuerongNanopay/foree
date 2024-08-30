@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"time"
 
 	fAuth "xue.io/go-pay/app/foree/auth"
@@ -19,13 +18,7 @@ type SignUpReq struct {
 	ReferralCode string `json:"referralCode"`
 }
 
-func (q *SignUpReq) TrimSpace() {
-	q.Email = strings.TrimSpace(q.Email)
-	q.Password = strings.TrimSpace(q.Password)
-}
-
-func (q *SignUpReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q SignUpReq) Validate() *transport.BadRequestError {
 	if ret := validateStruct(q, "Invalid sign up request"); len(ret.Details) > 0 {
 		return ret
 	}
@@ -34,15 +27,11 @@ func (q *SignUpReq) Validate() *transport.BadRequestError {
 
 type ChangePasswdReq struct {
 	transport.SessionReq
-	Password string `json:"password" validate:"required,min=8,max=12"`
+	OldPassword string `json:"oldPassword" validate:"required,min=8,max=16"`
+	Password    string `json:"password" validate:"required,min=8,max=16"`
 }
 
-func (q *ChangePasswdReq) TrimSpace() {
-	q.Password = strings.TrimSpace(q.Password)
-}
-
-func (q *ChangePasswdReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q ChangePasswdReq) Validate() *transport.BadRequestError {
 	if ret := validateStruct(q, "Invalid change password request"); len(ret.Details) > 0 {
 		return ret
 	}
@@ -54,12 +43,7 @@ type VerifyEmailReq struct {
 	Code string `json:"code"`
 }
 
-func (q *VerifyEmailReq) TrimSpace() {
-	q.Code = strings.TrimSpace(q.Code)
-}
-
-func (q *VerifyEmailReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q VerifyEmailReq) Validate() *transport.BadRequestError {
 	if ret := validateStruct(q, "Invalid verify email request"); len(ret.Details) > 0 {
 		return ret
 	}
@@ -72,13 +56,7 @@ type LoginReq struct {
 	Password string `json:"password" validate:"required,min=8,max=12"`
 }
 
-func (q *LoginReq) TrimSpace() {
-	q.Email = strings.TrimSpace(q.Email)
-	q.Password = strings.TrimSpace(q.Password)
-}
-
-func (q *LoginReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q LoginReq) Validate() *transport.BadRequestError {
 	if ret := validateStruct(q, "Invalid login request"); len(ret.Details) > 0 {
 		return ret
 	}
@@ -110,26 +88,8 @@ type CreateUserReq struct {
 	AvatarUrl           string    `json:"avatarUrl"`
 }
 
-func (q *CreateUserReq) TrimSpace() {
-	q.FirstName = strings.TrimSpace(q.FirstName)
-	q.MiddleName = strings.TrimSpace(q.MiddleName)
-	q.LastName = strings.TrimSpace(q.LastName)
-	q.Nationality = strings.TrimSpace(q.Nationality)
-	q.Address1 = strings.TrimSpace(q.Address1)
-	q.Address2 = strings.TrimSpace(q.Address2)
-	q.City = strings.TrimSpace(q.City)
-	q.Province = strings.TrimSpace(q.Province)
-	q.Country = strings.TrimSpace(q.Country)
-	q.PostalCode = strings.TrimSpace(q.PostalCode)
-	q.PhoneNumber = strings.TrimSpace(q.PhoneNumber)
-	q.IdentificationType = strings.TrimSpace(q.IdentificationType)
-	q.IdentificationValue = strings.TrimSpace(q.IdentificationValue)
-	q.AvatarUrl = strings.TrimSpace(q.AvatarUrl)
-}
-
 // TODO: trim name, and use allowText
-func (q *CreateUserReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q CreateUserReq) Validate() *transport.BadRequestError {
 	ret := validateStruct(q, "Invalid user creation request")
 
 	// Age

@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"strings"
 
 	"xue.io/go-pay/app/foree/account"
 	foree_constant "xue.io/go-pay/app/foree/constant"
@@ -35,25 +34,7 @@ type CreateContactReq struct {
 	AccountNoOrIBAN       string `json:"accountNoOrIBAN"`
 }
 
-func (q *CreateContactReq) TrimSpace() {
-	q.FirstName = strings.TrimSpace(q.FirstName)
-	q.MiddleName = strings.TrimSpace(q.MiddleName)
-	q.LastName = strings.TrimSpace(q.LastName)
-	q.Address1 = strings.TrimSpace(q.Address1)
-	q.Address2 = strings.TrimSpace(q.Address2)
-	q.City = strings.TrimSpace(q.City)
-	q.Province = strings.TrimSpace(q.Province)
-	q.Country = strings.TrimSpace(q.Country)
-	q.PostalCode = strings.TrimSpace(q.PostalCode)
-	q.PhoneNumber = strings.TrimSpace(q.PhoneNumber)
-	q.RelationshipToContact = strings.TrimSpace(q.RelationshipToContact)
-	q.TransferMethod = strings.TrimSpace(q.TransferMethod)
-	q.BankName = strings.TrimSpace(q.BankName)
-	q.AccountNoOrIBAN = strings.TrimSpace(q.AccountNoOrIBAN)
-}
-
-func (q *CreateContactReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q CreateContactReq) Validate() *transport.BadRequestError {
 	ret := validateStruct(q, "Invalid create contact request")
 
 	// Check relationship
@@ -88,11 +69,7 @@ type DeleteContactReq struct {
 	ContactId int64 `json:"contactId" validate:"required,gte=0"`
 }
 
-func (q *DeleteContactReq) TrimSpace() {
-}
-
-func (q *DeleteContactReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q DeleteContactReq) Validate() *transport.BadRequestError {
 	if ret := validateStruct(q, "Invalid delete contact request"); len(ret.Details) > 0 {
 		return ret
 	}
@@ -104,11 +81,7 @@ type GetContactReq struct {
 	ContactId int64 `json:"contactId" validate:"required,gt=0"`
 }
 
-func (q *GetContactReq) TrimSpace() {
-}
-
-func (q *GetContactReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
+func (q GetContactReq) Validate() *transport.BadRequestError {
 	if ret := validateStruct(q, "Invalid get contact request"); len(ret.Details) > 0 {
 		return ret
 	}
@@ -121,12 +94,7 @@ type QueryContactReq struct {
 	Limit  int `json:"limit" validate:"required,gt=0"`
 }
 
-func (q *QueryContactReq) TrimSpace() {
-}
-
-func (q *QueryContactReq) Validate() *transport.BadRequestError {
-	q.TrimSpace()
-
+func (q QueryContactReq) Validate() *transport.BadRequestError {
 	if ret := validateStruct(q, "Invalid query contact request"); len(ret.Details) > 0 {
 		return ret
 	}
