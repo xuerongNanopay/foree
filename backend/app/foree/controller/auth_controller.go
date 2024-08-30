@@ -14,7 +14,7 @@ type AuthController struct {
 	authService *service.AuthService
 }
 
-func (c *AuthController) RegisterRouter(router *mux.Router) error {
+func (c *AuthController) RegisterRouter(router *mux.Router) {
 	loginHandler := restful_wrapper.RestPostWrapper(
 		c.authService.Login,
 		func(w http.ResponseWriter) http.ResponseWriter {
