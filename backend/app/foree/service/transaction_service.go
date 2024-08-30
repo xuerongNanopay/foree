@@ -182,9 +182,9 @@ func (t *TransactionService) getFee(ctx context.Context, feeGroup string, validI
 }
 
 func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionReq) (*QuoteTransactionDTO, transport.HError) {
-	session, serr := t.authService.VerifySession(ctx, req.SessionId)
-	if serr != nil {
-		return nil, serr
+	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionTransactionWrite)
+	if sErr != nil {
+		return nil, sErr
 	}
 
 	user := *session.User
@@ -405,9 +405,9 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 }
 
 func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
-	session, serr := t.authService.VerifySession(ctx, req.SessionId)
-	if serr != nil {
-		return nil, serr
+	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionTransactionWrite)
+	if sErr != nil {
+		return nil, sErr
 	}
 
 	quote := t.quoteRepo.GetUniqueById(ctx, req.QuoteId)
@@ -603,9 +603,9 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 // }
 
 func (t *TransactionService) GetDailyTxLimit(ctx context.Context, req transport.SessionReq) (*DailyTxLimitDTO, transport.HError) {
-	session, serr := t.authService.VerifySession(ctx, req.SessionId)
-	if serr != nil {
-		return nil, serr
+	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionTransactionWrite)
+	if sErr != nil {
+		return nil, sErr
 	}
 
 	limit, err := t.getDailyTxLimit(ctx, *session)
@@ -685,13 +685,27 @@ func (t *TransactionService) getDailyTxLimit(ctx context.Context, session auth.S
 }
 
 func (t *TransactionService) GetSummaryTx(ctx context.Context, req GetTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
+	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionTransactionRead)
+	if sErr != nil {
+		return nil, sErr
+	}
 	return nil, nil
 }
 
 func (t *TransactionService) GetAllSummaryTxs(ctx context.Context, req GetAllTransactionReq) ([]*TxSummaryDTO, transport.HError) {
+	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionTransactionRead)
+	if sErr != nil {
+		return nil, sErr
+	}
+
 	return nil, nil
 }
 
 func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTransactionReq) ([]*TxSummaryDTO, transport.HError) {
+	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionTransactionRead)
+	if sErr != nil {
+		return nil, sErr
+	}
+
 	return nil, nil
 }

@@ -16,7 +16,7 @@ type AccountService struct {
 }
 
 func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq) (*ContactAccountDetailDTO, transport.HError) {
-	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactCreate)
+	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactWrite)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 }
 
 func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq) transport.HError {
-	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactDelete)
+	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactWrite)
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 }
 
 func (a *AccountService) GetActiveContact(ctx context.Context, req GetContactReq) (*ContactAccountDetailDTO, transport.HError) {
-	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactGet)
+	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactRead)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (a *AccountService) GetActiveContact(ctx context.Context, req GetContactReq
 }
 
 func (a *AccountService) GetAllActiveContacts(ctx context.Context, req transport.SessionReq) ([]*ContactAccountSummaryDTO, transport.HError) {
-	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactQuery)
+	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactRead)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (a *AccountService) GetAllActiveContacts(ctx context.Context, req transport
 }
 
 func (a *AccountService) QueryActiveContacts(ctx context.Context, req QueryContactReq) ([]*ContactAccountSummaryDTO, transport.HError) {
-	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactQuery)
+	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactRead)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (a *AccountService) QueryActiveContacts(ctx context.Context, req QueryConta
 }
 
 func (a *AccountService) GetAllActiveInteracs(ctx context.Context, req transport.SessionReq) ([]*InteracAccountSummaryDTO, transport.HError) {
-	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionInteracQuery)
+	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionInteracRead)
 	if err != nil {
 		return nil, err
 	}
