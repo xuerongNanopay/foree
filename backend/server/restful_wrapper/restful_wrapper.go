@@ -12,7 +12,7 @@ import (
 
 func RestGetWrapper[P any, Q any](
 	handler func(context.Context, P) (Q, transport.HError),
-	beforeResponse func(http.ResponseWriter) http.ResponseWriter,
+	beforeResponse func(http.ResponseWriter, Q) http.ResponseWriter,
 	afterRun func(P, Q, transport.HError), isAsyncAfter bool,
 ) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +36,7 @@ func RestGetWrapper[P any, Q any](
 			resp, herr := handler(context.Background(), req)
 
 			w.Header().Add("Content-Type", "application/json")
-			w = beforeResponse(w)
+			w = beforeResponse(w, resp)
 
 			var err error
 			if herr != nil {
@@ -67,7 +67,7 @@ func RestGetWrapper[P any, Q any](
 
 func RestPostWrapper[P any, Q any](
 	handler func(context.Context, P) (Q, transport.HError),
-	beforeResponse func(http.ResponseWriter) http.ResponseWriter,
+	beforeResponse func(http.ResponseWriter, Q) http.ResponseWriter,
 	afterRun func(P, Q, transport.HError),
 	isAsyncAfter bool,
 ) func(http.ResponseWriter, *http.Request) {
@@ -85,7 +85,7 @@ func RestPostWrapper[P any, Q any](
 			resp, herr := handler(context.Background(), req)
 
 			w.Header().Add("Content-Type", "application/json")
-			w = beforeResponse(w)
+			w = beforeResponse(w, resp)
 
 			var err error
 			if herr != nil {

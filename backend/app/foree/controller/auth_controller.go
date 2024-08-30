@@ -17,7 +17,8 @@ type AuthController struct {
 func (c *AuthController) RegisterRouter(router *mux.Router) {
 	loginHandler := restful_wrapper.RestPostWrapper(
 		c.authService.Login,
-		func(w http.ResponseWriter) http.ResponseWriter {
+		func(w http.ResponseWriter, session *auth.Session) http.ResponseWriter {
+			//TODO: add session
 			return w
 		},
 		func(req service.LoginReq, session *auth.Session, hErr transport.HError) {},
