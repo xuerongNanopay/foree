@@ -124,7 +124,7 @@ func (a *AccountService) QueryActiveContacts(ctx context.Context, req QueryConta
 	if err != nil {
 		return nil, err
 	}
-	accs, derr := a.contactRepo.QueryActiveContactAccountByOwnerId(ctx, session.User.ID, req.Limit, req.Offset)
+	accs, derr := a.contactRepo.QueryActiveContactAccountByOwnerIdWithPagination(ctx, session.User.ID, req.Limit, req.Offset)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}

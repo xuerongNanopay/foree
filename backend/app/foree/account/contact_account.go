@@ -57,7 +57,7 @@ const (
 		where a.owner_id = ? AND a.status = 'ACTIVE'
 		ORDER BY a.latest_activity_at DESC
 	`
-	sQLContactAccountQueryActiveByOwnerId = `
+	sQLContactAccountQueryActiveByOwnerIdWithPagination = `
 		SELECT 
 			a.id, a.status, a.type, a.first_name, a.middle_name,
 			a.last_name, a.address1, a.address2, a.city, a.province,
@@ -301,8 +301,8 @@ func (repo *ContactAccountRepo) GetAllActiveContactAccountByOwnerId(ctx context.
 	return accounts, nil
 }
 
-func (repo *ContactAccountRepo) QueryActiveContactAccountByOwnerId(ctx context.Context, ownerId int64, limit, offset int) ([]*ContactAccount, error) {
-	rows, err := repo.db.Query(sQLContactAccountQueryActiveByOwnerId, ownerId, limit, offset)
+func (repo *ContactAccountRepo) QueryActiveContactAccountByOwnerIdWithPagination(ctx context.Context, ownerId int64, limit, offset int) ([]*ContactAccount, error) {
+	rows, err := repo.db.Query(sQLContactAccountQueryActiveByOwnerIdWithPagination, ownerId, limit, offset)
 
 	if err != nil {
 		return nil, err

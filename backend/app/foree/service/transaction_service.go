@@ -705,7 +705,7 @@ func (t *TransactionService) GetAllSummaryTxs(ctx context.Context, req GetAllTra
 	}
 
 	//TODO: limit, offset pruning
-	summaryTxs, err := t.txSummaryRepo.GetAllTxSummaryByOwnerId(ctx, session.UserId, req.Limit, req.Offset)
+	summaryTxs, err := t.txSummaryRepo.GetAllTxSummaryByOwnerIdWithPagination(ctx, session.UserId, req.Limit, req.Offset)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -726,7 +726,7 @@ func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTrans
 	}
 
 	//TODO: limit, offset pruning
-	summaryTxs, err := t.txSummaryRepo.QueryTxSummaryByOwnerId(ctx, session.UserId, req.Status, req.Limit, req.Offset)
+	summaryTxs, err := t.txSummaryRepo.QueryTxSummaryByOwnerIdAndStatusWithPagination(ctx, session.UserId, req.Status, req.Limit, req.Offset)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}

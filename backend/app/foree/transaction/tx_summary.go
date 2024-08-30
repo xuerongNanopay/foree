@@ -68,7 +68,7 @@ const (
         FROM tx_summary t
         where t.ParentTxId = ?
     `
-	sQLTxSummaryGetAllByOwnerId = `
+	sQLTxSummaryGetAllByOwnerIdWithPagination = `
 	    SELECT
 	        t.id, t.summary, t.type, t.status, t.rate,
 			t.payment_url, t.src_acc_id, t.dest_acc_id,
@@ -84,7 +84,7 @@ const (
 	    ORDER BY t.created_at DESC
 	    LIMIT ? OFFSET ?
 	`
-	sQLTxSummaryQueryByOwnerId = `
+	sQLTxSummaryQueryByOwnerIdAndStatusWithPagination = `
 	    SELECT
 	        t.id, t.summary, t.type, t.status, t.rate,
 			t.payment_url, t.src_acc_id, t.dest_acc_id,
@@ -274,8 +274,8 @@ func (repo *TxSummaryRepo) GetUniqueTxSummaryByParentTxId(ctx context.Context, p
 	return f, nil
 }
 
-func (repo *TxSummaryRepo) GetAllTxSummaryByOwnerId(ctx context.Context, ownerId int64, limit, offset int) ([]*TxSummary, error) {
-	rows, err := repo.db.Query(sQLTxSummaryGetAllByOwnerId, ownerId, limit, offset)
+func (repo *TxSummaryRepo) GetAllTxSummaryByOwnerIdWithPagination(ctx context.Context, ownerId int64, limit, offset int) ([]*TxSummary, error) {
+	rows, err := repo.db.Query(sQLTxSummaryGetAllByOwnerIdWithPagination, ownerId, limit, offset)
 
 	if err != nil {
 		return nil, err
@@ -298,8 +298,8 @@ func (repo *TxSummaryRepo) GetAllTxSummaryByOwnerId(ctx context.Context, ownerId
 	return accounts, nil
 }
 
-func (repo *TxSummaryRepo) QueryTxSummaryByOwnerId(ctx context.Context, ownerId int64, status string, limit, offset int) ([]*TxSummary, error) {
-	rows, err := repo.db.Query(sQLTxSummaryQueryByOwnerId, ownerId, status, limit, offset)
+func (repo *TxSummaryRepo) QueryTxSummaryByOwnerIdAndStatusWithPagination(ctx context.Context, ownerId int64, status string, limit, offset int) ([]*TxSummary, error) {
+	rows, err := repo.db.Query(sQLTxSummaryQueryByOwnerIdAndStatusWithPagination, ownerId, status, limit, offset)
 
 	if err != nil {
 		return nil, err
