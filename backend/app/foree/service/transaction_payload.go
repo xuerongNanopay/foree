@@ -145,16 +145,36 @@ func (q GetRateReq) Validate() *transport.BadRequestError {
 
 // ----------   Response --------------
 type RateDTO struct {
-	SrcCurrency  string
-	DestCurrency string
-	amt          float64
+	SrcAmount    types.Amount `json:"srcAmount,omitempty"`
+	SrcCurrency  string       `json:"srcCurrency,omitempty"`
+	DestAmount   types.Amount `json:"destAmount,omitempty"`
+	DestCurrency string       `json:"destCurrency,omitempty"`
+	Description  string       `json:"description,omitempty"`
 }
 
 func NewRateDTO(r *transaction.Rate) *RateDTO {
 	return &RateDTO{
+		SrcAmount:    r.SrcAmt.Amount,
 		SrcCurrency:  r.SrcAmt.Currency,
+		DestAmount:   r.DestAmt.Amount,
 		DestCurrency: r.DestAmt.Currency,
-		amt:          r.GetForwardRate(),
+		Description:  r.ToSummary(),
+	}
+}
+
+type DailyTxLimitDTO struct {
+	UsedAmount   types.Amount `json:"usedAmount,omitempty"`
+	UsedCurrency string       `json:"usedCurrency,omitempty"`
+	MaxAmount    types.Amount `json:"maxAmount,omitempty"`
+	MaxCurrency  string       `json:"maxCurrency,omitempty"`
+}
+
+func NewDailyTxLimitDTO(r *transaction.DailyTxLimit) *DailyTxLimitDTO {
+	return &DailyTxLimitDTO{
+		UsedAmount:   r.UsedAmt.Amount,
+		UsedCurrency: r.UsedAmt.Currency,
+		MaxAmount:    r.UsedAmt.Amount,
+		MaxCurrency:  r.UsedAmt.Currency,
 	}
 }
 

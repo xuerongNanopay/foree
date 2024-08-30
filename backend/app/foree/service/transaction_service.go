@@ -404,7 +404,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}, nil
 }
 
-func (t *TransactionService) createTx(ctx context.Context, req CreateTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
+func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
 	session, serr := t.authService.VerifySession(ctx, req.SessionId)
 	if serr != nil {
 		return nil, serr
@@ -607,7 +607,7 @@ func (t *TransactionService) GetDailyTxLimit(session auth.Session) (*transaction
 	return t.getDailyTxLimit(ctx, session)
 }
 
-func (t *TransactionService) addDailyTxLimit(ctx context.Context, session auth.Session, amt types.AmountData) (*transaction.DailyTxLimit, error) {
+func (t *TransactionService) addDailyTxLimit(ctx context.Context, session auth.Session, amt types.AmountData) (*DailyTxLimitDTO, error) {
 	dailyLimit, err := t.getDailyTxLimit(ctx, session)
 	if err != nil {
 		return nil, err
@@ -619,7 +619,7 @@ func (t *TransactionService) addDailyTxLimit(ctx context.Context, session auth.S
 		return nil, err
 	}
 
-	return dailyLimit, nil
+	return NewDailyTxLimitDTO(dailyLimit), nil
 }
 
 func (t *TransactionService) minusDailyTxLimit(ctx context.Context, session auth.Session, amt types.AmountData) (*transaction.DailyTxLimit, error) {
