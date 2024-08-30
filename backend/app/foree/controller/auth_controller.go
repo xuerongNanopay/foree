@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -15,13 +16,21 @@ type AuthController struct {
 }
 
 func (c *AuthController) RegisterRouter(router *mux.Router) {
+	// Login
 	loginHandler := restful_wrapper.RestPostWrapper(
 		c.authService.Login,
 		func(w http.ResponseWriter, session *auth.Session) http.ResponseWriter {
 			//TODO: add session
 			return w
 		},
-		func(req service.LoginReq, session *auth.Session, hErr transport.HError) {},
+		func(req service.LoginReq, session *auth.Session, hErr transport.HError) {
+			if v, is := hErr.(*transport.InteralServerError); is {
+				// use logger.
+				fmt.Print(v.OriginalError.Error())
+			} else {
+				fmt.Println(hErr.Error())
+			}
+		},
 		true,
 	)
 
