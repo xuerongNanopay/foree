@@ -602,12 +602,20 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 // 	return &txLimit, nil
 // }
 
-func (t *TransactionService) GetDailyTxLimit(session auth.Session) (*transaction.DailyTxLimit, error) {
-	ctx := context.Background()
-	return t.getDailyTxLimit(ctx, session)
+func (t *TransactionService) GetDailyTxLimit(ctx context.Context, req transport.SessionReq) (*DailyTxLimitDTO, transport.HError) {
+	session, serr := t.authService.VerifySession(ctx, req.SessionId)
+	if serr != nil {
+		return nil, serr
+	}
+
+	limit, err := t.getDailyTxLimit(ctx, *session)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+	return NewDailyTxLimitDTO(limit), nil
 }
 
-func (t *TransactionService) addDailyTxLimit(ctx context.Context, session auth.Session, amt types.AmountData) (*DailyTxLimitDTO, error) {
+func (t *TransactionService) addDailyTxLimit(ctx context.Context, session auth.Session, amt types.AmountData) (*transaction.DailyTxLimit, error) {
 	dailyLimit, err := t.getDailyTxLimit(ctx, session)
 	if err != nil {
 		return nil, err
@@ -619,23 +627,23 @@ func (t *TransactionService) addDailyTxLimit(ctx context.Context, session auth.S
 		return nil, err
 	}
 
-	return NewDailyTxLimitDTO(dailyLimit), nil
-}
-
-func (t *TransactionService) minusDailyTxLimit(ctx context.Context, session auth.Session, amt types.AmountData) (*transaction.DailyTxLimit, error) {
-	dailyLimit, err := t.getDailyTxLimit(ctx, session)
-	if err != nil {
-		return nil, err
-	}
-
-	dailyLimit.UsedAmt.Amount -= amt.Amount
-
-	if err := t.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
-		return nil, err
-	}
-
 	return dailyLimit, nil
 }
+
+// func (t *TransactionService) minusDailyTxLimit(ctx context.Context, session auth.Session, amt types.AmountData) (*transaction.DailyTxLimit, error) {
+// 	dailyLimit, err := t.getDailyTxLimit(ctx, session)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	dailyLimit.UsedAmt.Amount -= amt.Amount
+
+// 	if err := t.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
+// 		return nil, err
+// 	}
+
+// 	return dailyLimit, nil
+// }
 
 // I don't case race condition here, cause create transaction will rescure it.
 func (t *TransactionService) getDailyTxLimit(ctx context.Context, session auth.Session) (*transaction.DailyTxLimit, error) {

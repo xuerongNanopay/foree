@@ -25,6 +25,9 @@ func (c *TransactionController) RegisterRouter(router *mux.Router) {
 	// === Private
 	// Transaction quote
 	router.HandleFunc("quote", simplePostWrapper(c.transactionService.QuoteTx)).Methods("POST")
-	// Transaction create_transaction
+	// Transaction creation
 	router.HandleFunc("create_transaction", simplePostWrapper(c.transactionService.CreateTx)).Methods("POST")
+	// Transaction limit
+	router.HandleFunc("transaction_limit", simpleGetWrapper(c.transactionService.GetDailyTxLimit)).Methods("GET")
+
 }
