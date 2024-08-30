@@ -227,7 +227,7 @@ type TxSummaryDetailDTO struct {
 	CreatedAt       time.Time                   `json:"createdAt,omitempty"`
 }
 
-func NewTxSummaryDetailDTO(tx transaction.TxSummary) *TxSummaryDetailDTO {
+func NewTxSummaryDetailDTO(tx *transaction.TxSummary) *TxSummaryDetailDTO {
 	return &TxSummaryDetailDTO{
 		ID:              tx.ID,
 		Summary:         tx.Summary,
