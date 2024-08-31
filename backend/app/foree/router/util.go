@@ -1,4 +1,4 @@
-package foree_controller
+package foree_router
 
 import (
 	"context"
