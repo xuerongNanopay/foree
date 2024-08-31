@@ -18,8 +18,8 @@ func commonEndFunc[P any, Q any](req P, resp Q, hErr transport.HError) {
 	}
 }
 
-func commonBeforeProcess[P any](r *http.Request, req P) transport.HError {
-	return nil
+func validatePayloadBeforeProcess[P transport.ForeeRequest](r *http.Request, req P) transport.HError {
+	return req.Validate()
 }
 
 func emptyAfterProcess[Q any](w http.ResponseWriter, resp Q, hErr transport.HError) http.ResponseWriter {
@@ -29,7 +29,7 @@ func emptyAfterProcess[Q any](w http.ResponseWriter, resp Q, hErr transport.HErr
 func simpleGetWrapper[P transport.ForeeRequest, Q any](handler func(context.Context, P) (Q, transport.HError)) func(http.ResponseWriter, *http.Request) {
 	return restful_wrapper.RestGetWrapper(
 		handler,
-		commonBeforeProcess,
+		validatePayloadBeforeProcess,
 		emptyAfterProcess,
 		commonEndFunc,
 		true,
@@ -39,7 +39,7 @@ func simpleGetWrapper[P transport.ForeeRequest, Q any](handler func(context.Cont
 func simplePostWrapper[P transport.ForeeRequest, Q any](handler func(context.Context, P) (Q, transport.HError)) func(http.ResponseWriter, *http.Request) {
 	return restful_wrapper.RestPostWrapper(
 		handler,
-		commonBeforeProcess,
+		validatePayloadBeforeProcess,
 		emptyAfterProcess,
 		commonEndFunc,
 		true,
