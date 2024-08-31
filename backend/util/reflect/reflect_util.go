@@ -1,6 +1,7 @@
 package reflect_util
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
 )
@@ -9,31 +10,41 @@ func TrySetStuctValueFromString(o interface{}, f, v string) {
 	SetStuctValueFromString(o, f, v)
 }
 
-func SetStuctValueFromString(o interface{}, f, v string) error {
+func SetStuctValueFromString(o interface{}, field, value string) error {
 	rValue := reflect.ValueOf(o)
 	s := rValue.Elem()
 
 	if s.Kind() == reflect.Struct {
-		f := s.FieldByName(f)
+		f := s.FieldByName(field)
 		if f.IsValid() && f.CanSet() {
 			switch f.Kind() {
 			case reflect.String:
-				f.SetString(v)
+				f.SetString(value)
 			case reflect.Bool:
-				if s, err := strconv.ParseBool(v); err == nil {
+				if s, err := strconv.ParseBool(value); err == nil {
 					f.SetBool(s)
 				} else {
-					return err
+					return fmt.Errorf("value `%v` is not a bool", value)
 				}
-			case reflect.Int | reflect.Int16 | reflect.Int32 | reflect.Int64 | reflect.Int8:
-				if s, err := strconv.Atoi(v); err == nil {
+			case reflect.Int8:
+				fallthrough
+			case reflect.Int16:
+				fallthrough
+			case reflect.Int32:
+				fallthrough
+			case reflect.Int64:
+				fallthrough
+			case reflect.Int:
+				if s, err := strconv.Atoi(value); err == nil {
 					x := int64(s)
 					if !f.OverflowInt(x) {
 						f.SetInt(x)
 					}
 				} else {
-					return err
+					return fmt.Errorf("value `%v` is not a integer", value)
 				}
+			default:
+				return fmt.Errorf("unsupport type: `%v`", f.Kind())
 			}
 		}
 	}

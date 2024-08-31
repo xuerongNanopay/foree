@@ -1,35 +1,38 @@
 package config
 
 import (
-	"fmt"
-	"strings"
+	"os"
 	"testing"
-
-	reflect_util "xue.io/go-pay/util/reflect"
 )
 
 func TestEnvConfig(t *testing.T) {
-	type Person struct {
-		Name string `os_config:"name,default=xue"`
-		Age  int    `os_config:"age,required"`
-	}
 
-	var person Person
-
-	for _, f := range reflect_util.GetAllFieldNamesOfStruct(&person) {
-		field, t := reflect_util.GetTagOfStruct(&person, f)
-		rawTag, ok := t.Lookup("os_config")
-		if ok {
-			tags := strings.Split(rawTag, ",")
-			label := tags[0]
-			fmt.Println("label: ", label)
-			l2 := tags[1]
-			if l2 == "required" {
-				//TODO: load from env.
-			} else {
-				defaultValue := strings.Split(l2, "=")[1]
-				reflect_util.TrySetStuctValueFromString(&person, field.Name, defaultValue)
-			}
+	t.Run("environment config should load", func(t *testing.T) {
+		type Person struct {
+			FirstName  string `os_config:"FIRST_NAME,required"`
+			MiddleName string `os_config:"MIDDLE_NAME,default=rong"`
+			Age        int    `os_config:"AGE,required"`
+			Male       bool   `os_config:"MALE,required"`
 		}
-	}
+
+		var person Person
+
+		os.Setenv("FIRST_NAME", "xue")
+		os.Setenv("AGE", "35")
+		os.Setenv("MALE", "true")
+
+		err := Load(&person)
+
+		if err != nil {
+			t.Errorf("should not raise error `%v`", err.Error())
+		}
+
+		if person.FirstName != "xue" &&
+			person.MiddleName != "rong" &&
+			person.Age != 35 &&
+			person.Male != true {
+
+			t.Errorf("should load environment successfully, but got `%v`", person)
+		}
+	})
 }
