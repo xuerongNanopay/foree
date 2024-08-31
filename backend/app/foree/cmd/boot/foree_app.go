@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-sql-driver/mysql"
+	"xue.io/go-pay/app/foree/account"
 	foree_config "xue.io/go-pay/app/foree/cmd/config"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/config"
@@ -13,21 +14,24 @@ import (
 )
 
 type ForeeApp struct {
-	envFilePath     string
-	db              *sql.DB
-	userRepo        *auth.UserRepo
-	userGroupRepo   *auth.UserGroupRepo
-	sessionRepo     *auth.SessionRepo
-	emailPasswdRepo *auth.EmailPasswdRepo
+	envFilePath           string
+	db                    *sql.DB
+	userRepo              *auth.UserRepo
+	userGroupRepo         *auth.UserGroupRepo
+	sessionRepo           *auth.SessionRepo
+	emailPasswdRepo       *auth.EmailPasswdRepo
+	contactAccountRepo    *account.ContactAccountRepo
+	newInteracAccountRepo *account.InteracAccountRepo
 }
 
-func (app *ForeeApp) boot(envFilePath string) error {
+func (app *ForeeApp) Boot(envFilePath string) error {
 	app.envFilePath = envFilePath
 	var cfg foree_config.ForeeLocalConfig
 	if err := config.LoadFromFile(&cfg, envFilePath); err != nil {
 		return err
 	}
 
+	//Initial DB
 	db, err := ms.NewMysqlPool(mysql.Config{
 		Addr:                 fmt.Sprintf("%s:%s", cfg.MysqlDBHost, cfg.MysqlDBPort),
 		DBName:               cfg.MysqlDBName,
@@ -42,12 +46,14 @@ func (app *ForeeApp) boot(envFilePath string) error {
 	}
 	app.db = db
 
+	// Initial Repo
 	app.userRepo = auth.NewUserRepo(db)
 	app.userGroupRepo = auth.NewUserGroupRepo(db)
 	app.sessionRepo = auth.NewDefaultSessionRepo(db)
 	app.emailPasswdRepo = auth.NewEmailPasswdRepo(db)
+	app.contactAccountRepo = account.NewContactAccountRepo(db)
+	app.newInteracAccountRepo = account.NewInteracAccountRepo(db)
 
-	//Initial DB
 	//Initial Repo
 	//Initial service
 	//Initial handler
