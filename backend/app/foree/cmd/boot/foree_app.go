@@ -1,5 +1,6 @@
 package foree_boot
 
-func ForeeAppBooter() error {
+// ../../deploy/.local_env
+func ForeeAppBooter(envFilePath string) error {
 	return nil
 }

@@ -9,10 +9,10 @@ func TestEnvConfig(t *testing.T) {
 
 	t.Run("environment config should load", func(t *testing.T) {
 		type Person struct {
-			FirstName  string `os_config:"FIRST_NAME,required"`
-			MiddleName string `os_config:"MIDDLE_NAME,default=rong"`
-			Age        int    `os_config:"AGE,required"`
-			Male       bool   `os_config:"MALE,required"`
+			FirstName  string `env_var:"FIRST_NAME,required"`
+			MiddleName string `env_var:"MIDDLE_NAME,default=rong"`
+			Age        int    `env_var:"AGE,required"`
+			Male       bool   `env_var:"MALE,required"`
 		}
 
 		var person Person

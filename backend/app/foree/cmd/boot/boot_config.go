@@ -9,6 +9,7 @@ type BootConfig struct {
 	MysqlDBAddress string
 	MysqlDBUser    string
 	MysqlDBPasswd  string
+	MysqlDBName    string
 	HttpServerHost string
 	HttpServerPort string
 }

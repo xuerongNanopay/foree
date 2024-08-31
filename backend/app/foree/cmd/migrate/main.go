@@ -12,9 +12,17 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/mysql"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	foree_config "xue.io/go-pay/app/foree/cmd/config"
+	"xue.io/go-pay/config"
 )
 
 func main() {
+	err := foree_config.Load("../../deploy/.local_migration_env")
+	if err != nil {
+		log.Fatal(err)
+	}
+	var cfg foree_config.ForeeMigrateConfig
+	config.Load(&cfg)
+
 	ex, err := os.Executable()
 	if err != nil {
 		panic(err)
@@ -22,10 +30,10 @@ func main() {
 	configPath := filepath.Join(ex, "../migrations/")
 
 	db, err := newMySQLStorage(mysqlCfg.Config{
-		User:                 foree_config.Envs.DBUser,
-		Passwd:               foree_config.Envs.DBPasswd,
-		Addr:                 foree_config.Envs.DBAddr,
-		DBName:               foree_config.Envs.DBName,
+		User:                 cfg.MysqlDBUser,
+		Passwd:               cfg.MysqlDBPasswd,
+		Addr:                 fmt.Sprintf("%s:%s", cfg.MysqlDBHost, cfg.MysqlDBPort),
+		DBName:               cfg.MysqlDBName,
 		MultiStatements:      true,
 		Net:                  "tcp",
 		AllowNativePasswords: true,
@@ -43,7 +51,7 @@ func main() {
 
 	m, err := migrate.NewWithDatabaseInstance(
 		fmt.Sprintf("%s//%s", "file://", configPath),
-		foree_config.Envs.DBName,
+		cfg.MysqlDBName,
 		driver,
 	)
 	if err != nil {
