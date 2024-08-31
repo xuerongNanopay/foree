@@ -5,17 +5,17 @@ import (
 	"xue.io/go-pay/app/foree/service"
 )
 
-type TransactionController struct {
+type TransactionRouter struct {
 	transactionService *service.TransactionService
 }
 
-func NewTransactionController(transactionService *service.TransactionService) *TransactionController {
-	return &TransactionController{
+func NewTransactionRouter(transactionService *service.TransactionService) *TransactionRouter {
+	return &TransactionRouter{
 		transactionService: transactionService,
 	}
 }
 
-func (c *TransactionController) RegisterRouter(router *mux.Router) {
+func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 	// === Public
 	// Rate
 	router.HandleFunc("rate", simplePostWrapper(c.transactionService.GetRate)).Methods("POST")

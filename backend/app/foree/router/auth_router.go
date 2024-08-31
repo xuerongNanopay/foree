@@ -5,17 +5,17 @@ import (
 	"xue.io/go-pay/app/foree/service"
 )
 
-type AuthController struct {
+type AuthRouter struct {
 	authService *service.AuthService
 }
 
-func NewAuthController(authService *service.AuthService) *AuthController {
-	return &AuthController{
+func NewAuthRouter(authService *service.AuthService) *AuthRouter {
+	return &AuthRouter{
 		authService: authService,
 	}
 }
 
-func (c *AuthController) RegisterRouter(router *mux.Router) {
+func (c *AuthRouter) RegisterRouter(router *mux.Router) {
 	// Login
 	router.HandleFunc("/login", simplePostWrapper(c.authService.Login)).Methods("POST")
 	// Verify email

@@ -5,17 +5,17 @@ import (
 	"xue.io/go-pay/app/foree/service"
 )
 
-type AccountController struct {
+type AccountRouter struct {
 	accountService *service.AccountService
 }
 
-func NewAccountController(accountService *service.AccountService) *AccountController {
-	return &AccountController{
+func NewAccountRouter(accountService *service.AccountService) *AccountRouter {
+	return &AccountRouter{
 		accountService: accountService,
 	}
 }
 
-func (c *AccountController) RegisterRouter(router *mux.Router) {
+func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 	router.HandleFunc("/create_contact_account", simplePostWrapper(c.accountService.CreateContact)).Methods("POST")
 	router.HandleFunc("/contact_accounts/{ContactId}", simpleGetWrapper(c.accountService.GetActiveContact)).Methods("GET")
 	router.HandleFunc("/contact_accounts", simpleGetWrapper(c.accountService.QueryActiveContacts)).Methods("GET")
