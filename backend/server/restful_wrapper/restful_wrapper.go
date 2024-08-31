@@ -21,13 +21,13 @@ func RestGetWrapper[P any, Q any](
 		resp, herr := func() (Q, transport.HError) {
 			params := mux.Vars(r)
 			for k, v := range params {
-				reflect_util.SetIntOrStringValueIfFieldExistFromString(&req, k, v)
+				reflect_util.SetStuctValueFromString(&req, k, v)
 			}
 
 			for _, k := range reflect_util.GetAllFieldNamesOfStruct(&req) {
 				query := r.URL.Query()
 				if query.Has(k) {
-					reflect_util.SetIntOrStringValueIfFieldExistFromString(&req, k, query.Get(k))
+					reflect_util.SetStuctValueFromString(&req, k, query.Get(k))
 				}
 			}
 
@@ -87,7 +87,7 @@ func RestPostWrapper[P any, Q any](
 			}
 
 			sessionId := r.Header.Get("SESSION_ID")
-			reflect_util.SetStringValueIfFieldExist(&req, "SessionId", sessionId)
+			reflect_util.SetStuctValueFromString(&req, "SessionId", sessionId)
 
 			var resp Q
 			var herr transport.HError
