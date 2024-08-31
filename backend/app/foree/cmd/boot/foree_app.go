@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 	"xue.io/go-pay/app/foree/account"
+	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_config "xue.io/go-pay/app/foree/cmd/config"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/config"
@@ -14,14 +15,16 @@ import (
 )
 
 type ForeeApp struct {
-	envFilePath           string
-	db                    *sql.DB
-	userRepo              *auth.UserRepo
-	userGroupRepo         *auth.UserGroupRepo
-	sessionRepo           *auth.SessionRepo
-	emailPasswdRepo       *auth.EmailPasswdRepo
-	contactAccountRepo    *account.ContactAccountRepo
-	newInteracAccountRepo *account.InteracAccountRepo
+	envFilePath            string
+	db                     *sql.DB
+	userRepo               *auth.UserRepo
+	userGroupRepo          *auth.UserGroupRepo
+	sessionRepo            *auth.SessionRepo
+	emailPasswdRepo        *auth.EmailPasswdRepo
+	contactAccountRepo     *account.ContactAccountRepo
+	newInteracAccountRepo  *account.InteracAccountRepo
+	userExtraRepo          *foree_auth.UserExtraRepo
+	userIdnetificationRepo *foree_auth.UserIdentificationRepo
 }
 
 func (app *ForeeApp) Boot(envFilePath string) error {
@@ -53,6 +56,8 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.emailPasswdRepo = auth.NewEmailPasswdRepo(db)
 	app.contactAccountRepo = account.NewContactAccountRepo(db)
 	app.newInteracAccountRepo = account.NewInteracAccountRepo(db)
+	app.userExtraRepo = foree_auth.NewUserExtraRepo(db)
+	app.userIdnetificationRepo = foree_auth.NewUserIdentificationRepo(db)
 
 	//Initial Repo
 	//Initial service
