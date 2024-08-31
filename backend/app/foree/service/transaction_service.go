@@ -684,7 +684,7 @@ func (t *TransactionService) getDailyTxLimit(ctx context.Context, session auth.S
 	return dailyLimit, nil
 }
 
-func (t *TransactionService) GetSummaryTx(ctx context.Context, req GetTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
+func (t *TransactionService) GetTxSummary(ctx context.Context, req GetTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
 	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionForeeTxSummaryRead)
 	if sErr != nil {
 		return nil, sErr
@@ -698,27 +698,6 @@ func (t *TransactionService) GetSummaryTx(ctx context.Context, req GetTransactio
 	return NewTxSummaryDetailDTO(summaryTx), nil
 }
 
-func (t *TransactionService) GetAllSummaryTxs(ctx context.Context, req GetAllTransactionReq) ([]*TxSummaryDTO, transport.HError) {
-	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionForeeTxSummaryRead)
-	if sErr != nil {
-		return nil, sErr
-	}
-
-	//TODO: limit, offset pruning
-	summaryTxs, err := t.txSummaryRepo.GetAllTxSummaryByOwnerIdWithPagination(ctx, session.UserId, req.Limit, req.Offset)
-	if err != nil {
-		return nil, transport.WrapInteralServerError(err)
-	}
-
-	rets := make([]*TxSummaryDTO, len(summaryTxs))
-
-	for _, v := range summaryTxs {
-		rets = append(rets, NewTxSummaryDTO(v))
-	}
-
-	return rets, nil
-}
-
 func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTransactionReq) ([]*TxSummaryDTO, transport.HError) {
 	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionForeeTxSummaryRead)
 	if sErr != nil {
@@ -726,7 +705,15 @@ func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTrans
 	}
 
 	//TODO: limit, offset pruning
-	summaryTxs, err := t.txSummaryRepo.QueryTxSummaryByOwnerIdAndStatusWithPagination(ctx, session.UserId, req.Status, req.Limit, req.Offset)
+	var summaryTxs []*transaction.TxSummary
+	var err error
+
+	if req.Status == "" {
+		summaryTxs, err = t.txSummaryRepo.GetAllTxSummaryByOwnerIdWithPagination(ctx, session.UserId, req.Limit, req.Offset)
+	} else {
+		summaryTxs, err = t.txSummaryRepo.QueryTxSummaryByOwnerIdAndStatusWithPagination(ctx, session.UserId, req.Status, req.Limit, req.Offset)
+	}
+
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
