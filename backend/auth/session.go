@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"database/sql"
 	"fmt"
 	"strconv"
 	"strings"
@@ -31,9 +32,11 @@ type Session struct {
 
 // 13 buckets, 1024 sesson of each bucket, and 12 hours session expiry
 // It should be able to support at least 10000 sessions in 12 hours
-func NewDefaultSessionRepo() *SessionRepo {
+func NewDefaultSessionRepo(db *sql.DB) *SessionRepo {
 	// If you don't have active in 3 hours, the session will expire.
-	return NewSessionRepo(12, 3, 13, 1024)
+	repo := NewSessionRepo(12, 3, 13, 1024)
+	repo.db = db
+	return repo
 }
 
 func NewSessionRepo(expireInHour, activeInHour, numberOfBucket, maxBucketSize int) *SessionRepo {
@@ -55,7 +58,7 @@ func NewSessionRepo(expireInHour, activeInHour, numberOfBucket, maxBucketSize in
 // Still have performance issue. TOOD: use atomic instead of lock
 // TODO: persist difference use go-routine.
 type SessionRepo struct {
-	// db *sql.DB
+	db             *sql.DB
 	cur            int
 	maxBucketSize  int
 	expireInHour   int

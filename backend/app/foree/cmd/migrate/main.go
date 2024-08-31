@@ -29,10 +29,10 @@ func main() {
 	configPath := filepath.Join(ex, "../migrations/")
 
 	db, err := newMySQLStorage(mysqlCfg.Config{
-		User:                 cfg.MysqlDBUser,
-		Passwd:               cfg.MysqlDBPasswd,
 		Addr:                 fmt.Sprintf("%s:%s", cfg.MysqlDBHost, cfg.MysqlDBPort),
 		DBName:               cfg.MysqlDBName,
+		User:                 cfg.MysqlDBUser,
+		Passwd:               cfg.MysqlDBPasswd,
 		MultiStatements:      true,
 		Net:                  "tcp",
 		AllowNativePasswords: true,
