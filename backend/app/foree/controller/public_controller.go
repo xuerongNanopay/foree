@@ -6,13 +6,10 @@ import (
 )
 
 type PublicController struct {
-	transactionService *service.TransactionService
 }
 
 func NewPublicController(transactionService *service.TransactionService) *PublicController {
-	return &PublicController{
-		transactionService: transactionService,
-	}
+	return &PublicController{}
 }
 
 func (c *PublicController) RegisterRouter(router *mux.Router) {
