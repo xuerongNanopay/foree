@@ -1,4 +1,5 @@
 package foree_boot
 
-type ForeeAppBooter struct {
+func ForeeAppBooter() error {
+	return nil
 }

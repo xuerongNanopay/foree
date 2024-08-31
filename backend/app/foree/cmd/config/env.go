@@ -9,6 +9,15 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type ForeeAppBootConfig struct {
+	MysqlDBHost    string
+	MysqlDBAddress string
+	MysqlDBUser    string
+	MysqlDBPasswd  string
+	HttpServerHost string
+	HttpServerPort string
+}
+
 type Config struct {
 	PublicHost             string
 	Port                   string
