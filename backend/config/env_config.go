@@ -14,24 +14,27 @@ func Load(config any) error {
 		rawTag, ok := sTag.Lookup("os_config")
 		if ok {
 			tags := strings.Split(rawTag, ",")
+			if len(tags) != 2 {
+				return fmt.Errorf("invalid os_config format `%s` in field `%s`", tags, sField.Name)
+			}
 			label := tags[0]
-			fmt.Println("label: ", label)
 			l2 := tags[1]
+			if l2 != "required" || !strings.HasPrefix(l2, "default=") {
+				return fmt.Errorf("invalid os_config format `%s` in field `%s`", tags, sField.Name)
+			}
+
 			if l2 == "required" {
-				value, ok := os.LookupEnv(sField.Name)
+				value, ok := os.LookupEnv(label)
 				if !ok {
-					return fmt.Errorf("do not find `%s` in environment", sField.Name)
+					return fmt.Errorf("do not find `%s` in environment", label)
 				}
-				reflect_util.SetStuctValueFromString(config, sField.Name, value)
+				return reflect_util.SetStuctValueFromString(config, sField.Name, value)
 			} else {
-				value, ok := os.LookupEnv(sField.Name)
-				if !ok {
-					return fmt.Errorf("do not find `%s` in environment", sField.Name)
-				}
-				if value == "" {
+				value, ok := os.LookupEnv(label)
+				if !ok || value == "" {
 					value = strings.Split(l2, "=")[1]
 				}
-				reflect_util.SetStuctValueFromString(config, sField.Name, value)
+				return reflect_util.SetStuctValueFromString(config, sField.Name, value)
 			}
 		}
 	}

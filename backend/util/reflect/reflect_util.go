@@ -5,7 +5,11 @@ import (
 	"strconv"
 )
 
-func SetStuctValueFromString(o interface{}, f, v string) {
+func TrySetStuctValueFromString(o interface{}, f, v string) {
+	SetStuctValueFromString(o, f, v)
+}
+
+func SetStuctValueFromString(o interface{}, f, v string) error {
 	rValue := reflect.ValueOf(o)
 	s := rValue.Elem()
 
@@ -18,6 +22,8 @@ func SetStuctValueFromString(o interface{}, f, v string) {
 			case reflect.Bool:
 				if s, err := strconv.ParseBool(v); err == nil {
 					f.SetBool(s)
+				} else {
+					return err
 				}
 			case reflect.Int | reflect.Int16 | reflect.Int32 | reflect.Int64 | reflect.Int8:
 				if s, err := strconv.Atoi(v); err == nil {
@@ -25,10 +31,13 @@ func SetStuctValueFromString(o interface{}, f, v string) {
 					if !f.OverflowInt(x) {
 						f.SetInt(x)
 					}
+				} else {
+					return err
 				}
 			}
 		}
 	}
+	return nil
 }
 
 func GetAllFieldNamesOfStruct(o interface{}) []string {

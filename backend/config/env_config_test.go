@@ -28,7 +28,7 @@ func TestEnvConfig(t *testing.T) {
 				//TODO: load from env.
 			} else {
 				defaultValue := strings.Split(l2, "=")[1]
-				reflect_util.SetStuctValueFromString(&person, field.Name, defaultValue)
+				reflect_util.TrySetStuctValueFromString(&person, field.Name, defaultValue)
 			}
 		}
 	}
