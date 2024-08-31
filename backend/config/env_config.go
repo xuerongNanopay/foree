@@ -3,10 +3,26 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/joho/godotenv"
 	reflect_util "xue.io/go-pay/util/reflect"
 )
+
+func LoadFromFile(config any, envFilePath string) error {
+	ex, err := os.Executable()
+	if err != nil {
+		return err
+	}
+
+	configPath := filepath.Join(ex, envFilePath)
+	err = godotenv.Load(configPath)
+	if err != nil {
+		return err
+	}
+	return Load(config)
+}
 
 func Load(config any) error {
 	for _, f := range reflect_util.GetAllFieldNamesOfStruct(config) {

@@ -16,12 +16,11 @@ import (
 )
 
 func main() {
-	err := foree_config.Load("../../deploy/.local_migration_env")
+	var cfg foree_config.ForeeMigrateConfig
+	err := config.LoadFromFile(&cfg, "../../deploy/.local_migration_env")
 	if err != nil {
 		log.Fatal(err)
 	}
-	var cfg foree_config.ForeeMigrateConfig
-	config.Load(&cfg)
 
 	ex, err := os.Executable()
 	if err != nil {
