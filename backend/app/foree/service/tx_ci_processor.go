@@ -15,20 +15,35 @@ const DefaultScotiaProfileName = "FOREE"
 
 type ScotiaProfile struct {
 	Name                          string
-	legalName                     string
-	companyName                   string
-	initiatingPartyName           string
-	expireInHours                 int
-	supressResponderNotifications bool
-	interacId                     string
-	countryOfResidence            string
-	profileName                   string
-	email                         string
-	accountNumber                 string
-	accountCurrency               string
-	amountModificationAllowed     bool
-	earlyPaymentAllowed           bool
-	guaranteedPaymentRequested    bool
+	LegalName                     string
+	CompanyName                   string
+	InitiatingPartyName           string
+	ExpireInHours                 int
+	SupressResponderNotifications bool
+	InteracId                     string
+	CountryOfResidence            string
+	ProfileName                   string
+	Email                         string
+	AccountNumber                 string
+	AccountCurrency               string
+	AmountModificationAllowed     bool
+	EarlyPaymentAllowed           bool
+	GuaranteedPaymentRequested    bool
+}
+
+func NewCITxProcessor(
+	db *sql.DB,
+	scotiaProfile ScotiaProfile,
+	scotiaClient scotia.ScotiaClient,
+	interacTxRepo *transaction.InteracCITxRepo,
+	foreeTxRepo *transaction.ForeeTxRepo,
+	txSummaryRepo *transaction.TxSummaryRepo,
+	txProcessor *TxProcessor,
+) *CITxProcessor {
+	return &CITxProcessor{
+		db:            db,
+		scotiaProfile: scotiaProfile,
+	}
 }
 
 type CITxProcessor struct {
@@ -104,6 +119,7 @@ func (p *CITxProcessor) startProcessor() {
 						//Log error
 						return
 					}
+					//TODO: end process of over one day.
 					if nTx.CurStageStatus != tx.CurStageStatus {
 						p.forwardChan <- *nTx
 					}
@@ -332,7 +348,7 @@ func scotiaToInternalStatusMapper(scotiaStatus string) transaction.TxStatus {
 }
 
 func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.RequestPaymentRequest {
-	expireDate := time.Now().Add(time.Hour * time.Duration(p.scotiaProfile.expireInHours))
+	expireDate := time.Now().Add(time.Hour * time.Duration(p.scotiaProfile.ExpireInHours))
 
 	req := &scotia.RequestPaymentRequest{
 		RequestData: &scotia.RequestPaymentRequestData{
@@ -342,7 +358,7 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 			CreditDebitIndicator:           "CRDT",
 			CreationDatetime:               (*scotia.ScotiaDatetime)(&tx.CreatedAt),
 			PaymentExpiryDate:              (*scotia.ScotiaDatetime)(&expireDate),
-			SuppressResponderNotifications: p.scotiaProfile.supressResponderNotifications,
+			SuppressResponderNotifications: p.scotiaProfile.SupressResponderNotifications,
 			ReturnUrl:                      "string",
 			Language:                       "EN",
 			InstructedAmtData: &scotia.ScotiaAmtData{
@@ -350,12 +366,12 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 				Currency: tx.CI.Amt.Currency,
 			},
 			InitiatingParty: &scotia.InitiatingPartyData{
-				Name: p.scotiaProfile.initiatingPartyName,
+				Name: p.scotiaProfile.InitiatingPartyName,
 				Identification: &scotia.IdentificationData{
 					OrganisationIdentification: &scotia.OrganisationIdentificationData{
 						Other: []scotia.OtherData{
 							{
-								Identification: p.scotiaProfile.interacId,
+								Identification: p.scotiaProfile.InteracId,
 								SchemeName: &scotia.SchemeNameData{
 									Code: "BANK",
 								},
@@ -366,37 +382,37 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 			},
 			Debtor: &scotia.DebtorData{
 				Name:               tx.CI.CashInAcc.GetLegalName(),
-				CountryOfResidence: p.scotiaProfile.countryOfResidence,
+				CountryOfResidence: p.scotiaProfile.CountryOfResidence,
 				ContactDetails: &scotia.ContactDetailsData{
 					EmailAddress: tx.CI.CashInAcc.Email,
 				},
 			},
 			Creditor: &scotia.CreditorData{
-				Name:               p.scotiaProfile.legalName,
-				CountryOfResidence: p.scotiaProfile.countryOfResidence,
+				Name:               p.scotiaProfile.LegalName,
+				CountryOfResidence: p.scotiaProfile.CountryOfResidence,
 				ContactDetails: &scotia.ContactDetailsData{
-					EmailAddress: p.scotiaProfile.email,
+					EmailAddress: p.scotiaProfile.Email,
 				},
 			},
 			UltimateCreditor: &scotia.CreditorData{
-				Name:               p.scotiaProfile.legalName,
-				CountryOfResidence: p.scotiaProfile.countryOfResidence,
+				Name:               p.scotiaProfile.LegalName,
+				CountryOfResidence: p.scotiaProfile.CountryOfResidence,
 				ContactDetails: &scotia.ContactDetailsData{
-					EmailAddress: p.scotiaProfile.email,
+					EmailAddress: p.scotiaProfile.Email,
 				},
 			},
 			CreditorAccount: &scotia.CreditorAccountData{
-				Identification: p.scotiaProfile.accountNumber,
-				Currency:       p.scotiaProfile.accountCurrency,
+				Identification: p.scotiaProfile.AccountNumber,
+				Currency:       p.scotiaProfile.AccountCurrency,
 				SchemeName:     "ALIAS_ACCT_NO",
 			},
 			FraudSupplementaryInfo: &scotia.FraudSupplementaryInfoData{
 				CustomerAuthenticationMethod: "PASSWORD",
 			},
 			PaymentCondition: &scotia.PaymentConditionData{
-				AmountModificationAllowed:  p.scotiaProfile.amountModificationAllowed,
-				EarlyPaymentAllowed:        p.scotiaProfile.earlyPaymentAllowed,
-				GuaranteedPaymentRequested: p.scotiaProfile.guaranteedPaymentRequested,
+				AmountModificationAllowed:  p.scotiaProfile.AmountModificationAllowed,
+				EarlyPaymentAllowed:        p.scotiaProfile.EarlyPaymentAllowed,
+				GuaranteedPaymentRequested: p.scotiaProfile.GuaranteedPaymentRequested,
 			},
 			PaymentTypeInformation: &scotia.PaymentTypeInformationData{
 				CategoryPurpose: &scotia.CategoryPurposeData{
