@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	reflect_util "xue.io/go-pay/util/reflect"
 )
 
 const (
@@ -28,8 +29,8 @@ type ScotiaClient interface {
 	PaymentDetail(req PaymentDetailRequest) (*PaymentDetailResponse, error)
 	PaymentStatus(req PaymentStatusRequest) (*PaymentStatusResponse, error)
 	CancelPayment(req CancelPaymentRequest) (*CancelPaymentResponse, error)
-	GetConfigs() map[string]string
-	SetConfig(key string, value string)
+	GetConfigs() ScotiaConfig
+	SetConfig(key string, value string) error
 }
 
 type tokenData struct {
@@ -50,11 +51,9 @@ func initRSA(config ScotiaConfig) (*rsa, error) {
 	return nil, nil
 }
 
-func NewScotiaClientImpl(configs map[string]string) ScotiaClient {
-	scotiaConfig := NewScotiaConfigWithDefaultConfig(configs)
-
+func NewScotiaClientImpl(config ScotiaConfig) ScotiaClient {
 	return &scotiaClientImpl{
-		config: scotiaConfig,
+		config: config,
 	}
 }
 
@@ -66,16 +65,16 @@ type scotiaClientImpl struct {
 	httpClient *http.Client
 }
 
-func (s *scotiaClientImpl) GetConfigs() map[string]string {
-	return s.config.ShowConfigs()
+func (s *scotiaClientImpl) GetConfigs() ScotiaConfig {
+	return s.config
 }
 
-func (s *scotiaClientImpl) SetConfig(key string, value string) {
-	s.config.SetConfig(key, value)
+func (s *scotiaClientImpl) SetConfig(key string, value string) error {
+	return reflect_util.SetStuctValueFromString(&(s.config), key, value)
 }
 
 func (s *scotiaClientImpl) PaymentStatus(req PaymentStatusRequest) (*PaymentStatusResponse, error) {
-	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests", s.config.GetBaseUrl())
+	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests", s.config.BaseUrl)
 	r, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		//Unlikely; Fatal
@@ -119,7 +118,7 @@ func (s *scotiaClientImpl) PaymentStatus(req PaymentStatusRequest) (*PaymentStat
 }
 
 func (s *scotiaClientImpl) PaymentDetail(req PaymentDetailRequest) (*PaymentDetailResponse, error) {
-	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests/%v", s.config.GetBaseUrl(), req.PaymentId)
+	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests/%v", s.config.BaseUrl, req.PaymentId)
 	r, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		//Unlikely; Fatal
@@ -162,7 +161,7 @@ func (s *scotiaClientImpl) PaymentDetail(req PaymentDetailRequest) (*PaymentDeta
 }
 
 func (s *scotiaClientImpl) CancelPayment(req CancelPaymentRequest) (*CancelPaymentResponse, error) {
-	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests/%v/cancel", s.config.GetBaseUrl(), req.PaymentId)
+	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests/%v/cancel", s.config.BaseUrl, req.PaymentId)
 
 	rawReqeust, err := json.Marshal(req)
 	if err != nil {
@@ -214,7 +213,7 @@ func (s *scotiaClientImpl) CancelPayment(req CancelPaymentRequest) (*CancelPayme
 }
 
 func (s *scotiaClientImpl) RequestPayment(req RequestPaymentRequest) (*RequestPaymentResponse, error) {
-	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests", s.config.GetBaseUrl())
+	url := fmt.Sprintf("%s/treasury/payments/rtp/v1/requests", s.config.BaseUrl)
 
 	rawReqeust, err := json.Marshal(req)
 	if err != nil {
@@ -266,8 +265,8 @@ func (s *scotiaClientImpl) RequestPayment(req RequestPaymentRequest) (*RequestPa
 }
 
 func (s *scotiaClientImpl) tokenRequest() (*tokenResponse, error) {
-	endpoint := fmt.Sprintf("%s/scotiabank/wam/vi/getToken", s.config.GetBaseUrl())
-	basicAuth := fmt.Sprintf("%s:%s", s.config.GetAuthUsername(), s.config.GetAuthPassword())
+	endpoint := fmt.Sprintf("%s/scotiabank/wam/vi/getToken", s.config.BaseUrl)
+	basicAuth := fmt.Sprintf("%s:%s", s.config.AuthUserName, s.config.AuthPassword)
 	basicAuth = base64.StdEncoding.EncodeToString([]byte(basicAuth))
 	basicAuth = fmt.Sprintf("Basic %v", basicAuth)
 
@@ -278,8 +277,8 @@ func (s *scotiaClientImpl) tokenRequest() (*tokenResponse, error) {
 
 	formData := url.Values{}
 	formData.Add("grant_type", "client_credentials")
-	formData.Add("scope", s.config.GetScope())
-	formData.Add("client_id", s.config.GetClientId())
+	formData.Add("scope", s.config.Scope)
+	formData.Add("client_id", s.config.ClientId)
 	formData.Add("client_assertion", jwt)
 	formData.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
 
@@ -324,13 +323,13 @@ func (s *scotiaClientImpl) tokenRequest() (*tokenResponse, error) {
 
 func (s *scotiaClientImpl) signJWT() (string, error) {
 	claims := &jwt.RegisteredClaims{
-		Subject:   s.config.GetClientId(),
-		Audience:  []string{s.config.GetJWTAudience()},
-		Issuer:    s.config.GetClientId(),
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(s.config.GetJWTExpiryMinutes()) * time.Minute)),
+		Subject:   s.config.ClientId,
+		Audience:  []string{s.config.JWTAudience},
+		Issuer:    s.config.ClientId,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(s.config.JWTExpiryMinutes) * time.Minute)),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	token.Header["kid"] = s.config.GetJWTKid()
+	token.Header["kid"] = s.config.JWTKid
 	ss, err := token.SignedString(s.rsa.signKey)
 	if err != nil {
 		return "", fmt.Errorf("ScotiaClientImpl JWT signature got error `%v`", err.Error())
@@ -347,9 +346,9 @@ func (s *scotiaClientImpl) setCommonHeaders(r *http.Request) error {
 	basicAuth := fmt.Sprintf("Basic %v", token)
 	r.Header.Add("Content-Type", "application/json")
 	r.Header.Add("Authorization", basicAuth)
-	r.Header.Add("customer-profile-id", s.config.GetProfileId())
-	r.Header.Add("x-country-code", s.config.GetCountryCode())
-	r.Header.Add("x-api-key", s.config.GetApiKey())
+	r.Header.Add("customer-profile-id", s.config.ProfileId)
+	r.Header.Add("x-country-code", s.config.CountryCode)
+	r.Header.Add("x-api-key", s.config.ApiKey)
 
 	return nil
 }

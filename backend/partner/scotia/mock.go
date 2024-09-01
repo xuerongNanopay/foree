@@ -1,7 +1,11 @@
 package scotia
 
 func NewMockScotiaClient() ScotiaClient {
-	return &ScotiaClientMock{}
+	return &ScotiaClientMock{
+		config: ScotiaConfig{
+			Mode: "mock",
+		},
+	}
 }
 
 type ScotiaClientMock struct {
@@ -48,9 +52,9 @@ func (s *ScotiaClientMock) CancelPayment(req CancelPaymentRequest) (*CancelPayme
 		},
 	}, nil
 }
-func (s *ScotiaClientMock) GetConfigs() map[string]string {
-	return s.config.ShowConfigs()
+func (s *ScotiaClientMock) GetConfigs() ScotiaConfig {
+	return s.config
 }
-func (s *ScotiaClientMock) SetConfig(key string, value string) {
-	s.config.SetConfig(key, value)
+func (s *ScotiaClientMock) SetConfig(key string, value string) error {
+	return nil
 }
