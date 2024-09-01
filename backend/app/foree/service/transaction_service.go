@@ -13,6 +13,8 @@ import (
 	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
+	"xue.io/go-pay/partner/nbp"
+	"xue.io/go-pay/partner/scotia"
 	"xue.io/go-pay/server/transport"
 )
 
@@ -41,6 +43,9 @@ func NewTransactionService(
 	contactAccountRepo *account.ContactAccountRepo,
 	interacAccountRepo *account.InteracAccountRepo,
 	feeJointRepo *transaction.FeeJointRepo,
+	txProcessor *TxProcessor,
+	scotiaClient scotia.ScotiaClient,
+	nbpClient nbp.NBPClient,
 ) *TransactionService {
 	return &TransactionService{
 		db:                 db,
@@ -56,6 +61,9 @@ func NewTransactionService(
 		contactAccountRepo: contactAccountRepo,
 		interacAccountRepo: interacAccountRepo,
 		feeJointRepo:       feeJointRepo,
+		txProcessor:        txProcessor,
+		scotiaClient:       scotiaClient,
+		nbpClient:          nbpClient,
 		rateCache:          make(map[string]CacheItem[transaction.Rate], 8),
 		feeCache:           make(map[string]CacheItem[transaction.Fee], 8),
 	}
@@ -76,6 +84,8 @@ type TransactionService struct {
 	interacAccountRepo *account.InteracAccountRepo
 	feeJointRepo       *transaction.FeeJointRepo
 	txProcessor        *TxProcessor
+	scotiaClient       scotia.ScotiaClient
+	nbpClient          nbp.NBPClient
 	rateCache          map[string]CacheItem[transaction.Rate]
 	rateCacheRWLock    sync.RWMutex
 	feeCache           map[string]CacheItem[transaction.Fee]

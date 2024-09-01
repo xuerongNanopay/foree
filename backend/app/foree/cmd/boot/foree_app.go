@@ -114,21 +114,21 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.interacAccountRepo,
 	)
 
-	app.transactionService = service.NewTransactionService(
-		db,
-		app.authService,
-		app.userGroupRepo,
-		app.foreeTxRepo,
-		app.txSummaryRepo,
-		app.txQuoteRepo,
-		app.rateRepo,
-		app.rewardRepo,
-		app.dailyTxLimitRepo,
-		app.feeRepo,
-		app.contactAccountRepo,
-		app.interacAccountRepo,
-		app.feeJointRepo,
-	)
+	// app.transactionService = service.NewTransactionService(
+	// 	db,
+	// 	app.authService,
+	// 	app.userGroupRepo,
+	// 	app.foreeTxRepo,
+	// 	app.txSummaryRepo,
+	// 	app.txQuoteRepo,
+	// 	app.rateRepo,
+	// 	app.rewardRepo,
+	// 	app.dailyTxLimitRepo,
+	// 	app.feeRepo,
+	// 	app.contactAccountRepo,
+	// 	app.interacAccountRepo,
+	// 	app.feeJointRepo,
+	// )
 
 	//Initial handler
 
