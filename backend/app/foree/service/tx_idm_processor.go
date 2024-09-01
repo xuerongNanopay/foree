@@ -11,12 +11,26 @@ import (
 	"xue.io/go-pay/partner/idm"
 )
 
+func NewIDMTxProcessor(
+	db *sql.DB,
+	foreeTxRepo *transaction.ForeeTxRepo,
+	idmTxRepo *transaction.IdmTxRepo,
+	idmClient idm.IDMClient,
+) *IDMTxProcessor {
+	return &IDMTxProcessor{
+		db:          db,
+		foreeTxRepo: foreeTxRepo,
+		idmTxRepo:   idmTxRepo,
+		idmClient:   idmClient,
+	}
+}
+
 type IDMTxProcessor struct {
 	db          *sql.DB
 	foreeTxRepo *transaction.ForeeTxRepo
 	idmTxRepo   *transaction.IdmTxRepo
-	txProcessor *TxProcessor
 	idmClient   idm.IDMClient
+	// txProcessor *TxProcessor
 }
 
 // IDM API called
