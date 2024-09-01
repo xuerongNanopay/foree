@@ -7,18 +7,19 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	reflect_util "xue.io/go-pay/util/reflect"
 )
 
 type IDMClient interface {
 	Transfer(req IDMRequest) (*IDMResponse, error)
-	GetConfigs() map[string]string
-	SetConfig(key string, value string)
+	GetConfigs() IDMConfig
+	SetConfig(key string, value string) error
 }
 
-func NewIDMClient(config map[string]string) IDMClient {
-	idmConfig := NewIDMConfigWithDefaultConfig(config)
+func NewIDMClient(config IDMConfig) IDMClient {
 	return &IDMClientImpl{
-		config:     idmConfig,
+		config:     config,
 		httpClient: &http.Client{},
 	}
 }
@@ -28,17 +29,17 @@ type IDMClientImpl struct {
 	httpClient *http.Client
 }
 
-func (s *IDMClientImpl) GetConfigs() map[string]string {
-	return map[string]string{}
+func (s *IDMClientImpl) GetConfigs() IDMConfig {
+	return s.config
 }
 
-func (s *IDMClientImpl) SetConfig(key string, value string) {
-	s.config.SetConfig(key, value)
+func (s *IDMClientImpl) SetConfig(key string, value string) error {
+	return reflect_util.SetStuctValueFromString(&(s.config), key, value)
 }
 
 func (c *IDMClientImpl) Transfer(req IDMRequest) (*IDMResponse, error) {
-	url := fmt.Sprintf("%s/account/transfer", c.config.GetBaseUrl())
-	basicAuth := fmt.Sprintf("%s:%s", c.config.GetAuthUsername(), c.config.GetAuthPassword())
+	url := fmt.Sprintf("%s/account/transfer", c.config.BaseUrl)
+	basicAuth := fmt.Sprintf("%s:%s", c.config.AuthUserName, c.config.AuthPassword)
 	basicAuth = base64.StdEncoding.EncodeToString([]byte(basicAuth))
 	basicAuth = fmt.Sprintf("Basic %v", basicAuth)
 
