@@ -15,6 +15,9 @@ import (
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/config"
 	ms "xue.io/go-pay/db/mysql"
+	"xue.io/go-pay/partner/idm"
+	"xue.io/go-pay/partner/nbp"
+	"xue.io/go-pay/partner/scotia"
 )
 
 type ForeeApp struct {
@@ -47,6 +50,9 @@ type ForeeApp struct {
 	authService            *service.AuthService
 	accountService         *service.AccountService
 	transactionService     *service.TransactionService
+	scotiaClient           scotia.ScotiaClient
+	idmClient              idm.IDMClient
+	nbpClient              nbp.NBPClient
 }
 
 func (app *ForeeApp) Boot(envFilePath string) error {
@@ -71,7 +77,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	}
 	app.db = db
 
-	// Initial Repo
+	// Initial Repos
 	app.userRepo = auth.NewUserRepo(db)
 	app.userGroupRepo = auth.NewUserGroupRepo(db)
 	app.sessionRepo = auth.NewDefaultSessionRepo(db)
@@ -96,6 +102,13 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.nbpCOTxRepo = transaction.NewNBPCOTxRepo(db)
 	app.txQuoteRepo = transaction.NewTxQuoteRepo(5, 2048)
 	app.txSummaryRepo = transaction.NewTxSummaryRepo(db)
+
+	//Initial vendors
+	app.scotiaClient = scotia.NewMockScotiaClient()
+	app.idmClient = idm.NewMockIDMClient()
+	app.nbpClient = nbp.NewMockNBPClient()
+
+	//Initial transaction processors
 
 	//Initial service
 	app.authService = service.NewAuthService(

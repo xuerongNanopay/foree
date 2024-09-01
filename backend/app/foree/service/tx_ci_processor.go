@@ -75,7 +75,7 @@ type CITxProcessor struct {
 
 // Loading from DB at beginning. OR, let foree processor do it.
 
-func (p *CITxProcessor) start() error {
+func (p *CITxProcessor) Start() error {
 	go p.startProcessor()
 	return nil
 }

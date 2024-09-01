@@ -14,6 +14,32 @@ import (
 	"xue.io/go-pay/partner/nbp"
 )
 
+func NewNBPTxProcessor(
+	db *sql.DB,
+	foreeTxRepo *transaction.ForeeTxRepo,
+	txProcessor *TxProcessor,
+	nbpTxRepo *transaction.NBPCOTxRepo,
+	nbpClient nbp.NBPClient,
+	userExtraRepo *foree_auth.UserExtraRepo,
+	userIdentificationRepo *foree_auth.UserIdentificationRepo,
+) *NBPTxProcessor {
+	return &NBPTxProcessor{
+		db:                     db,
+		foreeTxRepo:            foreeTxRepo,
+		txProcessor:            txProcessor,
+		nbpTxRepo:              nbpTxRepo,
+		nbpClient:              nbpClient,
+		userExtraRepo:          userExtraRepo,
+		userIdentificationRepo: userIdentificationRepo,
+		retryFTxs:              make(map[int64]*transaction.ForeeTx, 64),
+		waitFTxs:               make(map[int64]*transaction.ForeeTx, 256),
+		clearChan:              make(chan int64, 32),               // capacity with 32 should be enough.
+		forwardChan:            make(chan transaction.ForeeTx, 32), // capacity with 32 should be enough.
+		retryTicker:            time.NewTicker(5 * time.Minute),
+		checkStatusTicker:      time.NewTicker(3 * time.Minute),
+	}
+}
+
 type NBPTxProcessor struct {
 	db                     *sql.DB
 	foreeTxRepo            *transaction.ForeeTxRepo
@@ -27,12 +53,12 @@ type NBPTxProcessor struct {
 	retryChan              chan transaction.ForeeTx
 	waitChan               chan transaction.ForeeTx
 	forwardChan            chan transaction.ForeeTx
-	retryTicker            time.Ticker
-	checkStatusTicker      time.Ticker
+	retryTicker            *time.Ticker
+	checkStatusTicker      *time.Ticker
 	clearChan              chan int64
 }
 
-func (p *NBPTxProcessor) start() error {
+func (p *NBPTxProcessor) Start() error {
 	go p.startProcessor()
 	return nil
 }
