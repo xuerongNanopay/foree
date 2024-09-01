@@ -9,10 +9,22 @@ import (
 	"xue.io/go-pay/server/transport"
 )
 
+func NewAccountService(
+	authService *AuthService,
+	contactAccountRepo *account.ContactAccountRepo,
+	interacAccountRepo *account.InteracAccountRepo,
+) *AccountService {
+	return &AccountService{
+		authService:        authService,
+		contactAccountRepo: contactAccountRepo,
+		interacAccountRepo: interacAccountRepo,
+	}
+}
+
 type AccountService struct {
-	authService *AuthService
-	contactRepo *account.ContactAccountRepo
-	interacRepo *account.InteracAccountRepo
+	authService        *AuthService
+	contactAccountRepo *account.ContactAccountRepo
+	interacAccountRepo *account.InteracAccountRepo
 }
 
 func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq) (*ContactAccountDetailDTO, transport.HError) {
@@ -43,12 +55,12 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 
 	newAcc.HashMyself()
 
-	accId, derr := a.contactRepo.InsertContactAccount(ctx, newAcc)
+	accId, derr := a.contactAccountRepo.InsertContactAccount(ctx, newAcc)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}
 
-	nAcc, nErr := a.contactRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, accId)
+	nAcc, nErr := a.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, accId)
 	if nErr != nil {
 		return nil, transport.WrapInteralServerError(nErr)
 	}
@@ -65,7 +77,7 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 	if err != nil {
 		return err
 	}
-	acc, derr := a.contactRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
+	acc, derr := a.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
 	if derr != nil {
 		return transport.WrapInteralServerError(derr)
 	}
@@ -76,7 +88,7 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 
 	newAcc := *acc
 	newAcc.Status = account.AccountStatusDelete
-	derr = a.contactRepo.UpdateActiveContactAccountByIdAndOwner(ctx, newAcc)
+	derr = a.contactAccountRepo.UpdateActiveContactAccountByIdAndOwner(ctx, newAcc)
 	if derr != nil {
 		return transport.WrapInteralServerError(derr)
 	}
@@ -89,7 +101,7 @@ func (a *AccountService) GetActiveContact(ctx context.Context, req GetContactReq
 		return nil, err
 	}
 
-	acc, derr := a.contactRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
+	acc, derr := a.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}
@@ -107,7 +119,7 @@ func (a *AccountService) GetAllActiveContacts(ctx context.Context, req transport
 		return nil, err
 	}
 
-	accs, derr := a.contactRepo.GetAllActiveContactAccountByOwnerId(ctx, session.User.ID)
+	accs, derr := a.contactAccountRepo.GetAllActiveContactAccountByOwnerId(ctx, session.User.ID)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}
@@ -124,7 +136,7 @@ func (a *AccountService) QueryActiveContacts(ctx context.Context, req QueryConta
 	if err != nil {
 		return nil, err
 	}
-	accs, derr := a.contactRepo.QueryActiveContactAccountByOwnerIdWithPagination(ctx, session.User.ID, req.Limit, req.Offset)
+	accs, derr := a.contactAccountRepo.QueryActiveContactAccountByOwnerIdWithPagination(ctx, session.User.ID, req.Limit, req.Offset)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}
@@ -142,7 +154,7 @@ func (a *AccountService) GetAllActiveInteracs(ctx context.Context, req transport
 		return nil, err
 	}
 
-	accs, derr := a.interacRepo.GetAllActiveInteracAccountByOwnerId(ctx, session.User.ID)
+	accs, derr := a.interacAccountRepo.GetAllActiveInteracAccountByOwnerId(ctx, session.User.ID)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}

@@ -44,6 +44,7 @@ type ForeeApp struct {
 	txQuoteRepo            *transaction.TxQuoteRepo
 	txSummaryRepo          *transaction.TxSummaryRepo
 	authService            *service.AuthService
+	accountService         *service.AccountService
 }
 
 func (app *ForeeApp) Boot(envFilePath string) error {
@@ -103,6 +104,13 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.interacAccountRepo,
 		app.userGroupRepo,
 	)
+
+	app.accountService = service.NewAccountService(
+		app.authService,
+		app.contactAccountRepo,
+		app.interacAccountRepo,
+	)
+
 	//Initial handler
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%v", cfg.HttpServerPort), nil); err != nil {
