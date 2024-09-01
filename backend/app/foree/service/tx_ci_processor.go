@@ -178,9 +178,27 @@ func (p *CITxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx
 	}
 
 	if resp.StatusCode/100 != 2 {
-		//TODO: logging?
-		dTx.Rollback()
-		return nil, fmt.Errorf("CITxProcessor -- scotial requestPayment error: (httpCode: `%v`, request: `%s`, response: `%s`)", resp.StatusCode, resp.RawRequest, resp.RawResponse)
+		//Directly reject to avoid mess up.
+		fTx.CI.Status = transaction.TxStatusRejected
+		fTx.CurStageStatus = transaction.TxStatusRejected
+
+		err = p.interacTxRepo.UpdateInteracCITxById(ctx, *fTx.CI)
+		if err != nil {
+			dTx.Rollback()
+			return nil, err
+		}
+
+		err = p.foreeTxRepo.UpdateForeeTxById(ctx, fTx)
+		if err != nil {
+			dTx.Rollback()
+			return nil, err
+		}
+
+		if err = dTx.Commit(); err != nil {
+			return nil, err
+		}
+
+		return &fTx, nil
 	}
 
 	//TODO: log success

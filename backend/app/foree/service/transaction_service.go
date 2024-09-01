@@ -796,9 +796,7 @@ func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTr
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	if fTx.CurStage == transaction.TxStageInteracCI && fTx.CurStageStatus == transaction.TxStatusInitial {
-
-	} else if fTx.CurStage == transaction.TxStageInteracCI && fTx.CurStageStatus == transaction.TxStatusSent {
+	if fTx.CurStage == transaction.TxStageInteracCI && fTx.CurStageStatus == transaction.TxStatusSent {
 
 	} else if fTx.CurStage == transaction.TxStageNBPCO && fTx.CurStageStatus == transaction.TxStatusSent && fTx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
 
