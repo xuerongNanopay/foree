@@ -2,14 +2,14 @@ package foree_router
 
 import (
 	"github.com/gorilla/mux"
-	"xue.io/go-pay/app/foree/service"
+	foree_service "xue.io/go-pay/app/foree/app_service"
 )
 
 type AuthRouter struct {
-	authService *service.AuthService
+	authService *foree_service.AuthService
 }
 
-func NewAuthRouter(authService *service.AuthService) *AuthRouter {
+func NewAuthRouter(authService *foree_service.AuthService) *AuthRouter {
 	return &AuthRouter{
 		authService: authService,
 	}

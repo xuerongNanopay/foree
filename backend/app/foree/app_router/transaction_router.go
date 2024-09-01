@@ -2,14 +2,14 @@ package foree_router
 
 import (
 	"github.com/gorilla/mux"
-	"xue.io/go-pay/app/foree/service"
+	foree_service "xue.io/go-pay/app/foree/app_service"
 )
 
 type TransactionRouter struct {
-	transactionService *service.TransactionService
+	transactionService *foree_service.TransactionService
 }
 
-func NewTransactionRouter(transactionService *service.TransactionService) *TransactionRouter {
+func NewTransactionRouter(transactionService *foree_service.TransactionService) *TransactionRouter {
 	return &TransactionRouter{
 		transactionService: transactionService,
 	}

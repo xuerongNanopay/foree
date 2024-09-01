@@ -6,11 +6,13 @@ import (
 	"net/http"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
 	"xue.io/go-pay/app/foree/account"
+	foree_router "xue.io/go-pay/app/foree/app_router"
+	foree_service "xue.io/go-pay/app/foree/app_service"
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_config "xue.io/go-pay/app/foree/cmd/config"
 	"xue.io/go-pay/app/foree/referral"
-	"xue.io/go-pay/app/foree/service"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/config"
@@ -47,16 +49,19 @@ type ForeeApp struct {
 	nbpCOTxRepo            *transaction.NBPCOTxRepo
 	txQuoteRepo            *transaction.TxQuoteRepo
 	txSummaryRepo          *transaction.TxSummaryRepo
-	authService            *service.AuthService
-	accountService         *service.AccountService
-	transactionService     *service.TransactionService
+	authService            *foree_service.AuthService
+	accountService         *foree_service.AccountService
+	transactionService     *foree_service.TransactionService
 	scotiaClient           scotia.ScotiaClient
 	idmClient              idm.IDMClient
 	nbpClient              nbp.NBPClient
-	txProcessor            *service.TxProcessor
-	ciTxProcessor          *service.CITxProcessor
-	idmTxProcessor         *service.IDMTxProcessor
-	nbpTxProcessor         *service.NBPTxProcessor
+	txProcessor            *foree_service.TxProcessor
+	ciTxProcessor          *foree_service.CITxProcessor
+	idmTxProcessor         *foree_service.IDMTxProcessor
+	nbpTxProcessor         *foree_service.NBPTxProcessor
+	accountRouter          *foree_router.AccountRouter
+	authRouter             *foree_router.AuthRouter
+	transactionRouter      *foree_router.TransactionRouter
 }
 
 func (app *ForeeApp) Boot(envFilePath string) error {
@@ -113,7 +118,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.nbpClient = nbp.NewMockNBPClient()
 
 	//Initial transaction processors
-	app.txProcessor = service.NewTxProcessor(
+	app.txProcessor = foree_service.NewTxProcessor(
 		app.db,
 		app.interacCITxRepo,
 		app.nbpCOTxRepo,
@@ -128,22 +133,22 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.contactAccountRepo,
 		app.interacAccountRepo,
 	)
-	app.ciTxProcessor = service.NewCITxProcessor(
+	app.ciTxProcessor = foree_service.NewCITxProcessor(
 		app.db,
-		service.ScotiaProfile{},
+		foree_service.ScotiaProfile{},
 		app.scotiaClient,
 		app.interacCITxRepo,
 		app.foreeTxRepo,
 		app.txSummaryRepo,
 		app.txProcessor,
 	)
-	app.idmTxProcessor = service.NewIDMTxProcessor(
+	app.idmTxProcessor = foree_service.NewIDMTxProcessor(
 		app.db,
 		app.foreeTxRepo,
 		app.idmTxRepo,
 		app.idmClient,
 	)
-	app.nbpTxProcessor = service.NewNBPTxProcessor(
+	app.nbpTxProcessor = foree_service.NewNBPTxProcessor(
 		app.db,
 		app.foreeTxRepo,
 		app.txProcessor,
@@ -166,7 +171,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	}
 
 	//Initial service
-	app.authService = service.NewAuthService(
+	app.authService = foree_service.NewAuthService(
 		db, app.sessionRepo,
 		app.userRepo,
 		app.emailPasswdRepo,
@@ -176,13 +181,13 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.userGroupRepo,
 	)
 
-	app.accountService = service.NewAccountService(
+	app.accountService = foree_service.NewAccountService(
 		app.authService,
 		app.contactAccountRepo,
 		app.interacAccountRepo,
 	)
 
-	app.transactionService = service.NewTransactionService(
+	app.transactionService = foree_service.NewTransactionService(
 		db,
 		app.authService,
 		app.userGroupRepo,
@@ -201,9 +206,19 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.nbpClient,
 	)
 
-	//Initial handler
+	//Initial router
+	app.accountRouter = foree_router.NewAccountRouter(app.accountService)
+	app.authRouter = foree_router.NewAuthRouter(app.authService)
+	app.transactionRouter = foree_router.NewTransactionRouter(app.transactionService)
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%v", cfg.HttpServerPort), nil); err != nil {
+	router := mux.NewRouter()
+	subrouter := router.PathPrefix("/api/v1").Subrouter()
+
+	app.accountRouter.RegisterRouter(subrouter)
+	app.authRouter.RegisterRouter(subrouter)
+	app.transactionRouter.RegisterRouter(subrouter)
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%v", cfg.HttpServerPort), router); err != nil {
 		return err
 	}
 
