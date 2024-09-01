@@ -287,6 +287,7 @@ func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, e
 			return nil, err
 		}
 		if tx.CurStage == nTx.CurStage && nTx.CurStageStatus == tx.CurStageStatus {
+			p.updateTxSummary(context.TODO(), *nTx)
 			return nTx, nil
 		}
 		// Record the history.

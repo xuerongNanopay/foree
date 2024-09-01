@@ -20,10 +20,10 @@ type TransactionSuperService struct {
 	txProcessor   *TxProcessor
 }
 
-func (t *TransactionSuperService) forceCIStatusUpdate(ctx context.Context, fTxId int64, newStatus transaction.TxStage) (*transaction.ForeeTx, error) {
+func (t *TransactionSuperService) ForceCIStatusUpdate(ctx context.Context, fTxId int64, newStatus transaction.TxStage) (*transaction.ForeeTx, error) {
 	if newStatus != transaction.TxStage(transaction.TxStatusRejected) &&
 		newStatus != transaction.TxStage(transaction.TxStatusCompleted) {
-		return nil, fmt.Errorf("forceCIStatusUpdate -- unacceptable new transaction status %s", newStatus)
+		return nil, fmt.Errorf("ForceCIStatusUpdate -- unacceptable new transaction status %s", newStatus)
 	}
 	fTx, err := t.txProcessor.loadTx(fTxId, true)
 	if err != nil {
@@ -85,10 +85,10 @@ func (t *TransactionSuperService) forceCIStatusUpdate(ctx context.Context, fTxId
 	return fTx, nil
 }
 
-func (t *TransactionSuperService) idmStatusUpdate(ctx context.Context, fTxId int64, newStatus transaction.TxStage) (*transaction.ForeeTx, error) {
+func (t *TransactionSuperService) IdmStatusUpdate(ctx context.Context, fTxId int64, newStatus transaction.TxStage) (*transaction.ForeeTx, error) {
 	if newStatus != transaction.TxStage(transaction.TxStatusRejected) &&
 		newStatus != transaction.TxStage(transaction.TxStatusCompleted) {
-		return nil, fmt.Errorf("idmStatusUpdate -- unacceptable new transaction status %s", newStatus)
+		return nil, fmt.Errorf("IdmStatusUpdate -- unacceptable new transaction status %s", newStatus)
 	}
 
 	fTx, err := t.txProcessor.loadTx(fTxId, true)
