@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
+	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
@@ -456,6 +457,8 @@ func (p *TxProcessor) updateTxSummary(ctx context.Context, fTx transaction.Foree
 	} else if fTx.Status == transaction.TxStatusProcessing {
 		if fTx.CurStage == transaction.TxStageInteracCI && fTx.CurStageStatus == transaction.TxStatusSent {
 			txSummary.Status = transaction.TxSummaryStatusAwaitPayment
+		} else if fTx.CurStage == transaction.TxStageNBPCO && fTx.CurStageStatus == transaction.TxStatusSent && fTx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
+			txSummary.Status = transaction.TxSummaryStatusPickup
 		} else {
 			txSummary.Status = transaction.TxSummaryStatusInProgress
 		}

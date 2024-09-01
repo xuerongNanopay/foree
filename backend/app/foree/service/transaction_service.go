@@ -729,6 +729,10 @@ func (t *TransactionService) GetTxSummary(ctx context.Context, req GetTransactio
 		return nil, transport.WrapInteralServerError(err)
 	}
 
+	if summaryTx == nil {
+		return nil, nil
+	}
+
 	return NewTxSummaryDetailDTO(summaryTx), nil
 }
 
@@ -771,6 +775,25 @@ func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTr
 	summaryTx, err := t.txSummaryRepo.GetUniqueTxSummaryByOwnerAndId(ctx, session.UserId, req.TransactionId)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
+	}
+
+	if summaryTx == nil {
+		return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "no found")
+	}
+
+	fTx, err := t.txProcessor.LoadTx(summaryTx.ParentTxId)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	if fTx.CurStage == transaction.TxStageInteracCI && fTx.CurStageStatus == transaction.TxStatusInitial {
+
+	} else if fTx.CurStage == transaction.TxStageInteracCI && fTx.CurStageStatus == transaction.TxStatusSent {
+
+	} else if fTx.CurStage == transaction.TxStageNBPCO && fTx.CurStageStatus == transaction.TxStatusSent && fTx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
+
+	} else {
+		return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
 	}
 
 	return nil, nil
