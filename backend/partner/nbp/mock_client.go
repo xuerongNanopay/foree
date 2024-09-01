@@ -6,17 +6,23 @@ import (
 )
 
 func NewMockNBPClient() NBPClient {
-	return &NBPClientMock{}
+	return &NBPClientMock{
+		config: NBPConfig{
+			Mode: "mock",
+		},
+	}
 }
 
 type NBPClientMock struct {
+	config NBPConfig
 }
 
-func (s *NBPClientMock) GetConfigs() map[string]string {
-	return map[string]string{}
+func (s *NBPClientMock) GetConfigs() NBPConfig {
+	return s.config
 }
 
-func (s *NBPClientMock) SetConfig(key string, value string) {
+func (s *NBPClientMock) SetConfig(key string, value string) error {
+	return nil
 }
 
 func (*NBPClientMock) Hello() (*HelloResponse, error) {

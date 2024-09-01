@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	reflect_util "xue.io/go-pay/util/reflect"
 )
 
 type tokenData struct {
@@ -27,15 +29,14 @@ type NBPClient interface {
 	TransactionStatusByIds(TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error)
 	TransactionStatusByDate(TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error)
 	CancelTransaction(CancelTransactionRequest) (*CancelTransactionResponse, error)
-	GetConfigs() map[string]string
-	SetConfig(key string, value string)
+	GetConfigs() NBPConfig
+	SetConfig(key string, value string) error
 }
 
-func NewNBPClient(configs map[string]string) NBPClient {
-	nbpConfig := NewNBPConfigWithDefaultConfig(configs)
+func NewNBPClient(config NBPConfig) NBPClient {
 
 	return &NBPClientImpl{
-		config: nbpConfig,
+		config: config,
 		httpClient: &http.Client{
 			Timeout: 4 * time.Minute, // At least 3 minutes
 		},
@@ -49,16 +50,17 @@ type NBPClientImpl struct {
 	mu         sync.Mutex
 }
 
-func (s *NBPClientImpl) GetConfigs() map[string]string {
-	return s.config.ShowConfigs()
+func (s *NBPClientImpl) GetConfigs() NBPConfig {
+	return s.config
 }
 
-func (s *NBPClientImpl) SetConfig(key string, value string) {
-	s.config.SetConfig(key, value)
+func (s *NBPClientImpl) SetConfig(key string, value string) error {
+	return reflect_util.SetStuctValueFromString(&(s.config), key, value)
+
 }
 
 func (c *NBPClientImpl) Hello() (*HelloResponse, error) {
-	url := c.config.GetBaseUrl() + "/Hello"
+	url := c.config.BaseUrl + "/Hello"
 	resp, err := c.httpClient.Get(url)
 
 	if err != nil {
@@ -85,8 +87,8 @@ func (c *NBPClientImpl) Hello() (*HelloResponse, error) {
 }
 
 func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
-	url := fmt.Sprintf("%s/Authenticate?Agency_Code=%s", c.config.GetBaseUrl(), c.config.GetAgencyCode())
-	basicAuth := fmt.Sprintf("%s:%s", c.config.GetAuthUsername(), c.config.GetAuthPassword())
+	url := fmt.Sprintf("%s/Authenticate?Agency_Code=%s", c.config.BaseUrl, c.config.AgencyCode)
+	basicAuth := fmt.Sprintf("%s:%s", c.config.AuthUserName, c.config.AuthPassword)
 	basicAuth = base64.StdEncoding.EncodeToString([]byte(basicAuth))
 	basicAuth = fmt.Sprintf("Basic %v", basicAuth)
 
@@ -132,12 +134,12 @@ func (c *NBPClientImpl) authenticate() (*authenticateResponse, error) {
 
 // Update token but not throw error, Only log error
 func (c *NBPClientImpl) maybeUpdateToken() {
-	if isValidToken(c.auth, c.config.GetTokenExpiryThreshold()) {
+	if isValidToken(c.auth, c.config.TokenExpiryThresholdInSecond) {
 		return
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if isValidToken(c.auth, c.config.GetTokenExpiryThreshold()) {
+	if isValidToken(c.auth, c.config.TokenExpiryThresholdInSecond) {
 		return
 	}
 
@@ -179,11 +181,11 @@ func (c *NBPClientImpl) maybeUpdateToken() {
 
 func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
 	c.maybeUpdateToken()
-	url := fmt.Sprintf("%s/BankList", c.config.GetBaseUrl())
+	url := fmt.Sprintf("%s/BankList", c.config.BaseUrl)
 
 	r := requestCommon{
 		Token:      c.auth.token,
-		AgencyCode: c.config.GetAgencyCode(),
+		AgencyCode: c.config.AgencyCode,
 	}
 
 	rawReqeust, err := json.Marshal(r)
@@ -232,10 +234,10 @@ func (c *NBPClientImpl) BankList() (*BankListResponse, error) {
 
 func (c *NBPClientImpl) AccountEnquiry(r AccountEnquiryRequest) (*AccountEnquiryResponse, error) {
 	c.maybeUpdateToken()
-	url := fmt.Sprintf("%s/AccountEnquiry", c.config.GetBaseUrl())
+	url := fmt.Sprintf("%s/AccountEnquiry", c.config.BaseUrl)
 
 	r.Token = c.auth.token
-	r.AgencyCode = c.config.GetAgencyCode()
+	r.AgencyCode = c.config.AgencyCode
 
 	rawReqeust, err := json.Marshal(r)
 	if err != nil {
@@ -299,9 +301,9 @@ func (c *NBPClientImpl) LoadRemittanceThirdParty(r LoadRemittanceRequest) (*Load
 
 func (c *NBPClientImpl) loadRemittance(endpoint string, r LoadRemittanceRequest) (*LoadRemittanceResponse, error) {
 	c.maybeUpdateToken()
-	url := fmt.Sprintf("%s/%s", c.config.GetBaseUrl(), endpoint)
+	url := fmt.Sprintf("%s/%s", c.config.BaseUrl, endpoint)
 	r.Token = c.auth.token
-	r.AgencyCode = c.config.GetAgencyCode()
+	r.AgencyCode = c.config.AgencyCode
 
 	rawReqeust, err := json.Marshal(r)
 	if err != nil {
@@ -349,10 +351,10 @@ func (c *NBPClientImpl) loadRemittance(endpoint string, r LoadRemittanceRequest)
 
 func (c *NBPClientImpl) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error) {
 	c.maybeUpdateToken()
-	url := fmt.Sprintf("%s/TransactionStatusByIds", c.config.GetBaseUrl())
+	url := fmt.Sprintf("%s/TransactionStatusByIds", c.config.BaseUrl)
 
 	r.Token = c.auth.token
-	r.AgencyCode = c.config.GetAgencyCode()
+	r.AgencyCode = c.config.AgencyCode
 
 	rawReqeust, err := json.Marshal(r)
 	if err != nil {
@@ -400,10 +402,10 @@ func (c *NBPClientImpl) TransactionStatusByIds(r TransactionStatusByIdsRequest) 
 
 func (c *NBPClientImpl) TransactionStatusByDate(r TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error) {
 	c.maybeUpdateToken()
-	url := fmt.Sprintf("%s/TransactionStatus", c.config.GetBaseUrl())
+	url := fmt.Sprintf("%s/TransactionStatus", c.config.BaseUrl)
 
 	r.Token = c.auth.token
-	r.AgencyCode = c.config.GetAgencyCode()
+	r.AgencyCode = c.config.AgencyCode
 
 	rawReqeust, err := json.Marshal(r)
 	if err != nil {
@@ -451,10 +453,10 @@ func (c *NBPClientImpl) TransactionStatusByDate(r TransactionStatusByDateRequest
 
 func (c *NBPClientImpl) CancelTransaction(r CancelTransactionRequest) (*CancelTransactionResponse, error) {
 	c.maybeUpdateToken()
-	url := fmt.Sprintf("%s/CancelTransaction", c.config.GetBaseUrl())
+	url := fmt.Sprintf("%s/CancelTransaction", c.config.BaseUrl)
 
 	r.Token = c.auth.token
-	r.AgencyCode = c.config.GetAgencyCode()
+	r.AgencyCode = c.config.AgencyCode
 
 	rawReqeust, err := json.Marshal(r)
 	if err != nil {

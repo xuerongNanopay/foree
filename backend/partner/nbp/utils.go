@@ -15,12 +15,12 @@ func parseTokenExpiryDate(rawExpiry string) (time.Time, error) {
 	return t, nil
 }
 
-func isValidToken(auth tokenData, threshold int64) bool {
+func isValidToken(auth tokenData, thresholdInSecond int64) bool {
 	if auth.token == "" || auth.tokenExpiry.IsZero() {
 		return false
 	}
 
-	if time.Now().Unix()+threshold >= auth.tokenExpiry.Unix() {
+	if time.Now().Unix()+thresholdInSecond >= auth.tokenExpiry.Unix() {
 		return false
 	}
 
