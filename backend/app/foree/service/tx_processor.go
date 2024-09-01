@@ -17,10 +17,54 @@ import (
 
 // It is the internal service for transaction process.
 
+func NewTxProcessor(
+	db *sql.DB,
+	interacTxRepo *transaction.InteracCITxRepo,
+	nbpTxRepo *transaction.NBPCOTxRepo,
+	idmTxRepo *transaction.IdmTxRepo,
+	txHistoryRepo *transaction.TxHistoryRepo,
+	txSummaryRepo *transaction.TxSummaryRepo,
+	foreeTxRepo *transaction.ForeeTxRepo,
+	interacRefundTxRepo *transaction.InteracRefundTxRepo,
+	rewardRepo *transaction.RewardRepo,
+	dailyTxLimiteRepo *transaction.DailyTxLimitRepo,
+	userRepo *auth.UserRepo,
+	contactAccountRepo *account.ContactAccountRepo,
+	interacAccountRepo *account.InteracAccountRepo,
+) *TxProcessor {
+	return &TxProcessor{
+		db:                  db,
+		interacTxRepo:       interacTxRepo,
+		nbpTxRepo:           nbpTxRepo,
+		idmTxRepo:           idmTxRepo,
+		txHistoryRepo:       txHistoryRepo,
+		txSummaryRepo:       txSummaryRepo,
+		foreeTxRepo:         foreeTxRepo,
+		interacRefundTxRepo: interacRefundTxRepo,
+		rewardRepo:          rewardRepo,
+		dailyTxLimiteRepo:   dailyTxLimiteRepo,
+		userRepo:            userRepo,
+		contactAccountRepo:  contactAccountRepo,
+		interacAccountRepo:  interacAccountRepo,
+	}
+}
+
+func (p *TxProcessor) SetCITxProcessor(ciTxProcessor *CITxProcessor) {
+	p.ciTxProcessor = ciTxProcessor
+}
+
+func (p *TxProcessor) SetIDMTxProcessor(idmTxProcessor *IDMTxProcessor) {
+	p.idmTxProcessor = idmTxProcessor
+}
+
+func (p *TxProcessor) SetNBPTxProcessor(nbpTxProcessor *NBPTxProcessor) {
+	p.nbpTxProcessor = nbpTxProcessor
+}
+
 type TxProcessor struct {
 	db                  *sql.DB
 	interacTxRepo       *transaction.InteracCITxRepo
-	npbTxRepo           *transaction.NBPCOTxRepo
+	nbpTxRepo           *transaction.NBPCOTxRepo
 	idmTxRepo           *transaction.IdmTxRepo
 	txHistoryRepo       *transaction.TxHistoryRepo
 	txSummaryRepo       *transaction.TxSummaryRepo
@@ -29,8 +73,8 @@ type TxProcessor struct {
 	rewardRepo          *transaction.RewardRepo
 	dailyTxLimiteRepo   *transaction.DailyTxLimitRepo
 	userRepo            *auth.UserRepo
-	contactRepo         *account.ContactAccountRepo
-	interacRepo         *account.InteracAccountRepo
+	contactAccountRepo  *account.ContactAccountRepo
+	interacAccountRepo  *account.InteracAccountRepo
 	ciTxProcessor       *CITxProcessor
 	idmTxProcessor      *IDMTxProcessor
 	nbpTxProcessor      *NBPTxProcessor
@@ -143,7 +187,7 @@ func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, er
 	var coutErr error
 	createCout := func() {
 		defer wg.Done()
-		coutId, err := p.npbTxRepo.InsertNBPCOTx(ctx, transaction.NBPCOTx{
+		coutId, err := p.nbpTxRepo.InsertNBPCOTx(ctx, transaction.NBPCOTx{
 			Status:       transaction.TxStatusInitial,
 			Amt:          tx.SrcAmt,
 			NBPReference: tx.Summary.NBPReference,
@@ -155,7 +199,7 @@ func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, er
 			coutErr = err
 			return
 		}
-		cout, err := p.npbTxRepo.GetUniqueNBPCOTxById(ctx, coutId)
+		cout, err := p.nbpTxRepo.GetUniqueNBPCOTxById(ctx, coutId)
 		if err != nil {
 			coutErr = err
 			return
@@ -217,7 +261,7 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 		return nil, fmt.Errorf("InteracCITx no found for ForeeTx `%v`", foreeTx.ID)
 	}
 
-	CashInAcc, err := p.interacRepo.GetUniqueInteracAccountById(ctx, ci.CashInAccId)
+	CashInAcc, err := p.interacAccountRepo.GetUniqueInteracAccountById(ctx, ci.CashInAccId)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +283,7 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	foreeTx.IDM = idm
 
 	// Load COUT
-	cout, err := p.npbTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, foreeTx.ID)
+	cout, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, foreeTx.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +291,7 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 		return nil, fmt.Errorf("NBPCOTx no found for ForeeTx `%v`", foreeTx.ID)
 	}
 
-	CashOutAcc, err := p.contactRepo.GetUniqueContactAccountById(ctx, cout.CashOutAccId)
+	CashOutAcc, err := p.contactAccountRepo.GetUniqueContactAccountById(ctx, cout.CashOutAccId)
 	if err != nil {
 		return nil, err
 	}
@@ -432,14 +476,14 @@ func (p *TxProcessor) closeRemainingTx(ctx context.Context, fTx transaction.Fore
 		if err := p.idmTxRepo.UpdateIDMTxById(ctx, *idm); err != nil {
 			return nil, err
 		}
-		if err := p.npbTxRepo.UpdateNBPCOTxById(ctx, *co); err != nil {
+		if err := p.nbpTxRepo.UpdateNBPCOTxById(ctx, *co); err != nil {
 			return nil, err
 		}
 		return &fTx, nil
 	case transaction.TxStageIDM:
 		co := fTx.COUT
 		co.Status = transaction.TxStatusClosed
-		if err := p.npbTxRepo.UpdateNBPCOTxById(ctx, *co); err != nil {
+		if err := p.nbpTxRepo.UpdateNBPCOTxById(ctx, *co); err != nil {
 			return nil, err
 		}
 		return &fTx, nil
