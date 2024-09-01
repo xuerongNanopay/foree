@@ -53,6 +53,10 @@ type ForeeApp struct {
 	scotiaClient           scotia.ScotiaClient
 	idmClient              idm.IDMClient
 	nbpClient              nbp.NBPClient
+	txProcessor            *service.TxProcessor
+	ciTxProcessor          *service.CITxProcessor
+	idmTxProcessor         *service.IDMTxProcessor
+	nbpTxProcessor         *service.NBPTxProcessor
 }
 
 func (app *ForeeApp) Boot(envFilePath string) error {
@@ -109,6 +113,57 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.nbpClient = nbp.NewMockNBPClient()
 
 	//Initial transaction processors
+	app.txProcessor = service.NewTxProcessor(
+		app.db,
+		app.interacCITxRepo,
+		app.nbpCOTxRepo,
+		app.idmTxRepo,
+		app.txHistoryRepo,
+		app.txSummaryRepo,
+		app.foreeTxRepo,
+		app.interacRefundTxRepo,
+		app.rewardRepo,
+		app.dailyTxLimitRepo,
+		app.userRepo,
+		app.contactAccountRepo,
+		app.interacAccountRepo,
+	)
+	app.ciTxProcessor = service.NewCITxProcessor(
+		app.db,
+		service.ScotiaProfile{},
+		app.scotiaClient,
+		app.interacCITxRepo,
+		app.foreeTxRepo,
+		app.txSummaryRepo,
+		app.txProcessor,
+	)
+	app.idmTxProcessor = service.NewIDMTxProcessor(
+		app.db,
+		app.foreeTxRepo,
+		app.idmTxRepo,
+		app.idmClient,
+	)
+	app.nbpTxProcessor = service.NewNBPTxProcessor(
+		app.db,
+		app.foreeTxRepo,
+		app.txProcessor,
+		app.nbpCOTxRepo,
+		app.nbpClient,
+		app.userExtraRepo,
+		app.userIdnetificationRepo,
+	)
+
+	app.txProcessor.SetCITxProcessor(app.ciTxProcessor)
+	app.txProcessor.SetIDMTxProcessor(app.idmTxProcessor)
+	app.txProcessor.SetNBPTxProcessor(app.nbpTxProcessor)
+
+	if err := app.ciTxProcessor.Start(); err != nil {
+		return err
+	}
+
+	if err := app.nbpTxProcessor.Start(); err != nil {
+		return err
+	}
 
 	//Initial service
 	app.authService = service.NewAuthService(
@@ -127,21 +182,24 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.interacAccountRepo,
 	)
 
-	// app.transactionService = service.NewTransactionService(
-	// 	db,
-	// 	app.authService,
-	// 	app.userGroupRepo,
-	// 	app.foreeTxRepo,
-	// 	app.txSummaryRepo,
-	// 	app.txQuoteRepo,
-	// 	app.rateRepo,
-	// 	app.rewardRepo,
-	// 	app.dailyTxLimitRepo,
-	// 	app.feeRepo,
-	// 	app.contactAccountRepo,
-	// 	app.interacAccountRepo,
-	// 	app.feeJointRepo,
-	// )
+	app.transactionService = service.NewTransactionService(
+		db,
+		app.authService,
+		app.userGroupRepo,
+		app.foreeTxRepo,
+		app.txSummaryRepo,
+		app.txQuoteRepo,
+		app.rateRepo,
+		app.rewardRepo,
+		app.dailyTxLimitRepo,
+		app.feeRepo,
+		app.contactAccountRepo,
+		app.interacAccountRepo,
+		app.feeJointRepo,
+		app.txProcessor,
+		app.scotiaClient,
+		app.nbpClient,
+	)
 
 	//Initial handler
 
