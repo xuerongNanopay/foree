@@ -9,6 +9,8 @@ import (
 	"xue.io/go-pay/app/foree/account"
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_config "xue.io/go-pay/app/foree/cmd/config"
+	"xue.io/go-pay/app/foree/referral"
+	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/config"
 	ms "xue.io/go-pay/db/mysql"
@@ -25,6 +27,20 @@ type ForeeApp struct {
 	newInteracAccountRepo  *account.InteracAccountRepo
 	userExtraRepo          *foree_auth.UserExtraRepo
 	userIdnetificationRepo *foree_auth.UserIdentificationRepo
+	referralRepo           *referral.ReferralRepo
+	dailyTxLimitRepo       *transaction.DailyTxLimitRepo
+	feeRepo                *transaction.FeeRepo
+	feeJointRepo           *transaction.FeeJointRepo
+	rateRepo               *transaction.RateRepo
+	idmTxRepo              *transaction.IdmTxRepo
+	idmRepo                *transaction.IDMComplianceRepo
+	foreeTxRepo            *transaction.ForeeTxRepo
+	txHistoryRepo          *transaction.TxHistoryRepo
+	interacCITxRepo        *transaction.InteracCITxRepo
+	interacRefundTxRepo    *transaction.InteracRefundTxRepo
+	nbpCOTxRepo            *transaction.NBPCOTxRepo
+	txQuoteRepo            *transaction.TxQuoteRepo
+	txSummaryRepo          *transaction.TxSummaryRepo
 }
 
 func (app *ForeeApp) Boot(envFilePath string) error {
@@ -58,8 +74,21 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.newInteracAccountRepo = account.NewInteracAccountRepo(db)
 	app.userExtraRepo = foree_auth.NewUserExtraRepo(db)
 	app.userIdnetificationRepo = foree_auth.NewUserIdentificationRepo(db)
+	app.referralRepo = referral.NewReferralRepo(db)
+	app.dailyTxLimitRepo = transaction.NewDailyTxLimitRepo(db)
+	app.feeRepo = transaction.NewFeeRepo(db)
+	app.feeJointRepo = transaction.NewFeeJointRepo(db)
+	app.rateRepo = transaction.NewRateRepo(db)
+	app.idmTxRepo = transaction.NewIdmTxRepo(db)
+	app.idmRepo = transaction.NewIDMComplianceRepo(db)
+	app.foreeTxRepo = transaction.NewForeeTxRepo(db)
+	app.txHistoryRepo = transaction.NewTxHistoryRepo(db)
+	app.interacCITxRepo = transaction.NewInteracCITxRepo(db)
+	app.interacRefundTxRepo = transaction.NewInteracRefundTxRepo(db)
+	app.nbpCOTxRepo = transaction.NewNBPCOTxRepo(db)
+	app.txQuoteRepo = transaction.NewTxQuoteRepo(5, 2048)
+	app.txSummaryRepo = transaction.NewTxSummaryRepo(db)
 
-	//Initial Repo
 	//Initial service
 	//Initial handler
 

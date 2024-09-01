@@ -24,14 +24,14 @@ type TxQuote struct {
 }
 
 // set to 512
-func NewTxQuoteRepo(expire, maxBucketSize int) *TxQuoteRepo {
+func NewTxQuoteRepo(expireInMinute, maxBucketSize int) *TxQuoteRepo {
 	return &TxQuoteRepo{
 		mems: [2]map[string]TxQuote{
 			make(map[string]TxQuote, maxBucketSize),
 			make(map[string]TxQuote, maxBucketSize),
 		},
 		cur:            0,
-		expireInMinute: expire,
+		expireInMinute: expireInMinute,
 		maxBucketSize:  maxBucketSize,
 	}
 }
