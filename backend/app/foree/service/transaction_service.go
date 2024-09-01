@@ -26,6 +26,28 @@ type CacheItem[T any] struct {
 	createdAt time.Time
 }
 
+func NewTransactionService(
+	db *sql.DB,
+	authService *AuthService,
+	userGroupRepo *auth.UserGroupRepo,
+	foreeTxRepo *transaction.ForeeTxRepo,
+	txSummaryRepo *transaction.TxSummaryRepo,
+	txQuoteRepo *transaction.TxQuoteRepo,
+	rateRepo *transaction.RateRepo,
+	rewardRepo *transaction.RewardRepo,
+	dailyTxLimiteRepo *transaction.DailyTxLimitRepo,
+	feeRepo *transaction.FeeRepo,
+	contactRepo *account.ContactAccountRepo,
+	interacRepo *account.InteracAccountRepo,
+	feeJointRepo *transaction.FeeJointRepo,
+) *TransactionService {
+	return &TransactionService{
+		db:        db,
+		rateCache: make(map[string]CacheItem[transaction.Rate], 8),
+		feeCache:  make(map[string]CacheItem[transaction.Fee], 8),
+	}
+}
+
 type TransactionService struct {
 	db                *sql.DB
 	authService       *AuthService
@@ -37,7 +59,6 @@ type TransactionService struct {
 	rewardRepo        *transaction.RewardRepo
 	dailyTxLimiteRepo *transaction.DailyTxLimitRepo
 	feeRepo           *transaction.FeeRepo
-	quoteRepo         *transaction.TxQuoteRepo
 	contactRepo       *account.ContactAccountRepo
 	interacRepo       *account.InteracAccountRepo
 	feeJointRepo      *transaction.FeeJointRepo
@@ -389,7 +410,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 
 	foreeTx.Summary = &txSummary
 
-	quoteId, err := t.quoteRepo.InsertTxQuote(ctx, transaction.TxQuote{
+	quoteId, err := t.txQuoteRepo.InsertTxQuote(ctx, transaction.TxQuote{
 		Tx:     foreeTx,
 		OwerId: user.ID,
 	})
@@ -410,7 +431,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		return nil, sErr
 	}
 
-	quote := t.quoteRepo.GetUniqueById(ctx, req.QuoteId)
+	quote := t.txQuoteRepo.GetUniqueById(ctx, req.QuoteId)
 	user := session.User
 	if quote.OwerId != session.User.ID {
 		return nil, transport.NewInteralServerError("user `%v` try to create a transaction with quote belong to `%v`", user.ID, quote.OwerId)
