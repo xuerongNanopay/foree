@@ -12,6 +12,28 @@ import (
 	"xue.io/go-pay/server/transport"
 )
 
+func NewAuthService(
+	db *sql.DB,
+	sessionRepo *auth.SessionRepo,
+	userRepo *auth.UserRepo,
+	emailPasswordRepo *auth.EmailPasswdRepo,
+	rolePermissionRepo *auth.RolePermissionRepo,
+	userIdentificationRepo *foree_auth.UserIdentificationRepo,
+	interacAccountRepo *account.InteracAccountRepo,
+	userGroupRepo *auth.UserGroupRepo,
+) *AuthService {
+	return &AuthService{
+		db:                     db,
+		sessionRepo:            sessionRepo,
+		userRepo:               userRepo,
+		emailPasswordRepo:      emailPasswordRepo,
+		rolePermissionRepo:     rolePermissionRepo,
+		userIdentificationRepo: userIdentificationRepo,
+		interacAccountRepo:     interacAccountRepo,
+		userGroupRepo:          userGroupRepo,
+	}
+}
+
 type AuthService struct {
 	db                     *sql.DB
 	sessionRepo            *auth.SessionRepo
@@ -19,7 +41,7 @@ type AuthService struct {
 	emailPasswordRepo      *auth.EmailPasswdRepo
 	rolePermissionRepo     *auth.RolePermissionRepo
 	userIdentificationRepo *foree_auth.UserIdentificationRepo
-	interacRepo            *account.InteracAccountRepo
+	interacAccountRepo     *account.InteracAccountRepo
 	userGroupRepo          *auth.UserGroupRepo
 	// emailPasswdRecoverRepo *auth.EmailPasswdRecoverRepo
 }
@@ -340,7 +362,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 		Status:           account.AccountStatusActive,
 		LatestActivityAt: time.Now(),
 	}
-	_, derr := a.interacRepo.InsertInteracAccount(ctx, acc)
+	_, derr := a.interacAccountRepo.InsertInteracAccount(ctx, acc)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}

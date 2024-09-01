@@ -10,6 +10,7 @@ import (
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_config "xue.io/go-pay/app/foree/cmd/config"
 	"xue.io/go-pay/app/foree/referral"
+	"xue.io/go-pay/app/foree/service"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/config"
@@ -23,8 +24,9 @@ type ForeeApp struct {
 	userGroupRepo          *auth.UserGroupRepo
 	sessionRepo            *auth.SessionRepo
 	emailPasswdRepo        *auth.EmailPasswdRepo
+	rolePermissionRepo     *auth.RolePermissionRepo
 	contactAccountRepo     *account.ContactAccountRepo
-	newInteracAccountRepo  *account.InteracAccountRepo
+	interacAccountRepo     *account.InteracAccountRepo
 	userExtraRepo          *foree_auth.UserExtraRepo
 	userIdnetificationRepo *foree_auth.UserIdentificationRepo
 	referralRepo           *referral.ReferralRepo
@@ -41,6 +43,7 @@ type ForeeApp struct {
 	nbpCOTxRepo            *transaction.NBPCOTxRepo
 	txQuoteRepo            *transaction.TxQuoteRepo
 	txSummaryRepo          *transaction.TxSummaryRepo
+	authService            *service.AuthService
 }
 
 func (app *ForeeApp) Boot(envFilePath string) error {
@@ -70,8 +73,9 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.userGroupRepo = auth.NewUserGroupRepo(db)
 	app.sessionRepo = auth.NewDefaultSessionRepo(db)
 	app.emailPasswdRepo = auth.NewEmailPasswdRepo(db)
+	app.rolePermissionRepo = auth.NewRolePermission(db)
 	app.contactAccountRepo = account.NewContactAccountRepo(db)
-	app.newInteracAccountRepo = account.NewInteracAccountRepo(db)
+	app.interacAccountRepo = account.NewInteracAccountRepo(db)
 	app.userExtraRepo = foree_auth.NewUserExtraRepo(db)
 	app.userIdnetificationRepo = foree_auth.NewUserIdentificationRepo(db)
 	app.referralRepo = referral.NewReferralRepo(db)
@@ -90,6 +94,15 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.txSummaryRepo = transaction.NewTxSummaryRepo(db)
 
 	//Initial service
+	app.authService = service.NewAuthService(
+		db, app.sessionRepo,
+		app.userRepo,
+		app.emailPasswdRepo,
+		app.rolePermissionRepo,
+		app.userIdnetificationRepo,
+		app.interacAccountRepo,
+		app.userGroupRepo,
+	)
 	//Initial handler
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%v", cfg.HttpServerPort), nil); err != nil {
