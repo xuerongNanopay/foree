@@ -193,6 +193,10 @@ func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, er
 	return &tx, nil
 }
 
+func (p *TxProcessor) LoadTx(id int64) (*transaction.ForeeTx, error) {
+	return p.loadTx(id, true)
+}
+
 func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx, error) {
 	ctx := context.Background()
 	foreeTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, id)

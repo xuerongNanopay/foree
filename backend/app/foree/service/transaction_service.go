@@ -760,3 +760,18 @@ func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTrans
 
 	return rets, nil
 }
+
+// Check transaction status, see if is able to cancel.
+func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTransactionReq) (*TxSummaryDTO, transport.HError) {
+	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionForeeTxWrite)
+	if sErr != nil {
+		return nil, sErr
+	}
+
+	summaryTx, err := t.txSummaryRepo.GetUniqueTxSummaryByOwnerAndId(ctx, session.UserId, req.TransactionId)
+	if err != nil {
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	return nil, nil
+}

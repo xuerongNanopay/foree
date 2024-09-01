@@ -9,19 +9,47 @@ type ScotiaClientMock struct {
 }
 
 func (s *ScotiaClientMock) RequestPayment(req RequestPaymentRequest) (*RequestPaymentResponse, error) {
-	return nil, nil
+	return &RequestPaymentResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode: 200,
+		},
+		Data: RequestPaymentResponseData{
+			PaymentId:               req.RequestData.EndToEndIdentification,
+			ClearingSystemReference: "mock-clearing-system-reference",
+		},
+	}, nil
 }
 func (s *ScotiaClientMock) PaymentDetail(req PaymentDetailRequest) (*PaymentDetailResponse, error) {
-	return nil, nil
+	return &PaymentDetailResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode: 200,
+		},
+		PaymentDetail: PaymentDetailData{
+			RequestForPaymentStatus: "ACCC",
+		},
+	}, nil
 }
 func (s *ScotiaClientMock) PaymentStatus(req PaymentStatusRequest) (*PaymentStatusResponse, error) {
-	return nil, nil
+	return &PaymentStatusResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode: 200,
+		},
+		PaymentStatuses: []PaymentStatusData{
+			{
+				GatewayUrl: "www.google.ca",
+			},
+		},
+	}, nil
 }
 func (s *ScotiaClientMock) CancelPayment(req CancelPaymentRequest) (*CancelPaymentResponse, error) {
-	return nil, nil
+	return &CancelPaymentResponse{
+		CancelStatus: CancelPaymentData{
+			Status: "SUCCESS",
+		},
+	}, nil
 }
 func (s *ScotiaClientMock) GetConfigs() map[string]string {
-	s.config.ShowConfigs()
+	return s.config.ShowConfigs()
 }
 func (s *ScotiaClientMock) SetConfig(key string, value string) {
 	s.config.SetConfig(key, value)
