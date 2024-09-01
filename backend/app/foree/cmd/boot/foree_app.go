@@ -13,6 +13,7 @@ import (
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_config "xue.io/go-pay/app/foree/cmd/config"
 	"xue.io/go-pay/app/foree/referral"
+	"xue.io/go-pay/app/foree/sys_router"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/config"
@@ -62,6 +63,7 @@ type ForeeApp struct {
 	accountRouter          *foree_router.AccountRouter
 	authRouter             *foree_router.AuthRouter
 	transactionRouter      *foree_router.TransactionRouter
+	sysRouter              *sys_router.SystemRouter
 }
 
 func (app *ForeeApp) Boot(envFilePath string) error {
@@ -217,6 +219,10 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.accountRouter.RegisterRouter(subrouter)
 	app.authRouter.RegisterRouter(subrouter)
 	app.transactionRouter.RegisterRouter(subrouter)
+
+	sysSubrouter := router.PathPrefix("/sys/v1").Subrouter()
+	app.sysRouter = sys_router.NewSystemRouter(app.db)
+	app.sysRouter.RegisterRouter(sysSubrouter)
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%v", cfg.HttpServerPort), router); err != nil {
 		return err
