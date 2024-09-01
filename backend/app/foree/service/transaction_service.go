@@ -17,8 +17,9 @@ import (
 )
 
 var (
-	rateCacheTimeout time.Duration = 15 * time.Minute
-	feeCacheTimeout  time.Duration = time.Hour
+	rateCacheTimeout      time.Duration = 30 * time.Minute
+	quoteRateCacheTimeout time.Duration = 15 * time.Minute
+	feeCacheTimeout       time.Duration = time.Hour
 )
 
 type CacheItem[T any] struct {
@@ -37,41 +38,53 @@ func NewTransactionService(
 	rewardRepo *transaction.RewardRepo,
 	dailyTxLimiteRepo *transaction.DailyTxLimitRepo,
 	feeRepo *transaction.FeeRepo,
-	contactRepo *account.ContactAccountRepo,
-	interacRepo *account.InteracAccountRepo,
+	contactAccountRepo *account.ContactAccountRepo,
+	interacAccountRepo *account.InteracAccountRepo,
 	feeJointRepo *transaction.FeeJointRepo,
 ) *TransactionService {
 	return &TransactionService{
-		db:        db,
-		rateCache: make(map[string]CacheItem[transaction.Rate], 8),
-		feeCache:  make(map[string]CacheItem[transaction.Fee], 8),
+		db:                 db,
+		authService:        authService,
+		userGroupRepo:      userGroupRepo,
+		foreeTxRepo:        foreeTxRepo,
+		txSummaryRepo:      txSummaryRepo,
+		txQuoteRepo:        txQuoteRepo,
+		rateRepo:           rateRepo,
+		rewardRepo:         rewardRepo,
+		dailyTxLimiteRepo:  dailyTxLimiteRepo,
+		feeRepo:            feeRepo,
+		contactAccountRepo: contactAccountRepo,
+		interacAccountRepo: interacAccountRepo,
+		feeJointRepo:       feeJointRepo,
+		rateCache:          make(map[string]CacheItem[transaction.Rate], 8),
+		feeCache:           make(map[string]CacheItem[transaction.Fee], 8),
 	}
 }
 
 type TransactionService struct {
-	db                *sql.DB
-	authService       *AuthService
-	userGroupRepo     *auth.UserGroupRepo
-	foreeTxRepo       *transaction.ForeeTxRepo
-	txSummaryRepo     *transaction.TxSummaryRepo
-	txQuoteRepo       *transaction.TxQuoteRepo
-	rateRepo          *transaction.RateRepo
-	rewardRepo        *transaction.RewardRepo
-	dailyTxLimiteRepo *transaction.DailyTxLimitRepo
-	feeRepo           *transaction.FeeRepo
-	contactRepo       *account.ContactAccountRepo
-	interacRepo       *account.InteracAccountRepo
-	feeJointRepo      *transaction.FeeJointRepo
-	txProcessor       *TxProcessor
-	rateCache         map[string]CacheItem[transaction.Rate]
-	rateCacheRWLock   sync.RWMutex
-	feeCache          map[string]CacheItem[transaction.Fee]
-	feeCacheRWLock    sync.RWMutex
+	db                 *sql.DB
+	authService        *AuthService
+	userGroupRepo      *auth.UserGroupRepo
+	foreeTxRepo        *transaction.ForeeTxRepo
+	txSummaryRepo      *transaction.TxSummaryRepo
+	txQuoteRepo        *transaction.TxQuoteRepo
+	rateRepo           *transaction.RateRepo
+	rewardRepo         *transaction.RewardRepo
+	dailyTxLimiteRepo  *transaction.DailyTxLimitRepo
+	feeRepo            *transaction.FeeRepo
+	contactAccountRepo *account.ContactAccountRepo
+	interacAccountRepo *account.InteracAccountRepo
+	feeJointRepo       *transaction.FeeJointRepo
+	txProcessor        *TxProcessor
+	rateCache          map[string]CacheItem[transaction.Rate]
+	rateCacheRWLock    sync.RWMutex
+	feeCache           map[string]CacheItem[transaction.Fee]
+	feeCacheRWLock     sync.RWMutex
 }
 
 // Can be cache for 5 minutes.
 func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*RateDTO, transport.HError) {
-	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, 30*time.Minute)
+	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, rateCacheTimeout)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -118,7 +131,7 @@ func (t *TransactionService) getRate(ctx context.Context, src, dest string, vali
 }
 
 func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*QuoteTransactionDTO, transport.HError) {
-	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, 30*time.Minute)
+	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, rateCacheTimeout)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -134,7 +147,7 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 	}
 
 	//fee
-	fee, err := t.getFee(ctx, foree_constant.DefaultFeeGroup, 2*time.Hour)
+	fee, err := t.getFee(ctx, foree_constant.DefaultFeeGroup, feeCacheTimeout)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -209,7 +222,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	user := *session.User
-	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, 5*time.Minute)
+	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, quoteRateCacheTimeout)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -218,7 +231,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	// Get CI account.
-	ciAcc, err := t.interacRepo.GetUniqueActiveInteracAccountByOwnerAndId(ctx, user.ID, req.CinAccId)
+	ciAcc, err := t.interacAccountRepo.GetUniqueActiveInteracAccountByOwnerAndId(ctx, user.ID, req.CinAccId)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -227,7 +240,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	// Get Cout account.
-	coutAcc, err := t.contactRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, user.ID, req.CoutAccId)
+	coutAcc, err := t.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, user.ID, req.CoutAccId)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -455,7 +468,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	}
 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
 	//Lock ci account.
-	_, err = t.interacRepo.GetUniqueActiveInteracAccountForUpdateByOwnerAndId(ctx, foreeTx.OwnerId, foreeTx.CinAccId)
+	_, err = t.interacAccountRepo.GetUniqueActiveInteracAccountForUpdateByOwnerAndId(ctx, foreeTx.OwnerId, foreeTx.CinAccId)
 	if err != nil {
 		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(err)

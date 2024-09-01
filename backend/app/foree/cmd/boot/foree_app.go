@@ -33,6 +33,7 @@ type ForeeApp struct {
 	dailyTxLimitRepo       *transaction.DailyTxLimitRepo
 	feeRepo                *transaction.FeeRepo
 	feeJointRepo           *transaction.FeeJointRepo
+	rewardRepo             *transaction.RewardRepo
 	rateRepo               *transaction.RateRepo
 	idmTxRepo              *transaction.IdmTxRepo
 	idmRepo                *transaction.IDMComplianceRepo
@@ -45,6 +46,7 @@ type ForeeApp struct {
 	txSummaryRepo          *transaction.TxSummaryRepo
 	authService            *service.AuthService
 	accountService         *service.AccountService
+	transactionService     *service.TransactionService
 }
 
 func (app *ForeeApp) Boot(envFilePath string) error {
@@ -84,6 +86,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.feeRepo = transaction.NewFeeRepo(db)
 	app.feeJointRepo = transaction.NewFeeJointRepo(db)
 	app.rateRepo = transaction.NewRateRepo(db)
+	app.rewardRepo = transaction.NewRewardRepo(db)
 	app.idmTxRepo = transaction.NewIdmTxRepo(db)
 	app.idmRepo = transaction.NewIDMComplianceRepo(db)
 	app.foreeTxRepo = transaction.NewForeeTxRepo(db)
@@ -109,6 +112,22 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.authService,
 		app.contactAccountRepo,
 		app.interacAccountRepo,
+	)
+
+	app.transactionService = service.NewTransactionService(
+		db,
+		app.authService,
+		app.userGroupRepo,
+		app.foreeTxRepo,
+		app.txSummaryRepo,
+		app.txQuoteRepo,
+		app.rateRepo,
+		app.rewardRepo,
+		app.dailyTxLimitRepo,
+		app.feeRepo,
+		app.contactAccountRepo,
+		app.interacAccountRepo,
+		app.feeJointRepo,
 	)
 
 	//Initial handler
