@@ -776,7 +776,7 @@ func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTrans
 }
 
 // Check transaction status, see if is able to cancel.
-func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTransactionReq) (*TxSummaryDTO, transport.HError) {
+func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTransactionReq) (*TxCancelDTO, transport.HError) {
 	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionForeeTxWrite)
 	if sErr != nil {
 		return nil, sErr
@@ -797,12 +797,33 @@ func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTr
 	}
 
 	if fTx.CurStage == transaction.TxStageInteracCI && fTx.CurStageStatus == transaction.TxStatusSent {
-
+		resp, err := t.scotiaClient.CancelPayment(scotia.CancelPaymentRequest{
+			PaymentId:    fTx.CI.ScotiaPaymentId,
+			CancelReason: req.CancelReason,
+		})
+		//TODO: log
+		if err != nil {
+			return nil, transport.WrapInteralServerError(err)
+		} else if resp.StatusCode/100 != 2 {
+			return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
+		}
 	} else if fTx.CurStage == transaction.TxStageNBPCO && fTx.CurStageStatus == transaction.TxStatusSent && fTx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
-
+		resp, err := t.nbpClient.CancelTransaction(nbp.CancelTransactionRequest{
+			GlobalId:           fTx.COUT.NBPReference,
+			CancellationReason: req.CancelReason,
+		})
+		//TODO: log
+		if err != nil {
+			return nil, transport.WrapInteralServerError(err)
+		} else if resp.StatusCode/100 != 2 {
+			return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
+		}
 	} else {
 		return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
 	}
 
-	return nil, nil
+	return &TxCancelDTO{
+		TransactionId: req.TransactionId,
+		Message:       "cancel successfully",
+	}, nil
 }

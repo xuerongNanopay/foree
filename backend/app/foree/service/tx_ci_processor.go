@@ -198,6 +198,7 @@ func (p *CITxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx
 			return nil, err
 		}
 
+		//TODO: log
 		return &fTx, nil
 	}
 

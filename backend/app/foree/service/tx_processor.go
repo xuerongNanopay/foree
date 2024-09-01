@@ -452,14 +452,17 @@ func (p *TxProcessor) closeRemainingTx(ctx context.Context, fTx transaction.Fore
 // TODO: reDesign.
 func (p *TxProcessor) updateTxSummary(ctx context.Context, fTx transaction.ForeeTx) {
 	txSummary := *fTx.Summary
+	txSummary.IsCancelAllowed = false
 
 	if fTx.Status == transaction.TxStatusInitial {
 		txSummary.Status = transaction.TxSummaryStatusInitial
 	} else if fTx.Status == transaction.TxStatusProcessing {
 		if fTx.CurStage == transaction.TxStageInteracCI && fTx.CurStageStatus == transaction.TxStatusSent {
 			txSummary.Status = transaction.TxSummaryStatusAwaitPayment
+			txSummary.IsCancelAllowed = true
 		} else if fTx.CurStage == transaction.TxStageNBPCO && fTx.CurStageStatus == transaction.TxStatusSent && fTx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
 			txSummary.Status = transaction.TxSummaryStatusPickup
+			txSummary.IsCancelAllowed = true
 		} else {
 			txSummary.Status = transaction.TxSummaryStatusInProgress
 		}

@@ -119,7 +119,8 @@ func (q QueryTransactionReq) Validate() *transport.BadRequestError {
 
 type CancelTransactionReq struct {
 	transport.SessionReq
-	TransactionId int64 `json:"transactionId" validate:"required,gt=0"`
+	TransactionId int64  `json:"transactionId" validate:"required,gt=0"`
+	CancelReason  string `json:"cancelReason"`
 }
 
 func (q CancelTransactionReq) Validate() *transport.BadRequestError {
@@ -176,6 +177,11 @@ func NewDailyTxLimitDTO(r *transaction.DailyTxLimit) *DailyTxLimitDTO {
 		MaxAmount:    r.UsedAmt.Amount,
 		MaxCurrency:  r.UsedAmt.Currency,
 	}
+}
+
+type TxCancelDTO struct {
+	TransactionId int64  `json:"transactionId,omitempty"`
+	Message       string `json:"message,omitempty"`
 }
 
 type TxSummaryDTO struct {
