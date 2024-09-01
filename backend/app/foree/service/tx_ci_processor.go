@@ -43,6 +43,17 @@ func NewCITxProcessor(
 	return &CITxProcessor{
 		db:            db,
 		scotiaProfile: scotiaProfile,
+		scotiaClient:  scotiaClient,
+		interacTxRepo: interacTxRepo,
+		foreeTxRepo:   foreeTxRepo,
+		txSummaryRepo: txSummaryRepo,
+		txProcessor:   txProcessor,
+		waitFTxs:      make(map[int64]*transaction.ForeeTx, 256),
+		webhookChan:   make(chan int64, 32),               // capacity with 32 should be enough.
+		clearChan:     make(chan int64, 32),               // capacity with 32 should be enough.
+		forwardChan:   make(chan transaction.ForeeTx, 32), // capacity with 32 should be enough.
+		waitChan:      make(chan transaction.ForeeTx, 32), // capacity with 32 should be enough.
+		ticker:        time.NewTicker(5 * time.Minute),
 	}
 }
 
@@ -59,7 +70,7 @@ type CITxProcessor struct {
 	clearChan     chan int64
 	forwardChan   chan transaction.ForeeTx
 	waitChan      chan transaction.ForeeTx
-	ticker        time.Ticker
+	ticker        *time.Ticker
 }
 
 // Loading from DB at beginning. OR, let foree processor do it.
