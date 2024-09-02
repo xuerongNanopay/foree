@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	MysqlOpenConnection = `SHOW STATUS WHERE variable_name = '%s'`
+	MysqlOpenConnection = `SHOW STATUS WHERE variable_name = ?`
 )
 
 func NewSystemRouter(db *sql.DB) *SystemRouter {
@@ -27,23 +27,21 @@ func hello(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *SystemRouter) mysqlConnection(w http.ResponseWriter, r *http.Request) {
-	rows, err := s.db.Query(MysqlOpenConnection, "Threads_connected")
-	if err != nil {
-		w.Write([]byte(fmt.Sprintf("Error: `%s`", err.Error())))
-	}
-	defer rows.Close()
+	row := s.db.QueryRow(MysqlOpenConnection, "Threads_connected")
 
 	var variableName string
 	var value string
-	err = rows.Scan(&variableName, &value)
+
+	err := row.Scan(&variableName, &value)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf("Error: `%s`", err.Error())))
+		return
 	}
 
 	w.Write([]byte(fmt.Sprintf("Mysql Threads_connected: `%s`", value)))
 }
 
 func (c *SystemRouter) RegisterRouter(router *mux.Router) {
-	router.HandleFunc("hello", hello).Methods("GET")
-	router.HandleFunc("mysql_connection", c.mysqlConnection).Methods("GET")
+	router.HandleFunc("/hello", hello).Methods("GET")
+	router.HandleFunc("/mysql_connection", c.mysqlConnection).Methods("GET")
 }
