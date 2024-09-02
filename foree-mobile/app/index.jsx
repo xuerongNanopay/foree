@@ -8,11 +8,6 @@ import CustomButton from '../components/CustomButton'
 
 export default function App() {
   return (
-    // <View className="flex-1 items-center justify-center bg-white">
-    //   <Text className="text-3xl font-pblack">Foree!</Text>
-    //   <StatusBar style="auto" />
-    //   <Link href="/home" style={{color: 'blue'}}>Go to home</Link>
-    // </View>
     <SafeAreaView className="bg-slate-200 h-full">
       <ScrollView contentContainerStyle={{ height: '100%' }}>
         <View className="w-full items-center min-h-[85vh] px-2">
@@ -51,7 +46,7 @@ export default function App() {
         </View>
       </ScrollView>
 
-      {/* <StatusBar backgroundColor='#161622' style='auto'/> */}
+      <StatusBar backgroundColor='#161622' style='auto'/>
     </SafeAreaView>
   );
 }

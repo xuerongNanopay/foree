@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { SplashScreen, Stack } from 'expo-router'
 import { useFonts } from 'expo-font'
+import { Redirect, router } from 'expo-router'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -19,12 +20,16 @@ const RootLayout = () => {
 
   useEffect(() => {
     if (error) throw error;
-    if(fontsLoaded) SplashScreen.hideAsync()
+    if(fontsLoaded) {
+      SplashScreen.hideAsync()
+      router.replace('sign_in')
+    }
   }, [fontsLoaded, error])
 
   if(!fontsLoaded && !error) return null
 
   return (
+    // <Redirect href="/sign_in"/>
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false}} />
     </Stack>
