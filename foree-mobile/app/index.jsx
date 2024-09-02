@@ -1,13 +1,47 @@
-import { StatusBar } from 'expo-status-bar';
-import { Text, View } from 'react-native';
-import { Link } from 'expo-router';
+import { StatusBar } from 'expo-status-bar'
+import { ScrollView, Text, View } from 'react-native'
+import { Link } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { images } from '../constants'
+import { Image } from 'react-native'
 
 export default function App() {
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-3xl font-pblack">Foree!</Text>
-      <StatusBar style="auto" />
-      <Link href="/home" style={{color: 'blue'}}>Go to home</Link>
-    </View>
+    // <View className="flex-1 items-center justify-center bg-white">
+    //   <Text className="text-3xl font-pblack">Foree!</Text>
+    //   <StatusBar style="auto" />
+    //   <Link href="/home" style={{color: 'blue'}}>Go to home</Link>
+    // </View>
+    <SafeAreaView className="bg-slate-200 h-full">
+      <ScrollView contentContainerStyle={{ height: '100%' }}>
+        <View className="w-full items-center h-full px-4">
+          <Image
+            source={images.logo}
+            className="w-[120px] h-[84ox]"
+            resizeMode='contain'
+          />
+          <Image
+            source={images.cards}
+            className="max-w-[380px] w-full h-[300px]"
+            resizeMode='contain'
+          />
+
+          <View className="relative mt-5">
+            <Text className="text-3xl text-slate-900 font-bold text-center">
+              Transfer money with{' '}
+              <Text className="text-secondary-200">Foree</Text>
+            </Text>
+            <Image
+              source={images.path}
+              className="w-[136px h-[15px] absolute -bottom-2 right-4"
+              resizeMode='contain'
+            />
+          </View>
+          <Text
+            className="text-sm font-pregular text-gray-600 mt-4 text-center"
+          >Where creativeit meets invotaion embark fdsa pakkk fdsaf asdf </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
