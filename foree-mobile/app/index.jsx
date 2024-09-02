@@ -1,9 +1,10 @@
 import { StatusBar } from 'expo-status-bar'
 import { ScrollView, Text, View } from 'react-native'
-import { Link } from 'expo-router'
+import { Redirect, router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { images } from '../constants'
 import { Image } from 'react-native'
+import CustomButton from '../components/CustomButton'
 
 export default function App() {
   return (
@@ -14,7 +15,7 @@ export default function App() {
     // </View>
     <SafeAreaView className="bg-slate-200 h-full">
       <ScrollView contentContainerStyle={{ height: '100%' }}>
-        <View className="w-full items-center h-full px-4">
+        <View className="w-full items-center min-h-[85vh] px-2">
           <Image
             source={images.logo}
             className="w-[120px] h-[84ox]"
@@ -39,9 +40,18 @@ export default function App() {
           </View>
           <Text
             className="text-sm font-pregular text-gray-600 mt-4 text-center"
-          >Where creativeit meets invotaion embark fdsa pakkk fdsaf asdf </Text>
+          >
+            Where creativeit meets invotaion embark fdsa pakkk fdsaf asdf 
+          </Text>
+          <CustomButton
+            title="Continue With Email"
+            handlePress={() => router.push('/sign_in')}
+            containerStyles="w-full mt-7"
+          />
         </View>
       </ScrollView>
+
+      {/* <StatusBar backgroundColor='#161622' style='auto'/> */}
     </SafeAreaView>
   );
 }

@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "foree-mobile",
-    "slug": "foree-mobile",
+    "scheme": "foree",
+    "slug": "foree",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
