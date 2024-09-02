@@ -42,6 +42,51 @@ const TabsLayout = () => {
             )
           }}
         />
+        <Tabs.Screen 
+          name="bookmark"
+          options={{
+            title: 'Bookmark',
+            headerShown: false,
+            tabBarIcon:({ color, forced}) => (
+              <TabIcon 
+                icon={icons.bookmark}
+                color={color}
+                name="Bookmark"
+                forced={forced}
+              />
+            )
+          }}
+        />
+        <Tabs.Screen 
+          name="create"
+          options={{
+            title: 'Create',
+            headerShown: false,
+            tabBarIcon:({ color, forced}) => (
+              <TabIcon 
+                icon={icons.plus}
+                color={color}
+                name="Create"
+                forced={forced}
+              />
+            )
+          }}
+        />
+        <Tabs.Screen 
+          name="profile"
+          options={{
+            title: 'Profile',
+            headerShown: false,
+            tabBarIcon:({ color, forced}) => (
+              <TabIcon 
+                icon={icons.profile}
+                color={color}
+                name="Profile"
+                forced={forced}
+              />
+            )
+          }}
+        />
       </Tabs>
     </>
   )
