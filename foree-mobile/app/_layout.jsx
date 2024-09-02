@@ -22,7 +22,7 @@ const RootLayout = () => {
     if(fontsLoaded) SplashScreen.hideAsync()
   }, [fontsLoaded, error])
 
-  if(!fontsLoaded && !err) return null
+  if(!fontsLoaded && !error) return null
 
   return (
     <Stack>
