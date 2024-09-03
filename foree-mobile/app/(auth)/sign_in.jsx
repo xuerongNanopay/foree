@@ -23,9 +23,8 @@ const SignIn = () => {
   }
 
   return (
-    //TODO: investigate why StatusBar.backgroundColor not working.
     <SafeAreaView className="h-full">
-    <ScrollView
+      <ScrollView
         className="bg-slate-100"
         automaticallyAdjustKeyboardInsets
       >
@@ -79,6 +78,10 @@ const SignIn = () => {
                 })}
                 otherStyles="mt-7"
               />
+              <Link 
+                  href="/sign_up" 
+                  className="text-slate-500 p-2"
+                >Forget Password?</Link>
               <CustomButton
                 title="Sign In"
                 handlePress={submit}

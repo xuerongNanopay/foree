@@ -11,7 +11,7 @@ const FormField = ({title, value, placeholder, handleChangeText, otherStyles, ..
       <View 
         className="
           w-full h-12 px-4 bg-slate-100 border-2 
-          border-slate-400 rounded-2xl focus:border-secondary-200 
+          border-slate-400 rounded-2xl focus:border-secondary-200
           items-center flex-row
         "
       >
