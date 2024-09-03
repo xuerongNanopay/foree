@@ -1,6 +1,5 @@
 import { Button, Text } from 'react-native'
-import { router } from 'expo-router'
-import { Stack } from 'expo-router'
+import { router, Stack } from 'expo-router'
 import React from 'react'
 
 // flow:
@@ -32,6 +31,14 @@ const AuthLayout = () => {
         />
         <Stack.Screen
           name="forget_password"
+          options={{
+            headerShown: true,
+            title:"",
+            headerBackTitle:"Sign In",
+          }}
+        />
+        <Stack.Screen
+          name="update_password"
           options={{
             headerShown: true,
             title:"",
