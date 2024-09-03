@@ -58,37 +58,38 @@ const SignIn = () => {
               </Text>
             </View>
           </View>
-          <View className="bg-slate-100 px-2">
-              <FormField
-                title="Email"
-                value={form.email}
-                handleChangeText={(e) => setForm({
-                  ...form,
-                  email:e
-                })}
-                otherStyles="mt-7"
-                keyboardType="email-address"
-              />
-              <FormField
-                title="Password"
-                value={form.password}
-                handleChangeText={(e) => setForm({
-                  ...form,
-                  password:e
-                })}
-                otherStyles="mt-7"
-              />
-              <Link 
-                  href="/forget_password" 
-                  className="text-slate-500 p-2"
-                >Forget Password?</Link>
-              <CustomButton
-                title="Sign In"
-                handlePress={submit}
-                containerStyles="mt-7"
-                isLoading={isSubmitting}
-              />
-            </View>
+          <View className="bg-slate-100 px-2 mt-4">
+            <Text className="font-pbold text-xl text-slate-700">Wellcome back</Text>
+            <FormField
+              title="Email"
+              value={form.email}
+              handleChangeText={(e) => setForm({
+                ...form,
+                email:e
+              })}
+              otherStyles="mt-4"
+              keyboardType="email-address"
+            />
+            <FormField
+              title="Password"
+              value={form.password}
+              handleChangeText={(e) => setForm({
+                ...form,
+                password:e
+              })}
+              otherStyles="mt-7"
+            />
+            <Link 
+                href="/forget_password" 
+                className="text-slate-500 p-2"
+              >Forget Password?</Link>
+            <CustomButton
+              title="Sign In"
+              handlePress={submit}
+              containerStyles="mt-7"
+              isLoading={isSubmitting}
+            />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

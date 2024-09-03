@@ -2,6 +2,10 @@ import { StatusBar } from 'expo-status-bar'
 import { Stack } from 'expo-router'
 import React from 'react'
 
+// flow:
+// sign in -> sign up -> verify email -> onboarding
+// sign in -> sign up -> verify email -b-> sign in
+// sign in -> sign up -> verify email -> onboarding -b-> sign in
 const AuthLayout = () => {
   return (
     <>

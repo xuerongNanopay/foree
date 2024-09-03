@@ -44,7 +44,7 @@ const SignUp = () => {
               >Sign In</Link>
             </View>
           </View>
-          <Text className="text-2xl text-slate-700 text-semibold mt-10 font-psemibold">
+          <Text className="text-2xl text-slate-700 mt-10 font-pbold">
             Create an account
           </Text>
           <FormField
