@@ -23,8 +23,11 @@ const SignIn = () => {
   }
 
   return (
-    <SafeAreaView className="h-full bg-white">
-      <ScrollView>
+    //TODO: investigate why StatusBar.backgroundColor not working.
+    // <SafeAreaView className="h-full">
+    // <ScrollView>
+    <SafeAreaView className="h-full bg-[#004d40]">
+      <ScrollView className="bg-slate-100">
         <View className="w-full justify-center min-h-[85vh] px-2 my-2">
           <Image
             source={images.logo}
