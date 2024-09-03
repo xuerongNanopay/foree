@@ -36,7 +36,7 @@ const SignUp = () => {
               resizeMode='contain'
               className="w-[36px] h-[36px]"
             />
-            <View className="bg-secondary rounded-lg">
+            <View className="bg-secondary-200 rounded-lg">
               <Link 
                 href="/sign_in" 
                 className="text-lg font-psemibold text-white p-2"

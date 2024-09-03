@@ -36,7 +36,7 @@ const SignIn = () => {
                 resizeMode='contain'
                 className="w-[36px] h-[36px]"
               />
-              <View className="bg-secondary rounded-lg">
+              <View className="bg-secondary-200 rounded-lg">
                 <Link 
                   href="/sign_up" 
                   className="text-lg font-psemibold text-white p-2"
@@ -79,7 +79,7 @@ const SignIn = () => {
                 otherStyles="mt-7"
               />
               <Link 
-                  href="/sign_up" 
+                  href="/forget_password" 
                   className="text-slate-500 p-2"
                 >Forget Password?</Link>
               <CustomButton
