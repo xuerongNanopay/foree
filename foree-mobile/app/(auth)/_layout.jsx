@@ -19,7 +19,8 @@ const AuthLayout = () => {
           }}
         />
       </Stack>
-      <StatusBar backgroundColor='#004d40' style='light'/>
+      {/* TODO: investigate why StatusBar.backgroundColor not working. */}
+      {/* <StatusBar backgroundColor='#004d40' style='light'/> */}
     </>
   )
 }

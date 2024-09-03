@@ -1,4 +1,4 @@
-import { ScrollView, Text, View, Image } from 'react-native'
+import { ScrollView, Text, View, Image, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import { Link } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -24,17 +24,26 @@ const SignIn = () => {
 
   return (
     //TODO: investigate why StatusBar.backgroundColor not working.
-    // <SafeAreaView className="h-full">
-    // <ScrollView>
-    <SafeAreaView className="h-full bg-[#004d40]">
-      <ScrollView className="bg-slate-100">
+    <SafeAreaView className="h-full">
+    <ScrollView
+        className="bg-slate-100"
+        automaticallyAdjustKeyboardInsets
+      >
         <View className="w-full">
           <View className="px-4 mt-5">
-            <Image
-              source={images.logoSmall}
-              resizeMode='contain'
-              className="w-[36px] h-[36px]"
-            />
+            <View className="flex-row items-center justify-between">
+              <Image
+                source={images.logoSmall}
+                resizeMode='contain'
+                className="w-[36px] h-[36px]"
+              />
+              <View className="bg-secondary rounded-lg">
+                <Link 
+                  href="/sign_up" 
+                  className="text-lg font-psemibold text-white p-2"
+                >Sign Up</Link>
+              </View>
+            </View>
             <View>
               <Text className="mt-6 text-secondary text-left font-psemibold text-xl">
                 Sign-up & receive $44 to try the fastest global transfer
@@ -50,8 +59,7 @@ const SignIn = () => {
               </Text>
             </View>
           </View>
-          <View>
-            <View>
+          <View className="bg-slate-100 px-2">
               <FormField
                 title="Email"
                 value={form.email}
@@ -77,14 +85,7 @@ const SignIn = () => {
                 containerStyles="mt-7"
                 isLoading={isSubmitting}
               />
-              <View className="justify-center items-center pt-4 flex-row gap-2">
-                <Text className="text-lg text-gray-100 font-pregular">
-                  Don't have account?
-                </Text>
-                <Link href="/sign_up" className='"text-lg font-psemibold text-secondary'>Sign Up</Link>
-              </View>
             </View>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
