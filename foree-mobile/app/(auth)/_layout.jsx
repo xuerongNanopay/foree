@@ -5,7 +5,14 @@ import React from 'react'
 const AuthLayout = () => {
   return (
     <>
-      <Stack>
+      <Stack
+        screenOptions={{
+          headerTintColor:"#004d40",
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      >
         <Stack.Screen
           name="sign_in"
           options={{
@@ -20,6 +27,22 @@ const AuthLayout = () => {
         />
         <Stack.Screen
           name="forget_password"
+          options={{
+            headerShown: true,
+            title:"",
+            headerBackTitle:"Sign In",
+          }}
+        />
+        <Stack.Screen
+          name="verify_email"
+          options={{
+            headerShown: true,
+            title:"",
+            headerBackTitle:"Sign In",
+          }}
+        />
+        <Stack.Screen
+          name="onboarding"
           options={{
             headerShown: true,
             title:"",

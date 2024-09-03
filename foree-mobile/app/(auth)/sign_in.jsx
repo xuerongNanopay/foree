@@ -36,10 +36,10 @@ const SignIn = () => {
                 resizeMode='contain'
                 className="w-[36px] h-[36px]"
               />
-              <View className="bg-secondary-200 rounded-lg">
-                <Link 
+              <View className="rounded-lg border-2 border-secondary-100">
+                <Link
                   href="/sign_up" 
-                  className="text-lg font-psemibold text-white p-2"
+                  className="text-lg text-secondary-100 font-psemibold p-1"
                 >Sign Up</Link>
               </View>
             </View>

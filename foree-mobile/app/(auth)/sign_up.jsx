@@ -1,6 +1,6 @@
 import { ScrollView, Text, View, Image } from 'react-native'
 import React, { useState } from 'react'
-import { Link } from 'expo-router'
+import { Link, router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { images } from '../../constants'
@@ -20,6 +20,7 @@ const SignUp = () => {
     setIsSubmitting(true)
     setTimeout(() => {
       setIsSubmitting(false)
+      router.replace("/verify_email")
     }, 2000);
   }
 
@@ -36,10 +37,10 @@ const SignUp = () => {
               resizeMode='contain'
               className="w-[36px] h-[36px]"
             />
-            <View className="bg-secondary-200 rounded-lg">
+            <View className="rounded-lg border-2 border-secondary-100">
               <Link 
                 href="/sign_in" 
-                className="text-lg font-psemibold text-white p-2"
+                className="text-lg text-secondary-100 font-psemibold p-1"
               >Sign In</Link>
             </View>
           </View>
