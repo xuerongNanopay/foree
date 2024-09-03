@@ -1,4 +1,5 @@
-import { StatusBar } from 'expo-status-bar'
+import { Button, Text } from 'react-native'
+import { router } from 'expo-router'
 import { Stack } from 'expo-router'
 import React from 'react'
 
@@ -42,7 +43,8 @@ const AuthLayout = () => {
           options={{
             headerShown: true,
             title:"",
-            headerBackTitle:"Sign In",
+            headerTintColor:"#004d40",
+            headerLeft: () => <Button onPress={() => router.replace("sign_in")} title="Sign In" color="#004d40"/>
           }}
         />
         <Stack.Screen
@@ -50,7 +52,8 @@ const AuthLayout = () => {
           options={{
             headerShown: true,
             title:"",
-            headerBackTitle:"Sign In",
+            headerTintColor:"#004d40",
+            headerLeft: () => <Button onPress={() => router.replace("sign_in")} title="Sign In" color="#004d40"/>
           }}
         />
       </Stack>

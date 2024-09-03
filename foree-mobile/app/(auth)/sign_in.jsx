@@ -1,6 +1,6 @@
 import { ScrollView, Text, View, Image } from 'react-native'
-import React, { useState } from 'react'
-import { Link } from 'expo-router'
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigation } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { images } from '../../constants'
@@ -8,6 +8,11 @@ import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 
 const SignIn = () => {
+  const navigation = useNavigation()
+  useEffect(() => {
+    console.log("clean token")
+  }, [navigation])
+
   const [form, setForm] = useState({
     email: '',
     password: ''
