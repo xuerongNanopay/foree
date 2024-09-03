@@ -3,9 +3,13 @@ import React from 'react'
 
 const VerifyEmail = () => {
   return (
-    <View>
-      <Text>VerifyEmail</Text>
-    </View>
+    <SafeAreaView className="h-full">
+      <ScrollView
+        className="bg-slate-100"
+        automaticallyAdjustKeyboardInsets
+      >
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 

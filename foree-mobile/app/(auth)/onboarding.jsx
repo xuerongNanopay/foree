@@ -3,9 +3,13 @@ import React from 'react'
 
 const Onboarding = () => {
   return (
-    <View>
-      <Text>Onboarding</Text>
-    </View>
+    <SafeAreaView className="h-full">
+      <ScrollView
+        className="bg-slate-100"
+        automaticallyAdjustKeyboardInsets
+      >
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 
