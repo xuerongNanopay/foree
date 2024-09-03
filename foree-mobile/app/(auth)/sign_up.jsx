@@ -10,7 +10,8 @@ import CustomButton from '../../components/CustomButton'
 const SignUp = () => {
   const [form, setForm] = useState({
     email: '',
-    password: ''
+    password: '',
+    rePassword: ''
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -24,15 +25,26 @@ const SignUp = () => {
 
   return (
     <SafeAreaView className="h-full">
-      <ScrollView>
-        <View className="w-full justify-center min-h-[85vh] px-2 my-2">
-          <Image
-            source={images.logo}
-            resizeMode='contain'
-            className="w-[115px] h-[35px]"
-          />
+      <ScrollView
+        className="bg-slate-100"
+        automaticallyAdjustKeyboardInsets
+      >
+        <View className="w-full px-2 my-6">
+          <View className="flex-row items-center justify-between">
+            <Image
+              source={images.logoSmall}
+              resizeMode='contain'
+              className="w-[36px] h-[36px]"
+            />
+            <View className="bg-secondary rounded-lg">
+              <Link 
+                href="/sign_in" 
+                className="text-lg font-psemibold text-white p-2"
+              >Sign In</Link>
+            </View>
+          </View>
           <Text className="text-2xl text-slate-700 text-semibold mt-10 font-psemibold">
-            Sign up to Aora
+            Create an account
           </Text>
           <FormField
             title="Email"
@@ -59,12 +71,6 @@ const SignUp = () => {
             containerStyles="mt-7"
             isLoading={isSubmitting}
           />
-          <View className="justify-center items-center pt-4 flex-row gap-2">
-            <Text className="text-lg text-gray-100 font-pregular">
-              Already have account?
-            </Text>
-            <Link href="/sign_in" className='"text-lg font-psemibold text-secondary'>Sign In</Link>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
