@@ -34,7 +34,7 @@ const ForgetPassword = () => {
               className="w-[36px] h-[36px]"
             />
           </View>
-          <Text className="text-lg font-psemibold text-center m-4">Forget Password?</Text>
+          <Text className="text-lg font-pbold text-center m-4">Forget Password?</Text>
           <Text className="font-pregular text-center m-4">
             Enter the mail you used to create your account in order to reset your password.
           </Text>

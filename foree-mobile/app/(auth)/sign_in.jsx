@@ -1,6 +1,6 @@
 import { ScrollView, Text, View, Image } from 'react-native'
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigation } from 'expo-router'
+import { Link, router, useNavigation } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { images } from '../../constants'
@@ -24,7 +24,8 @@ const SignIn = () => {
     setIsSubmitting(true)
     setTimeout(() => {
       setIsSubmitting(false)
-    }, 2000);
+      router.push('/verify_email')
+    }, 1000);
   }
 
   return (
@@ -45,6 +46,7 @@ const SignIn = () => {
                 <Link
                   href="/sign_up" 
                   className="text-lg text-secondary-100 font-psemibold p-1"
+                  disabled={isSubmitting}
                 >Sign Up</Link>
               </View>
             </View>
