@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar'
-import { Button, Text, Image } from 'react-native'
+import { Button, Text, Image, View } from 'react-native'
 import { router, Stack } from 'expo-router'
 import React from 'react'
 import { images } from '../../constants'
