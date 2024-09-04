@@ -1,5 +1,5 @@
 import { View, Text, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import CustomButton from './CustomButton'
 
 const MultiStepForm = ({
@@ -7,7 +7,13 @@ const MultiStepForm = ({
   showProgress=true,
   submitTintTitle = 'Submit'
 }) => {
-  const [progress, setProgress] = useState(0.3)
+  const [progress, setProgress] = useState(0.30)
+  const [progressCss, setProgressCss] = useState('-100%')
+  console.log(progressCss)
+  useEffect(()=>{
+    setProgressCss('-' + Math.round((1-progress)*100) + '%')
+  }, [progress])
+
   return (
     <View className={`${containerStyle}`}>
       { showProgress ? 
@@ -18,7 +24,7 @@ const MultiStepForm = ({
             <View 
               className={`border-t-[3px] border-secondary top-[0px]`}
               style={{
-                left:'-20%'
+                left: progressCss
               }}
             />
           </View>
