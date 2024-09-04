@@ -7,6 +7,7 @@ import CustomButton from '../../components/CustomButton'
 import FormField from '../../components/FormField'
 
 const ForgetPassword = () => {
+
   const [form, setForm] = useState({
     email: ''
   })
@@ -17,7 +18,7 @@ const ForgetPassword = () => {
     setIsSubmitting(true)
     setTimeout(() => {
       setIsSubmitting(false)
-      router.replace('/update_password')
+      router.replace({pathname:"/update_password", params:{token: "TODO: retrieve token"}})
     }, 2000);
   }
 
