@@ -1,6 +1,7 @@
 import { View, Text, ScrollView } from 'react-native'
 import React, { useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { router } from 'expo-router'
+import { SafeAreaView } from 'react-native'
 
 import CustomButton from '../../components/CustomButton'
 import FormField from '../../components/FormField'
@@ -16,6 +17,7 @@ const ForgetPassword = () => {
     setIsSubmitting(true)
     setTimeout(() => {
       setIsSubmitting(false)
+      router.replace('/update_password')
     }, 2000);
   }
 

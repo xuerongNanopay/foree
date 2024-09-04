@@ -1,7 +1,7 @@
 import { ScrollView, Text, View, Image } from 'react-native'
 import React, { useState } from 'react'
 import { Link, router } from 'expo-router'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native'
 
 import { images } from '../../constants'
 import FormField from '../../components/FormField'

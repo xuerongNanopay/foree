@@ -1,3 +1,4 @@
+import { StatusBar } from 'expo-status-bar'
 import { Button, Text, Image } from 'react-native'
 import { router, Stack } from 'expo-router'
 import React from 'react'
@@ -44,9 +45,8 @@ const AuthLayout = () => {
           name="update_password"
           options={{
             headerShown: true,
-            title:"",
-            headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
-            headerLeft: () => <Button onPress={() => router.replace("/login")} title="Login" color="#004d40"/>
+            // headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
+            // headerLeft: () => <Button onPress={() => router.replace("/login")} title="Login" color="#004d40"/>
           }}
         />
         <Stack.Screen
@@ -54,7 +54,7 @@ const AuthLayout = () => {
           options={{
             headerShown: true,
             title:"",
-            headerTintColor:"#004d40",
+            contentStyle:{top:0, bottom:0},
             headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
             headerLeft: () => <Button onPress={() => router.replace("/login")} title="Logout" color="#004d40"/>
           }}
@@ -71,7 +71,7 @@ const AuthLayout = () => {
         />
       </Stack>
       {/* TODO: investigate why StatusBar.backgroundColor not working. */}
-      {/* <StatusBar backgroundColor='#004d40' style='light'/> */}
+      {/* <StatusBar backgroundColor='#000000' translucent={true} style='auto'/> */}
     </>
   )
 }
