@@ -7,6 +7,7 @@ import { images } from '../../constants'
 // sign in -> sign up -> verify email -> onboarding
 // sign in -> sign up -> verify email -b-> sign in
 // sign in -> sign up -> verify email -> onboarding -b-> sign in
+// foget password -> update password -> sign in
 const AuthLayout = () => {
   return (
     <>
@@ -19,7 +20,7 @@ const AuthLayout = () => {
         }}
       >
         <Stack.Screen
-          name="sign_in"
+          name="login"
           options={{
             headerShown: false
           }}
@@ -45,7 +46,7 @@ const AuthLayout = () => {
             headerShown: true,
             title:"",
             headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
-            headerBackTitle:"Back",
+            headerLeft: () => <Button onPress={() => router.replace("/login")} title="Login" color="#004d40"/>
           }}
         />
         <Stack.Screen
@@ -55,7 +56,7 @@ const AuthLayout = () => {
             title:"",
             headerTintColor:"#004d40",
             headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
-            headerLeft: () => <Button onPress={() => router.replace("sign_in")} title="Back" color="#004d40"/>
+            headerLeft: () => <Button onPress={() => router.replace("/login")} title="Logout" color="#004d40"/>
           }}
         />
         <Stack.Screen
@@ -65,7 +66,7 @@ const AuthLayout = () => {
             title:"",
             headerTintColor:"#004d40",
             headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
-            headerLeft: () => <Button onPress={() => router.replace("sign_in")} title="Back" color="#004d40"/>
+            headerLeft: () => <Button onPress={() => router.replace("/login")} title="Logout" color="#004d40"/>
           }}
         />
       </Stack>

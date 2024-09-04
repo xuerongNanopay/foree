@@ -7,10 +7,10 @@ import { images } from '../../constants'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 
-const SignIn = () => {
+const Login = () => {
   const navigation = useNavigation()
   useEffect(() => {
-    console.log("clean token")
+    console.log("TODO: clean token")
   }, [navigation])
 
   const [form, setForm] = useState({
@@ -103,4 +103,4 @@ const SignIn = () => {
   )
 }
 
-export default SignIn
+export default Login

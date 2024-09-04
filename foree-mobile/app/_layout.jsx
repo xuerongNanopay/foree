@@ -21,14 +21,14 @@ const RootLayout = () => {
     if (error) throw error;
     if(fontsLoaded) {
       SplashScreen.hideAsync()
-      // router.replace('sign_in')
+      // router.replace('login')
     }
   }, [fontsLoaded, error])
 
   if(!fontsLoaded && !error) return null
 
   return (
-    // <Redirect href="/sign_in"/>
+    // <Redirect href="/login"/>
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false}} />
       <Stack.Screen name="(auth)" options={{ headerShown: false}} />

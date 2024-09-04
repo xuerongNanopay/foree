@@ -39,7 +39,7 @@ const SignUp = () => {
             />
             <View className="rounded-lg border-2 border-secondary-100">
               <Link 
-                href="/sign_in" 
+                href="/login" 
                 className="text-lg text-secondary-100 font-psemibold p-1"
               >Sign In</Link>
             </View>
