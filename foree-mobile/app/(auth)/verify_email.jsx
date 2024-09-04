@@ -1,5 +1,6 @@
 import { View, Text, ScrollView, Image, Button } from 'react-native'
 import React, { useState } from 'react'
+import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { images } from '../../constants'
@@ -18,7 +19,8 @@ const VerifyEmail = () => {
     setIsSubmitting(true)
     setTimeout(() => {
       setIsSubmitting(false)
-    }, 2000);
+      router.replace("/onboarding")
+    }, 1000);
   }
 
   return (
