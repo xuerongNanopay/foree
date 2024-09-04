@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image } from 'react-native'
+import { View, Text, ScrollView, Image, Button } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -60,6 +60,15 @@ const VerifyEmail = () => {
               containerStyles="mt-7"
               isLoading={isSubmitting}
             />
+            <View className="flex-row items-center justify-center mt-4">
+              <Text>Do not receive code?</Text>
+              <Button
+                onPress={submit}
+                title="Resend"
+                color="#26a69a"
+                isSubmitting={isSubmitting}
+              />
+            </View>
           </View>
         </View>
       </ScrollView>
