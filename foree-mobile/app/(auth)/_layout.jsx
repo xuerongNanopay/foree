@@ -1,6 +1,7 @@
-import { Button, Text } from 'react-native'
+import { Button, Text, Image } from 'react-native'
 import { router, Stack } from 'expo-router'
 import React from 'react'
+import { images } from '../../constants'
 
 // flow:
 // sign in -> sign up -> verify email -> onboarding
@@ -34,7 +35,8 @@ const AuthLayout = () => {
           options={{
             headerShown: true,
             title:"",
-            headerBackTitle:"Sign In",
+            headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
+            headerBackTitle:"Back",
           }}
         />
         <Stack.Screen
@@ -42,7 +44,8 @@ const AuthLayout = () => {
           options={{
             headerShown: true,
             title:"",
-            headerBackTitle:"Sign In",
+            headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
+            headerBackTitle:"Back",
           }}
         />
         <Stack.Screen
@@ -51,7 +54,8 @@ const AuthLayout = () => {
             headerShown: true,
             title:"",
             headerTintColor:"#004d40",
-            headerLeft: () => <Button onPress={() => router.replace("sign_in")} title="Sign In" color="#004d40"/>
+            headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
+            headerLeft: () => <Button onPress={() => router.replace("sign_in")} title="Back" color="#004d40"/>
           }}
         />
         <Stack.Screen
@@ -60,7 +64,8 @@ const AuthLayout = () => {
             headerShown: true,
             title:"",
             headerTintColor:"#004d40",
-            headerLeft: () => <Button onPress={() => router.replace("sign_in")} title="Sign In" color="#004d40"/>
+            headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
+            headerLeft: () => <Button onPress={() => router.replace("sign_in")} title="Back" color="#004d40"/>
           }}
         />
       </Stack>

@@ -1,8 +1,7 @@
-import { View, Text, ScrollView, Image } from 'react-native'
+import { View, Text, ScrollView } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { images } from '../../constants'
 import CustomButton from '../../components/CustomButton'
 import FormField from '../../components/FormField'
 
@@ -27,13 +26,6 @@ const ForgetPassword = () => {
         automaticallyAdjustKeyboardInsets
       >
         <View className="w-full mt-4">
-          <View className="flex-row items-center justify-center">
-            <Image
-              source={images.logoSmall}
-              resizeMode='contain'
-              className="w-[36px] h-[36px]"
-            />
-          </View>
           <Text className="text-lg font-pbold text-center m-4">Forget Password?</Text>
           <Text className="font-pregular text-center m-4">
             Enter the mail you used to create your account in order to reset your password.
