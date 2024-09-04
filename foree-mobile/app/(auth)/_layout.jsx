@@ -63,9 +63,9 @@ const AuthLayout = () => {
           name="onboarding"
           options={{
             headerShown: true,
-            title:"",
+            title:"Onboard",
             headerTintColor:"#004d40",
-            headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
+            // headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
             headerLeft: () => <Button onPress={() => router.replace("/login")} title="Logout" color="#004d40"/>
           }}
         />
