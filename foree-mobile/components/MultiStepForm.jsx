@@ -5,11 +5,16 @@ import CustomButton from './CustomButton'
 const MultiStepForm = ({
   containerStyle,
   showProgress=true,
-  submitTintTitle = 'Submit'
+  submitTintTitle = 'Submit',
+  steps = () => []
 }) => {
+  const formStep = steps()
+  const [curIdx, setCurIdx] = useState(0)
+  const [isFirst, setIsFirst] = useState(curIdx===0)
+  const [isLast, setIsLast] =  useState(curIdx===formStep.length-1)
   const [progress, setProgress] = useState(0.30)
   const [progressCss, setProgressCss] = useState('-100%')
-  console.log(progressCss)
+
   useEffect(()=>{
     setProgressCss('-' + Math.round((1-progress)*100) + '%')
   }, [progress])
@@ -40,24 +45,33 @@ const MultiStepForm = ({
         </View>
         <View className="px-2">
           <View>
-            <CustomButton
-              title={"Previous"}
-              handlePress={()=>{}}
-              containerStyles="mb-2"
-                // isLoading={isSubmitting}
-            />
-            <CustomButton
-              title={"Next"}
-              handlePress={()=>{}}
-              containerStyles="mb-2"
-                // isLoading={isSubmitting}
-            />
-            <CustomButton
-              title={submitTintTitle}
-              handlePress={()=>{}}
-              containerStyles="mb-4"
-                // isLoading={isSubmitting}
-            />
+            {
+              !isFirst ?
+              <CustomButton
+                title={"Previous"}
+                handlePress={()=>{}}
+                containerStyles="mb-2"
+                  // isLoading={isSubmitting}
+              /> : null
+            }
+            {
+              !isLast ? 
+              <CustomButton
+                title={"Next"}
+                handlePress={()=>{}}
+                containerStyles="mb-2"
+                  // isLoading={isSubmitting}
+              /> : null
+            }
+            {
+              isLast ? 
+              <CustomButton
+                title={submitTintTitle}
+                handlePress={()=>{}}
+                containerStyles="mb-4"
+                  // isLoading={isSubmitting}
+              /> : null
+            }
           </View>
         </View>
       </ScrollView>

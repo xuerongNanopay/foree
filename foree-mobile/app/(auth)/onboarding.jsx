@@ -32,7 +32,9 @@ const Onboarding = () => {
 
   return (
     <SafeAreaView className="bg-slate-100">
-      <MultiStepForm/>
+      <MultiStepForm
+        steps={() => [NameField]}
+      />
       {/* <ScrollView
         className="bg-slate-100"
         automaticallyAdjustKeyboardInsets
