@@ -22,6 +22,13 @@ const VerifyEmail = () => {
     }, 1000);
   }
 
+  const resendSubmit = () => {
+    setIsSubmitting(true)
+    setTimeout(() => {
+      setIsSubmitting(false)
+    }, 1000);
+  }
+
   return (
     <SafeAreaView className="h-full">
       <ScrollView
@@ -57,7 +64,7 @@ const VerifyEmail = () => {
             <View className="flex-row items-center justify-center mt-4">
               <Text>Do not receive code?</Text>
               <Button
-                onPress={submit}
+                onPress={resendSubmit}
                 title="Resend"
                 color="#26a69a"
                 isSubmitting={isSubmitting}
