@@ -209,6 +209,9 @@ const Onboarding = () => {
 
   const Review = () => (
     <View>
+      <Text className="font-pregular text-center mb-4">
+        Please review your information.
+      </Text>
       <ReviewItem title="First Name" value={form.firstName}/>
       <ReviewItem title="Middle Name" value={form.middleName}/>
       <ReviewItem title="Last Name" value={form.lastName}/>
