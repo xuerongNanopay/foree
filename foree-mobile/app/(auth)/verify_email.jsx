@@ -9,7 +9,7 @@ import FormField from '../../components/FormField'
 
 const VerifyEmail = () => {
   const [form, setForm] = useState({
-    verifyCode: ''
+    code: ''
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -43,10 +43,10 @@ const VerifyEmail = () => {
 
           <View className="px-2 mt-4">
             <FormField
-              value={form.verifyCode}
+              value={form.code}
               handleChangeText={(e) => setForm({
                 ...form,
-                verifyCode:e
+                code:e
               })}
               inputStyles="text-center"
               variant="flat"

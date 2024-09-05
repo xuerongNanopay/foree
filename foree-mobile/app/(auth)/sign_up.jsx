@@ -11,7 +11,6 @@ const SignUp = () => {
   const [form, setForm] = useState({
     email: '',
     password: '',
-    rePassword: ''
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)

@@ -116,4 +116,4 @@ export default {
   PasswdMinEightOneLetterOneNumberOneSpecial,
   PasswdMinEightOneUpperOneLowerOneNumber,
   PasswdMinEightOneUpperOneLowerOneNumberOneSepcia
-};
+}
