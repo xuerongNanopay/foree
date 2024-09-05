@@ -1,5 +1,5 @@
 import { View, Text, ScrollView } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import CustomButton from './CustomButton'
 
 const MultiStepForm = ({
@@ -10,17 +10,22 @@ const MultiStepForm = ({
   steps = () => [],
   isSubmitting=false
 }) => {
+  const scrollRef = useRef()
   const formStep = steps()
   const [curIdx, setCurIdx] = useState(0)
   const [isFirst, setIsFirst] = useState(curIdx===0)
   const [isLast, setIsLast] =  useState(curIdx===formStep.length-1)
-  const [progress, setProgress] = useState(curIdx+1/formStep.length)
+  const [progress, setProgress] = useState((curIdx+1)/formStep.length)
   const [progressCss, setProgressCss] = useState('-100%')
 
   useEffect(() => {
     setIsFirst(curIdx===0)
     setIsLast(curIdx===formStep.length-1)
-    setProgress(curIdx+1/formStep.length)
+    setProgress((curIdx+1)/formStep.length)
+    scrollRef.current?.scrollTo({
+      y: 0,
+      animated: false,
+    })
   }, [curIdx])
 
   useEffect(()=>{
@@ -46,11 +51,9 @@ const MultiStepForm = ({
       <ScrollView
         className="h-full"
         automaticallyAdjustKeyboardInsets
+        ref={scrollRef}
       >
-        <View>
-
-        </View>
-        <View className="px-2">
+        <View className="px-2 pb-4">
           {
             formStep[curIdx].formView()
           }

@@ -215,6 +215,12 @@ const Onboarding = () => {
     </View>
   )
 
+  const Review = () => {
+    <View>
+      <Text className="text-lg font-pbold text-center m-4">Review</Text>
+    </View>
+  }
+
   const OnboardingFlow = [
     {
       formView: NameField,
@@ -230,6 +236,12 @@ const Onboarding = () => {
     },
     {
       formView: PersonalDetailField,
+      canGoNext: () => {
+        return true
+      }
+    },
+    {
+      formView: Review,
       canGoNext: () => {
         return true
       }
