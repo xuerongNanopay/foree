@@ -5,7 +5,7 @@ var Countires = map[string]Country{
 		Code:  "CA",
 		Code3: "CAN",
 		Num:   "124",
-		Name:  "Canadian",
+		Name:  "Canada",
 	},
 	"PK": {
 		Code:  "PK",
