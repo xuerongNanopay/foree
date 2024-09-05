@@ -37,13 +37,16 @@ const OnboardingScheme = Joi.object({
   address1: Joi.string().required(),
   address2: Joi.string(),
   city: Joi.string().required(),
-  province: Joi.string.required(),
-  country: Joi.string.required(),
-  phoneNumber: Joi.string.required(),
+  province: Joi.string().required().custom((value, helper) => {
+    console.log("Onboarding Scheme", helper.original)
+    return true
+  }),
+  country: Joi.string().required(),
+  phoneNumber: Joi.string().required(),
   dob: fieldScheme.DateOnlyScheme({}),
-  nationality: Joi.string.required(),
-  identificationType: Joi.string.required(),
-  identificationValue: Joi.string.required(),
+  nationality: Joi.string().required(),
+  identificationType: Joi.string().required(),
+  identificationValue: Joi.string().required(),
 })
 
 

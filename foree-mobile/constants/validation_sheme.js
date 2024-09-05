@@ -1,4 +1,5 @@
 import Joi from 'joi'
+import Countries from './country'
 
 const internationalNameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžæÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
 
@@ -100,12 +101,30 @@ const PasswdMinEightOneUpperOneLowerOneNumber = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)
 // Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character
 const PasswdMinEightOneUpperOneLowerOneNumberOneSepcia = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
 
-const PasswordScheme =({
+const PasswordScheme = ({
   required=true,
   passwdLevel=PasswdMinFourOneLetterOneNumber
 }) => {
 
   const ret = Joi.string().regex(passwdLevel)
+  return required ? ret.required() : ret
+}
+
+const PostalCodeScheme = ({
+  required=true,
+  countryCode,
+}) => {
+
+  const ret = Joi.string().regex(Countries[countryCode].postalCodeRegex)
+  return required ? ret.required() : ret
+}
+
+const PhoneNumber = ({
+  required=true,
+  countryCode,
+}) => {
+
+  const ret = Joi.string().regex(Countries[countryCode].phoneRegex)
   return required ? ret.required() : ret
 }
 
@@ -121,6 +140,8 @@ export default {
   FloatScheme,
   PositiveFloatScheme,
   PasswordScheme,
+  PostalCodeScheme,
+  PhoneNumber,
   PasswdMinFourOneLetterOneNumber,
   PasswdMinEightOneLetterOneNumber,
   PasswdMinEightOneLetterOneNumberOneSpecial,

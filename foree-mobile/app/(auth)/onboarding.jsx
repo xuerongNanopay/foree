@@ -3,6 +3,8 @@ import { SafeAreaView } from 'react-native'
 import React, { useState } from 'react'
 import MultiStepForm from '../../components/MultiStepForm'
 import FormField from '../../components/FormField'
+import Countries from '../../constants/country'
+import Regions from '../../constants/region'
 
 const FieldItem = ({
   title,
