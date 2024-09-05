@@ -13,18 +13,18 @@ import (
 const (
 	sQLEmailPasswdInsert = `
 		INSERT INTO email_passwd(	 
-			u.status, u.email, u.passwd, u.verify_code, u.owner_id
-		) VALUES (?,?,?,?)
+			u.status, u.email, u.username, u.passwd, u.verify_code, u.owner_id
+		) VALUES (?,?,?,?,?)
 	`
 	sQLEmailPasswdUpdateByEmail = `
 		UPDATE email_passwd SET 
-			status = ?, passwd = ?, verify_code = ?, verify_code_expired_at = ?, retrieve_token = ?, retrieve_token_expired_at = ?
+			status = ?, passwd = ?, verify_code = ?, verify_code_expired_at = ?, login_attempts = ?, retrieve_token = ?, retrieve_token_expired_at = ?
 		WHERE email = ?
 	`
 	sQLEmailPasswdGetUniqueById = `
 		SELECT 
-			u.id, u.email, u.passwd, u.status,
-			u.verify_code, u.verify_code_expired_at,
+			u.id, u.email, u.username, u.passwd, u.status,
+			u.verify_code, u.verify_code_expired_at, u.login_attempts,
 			u.retrieve_token, u.retrieve_token_expired_at,
 			u.owner_id, u.created_at, u.updated_at
 		FROM email_passwd as u 
@@ -32,8 +32,8 @@ const (
 `
 	sQLEmailPasswdGetUniqueByEmail = `
 		SELECT 
-			u.id, u.email, u.passwd, u.status,
-			u.verify_code, u.verify_code_expired_at,
+			u.id, u.email, u.username, u.passwd, u.status,
+			u.verify_code, u.verify_code_expired_at, u.login_attempts,
 			u.retrieve_token, u.retrieve_token_expired_at,
 			u.owner_id, u.created_at, u.updated_at
 		FROM email_passwd as u 
@@ -41,8 +41,8 @@ const (
 	`
 	sQLEmailPasswdGetAll = `
 		SELECT 
-			u.id, u.email, u.passwd, u.status,
-			u.verify_code, u.verify_code_expired_at,
+			u.id, u.email, u.username, u.passwd, u.status,
+			u.verify_code, u.verify_code_expired_at, u.login_attempts,
 			u.retrieve_token, u.retrieve_token_expired_at,
 			u.owner_id, u.created_at, u.updated_at
 		FROM email_passwd as u
@@ -63,11 +63,13 @@ type EmailPasswd struct {
 	ID                     int64             `json:"id"`
 	Status                 EmailPasswdStatus `json:"status"`
 	Email                  string            `json:"email"`
+	Username               string            `json:"username"`
 	Passwd                 string            `json:"-"`
 	VerifyCode             string            `json:"-"`
 	VerifyCodeExpiredAt    time.Time         `json:"verifyCodeExpiredAt"`
 	RetrieveToken          string            `json:"-"`
 	RetrieveTokenExpiredAt time.Time         `json:"retrieveTokenExpiredAt"`
+	LoginAttempts          int32             `json:"loginAttempts"`
 	OwnerId                int64             `json:"ownerId"`
 	CreatedAt              time.Time         `json:"createdAt"`
 	UpdatedAt              time.Time         `json:"updatedAt"`
@@ -92,6 +94,7 @@ func (repo *EmailPasswdRepo) InsertEmailPasswd(ctx context.Context, ep EmailPass
 			sQLEmailPasswdInsert,
 			ep.Status,
 			ep.Email,
+			ep.Username,
 			ep.Passwd,
 			ep.VerifyCode,
 			ep.OwnerId,
@@ -101,6 +104,7 @@ func (repo *EmailPasswdRepo) InsertEmailPasswd(ctx context.Context, ep EmailPass
 			sQLEmailPasswdInsert,
 			ep.Status,
 			ep.Email,
+			ep.Username,
 			ep.Passwd,
 			ep.VerifyCode,
 			ep.OwnerId,
@@ -129,6 +133,7 @@ func (repo *EmailPasswdRepo) UpdateEmailPasswdByEmail(ctx context.Context, ep Em
 			ep.Passwd,
 			ep.VerifyCode,
 			ep.VerifyCodeExpiredAt,
+			ep.LoginAttempts,
 			ep.RetrieveToken,
 			ep.RetrieveTokenExpiredAt,
 			ep.Email,
@@ -140,6 +145,7 @@ func (repo *EmailPasswdRepo) UpdateEmailPasswdByEmail(ctx context.Context, ep Em
 			ep.Passwd,
 			ep.VerifyCode,
 			ep.VerifyCodeExpiredAt,
+			ep.LoginAttempts,
 			ep.RetrieveToken,
 			ep.RetrieveTokenExpiredAt,
 			ep.Email,
@@ -231,6 +237,7 @@ func scanRowIntoEmailPasswd(rows *sql.Rows) (*EmailPasswd, error) {
 		&p.ID,
 		&p.Status,
 		&p.Email,
+		&p.Username,
 		&p.Passwd,
 		&p.VerifyCode,
 		&p.VerifyCodeExpiredAt,
