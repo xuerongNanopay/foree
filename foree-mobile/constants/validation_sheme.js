@@ -1,4 +1,4 @@
-import Joi from 'joi'
+import { number, string } from 'yup'
 import Countries from './country'
 
 const internationalNameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžæÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
@@ -6,7 +6,7 @@ const internationalNameRegex = /^[a-zA-Zàáâäãåąčćęèéêëėįìíîï
 const NameScheme = ({
   required=true
 }) => {
-  const ret = Joi.string().regex(/^[a-z ,.'-]+$/i)
+  const ret = string().trim().matches(/^[a-z ,.'-]+$/i)
   return required ? ret.required() : ret
 }
 
@@ -15,15 +15,14 @@ const AlphanumNumberScheme = ({
   max=30,
   required=true
 }) => {
-  const ret = Joi.string().alphanum().min(min).max(max)
+  const ret = string().trim().alphanum().min(min).max(max)
   return required ? ret.required() : ret
 }
 
 const EmailScheme = ({
-  registerdTLD=true,
   required=true
 })=> {
-  const ret = Joi.string().email({ tlds: { allow: registerdTLD } })
+  const ret = string().email()
   return required ? ret.required() : ret
 }
 
@@ -32,7 +31,7 @@ const NumberOnlyScheme = ({
   max=30, 
   required=true
 }) => {
-  const ret = Joi.string().regex(/^\d+$/).min(min).max(max)
+  const ret = string().trim().matches(/^\d+$/).min(min).max(max)
   return required ? ret.required() : ret
 }
 
@@ -43,14 +42,14 @@ const AlphaOnlyScheme = ({
   required=true
 }) => {
   const regex = upperCaseOnly ? /^[A-Z]+$/ : /^[A-Za-z]+$/
-  const ret = Joi.string().regex(regex).min(min).max(max)
+  const ret = string().trim().matches(regex).min(min).max(max)
   return required ? ret.required() : ret
 }
 
 const DateOnlyScheme =({
   required=true
 }) => {
-  const ret = Joi.string().regex(/^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/)
+  const ret = string().trim().matches(/^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/)
   return required ? ret.required() : ret
 }
 
@@ -59,7 +58,7 @@ const IntegerScheme = ({
   max, 
   required=true
 }) => {
-  let ret = Joi.number().integer().max(max)
+  let ret = number().integer().max(max)
   ret = typeof(min) != "undefined" ? ret.min(min) : ret
   ret = typeof(max) != "undefined" ? ret.min(min) : ret
   return required ? ret.required() : ret
@@ -77,7 +76,7 @@ const FloatScheme = ({
   max, 
   required=true
 }) => {
-  let ret = Joi.number().integer().max(max)
+  let ret = number().integer().max(max)
   ret = typeof(min) != "undefined" ? ret.min(min) : ret
   ret = typeof(max) != "undefined" ? ret.min(min) : ret
   return required ? ret.required() : ret
@@ -106,7 +105,7 @@ const PasswordScheme = ({
   passwdLevel=PasswdMinFourOneLetterOneNumber
 }) => {
 
-  const ret = Joi.string().regex(passwdLevel)
+  const ret = string().trim().matches(passwdLevel)
   return required ? ret.required() : ret
 }
 
@@ -115,7 +114,7 @@ const PostalCodeScheme = ({
   countryCode,
 }) => {
 
-  const ret = Joi.string().regex(Countries[countryCode].postalCodeRegex)
+  const ret = string().trim().matches(Countries[countryCode].postalCodeRegex)
   return required ? ret.required() : ret
 }
 
@@ -124,7 +123,7 @@ const PhoneNumber = ({
   countryCode,
 }) => {
 
-  const ret = Joi.string().regex(Countries[countryCode].phoneRegex)
+  const ret = string().trim().matches(Countries[countryCode].phoneRegex)
   return required ? ret.required() : ret
 }
 

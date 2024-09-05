@@ -1,10 +1,11 @@
 import { View, Text, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import MultiStepForm from '../../components/MultiStepForm'
 import FormField from '../../components/FormField'
 import Countries from '../../constants/country'
 import Regions from '../../constants/region'
+import payload from '../../service/payload'
 
 const FieldItem = ({
   title,
@@ -58,6 +59,11 @@ const Onboarding = () => {
     identificationType: '',
     identificationValue: '',
   })
+
+  useEffect(() => {
+    const error = payload.OnboardingScheme.validate(form)
+    console.log(error)
+  }, [form])
 
   const submit = () => {
     setIsSubmitting(true)
