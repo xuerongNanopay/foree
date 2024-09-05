@@ -74,25 +74,19 @@ const Onboarding = () => {
         Please enter your full legal name so we can begin setting up your account
       </Text>
 
-      <FieldItem
-        title="First Name"
-        value={form.firstName}
+      <FieldItem title="First Name" value={form.firstName}
         handleChangeText={(e) => setForm({
           ...form,
           firstName:e
         })}
       />
-      <FieldItem
-        title="Middle Name"
-        value={form.middleName}
+      <FieldItem title="Middle Name" value={form.middleName}
         handleChangeText={(e) => setForm({
           ...form,
           middleName:e
         })}
       />
-      <FieldItem
-        title="Last Name"
-        value={form.lastName}
+      <FieldItem title="Last Name" value={form.lastName}
         handleChangeText={(e) => setForm({
           ...form,
           lastName:e
@@ -108,57 +102,43 @@ const Onboarding = () => {
         We require this information to continue setting up your Foree Remittance account
       </Text>
 
-      <FieldItem
-        title="Address Line 1"
-        value={form.addressLine1}
+      <FieldItem title="Address Line 1" value={form.addressLine1}
         handleChangeText={(e) => setForm({
           ...form,
           addressLine1:e
         })}
       />
-      <FieldItem
-        title="Address Line 2"
-        value={form.addressLine2}
+      <FieldItem title="Address Line 2" value={form.addressLine2}
         handleChangeText={(e) => setForm({
           ...form,
           addressLine2:e
         })}
       />
-      <FieldItem
-        title="City"
-        value={form.city}
+      <FieldItem title="City" value={form.city}
         handleChangeText={(e) => setForm({
           ...form,
           city:e
         })}
       />
-      <FieldItem
-        title="Province"
-        value={form.province}
+      <FieldItem title="Province" value={form.province}
         handleChangeText={(e) => setForm({
           ...form,
           province:e
         })}
       />
-      <FieldItem
-        title="Country"
-        value={form.country}
+      <FieldItem title="Country" value={form.country}
         handleChangeText={(e) => setForm({
           ...form,
           country:e
         })}
       />
-      <FieldItem
-        title="Postal Code"
-        value={form.postalCode}
+      <FieldItem title="Postal Code" value={form.postalCode}
         handleChangeText={(e) => setForm({
           ...form,
           postalCode:e
         })}
       />
-      <FieldItem
-        title="Phone Number"
-        value={form.phoneNumber}
+      <FieldItem title="Phone Number" value={form.phoneNumber}
         handleChangeText={(e) => setForm({
           ...form,
           phoneNumber:e
@@ -174,41 +154,31 @@ const Onboarding = () => {
       <Text className="font-pregular text-center mb-4">
         Almost done! Infomation below is requested by xxxxx xxxxx of xxxxxxx, our Foree Remittance payout parter, inorder to process your transfers under ...... regulatory guidelines
       </Text>
-      <FieldItem
-        title="Date of Birth"
-        value={form.dob}
+      <FieldItem title="Date of Birth" value={form.dob}
         handleChangeText={(e) => setForm({
           ...form,
           dob:e
         })}
       />
-      <FieldItem
-        title="Place of Birth"
-        value={form.pob}
+      <FieldItem title="Place of Birth" value={form.pob}
         handleChangeText={(e) => setForm({
           ...form,
           pob:e
         })}
       />
-      <FieldItem
-        title="Nationality"
-        value={form.nationality}
+      <FieldItem title="Nationality" value={form.nationality}
         handleChangeText={(e) => setForm({
           ...form,
           nationality:e
         })}
       />
-      <FieldItem
-        title="Identification Document Type"
-        value={form.identificationType}
+      <FieldItem title="Identification Document Type" value={form.identificationType}
         handleChangeText={(e) => setForm({
           ...form,
           identificationType:e
         })}
       />
-      <FieldItem
-        title="Identification Number"
-        value={form.identificationValue}
+      <FieldItem title="Identification Number" value={form.identificationValue}
         handleChangeText={(e) => setForm({
           ...form,
           identificationValue:e
@@ -220,70 +190,21 @@ const Onboarding = () => {
   const Review = () => (
     <View>
       <Text className="text-lg font-pbold text-center m-4">Review</Text>
-      <ReviewItem
-        title="First Name"
-        value={form.firstName}
-        handleChangeText={(e) => setForm({
-          ...form,
-          firstName:e
-        })}
-      />
-      <ReviewItem
-        title="Middle Name"
-        value={form.middleName}
-      />
-      <ReviewItem
-        title="Last Name"
-        value={form.lastName}
-      />
-      <ReviewItem
-        title="Address Line 1"
-        value={form.addressLine1}
-      />
-      <ReviewItem
-        title="Address Line 2"
-        value={form.addressLine2}
-      />
-      <ReviewItem
-        title="City"
-        value={form.city}
-      />
-      <ReviewItem
-        title="Province"
-        value={form.province}
-      />
-      <ReviewItem
-        title="Country"
-        value={form.country}
-      />
-      <ReviewItem
-        title="Postal Code"
-        value={form.postalCode}
-      />
-      <ReviewItem
-        title="Phone Number"
-        value={form.phoneNumber}
-      />
-      <ReviewItem
-        title="Date of Birth"
-        value={form.dob}
-      />
-      <ReviewItem
-        title="Place of Birth"
-        value={form.pob}
-      />
-      <ReviewItem
-        title="Nationality"
-        value={form.nationality}
-      />
-      <ReviewItem
-        title="Identification Document Type"
-        value={form.identificationType}
-      />
-      <ReviewItem
-        title="Identification Number"
-        value={form.identificationValue}
-      />
+      <ReviewItem title="First Name" value={form.firstName}/>
+      <ReviewItem title="Middle Name" value={form.middleName}/>
+      <ReviewItem title="Last Name" value={form.lastName}/>
+      <ReviewItem title="Address Line 1" value={form.addressLine1}/>
+      <ReviewItem title="Address Line 2" value={form.addressLine2}/>
+      <ReviewItem title="City" value={form.city}/>
+      <ReviewItem title="Province" value={form.province}/>
+      <ReviewItem title="Country" value={form.country}/>
+      <ReviewItem title="Postal Code" value={form.postalCode}/>
+      <ReviewItem title="Phone Number" value={form.phoneNumber}/>
+      <ReviewItem title="Date of Birth" value={form.dob}/>
+      <ReviewItem title="Place of Birth" value={form.pob}/>
+      <ReviewItem title="Nationality" value={form.nationality}/>
+      <ReviewItem title="Identification Document Type" value={form.identificationType}/>
+      <ReviewItem title="Identification Number" value={form.identificationValue}/>
     </View>
   )
 
