@@ -38,6 +38,7 @@ const ReviewItem = ({
 
 const Onboarding = () => {
 
+  const [errors, setErrors] = useState({});
   const [form, setForm] = useState({
     firstName: '',
     middleName: '',
