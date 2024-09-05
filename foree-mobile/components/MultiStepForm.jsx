@@ -6,7 +6,9 @@ const MultiStepForm = ({
   containerStyle,
   showProgress=true,
   submitTintTitle = 'Submit',
-  steps = () => []
+  onSumbit = () => {},
+  steps = () => [],
+  isSubmitting=false
 }) => {
   const formStep = steps()
   const [curIdx, setCurIdx] = useState(0)
@@ -57,6 +59,7 @@ const MultiStepForm = ({
               !isFirst ?
               <CustomButton
                 title={"Previous"}
+                isLoading={isSubmitting}
                 handlePress={()=>{setCurIdx(curIdx-1)}}
                 containerStyles="mb-2"
                 variant="bordered"
@@ -67,6 +70,7 @@ const MultiStepForm = ({
               !isLast ? 
               <CustomButton
                 title={"Next"}
+                isLoading={isSubmitting}
                 handlePress={()=>{setCurIdx(curIdx+1)}}
                 containerStyles="mb-2"
                   // isLoading={isSubmitting}
@@ -76,7 +80,8 @@ const MultiStepForm = ({
               isLast ? 
               <CustomButton
                 title={submitTintTitle}
-                handlePress={()=>{}}
+                isLoading={isSubmitting}
+                handlePress={onSumbit}
                 containerStyles="mb-4"
                   // isLoading={isSubmitting}
               /> : null

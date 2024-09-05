@@ -18,7 +18,21 @@ const Onboarding = () => {
     country: 'Canada',
     postalCode: '',
     phoneNumber: '',
+    dob: '',
+    pob: '',
+    nationality: '',
+    identificationType: '',
+    identificationValue: '',
   })
+
+  const submit = () => {
+    setIsSubmitting(true)
+    setTimeout(() => {
+      setIsSubmitting(false)
+      console.log(form)
+      // router.replace("/verify_email")
+    }, 1000);
+  }
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -142,6 +156,65 @@ const Onboarding = () => {
     </View>
   )
 
+  const PersonalDetailField = () => (
+    <View>
+      <Text className="text-lg font-pbold text-center m-4">Personal Details</Text>
+      <Text className="font-pregular text-center mb-4">
+        Almost done! Infomation below is requested by xxxxx xxxxx of xxxxxxx, our Foree Remittance payout parter, inorder to process your transfers under ...... regulatory guidelines
+      </Text>
+      <FormField
+        title="Date of Birth"
+        value={form.dob}
+        handleChangeText={(e) => setForm({
+          ...form,
+          dob:e
+        })}
+        keyboardType="ascii-capable"
+        otherStyles="mt-2"
+      />
+      <FormField
+        title="Place of Birth"
+        value={form.pob}
+        handleChangeText={(e) => setForm({
+          ...form,
+          pob:e
+        })}
+        keyboardType="ascii-capable"
+        otherStyles="mt-2"
+      />
+      <FormField
+        title="Nationality"
+        value={form.nationality}
+        handleChangeText={(e) => setForm({
+          ...form,
+          nationality:e
+        })}
+        keyboardType="ascii-capable"
+        otherStyles="mt-2"
+      />
+      <FormField
+        title="Identification Document Type"
+        value={form.identificationType}
+        handleChangeText={(e) => setForm({
+          ...form,
+          identificationType:e
+        })}
+        keyboardType="ascii-capable"
+        otherStyles="mt-2"
+      />
+      <FormField
+        title="Identification Number"
+        value={form.identificationValue}
+        handleChangeText={(e) => setForm({
+          ...form,
+          identificationValue:e
+        })}
+        keyboardType="ascii-capable"
+        otherStyles="mt-2"
+      />
+    </View>
+  )
+
   const OnboardingFlow = [
     {
       formView: NameField,
@@ -154,6 +227,12 @@ const Onboarding = () => {
       canGoNext: () => {
         return true
       }
+    },
+    {
+      formView: PersonalDetailField,
+      canGoNext: () => {
+        return true
+      }
     }
   ]
 
@@ -161,6 +240,7 @@ const Onboarding = () => {
     <SafeAreaView className="bg-slate-100">
       <MultiStepForm
         steps={() => OnboardingFlow}
+        onSumbit={submit}
       />
       {/* <ScrollView
         className="bg-slate-100"
