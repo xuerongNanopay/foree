@@ -57,6 +57,7 @@ const MultiStepForm = ({
         <ScrollView
           className=""
           automaticallyAdjustKeyboardInsets
+          showsVerticalScrollIndicator={false}
           ref={scrollRef}
         >
           {
