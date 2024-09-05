@@ -16,6 +16,7 @@ const FormField = ({
   handleChangeText, 
   otherStyles,
   inputStyles,
+  inputContainerStyles,
   variant='bordered',
   keyboardType='default', 
   editable=true,
@@ -31,7 +32,7 @@ const FormField = ({
         className={`
           w-full h-12 px-4 bg-slate-100 ${variants[variant] ?? variants.bordered}
           border-slate-400 focus:border-secondary-200
-          items-center flex-row
+          items-center flex-row ${inputContainerStyles}
         `}
       >
         <TextInput

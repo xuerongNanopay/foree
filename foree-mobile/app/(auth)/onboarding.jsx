@@ -4,6 +4,37 @@ import React, { useState } from 'react'
 import MultiStepForm from '../../components/MultiStepForm'
 import FormField from '../../components/FormField'
 
+const FieldItem = ({
+  title,
+  value,
+  handleChangeText,
+  keyboardType='ascii-capable'
+}) => (
+  <FormField
+    title={title}
+    value={value}
+    handleChangeText={handleChangeText}
+    keyboardType={keyboardType}
+    otherStyles="mt-2"
+  />
+)
+
+const ReviewItem = ({
+  title,
+  value,
+}) => (
+  <FormField
+    title={title}
+    value={value}
+    handleChangeText={() => {}}
+    keyboardType="ascii-capable"
+    otherStyles="mt-2"
+    variant="flat"
+    inputStyles="text-slate-500"
+    inputContainerStyles="border-slate-700 h-7"
+    editable={false}
+  />
+)
 
 const Onboarding = () => {
 
@@ -43,35 +74,29 @@ const Onboarding = () => {
         Please enter your full legal name so we can begin setting up your account
       </Text>
 
-      <FormField
+      <FieldItem
         title="First Name"
         value={form.firstName}
         handleChangeText={(e) => setForm({
           ...form,
           firstName:e
         })}
-        keyboardType="ascii-capable"
-        otherStyles="mt-2"
       />
-      <FormField
+      <FieldItem
         title="Middle Name"
         value={form.middleName}
         handleChangeText={(e) => setForm({
           ...form,
           middleName:e
         })}
-        keyboardType="ascii-capable"
-        otherStyles="mt-2"
       />
-      <FormField
+      <FieldItem
         title="Last Name"
         value={form.lastName}
         handleChangeText={(e) => setForm({
           ...form,
           lastName:e
         })}
-        otherStyles="mt-2"
-        keyboardType="ascii-capable"
       />
     </View>
   )
@@ -83,75 +108,62 @@ const Onboarding = () => {
         We require this information to continue setting up your Foree Remittance account
       </Text>
 
-      <FormField
+      <FieldItem
         title="Address Line 1"
         value={form.addressLine1}
         handleChangeText={(e) => setForm({
           ...form,
           addressLine1:e
         })}
-        keyboardType="ascii-capable"
-        otherStyles="mt-2"
       />
-      <FormField
+      <FieldItem
         title="Address Line 2"
         value={form.addressLine2}
         handleChangeText={(e) => setForm({
           ...form,
           addressLine2:e
         })}
-        keyboardType="ascii-capable"
-        otherStyles="mt-2"
       />
-      <FormField
+      <FieldItem
         title="City"
         value={form.city}
         handleChangeText={(e) => setForm({
           ...form,
           city:e
         })}
-        keyboardType="ascii-capable"
-        otherStyles="mt-2"
       />
-      <FormField
+      <FieldItem
         title="Province"
         value={form.province}
         handleChangeText={(e) => setForm({
           ...form,
           province:e
         })}
-        keyboardType="ascii-capable"
-        otherStyles="mt-2"
       />
-      <FormField
+      <FieldItem
         title="Country"
         value={form.country}
         handleChangeText={(e) => setForm({
           ...form,
           country:e
         })}
-        keyboardType="ascii-capable"
-        otherStyles="mt-2"
       />
-      <FormField
+      <FieldItem
         title="Postal Code"
         value={form.postalCode}
         handleChangeText={(e) => setForm({
           ...form,
           postalCode:e
         })}
-        otherStyles="mt-2"
-        keyboardType="ascii-capable"
       />
-      <FormField
+      <FieldItem
         title="Phone Number"
         value={form.phoneNumber}
         handleChangeText={(e) => setForm({
           ...form,
           phoneNumber:e
         })}
-        otherStyles="mt-2"
-        keyboardType="ascii-capable"
+        keyboardType="phone-pad"
       />
     </View>
   )
@@ -162,74 +174,47 @@ const Onboarding = () => {
       <Text className="font-pregular text-center mb-4">
         Almost done! Infomation below is requested by xxxxx xxxxx of xxxxxxx, our Foree Remittance payout parter, inorder to process your transfers under ...... regulatory guidelines
       </Text>
-      <FormField
+      <FieldItem
         title="Date of Birth"
         value={form.dob}
         handleChangeText={(e) => setForm({
           ...form,
           dob:e
         })}
-        keyboardType="ascii-capable"
-        otherStyles="mt-2"
       />
-      <FormField
+      <FieldItem
         title="Place of Birth"
         value={form.pob}
         handleChangeText={(e) => setForm({
           ...form,
           pob:e
         })}
-        keyboardType="ascii-capable"
-        otherStyles="mt-2"
       />
-      <FormField
+      <FieldItem
         title="Nationality"
         value={form.nationality}
         handleChangeText={(e) => setForm({
           ...form,
           nationality:e
         })}
-        keyboardType="ascii-capable"
-        otherStyles="mt-2"
       />
-      <FormField
+      <FieldItem
         title="Identification Document Type"
         value={form.identificationType}
         handleChangeText={(e) => setForm({
           ...form,
           identificationType:e
         })}
-        keyboardType="ascii-capable"
-        otherStyles="mt-2"
       />
-      <FormField
+      <FieldItem
         title="Identification Number"
         value={form.identificationValue}
         handleChangeText={(e) => setForm({
           ...form,
           identificationValue:e
         })}
-        keyboardType="ascii-capable"
-        otherStyles="mt-2"
       />
     </View>
-  )
-
-  const ReviewItem = ({
-    title,
-    value,
-  }) => (
-    <FormField
-      title={title}
-      value={value}
-      handleChangeText={() => {}}
-      keyboardType="ascii-capable"
-      otherStyles="mt-2"
-      variant="flat"
-      inputStyles="text-slate-500"
-      inputContainerStyles="border-slate-700 h-7"
-      editable={false}
-    />
   )
 
   const Review = () => (
