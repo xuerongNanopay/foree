@@ -43,8 +43,8 @@ const Onboarding = () => {
     firstName: '',
     middleName: '',
     lastName: '',
-    addressLine1: '',
-    addressLine2: '',
+    address1: '',
+    address2: '',
     city: '',
     province: '',
     country: 'Canada',
@@ -111,16 +111,16 @@ const Onboarding = () => {
         We require this information to continue setting up your Foree Remittance account
       </Text>
 
-      <FieldItem title="Address Line 1" value={form.addressLine1}
+      <FieldItem title="Address Line 1" value={form.address1}
         handleChangeText={(e) => setForm({
           ...form,
-          addressLine1:e
+          address1:e
         })}
       />
-      <FieldItem title="Address Line 2" value={form.addressLine2}
+      <FieldItem title="Address Line 2" value={form.address2}
         handleChangeText={(e) => setForm({
           ...form,
-          addressLine2:e
+          address2:e
         })}
       />
       <FieldItem title="City" value={form.city}
@@ -215,8 +215,8 @@ const Onboarding = () => {
       <ReviewItem title="First Name" value={form.firstName}/>
       <ReviewItem title="Middle Name" value={form.middleName}/>
       <ReviewItem title="Last Name" value={form.lastName}/>
-      <ReviewItem title="Address Line 1" value={form.addressLine1}/>
-      <ReviewItem title="Address Line 2" value={form.addressLine2}/>
+      <ReviewItem title="Address Line 1" value={form.address1}/>
+      <ReviewItem title="Address Line 2" value={form.address2}/>
       <ReviewItem title="City" value={form.city}/>
       <ReviewItem title="Province" value={form.province}/>
       <ReviewItem title="Country" value={form.country}/>

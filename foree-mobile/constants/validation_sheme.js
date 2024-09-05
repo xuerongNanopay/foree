@@ -1,5 +1,14 @@
 import Joi from 'joi'
 
+const internationalNameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžæÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
+
+const NameScheme = ({
+  required=true
+}) => {
+  const ret = Joi.string().regex(/^[a-z ,.'-]+$/i)
+  return required ? ret.required() : ret
+}
+
 const AlphanumNumberScheme = ({
   min=8,
   max=30,
@@ -101,6 +110,7 @@ const PasswordScheme =({
 }
 
 export default {
+  NameScheme,
   AlphanumNumberScheme,
   EmailScheme,
   NumberOnlyScheme,
