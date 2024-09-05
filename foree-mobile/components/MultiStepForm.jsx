@@ -49,6 +49,11 @@ const MultiStepForm = ({
         ) : null
       }
       <View className="h-full px-2 pb-4">
+        <View className="m-4">
+          {
+            formStep[curIdx].titleView()
+          }
+        </View>
         <ScrollView
           className=""
           automaticallyAdjustKeyboardInsets

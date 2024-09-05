@@ -68,9 +68,13 @@ const Onboarding = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const NameFieldTitle = () => (
+    <View>
+      <Text className="text-lg font-pbold text-center">Let's Get to Know You!</Text>
+    </View>
+  )
   const NameField = () => (
     <View>
-      <Text className="text-lg font-pbold text-center m-4">Let's Get to Know You!</Text>
       <Text className="font-pregular text-center mb-4">
         Please enter your full legal name so we can begin setting up your account
       </Text>
@@ -96,9 +100,13 @@ const Onboarding = () => {
     </View>
   )
 
+  const AddressFieldTitle = () => (
+    <View>
+      <Text className="text-lg font-pbold text-center">Your Residential Address and Phone Number</Text>
+    </View>
+  )
   const AddressField = () => (
     <View>
-      <Text className="text-lg font-pbold text-center m-4">Your Residential Address and Phone Number</Text>
       <Text className="font-pregular text-center mb-4">
         We require this information to continue setting up your Foree Remittance account
       </Text>
@@ -149,9 +157,14 @@ const Onboarding = () => {
     </View>
   )
 
+  const PersonalDetailFieldTitle = () => (
+    <View>
+      <Text className="text-lg font-pbold text-center">Personal Details</Text>
+    </View>
+  )
+
   const PersonalDetailField = () => (
     <View>
-      <Text className="text-lg font-pbold text-center m-4">Personal Details</Text>
       <Text className="font-pregular text-center mb-4">
         Almost done! Infomation below is requested by xxxxx xxxxx of xxxxxxx, our Foree Remittance payout parter, inorder to process your transfers under ...... regulatory guidelines
       </Text>
@@ -188,9 +201,14 @@ const Onboarding = () => {
     </View>
   )
 
+  const ReviewTitle = () => (
+    <View>
+      <Text className="text-lg font-pbold text-center">Review</Text>
+    </View>
+  )
+
   const Review = () => (
     <View>
-      <Text className="text-lg font-pbold text-center m-4">Review</Text>
       <ReviewItem title="First Name" value={form.firstName}/>
       <ReviewItem title="Middle Name" value={form.middleName}/>
       <ReviewItem title="Last Name" value={form.lastName}/>
@@ -211,24 +229,28 @@ const Onboarding = () => {
 
   const OnboardingFlow = [
     {
+      titleView: NameFieldTitle,
       formView: NameField,
       canGoNext: () => {
         return true
       }
     },
     {
+      titleView: AddressFieldTitle,
       formView: AddressField,
       canGoNext: () => {
         return true
       }
     },
     {
+      titleView: PersonalDetailFieldTitle,
       formView: PersonalDetailField,
       canGoNext: () => {
         return true
       }
     },
     {
+      titleView: ReviewTitle,
       formView: Review,
       canGoNext: () => {
         return true
@@ -241,6 +263,7 @@ const Onboarding = () => {
       <MultiStepForm
         steps={() => OnboardingFlow}
         onSumbit={submit}
+        containerStyle=""
       />
       {/* <ScrollView
         className="bg-slate-100"
