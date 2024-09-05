@@ -215,11 +215,92 @@ const Onboarding = () => {
     </View>
   )
 
-  const Review = () => {
+  const ReviewItem = ({
+    title,
+    value,
+  }) => (
+    <FormField
+      title={title}
+      value={value}
+      handleChangeText={() => {}}
+      keyboardType="ascii-capable"
+      otherStyles="mt-2"
+      variant="flat"
+      inputStyles="text-slate-500"
+      inputContainerStyles="border-slate-700 h-7"
+      editable={false}
+    />
+  )
+
+  const Review = () => (
     <View>
       <Text className="text-lg font-pbold text-center m-4">Review</Text>
+      <ReviewItem
+        title="First Name"
+        value={form.firstName}
+        handleChangeText={(e) => setForm({
+          ...form,
+          firstName:e
+        })}
+      />
+      <ReviewItem
+        title="Middle Name"
+        value={form.middleName}
+      />
+      <ReviewItem
+        title="Last Name"
+        value={form.lastName}
+      />
+      <ReviewItem
+        title="Address Line 1"
+        value={form.addressLine1}
+      />
+      <ReviewItem
+        title="Address Line 2"
+        value={form.addressLine2}
+      />
+      <ReviewItem
+        title="City"
+        value={form.city}
+      />
+      <ReviewItem
+        title="Province"
+        value={form.province}
+      />
+      <ReviewItem
+        title="Country"
+        value={form.country}
+      />
+      <ReviewItem
+        title="Postal Code"
+        value={form.postalCode}
+      />
+      <ReviewItem
+        title="Phone Number"
+        value={form.phoneNumber}
+      />
+      <ReviewItem
+        title="Date of Birth"
+        value={form.dob}
+      />
+      <ReviewItem
+        title="Place of Birth"
+        value={form.pob}
+      />
+      <ReviewItem
+        title="Nationality"
+        value={form.nationality}
+      />
+      <ReviewItem
+        title="Identification Document Type"
+        value={form.identificationType}
+      />
+      <ReviewItem
+        title="Identification Number"
+        value={form.identificationValue}
+      />
     </View>
-  }
+  )
 
   const OnboardingFlow = [
     {
