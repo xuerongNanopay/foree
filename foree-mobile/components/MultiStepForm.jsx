@@ -48,50 +48,50 @@ const MultiStepForm = ({
           </View>
         ) : null
       }
-      <ScrollView
-        className="h-full"
-        automaticallyAdjustKeyboardInsets
-        ref={scrollRef}
-      >
-        <View className="px-2 pb-4">
+      <View className="h-full px-2 pb-4">
+        <ScrollView
+          className=""
+          automaticallyAdjustKeyboardInsets
+          ref={scrollRef}
+        >
           {
             formStep[curIdx].formView()
           }
-          <View className="mt-10">
-            {
-              !isFirst ?
-              <CustomButton
-                title={"Previous"}
-                isLoading={isSubmitting}
-                handlePress={()=>{setCurIdx(curIdx-1)}}
-                containerStyles="mb-2"
-                variant="bordered"
-                  // isLoading={isSubmitting}
-              /> : null
-            }
-            {
-              !isLast ? 
-              <CustomButton
-                title={"Next"}
-                isLoading={isSubmitting}
-                handlePress={()=>{setCurIdx(curIdx+1)}}
-                containerStyles="mb-2"
-                  // isLoading={isSubmitting}
-              /> : null
-            }
-            {
-              isLast ? 
-              <CustomButton
-                title={submitTintTitle}
-                isLoading={isSubmitting}
-                handlePress={onSumbit}
-                containerStyles="mb-4"
-                  // isLoading={isSubmitting}
-              /> : null
-            }
-          </View>
+        </ScrollView>
+        <View className="mt-2 w-full flex flex-row justify-between">
+          {
+            !isFirst ?
+            <CustomButton
+              title={"< Previous"}
+              isLoading={isSubmitting}
+              handlePress={()=>{setCurIdx(curIdx-1)}}
+              containerStyles={"w-[49%]"}
+              variant="bordered"
+                // isLoading={isSubmitting}
+            /> : null
+          }
+          {
+            !isLast ? 
+            <CustomButton
+              title={"Next >"}
+              isLoading={isSubmitting}
+              handlePress={()=>{setCurIdx(curIdx+1)}}
+              containerStyles={isFirst ? "w-[100%]" : "w-[49%]"}
+                // isLoading={isSubmitting}
+            /> : null
+          }
+          {
+            isLast ? 
+            <CustomButton
+              title={submitTintTitle}
+              isLoading={isSubmitting}
+              handlePress={onSumbit}
+              containerStyles={isFirst ? "w-[100%]" : "w-[49%]"}
+                // isLoading={isSubmitting}
+            /> : null
+          }
         </View>
-      </ScrollView>
+      </View>
     </View>
   )
 }
