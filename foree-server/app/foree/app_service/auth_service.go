@@ -376,7 +376,8 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	return updateSession, nil
 }
 
-func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, transport.HError) {
+// TODO: Login protection on peak volume.
+func (a *AuthService) Login(ctx context.Context, req LoginReq) (*UserDTO, transport.HError) {
 	// Delete previous token if exists.
 	a.sessionRepo.Delete(req.SessionId)
 
@@ -384,38 +385,38 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
 
 	if err != nil {
-		logger.Logger.Error("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if ep == nil {
-		logger.Logger.Info("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
-		return nil, transport.NewFormError("Invaild signup", "email", "Invalid email")
+		logger.Logger.Warn("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
+		return nil, transport.NewFormError("Invaild signup", "email", "invalid email")
 	}
 
 	if ep.Status == auth.EPStatusDelete {
-		logger.Logger.Info("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` is in `%s` status", ep.Email, ep.Status))
-		return nil, transport.NewFormError("Invalid login request", "email", "email or password error")
+		logger.Logger.Warn("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` is in `%s` status", ep.Email, ep.Status))
+		return nil, transport.NewFormError("Invalid login request", "email", "invalid email")
 	}
 
 	if ep.Status == auth.EPStatusSuspend {
-		logger.Logger.Info("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` is in `%s` status", ep.Email, ep.Status))
+		logger.Logger.Warn("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` is in `%s` status", ep.Email, ep.Status))
 		return nil, transport.NewFormError("Invalid login request", "email", "your account is suspend. please contact us.")
 	}
 
 	if ep.LoginAttempts > maxLoginAttempts {
-		logger.Logger.Info("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` has try `%v` times", ep.Email, ep.LoginAttempts))
+		logger.Logger.Warn("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` has try `%v` times", ep.Email, ep.LoginAttempts))
 		return nil, transport.NewFormError("Invalid login request", "password", "max login attempts reached. please contact us.")
 	}
 
 	ok := auth.ComparePasswords(req.Password, []byte(ep.Passwd))
 	if !ok {
-		logger.Logger.Info("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", "invalid password")
+		logger.Logger.Warn("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "invalid password")
 		go func() {
 			newEP := *ep
 			newEP.LoginAttempts += 1
 			if err := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP); err != nil {
-				logger.Logger.Error("update login attempts error", "email", req.Email, "cause", err.Error())
+				logger.Logger.Error("Login_Attempts_Update", "email", req.Email, "cause", err.Error())
 			}
 		}()
 		return nil, transport.NewFormError("Invaild signup", "password", "Invalid password")
@@ -424,18 +425,24 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 	// Load user(user must exist, but not necessary to be active)
 	user, err := a.userRepo.GetUniqueUserById(ep.OwnerId)
 	if err != nil {
-		logger.Logger.Error("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
+	// User must exists
 	if user == nil {
-		logger.Logger.Error("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("owner `%v` no found", ep.OwnerId))
+		logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("owner `%v` no found", ep.OwnerId))
 		return nil, transport.NewInteralServerError("User `%v` do not exists", ep.OwnerId)
 	}
 
 	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
 	if er != nil {
-		logger.Logger.Error("login failed", "ip", loadRealIp(ctx), "email", req.Email, "user", user.ID, "cause", er.Error())
+		logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "user", user.ID, "cause", er.Error())
 		return nil, transport.WrapInteralServerError(er)
+	}
+	//User group must exists
+	if userGroup == nil {
+		logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("userGroup not found with owener `%v`", ep.OwnerId))
+		return nil, transport.NewInteralServerError("User `%v` do not exists", ep.OwnerId)
 	}
 
 	// Load permissions
@@ -453,28 +460,22 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 		RolePermissions: pers,
 	}
 
-	ip, ok := ctx.Value("ip").(string)
-	if ok {
-		newSession.Ip = ip
-	}
-
-	userAgent, ok := ctx.Value("userAgent").(string)
-	if ok {
-		newSession.UserAgent = userAgent
-	}
+	newSession.Ip = loadRealIp(ctx)
+	newSession.UserAgent = loadUserAgent(ctx)
 
 	sessionId, err := a.sessionRepo.InsertSession(newSession)
 	if err != nil {
+		logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprint("fail to insert session to session repo"))
 		return nil, transport.WrapInteralServerError(err)
 	}
-
-	//TODO: log user login.
-
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	if session == nil {
+		logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprint("fail to get session from session repo"))
 		return nil, transport.NewInteralServerError("sesson `%s` not found", sessionId)
 	}
-	return session, nil
+
+	logger.Logger.Info("Login_Success", loadRealIp(ctx), "email", req.Email, "userAgent", loadUserAgent(ctx))
+	return NewUserDTO(session), nil
 }
 
 // func (a *AuthService) ForgetPassword(ctx context.Context, email string) {
@@ -499,7 +500,7 @@ func (a *AuthService) GetUser(ctx context.Context, req transport.SessionReq) (*U
 		return nil, sErr
 	}
 
-	return NewUserDTO(session.User), nil
+	return NewUserDTO(session), nil
 }
 
 func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) transport.HError {

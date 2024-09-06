@@ -3,12 +3,10 @@ package foree_router
 import (
 	"github.com/gorilla/mux"
 	foree_service "xue.io/go-pay/app/foree/app_service"
-	"xue.io/go-pay/logger"
 )
 
 type AuthRouter struct {
 	authService *foree_service.AuthService
-	logger      *logger.Logger
 }
 
 func NewAuthRouter(authService *foree_service.AuthService) *AuthRouter {

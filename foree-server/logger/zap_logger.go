@@ -12,7 +12,7 @@ func NewZapLogger(level, outputPath string) (*ZapLogger, error) {
 	encoderCfg := zap.NewProductionEncoderConfig()
 	encoderCfg.TimeKey = "timestamp"
 	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
-	encoderCfg.MessageKey = "message"
+	encoderCfg.MessageKey = "event"
 	encoderCfg.LevelKey = "level"
 	encoderCfg.EncodeLevel = zapcore.CapitalLevelEncoder
 	//TODO: custom empty encode caller

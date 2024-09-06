@@ -153,21 +153,32 @@ func (q ForgetPasswordReq) Validate() *transport.BadRequestError {
 }
 
 // --------------- Response ------------------
+func NewUserDTO(session *auth.Session) *UserDTO {
+	ret := &UserDTO{
+		SessionId: session.ID,
+	}
 
-type UserDTO struct {
-	FirstName  string `json:"firstName,omitempty"`
-	MiddleName string `json:"middleName,omitempty"`
-	LastName   string `json:"lastName,omitempty"`
-	Status     string `json:"status,omitempty"`
-	AvatarUrl  string `json:"avatarUrl,omitempty"`
+	if session.EmailPasswd != nil {
+		ret.LoginStatus = session.EmailPasswd.Status
+	}
+
+	if session.User != nil {
+		ret.UserStatus = session.User.Status
+		ret.FirstName = session.User.FirstName
+		ret.MiddleName = session.User.MiddleName
+		ret.LastName = session.User.LastName
+		ret.AvatarUrl = session.User.AvatarUrl
+	}
+
+	return ret
 }
 
-func NewUserDTO(user *auth.User) *UserDTO {
-	return &UserDTO{
-		FirstName:  user.FirstName,
-		MiddleName: user.MiddleName,
-		LastName:   user.LastName,
-		Status:     string(user.Status),
-		AvatarUrl:  user.AvatarUrl,
-	}
+type UserDTO struct {
+	SessionId   string                 `json:"sessionId,omitempty"`
+	LoginStatus auth.EmailPasswdStatus `json:"loginStatus,omitempty"`
+	UserStatus  auth.UserStatus        `json:"userStatus,omitempty"`
+	FirstName   string                 `json:"firstName,omitempty"`
+	MiddleName  string                 `json:"middleName,omitempty"`
+	LastName    string                 `json:"lastName,omitempty"`
+	AvatarUrl   string                 `json:"avatarUrl,omitempty"`
 }
