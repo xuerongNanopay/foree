@@ -120,11 +120,12 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 
 	// Create EmailPasswd
 	id, err := a.emailPasswordRepo.InsertEmailPasswd(ctx, auth.EmailPasswd{
-		Email:      req.Email,
-		Passwd:     hashedPasswd,
-		Status:     auth.EPStatusWaitingVerify,
-		VerifyCode: auth.GenerateVerifyCode(),
-		OwnerId:    user.ID,
+		Email:               req.Email,
+		Passwd:              hashedPasswd,
+		Status:              auth.EPStatusWaitingVerify,
+		VerifyCode:          auth.GenerateVerifyCode(),
+		VerifyCodeExpiredAt: time.Now().Add(10 * time.Minute),
+		OwnerId:             user.ID,
 	})
 
 	if err != nil {
@@ -189,43 +190,44 @@ func (a *AuthService) allowVerifyEmail(sessionId string) (*auth.Session, transpo
 	return session, nil
 }
 
-func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*auth.Session, transport.HError) {
+func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*UserDTO, transport.HError) {
 	// Check Allow to VerifyEmail
 	session, err := a.allowVerifyEmail(req.SessionId)
 	if err != nil {
+		var userId int64
+		if session != nil {
+			userId = session.UserId
+		}
+		logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", userId, err.Error())
 		return nil, err
 	}
 
-	if session.EmailPasswd.VerifyCode != req.Code {
-		return nil, transport.NewFormError("Invalid VerifyEmail Requst", "verify code", "Do not match")
+	if session.EmailPasswd.VerifyCode != req.Code || session.EmailPasswd.VerifyCodeExpiredAt.After(time.Now()) {
+		logger.Logger.Warn("VerifyEmail_Fail", "userId", session.UserId, "cause", "verify code unmatch or expired")
+		return nil, transport.NewFormError("Invalid VerifyEmail Requst", "verifyCode", "please resend verify code")
 	}
 
 	// VerifyEmail and update EmailPasswd.
 	newEP := *session.EmailPasswd
 	newEP.Status = auth.EPStatusActive
-	// newEP.CodeVerifiedAt = time.Now()
+
 	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP)
 	if e != nil {
+		logger.Logger.Warn("VerifyEmail_Fail", "userId", session.UserId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(e)
-	}
-
-	ep, e := a.emailPasswordRepo.GetUniqueEmailPasswdById(newEP.ID)
-	if e != nil {
-		return nil, transport.WrapInteralServerError(e)
-	}
-	if ep == nil {
-		return nil, transport.NewInteralServerError("unable to get EmailPasswd with id: `%v`", newEP.ID)
 	}
 
 	// Update session
 	newSession := *session
-	newSession.EmailPasswd = ep
+	newSession.EmailPasswd = &newEP
 
 	session, e = a.sessionRepo.UpdateSession(newSession)
 	if e != nil {
+		logger.Logger.Warn("VerifyEmail_Fail", "userId", session.UserId, "cause", e.Error())
 		return nil, transport.WrapInteralServerError(e)
 	}
-	return session, nil
+	logger.Logger.Info("VerifyEmail_Success", "userId", session.UserId)
+	return NewUserDTO(session), nil
 }
 
 func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.SessionReq) (*auth.Session, transport.HError) {
