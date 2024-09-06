@@ -289,7 +289,7 @@ func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transpor
 	return session, nil
 }
 
-func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.Session, transport.HError) {
+func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserDTO, transport.HError) {
 	// Check allow to create user
 	session, err := a.allowCreateUser(req.SessionId)
 	if err != nil {
@@ -398,29 +398,33 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 		return nil, transport.WrapInteralServerError(sessionErr)
 	}
 
-	// Create default Interac Account for the user.
-	acc := account.InteracAccount{
-		FirstName:        session.User.FirstName,
-		MiddleName:       session.User.MiddleName,
-		LastName:         session.User.LastName,
-		Address1:         user.Address1,
-		Address2:         user.Address2,
-		City:             user.City,
-		Province:         user.Province,
-		Country:          user.Country,
-		PostalCode:       user.PostalCode,
-		PhoneNumber:      session.User.PhoneNumber,
-		Email:            session.User.Email,
-		OwnerId:          session.User.ID,
-		Status:           account.AccountStatusActive,
-		LatestActivityAt: time.Now(),
-	}
-	_, derr := a.interacAccountRepo.InsertInteracAccount(ctx, acc)
-	if derr != nil {
-		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", derr.Error())
-		return nil, transport.WrapInteralServerError(derr)
-	}
-	return updateSession, nil
+	go func() {
+		// Create default Interac Account for the user.
+		acc := account.InteracAccount{
+			FirstName:        session.User.FirstName,
+			MiddleName:       session.User.MiddleName,
+			LastName:         session.User.LastName,
+			Address1:         user.Address1,
+			Address2:         user.Address2,
+			City:             user.City,
+			Province:         user.Province,
+			Country:          user.Country,
+			PostalCode:       user.PostalCode,
+			PhoneNumber:      session.User.PhoneNumber,
+			Email:            session.User.Email,
+			OwnerId:          session.User.ID,
+			Status:           account.AccountStatusActive,
+			LatestActivityAt: time.Now(),
+		}
+		_, derr := a.interacAccountRepo.InsertInteracAccount(ctx, acc)
+		if derr != nil {
+			logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", derr.Error())
+		}
+	}()
+
+	go a.rewardOnboard(newUser)
+
+	return NewUserDTO(session), nil
 }
 
 // TODO: Login protection on peak volume.
