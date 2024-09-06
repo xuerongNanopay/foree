@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"xue.io/go-pay/constant"
 	"xue.io/go-pay/server/transport"
 	json_util "xue.io/go-pay/util/json"
 	reflect_util "xue.io/go-pay/util/reflect"
@@ -38,7 +39,9 @@ func RestGetWrapper[P any, Q any](
 			var herr transport.HError
 			herr = beforeProcess(r, req)
 			if herr == nil {
-				resp, herr = handler(context.Background(), req)
+				ctx := context.Background()
+				ctx = context.WithValue(ctx, constant.CKHttpRequest, r)
+				resp, herr = handler(ctx, req)
 			}
 			w = afterProcess(w, resp, herr)
 
@@ -93,7 +96,9 @@ func RestPostWrapper[P any, Q any](
 			var herr transport.HError
 			herr = beforeProcess(r, req)
 			if herr == nil {
-				resp, herr = handler(context.Background(), req)
+				ctx := context.Background()
+				ctx = context.WithValue(ctx, constant.CKHttpRequest, r)
+				resp, herr = handler(ctx, req)
 			}
 			w = afterProcess(w, resp, herr)
 

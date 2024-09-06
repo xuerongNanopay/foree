@@ -50,7 +50,7 @@ const (
 	UserStatusInitial UserStatus = "INITIAL"
 	UserStatusActive  UserStatus = "ACTIVE"
 	UserStatusSuspend UserStatus = "SUSPEND"
-	UserStatusDisable UserStatus = "DISABLE"
+	UserStatusDelete  UserStatus = "DELETE"
 )
 
 type User struct {

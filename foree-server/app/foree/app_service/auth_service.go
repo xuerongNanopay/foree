@@ -12,6 +12,8 @@ import (
 	"xue.io/go-pay/server/transport"
 )
 
+const maxLoginAttempts = 4
+
 func NewAuthService(
 	db *sql.DB,
 	sessionRepo *auth.SessionRepo,
@@ -431,7 +433,7 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	//TODO: send email. by goroutine
+	//TODO: log user login.
 
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	if session == nil {

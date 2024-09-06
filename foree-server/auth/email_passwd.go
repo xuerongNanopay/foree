@@ -56,7 +56,7 @@ const (
 	EPStatusPassExpire    EmailPasswdStatus = "PASSWORD_EXPIRE"
 	EPStatusActive        EmailPasswdStatus = "ACTIVE"
 	EPStatusSuspend       EmailPasswdStatus = "SUSPEND"
-	EPStatusDisable       EmailPasswdStatus = "DISABLE"
+	EPStatusDelete        EmailPasswdStatus = "DELETE"
 )
 
 type EmailPasswd struct {

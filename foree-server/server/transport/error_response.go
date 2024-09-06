@@ -85,6 +85,20 @@ func (b *BadRequestError) AddDetailWithSeverity(severity Severity, field, messag
 	return b
 }
 
+type UnauthorizedRequestError struct {
+	StatusCode int           `json:"statusCode"`
+	Message    string        `json:"message"`
+	Require    RequireAction `json:"require"`
+}
+
+func NewUnauthorizedRequestError() *UnauthorizedRequestError {
+	return &UnauthorizedRequestError{
+		StatusCode: http.StatusUnauthorized,
+		Message:    PreconditionRequireMsgLogin,
+		Require:    RequireActionLogin,
+	}
+}
+
 type RequireAction string
 
 const (
