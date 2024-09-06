@@ -398,6 +398,8 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		return nil, transport.WrapInteralServerError(sessionErr)
 	}
 
+	logger.Logger.Info("CreateUser_Success", "userId", session.UserId)
+
 	go func() {
 		// Create default Interac Account for the user.
 		acc := account.InteracAccount{
@@ -424,7 +426,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 
 	go a.rewardOnboard(newUser)
 
-	return NewUserDTO(session), nil
+	return NewUserDTO(updateSession), nil
 }
 
 // TODO: Login protection on peak volume.
