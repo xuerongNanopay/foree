@@ -50,30 +50,32 @@ type AuthService struct {
 	userIdentificationRepo *foree_auth.UserIdentificationRepo
 	interacAccountRepo     *account.InteracAccountRepo
 	userGroupRepo          *auth.UserGroupRepo
-	// emailPasswdRecoverRepo *auth.EmailPasswdRecoverRepo
 }
 
-// Any error should return 503
-// TODO: DB Transaction.
-func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session, transport.HError) {
+func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, transport.HError) {
 	// Check if email already exists.
 	oldEmail, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
 	if err != nil {
+		logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if oldEmail != nil {
+		logger.Logger.Warn("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "email already exists")
 		return nil, transport.NewFormError("Invaild signup", "email", "Duplicate email")
 	}
 
 	// Hashing password.
 	hashedPasswd, err := auth.HashPassword(req.Password)
 	if err != nil {
+		logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
+	// Start DB transaction
 	dTx, err := a.db.Begin()
 	if err != nil {
+		logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -86,17 +88,20 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 
 	if err != nil {
 		dTx.Rollback()
+		logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	user, err := a.userRepo.GetUniqueUserById(userId)
 	if err != nil {
 		dTx.Rollback()
+		logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if user == nil {
 		dTx.Rollback()
+		logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "userId", userId, "cause", "unable to get user")
 		return nil, transport.NewInteralServerError("unable to get user with id: `%v`", userId)
 	}
 
@@ -111,6 +116,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 
 	if err != nil {
 		dTx.Rollback()
+		logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -118,17 +124,31 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 
 	if err != nil {
 		dTx.Rollback()
+		logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if ep == nil {
 		dTx.Rollback()
+		logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "emailPasswordId", id, "cause", "unable to get created emailPassword")
 		return nil, transport.NewInteralServerError("unable to get EmailPasswd with id: `%v`", id)
 	}
 
 	if err = dTx.Commit(); err != nil {
+		logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
+
+	//TODO: Update referral
+	//TODO: send email. by goroutine
+	func() {
+		// Update referral if existing.
+
+	}()
+
+	func() {
+		//TODO: send email
+	}()
 
 	sessionId, err := a.sessionRepo.InsertSession(auth.Session{
 		UserId:      user.ID,
@@ -136,17 +156,16 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*auth.Session,
 		EmailPasswd: ep,
 	})
 	if err != nil {
+		logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	//TODO: Update referral
-	//TODO: send email. by goroutine
-
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	if session == nil {
+		logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "unable to get created session")
 		return nil, transport.NewInteralServerError("sesson `%s` not found", sessionId)
 	}
-	return session, nil
+	return NewUserDTO(session), nil
 }
 
 func (a *AuthService) allowVerifyEmail(sessionId string) (*auth.Session, transport.HError) {
