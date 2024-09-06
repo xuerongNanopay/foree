@@ -178,10 +178,10 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 func (a *AuthService) allowVerifyEmail(sessionId string) (*auth.Session, transport.HError) {
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	if session == nil {
-		return nil, transport.NewUnauthorizedRequestError()
+		return session, transport.NewUnauthorizedRequestError()
 	}
 	if session.EmailPasswd.Status != auth.EPStatusWaitingVerify {
-		return nil, transport.NewPreconditionRequireError(
+		return session, transport.NewPreconditionRequireError(
 			transport.PreconditionRequireMsgToMain,
 			transport.RequireActionToMain,
 		)
@@ -234,6 +234,11 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 	// Check Allow to VerifyEmail
 	session, err := a.allowVerifyEmail(req.SessionId)
 	if err != nil {
+		var userId int64
+		if session != nil {
+			userId = session.UserId
+		}
+		logger.Logger.Warn("ResendVerifyCode_Fail", "ip", loadRealIp(ctx), "userId", userId, err.Error())
 		return nil, err
 	}
 
@@ -264,18 +269,18 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transport.HError) {
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	if session == nil {
-		return nil, transport.NewUnauthorizedRequestError()
+		return session, transport.NewUnauthorizedRequestError()
 	}
 
 	if session.EmailPasswd.Status == auth.EPStatusWaitingVerify {
-		return nil, transport.NewPreconditionRequireError(
+		return session, transport.NewPreconditionRequireError(
 			transport.PreconditionRequireMsgVerifyEmail,
 			transport.RequireActionVerifyEmail,
 		)
 	}
 
 	if session.User.Status != auth.UserStatusInitial {
-		return nil, transport.NewPreconditionRequireError(
+		return session, transport.NewPreconditionRequireError(
 			transport.PreconditionRequireMsgToMain,
 			transport.RequireActionToMain,
 		)
@@ -288,12 +293,18 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	// Check allow to create user
 	session, err := a.allowCreateUser(req.SessionId)
 	if err != nil {
+		var userId int64
+		if session != nil {
+			userId = session.UserId
+		}
+		logger.Logger.Warn("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", userId, "cause", err.Error())
 		return nil, err
 	}
 
 	dTx, dErr := a.db.Begin()
 	if dErr != nil {
 		dTx.Rollback()
+		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", dErr.Error())
 		return nil, transport.WrapInteralServerError(dErr)
 	}
 
@@ -308,6 +319,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	_, ier := a.userIdentificationRepo.InsertUserIdentification(ctx, identification)
 	if ier != nil {
 		dTx.Rollback()
+		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", ier.Error())
 		return nil, transport.WrapInteralServerError(ier)
 	}
 
@@ -331,12 +343,14 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 
 	if updateErr != nil {
 		dTx.Rollback()
+		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", updateErr.Error())
 		return nil, transport.WrapInteralServerError(updateErr)
 	}
 
 	user, er := a.userRepo.GetUniqueUserById(newUser.ID)
 	if er != nil {
 		dTx.Rollback()
+		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", er.Error())
 		return nil, transport.WrapInteralServerError(er)
 	}
 
@@ -346,20 +360,28 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 		TransactionLimitGroup: foree_constant.DefaultTransactionLimitGroup,
 		OwnerId:               user.ID,
 	})
+	if er != nil {
+		dTx.Rollback()
+		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", er.Error())
+		return nil, transport.WrapInteralServerError(er)
+	}
 
 	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
 	if er != nil {
 		dTx.Rollback()
+		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", er.Error())
 		return nil, transport.WrapInteralServerError(er)
 	}
 
 	if err := dTx.Commit(); err != nil {
+		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	// Get Permission.
 	rolePermissions, pErr := a.rolePermissionRepo.GetAllEnabledRolePermissionByRoleName(userGroup.RoleGroup)
 	if pErr != nil {
+		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", pErr.Error())
 		return nil, transport.WrapInteralServerError(pErr)
 	}
 
@@ -372,6 +394,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 
 	updateSession, sessionErr := a.sessionRepo.UpdateSession(newSession)
 	if sessionErr != nil {
+		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", sessionErr.Error())
 		return nil, transport.WrapInteralServerError(sessionErr)
 	}
 
@@ -394,6 +417,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*auth.
 	}
 	_, derr := a.interacAccountRepo.InsertInteracAccount(ctx, acc)
 	if derr != nil {
+		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", derr.Error())
 		return nil, transport.WrapInteralServerError(derr)
 	}
 	return updateSession, nil
@@ -551,7 +575,7 @@ func (a *AuthService) Authorize(ctx context.Context, sessionId string, permissio
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	err := verifySession(session)
 	if err != nil {
-		return nil, err
+		return session, err
 	}
 	for _, p := range session.RolePermissions {
 		ok := auth.IsPermissionGrand(permission, p.Permission)
@@ -559,14 +583,14 @@ func (a *AuthService) Authorize(ctx context.Context, sessionId string, permissio
 			return session, nil
 		}
 	}
-	return nil, transport.NewForbiddenError(permission)
+	return session, transport.NewForbiddenError(permission)
 }
 
 func (a *AuthService) VerifySession(ctx context.Context, sessionId string) (*auth.Session, transport.HError) {
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	err := verifySession(session)
 	if err != nil {
-		return nil, err
+		return session, err
 	}
 	return session, nil
 }
