@@ -33,9 +33,9 @@ CREATE TABLE IF NOT EXISTS user_group(
 
 CREATE TABLE IF NOT EXISTS user_extra(
     `id` SERIAL PRIMARY KEY,
-    `pob` VARCHAR(64),
-    `cor` VARCHAR(64),
-    `nationality` VARCHAR(64),
+    `pob` CHAR(2),
+    `cor` CHAR(2),
+    `nationality` CHAR(2),
     `occupation_category` VARCHAR(64),
     `occupation_name` VARCHAR(128),
     `owner_id` BIGINT UNSIGNED NOT NULL,
