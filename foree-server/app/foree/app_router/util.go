@@ -2,9 +2,9 @@ package foree_router
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
+	"xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/server/restful_wrapper"
 	"xue.io/go-pay/server/transport"
 )
@@ -12,9 +12,9 @@ import (
 func commonEndFunc[P any, Q any](req P, resp Q, hErr transport.HError) {
 	if v, is := hErr.(*transport.InteralServerError); is {
 		// use logger.
-		fmt.Print(v.OriginalError.Error())
+		logger.Logger.Error("System Error", "cause", v.OriginalError.Error())
 	} else {
-		fmt.Println(hErr.Error())
+		logger.Logger.Warn("API Warning", "case", v.Error())
 	}
 }
 

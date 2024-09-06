@@ -3,6 +3,7 @@ package foree_service
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -10,9 +11,9 @@ import (
 	"xue.io/go-pay/app/foree/account"
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_constant "xue.io/go-pay/app/foree/constant"
+	"xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
-	"xue.io/go-pay/logger"
 	"xue.io/go-pay/server/transport"
 )
 
@@ -49,7 +50,6 @@ type AuthService struct {
 	userIdentificationRepo *foree_auth.UserIdentificationRepo
 	interacAccountRepo     *account.InteracAccountRepo
 	userGroupRepo          *auth.UserGroupRepo
-	logger                 *logger.Logger
 	// emailPasswdRecoverRepo *auth.EmailPasswdRecoverRepo
 }
 
@@ -383,41 +383,58 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 	// Verify email and password
 	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
 
+	if err != nil {
+		logger.Logger.Error("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	if ep == nil {
+		logger.Logger.Info("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
+		return nil, transport.NewFormError("Invaild signup", "email", "Invalid email")
+	}
+
 	if ep.Status == auth.EPStatusDelete {
+		logger.Logger.Info("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` is in `%s` status", ep.Email, ep.Status))
 		return nil, transport.NewFormError("Invalid login request", "email", "email or password error")
 	}
 
 	if ep.Status == auth.EPStatusSuspend {
+		logger.Logger.Info("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` is in `%s` status", ep.Email, ep.Status))
 		return nil, transport.NewFormError("Invalid login request", "email", "your account is suspend. please contact us.")
 	}
 
 	if ep.LoginAttempts > maxLoginAttempts {
+		logger.Logger.Info("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` has try `%v` times", ep.Email, ep.LoginAttempts))
 		return nil, transport.NewFormError("Invalid login request", "password", "max login attempts reached. please contact us.")
-	}
-
-	if err != nil {
-		return nil, transport.WrapInteralServerError(err)
-	}
-	if ep == nil {
-		return nil, transport.NewFormError("Invaild signup", "email", "Invalid email")
 	}
 
 	ok := auth.ComparePasswords(req.Password, []byte(ep.Passwd))
 	if !ok {
+		logger.Logger.Info("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", "invalid password")
+		go func() {
+			newEP := *ep
+			newEP.LoginAttempts += 1
+			if err := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP); err != nil {
+				logger.Logger.Error("update login attempts error", "email", req.Email, "cause", err.Error())
+			}
+		}()
 		return nil, transport.NewFormError("Invaild signup", "password", "Invalid password")
 	}
 
 	// Load user(user must exist, but not necessary to be active)
 	user, err := a.userRepo.GetUniqueUserById(ep.OwnerId)
 	if err != nil {
+		logger.Logger.Error("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if user == nil {
+		logger.Logger.Error("login failed", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("owner `%v` no found", ep.OwnerId))
 		return nil, transport.NewInteralServerError("User `%v` do not exists", ep.OwnerId)
 	}
 
 	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
 	if er != nil {
+		logger.Logger.Error("login failed", "ip", loadRealIp(ctx), "email", req.Email, "user", user.ID, "cause", er.Error())
 		return nil, transport.WrapInteralServerError(er)
 	}
 

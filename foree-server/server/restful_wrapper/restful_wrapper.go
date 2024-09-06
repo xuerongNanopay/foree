@@ -84,16 +84,19 @@ func RestPostWrapper[P any, Q any](
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req P
 		resp, herr := func() (Q, transport.HError) {
-			if err := json_util.DeserializeJsonFromHttpRequest(r, &req); err != nil {
-				var nilResp Q
-				return nilResp, transport.WrapInteralServerError(err)
-			}
 
 			sessionId := r.Header.Get("SESSION_ID")
 			reflect_util.TrySetStuctValueFromString(&req, "SessionId", sessionId)
 
 			var resp Q
+			var err error
 			var herr transport.HError
+			err = json_util.DeserializeJsonFromHttpRequest(r, &req)
+			if err != nil {
+				herr = transport.WrapInteralServerError(err)
+				goto SKIP_PROCESS
+			}
+
 			herr = beforeProcess(r, req)
 			if herr == nil {
 				ctx := context.Background()
@@ -104,7 +107,7 @@ func RestPostWrapper[P any, Q any](
 
 			w.Header().Add("Content-Type", "application/json")
 
-			var err error
+		SKIP_PROCESS:
 			if herr != nil {
 				err = json_util.SerializeToResponseWriter(w, herr.GetStatusCode(), herr)
 			} else {
