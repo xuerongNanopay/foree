@@ -338,6 +338,9 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	newUser.Country = req.Country
 	newUser.PostalCode = req.PostalCode
 	newUser.PhoneNumber = req.PhoneNumber
+	newUser.Email = session.EmailPasswd.Email
+
+	//TODO: user extra
 
 	updateErr := a.userRepo.UpdateUserById(ctx, newUser)
 
@@ -347,18 +350,11 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		return nil, transport.WrapInteralServerError(updateErr)
 	}
 
-	user, er := a.userRepo.GetUniqueUserById(newUser.ID)
-	if er != nil {
-		dTx.Rollback()
-		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", er.Error())
-		return nil, transport.WrapInteralServerError(er)
-	}
-
 	//Create userGroup
-	_, er = a.userGroupRepo.InsertUserGroup(ctx, auth.UserGroup{
+	_, er := a.userGroupRepo.InsertUserGroup(ctx, auth.UserGroup{
 		RoleGroup:             foree_constant.DefaultRoleGroup,
 		TransactionLimitGroup: foree_constant.DefaultTransactionLimitGroup,
-		OwnerId:               user.ID,
+		OwnerId:               newUser.ID,
 	})
 	if er != nil {
 		dTx.Rollback()
@@ -366,7 +362,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		return nil, transport.WrapInteralServerError(er)
 	}
 
-	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
+	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(newUser.ID)
 	if er != nil {
 		dTx.Rollback()
 		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", er.Error())
@@ -387,8 +383,8 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 
 	// Update session.
 	newSession := *session
-	newSession.User = user
-	newSession.UserId = user.ID
+	newSession.User = &newUser
+	newSession.UserId = newUser.ID
 	newSession.RolePermissions = rolePermissions
 	newSession.UserGroup = userGroup
 
@@ -403,18 +399,18 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	go func() {
 		// Create default Interac Account for the user.
 		acc := account.InteracAccount{
-			FirstName:        session.User.FirstName,
-			MiddleName:       session.User.MiddleName,
-			LastName:         session.User.LastName,
-			Address1:         user.Address1,
-			Address2:         user.Address2,
-			City:             user.City,
-			Province:         user.Province,
-			Country:          user.Country,
-			PostalCode:       user.PostalCode,
-			PhoneNumber:      session.User.PhoneNumber,
-			Email:            session.User.Email,
-			OwnerId:          session.User.ID,
+			FirstName:        newUser.FirstName,
+			MiddleName:       newUser.MiddleName,
+			LastName:         newUser.LastName,
+			Address1:         newUser.Address1,
+			Address2:         newUser.Address2,
+			City:             newUser.City,
+			Province:         newUser.Province,
+			Country:          newUser.Country,
+			PostalCode:       newUser.PostalCode,
+			PhoneNumber:      newUser.PhoneNumber,
+			Email:            newUser.Email,
+			OwnerId:          newUser.ID,
 			Status:           account.AccountStatusActive,
 			LatestActivityAt: time.Now(),
 		}
