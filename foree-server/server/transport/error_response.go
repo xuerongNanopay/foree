@@ -99,6 +99,18 @@ func NewUnauthorizedRequestError() *UnauthorizedRequestError {
 	}
 }
 
+func (b *UnauthorizedRequestError) GetStatusCode() int {
+	return b.StatusCode
+}
+
+func (b *UnauthorizedRequestError) GetMessage() string {
+	return b.Message
+}
+
+func (b *UnauthorizedRequestError) Error() string {
+	return serializeError(b)
+}
+
 type RequireAction string
 
 const (

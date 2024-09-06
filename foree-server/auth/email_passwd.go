@@ -53,7 +53,6 @@ type EmailPasswdStatus string
 
 const (
 	EPStatusWaitingVerify EmailPasswdStatus = "WAITING_VERIFY"
-	EPStatusPassExpire    EmailPasswdStatus = "PASSWORD_EXPIRE"
 	EPStatusActive        EmailPasswdStatus = "ACTIVE"
 	EPStatusSuspend       EmailPasswdStatus = "SUSPEND"
 	EPStatusDelete        EmailPasswdStatus = "DELETE"

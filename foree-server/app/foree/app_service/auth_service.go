@@ -3,12 +3,16 @@ package foree_service
 import (
 	"context"
 	"database/sql"
+	"net/http"
+	"strings"
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/auth"
+	"xue.io/go-pay/constant"
+	"xue.io/go-pay/logger"
 	"xue.io/go-pay/server/transport"
 )
 
@@ -45,6 +49,7 @@ type AuthService struct {
 	userIdentificationRepo *foree_auth.UserIdentificationRepo
 	interacAccountRepo     *account.InteracAccountRepo
 	userGroupRepo          *auth.UserGroupRepo
+	logger                 *logger.Logger
 	// emailPasswdRecoverRepo *auth.EmailPasswdRecoverRepo
 }
 
@@ -377,6 +382,19 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*auth.Session, t
 
 	// Verify email and password
 	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
+
+	if ep.Status == auth.EPStatusDelete {
+		return nil, transport.NewFormError("Invalid login request", "email", "email or password error")
+	}
+
+	if ep.Status == auth.EPStatusSuspend {
+		return nil, transport.NewFormError("Invalid login request", "email", "your account is suspend. please contact us.")
+	}
+
+	if ep.LoginAttempts > maxLoginAttempts {
+		return nil, transport.NewFormError("Invalid login request", "password", "max login attempts reached. please contact us.")
+	}
+
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -532,4 +550,28 @@ func verifySession(session *auth.Session) transport.HError {
 		)
 	}
 	return nil
+}
+
+func loadXForwardFor(ctx context.Context) string {
+	req, ok := ctx.Value(constant.CKHttpRequest).(*http.Request)
+	if !ok {
+		return ""
+	}
+	return req.Header.Get("X-Forwarded-For")
+}
+
+func loadIp(ctx context.Context) string {
+	req, ok := ctx.Value(constant.CKHttpRequest).(*http.Request)
+	if !ok {
+		return ""
+	}
+	return req.RemoteAddr
+}
+
+func loadRealIp(ctx context.Context) string {
+	xforward := loadXForwardFor(ctx)
+	if xforward != "" && len(strings.Split(xforward, ",")) == 0 {
+		return loadIp(ctx)
+	}
+	return strings.Split(xforward, ",")[0]
 }
