@@ -230,7 +230,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*Use
 	return NewUserDTO(session), nil
 }
 
-func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.SessionReq) (*auth.Session, transport.HError) {
+func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.SessionReq) (*UserDTO, transport.HError) {
 	// Check Allow to VerifyEmail
 	session, err := a.allowVerifyEmail(req.SessionId)
 	if err != nil {
@@ -243,6 +243,7 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 
 	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP)
 	if e != nil {
+		logger.Logger.Warn("ResendVerifyCode_Fail", "userId", session.UserId, "cause", e.Error())
 		return nil, transport.WrapInteralServerError(e)
 	}
 
@@ -254,9 +255,10 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 
 	_, e = a.sessionRepo.UpdateSession(newSession)
 	if e != nil {
+		logger.Logger.Warn("ResendVerifyCode_Fail", "userId", session.UserId, "cause", e.Error())
 		return nil, transport.WrapInteralServerError(e)
 	}
-	return nil, nil
+	return NewUserDTO(session), nil
 }
 
 func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transport.HError) {
