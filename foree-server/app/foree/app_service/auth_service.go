@@ -153,17 +153,8 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 	}
 
 	go a.linkReferer(*user, req)
-	//TOOD: Onboarding reward.
-	//TODO: Update referral
+
 	//TODO: send email. by goroutine
-	func() {
-		// Update referral if existing.
-
-	}()
-
-	func() {
-		//TODO: send email
-	}()
 
 	sessionId, err := a.sessionRepo.InsertSession(auth.Session{
 		UserId:      user.ID,
@@ -662,7 +653,7 @@ func (a *AuthService) rewardOnboard(registerUser auth.User) {
 	}
 }
 
-// TODO: Initial gift. Gift should alway exits in cache.
+// TODO: using atomic interger to limit peak volumn
 func (a *AuthService) getGift(giftCode string, validIn time.Duration) (*promotion.Gift, error) {
 	a.giftCacheRWLock.RLock()
 	giftCache, ok := a.giftCache[giftCode]
