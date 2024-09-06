@@ -6,18 +6,25 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/logger"
+	"xue.io/go-pay/app/foree/promotion"
+	"xue.io/go-pay/app/foree/referral"
+	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
 	"xue.io/go-pay/server/transport"
 )
 
 const maxLoginAttempts = 4
+const OnboardGift = "ONBOARD_GIFT"
+const ReferralGift = "REFERRAL_GIFT"
+const giftCacheTimeout = 15 * time.Minute
 
 func NewAuthService(
 	db *sql.DB,
@@ -50,6 +57,12 @@ type AuthService struct {
 	userIdentificationRepo *foree_auth.UserIdentificationRepo
 	interacAccountRepo     *account.InteracAccountRepo
 	userGroupRepo          *auth.UserGroupRepo
+	referralRepo           *referral.ReferralRepo
+	rewardRepo             *transaction.RewardRepo
+	giftRepo               *promotion.GiftRepo
+	giftCache              map[string]CacheItem[promotion.Gift]
+	giftCacheRWLock        sync.RWMutex
+	giftCacheUpdateLock    sync.RWMutex
 }
 
 func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, transport.HError) {
@@ -139,6 +152,8 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 		return nil, transport.WrapInteralServerError(err)
 	}
 
+	go a.linkReferer(*user, req)
+	//TOOD: Onboarding reward.
 	//TODO: Update referral
 	//TODO: send email. by goroutine
 	func() {
@@ -484,16 +499,16 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*UserDTO, transp
 
 	sessionId, err := a.sessionRepo.InsertSession(newSession)
 	if err != nil {
-		logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprint("fail to insert session to session repo"))
+		logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "fail to insert session to session repo")
 		return nil, transport.WrapInteralServerError(err)
 	}
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	if session == nil {
-		logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprint("fail to get session from session repo"))
+		logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "fail to get session from session repo")
 		return nil, transport.NewInteralServerError("sesson `%s` not found", sessionId)
 	}
 
-	logger.Logger.Info("Login_Success", loadRealIp(ctx), "email", req.Email, "userAgent", loadUserAgent(ctx))
+	logger.Logger.Info("Login_Success", "ip", loadRealIp(ctx), "email", req.Email, "userAgent", loadUserAgent(ctx))
 	return NewUserDTO(session), nil
 }
 
@@ -565,6 +580,123 @@ func (a *AuthService) VerifySession(ctx context.Context, sessionId string) (*aut
 		return nil, err
 	}
 	return session, nil
+}
+
+func (a *AuthService) linkReferer(registerUser auth.User, req SignUpReq) {
+	if req.ReferralCode == "" {
+		return
+	}
+
+	referral, err := a.referralRepo.GetUniqueReferralByReferralCode(req.ReferralCode)
+	if err != nil {
+		logger.Logger.Error("Link_Referer_Fail", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", err.Error())
+		return
+	}
+	if referral == nil {
+		logger.Logger.Warn("Link_Referer_Fail", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", "unknown ReferralCode")
+		return
+	}
+	if referral.RefereeId != 0 {
+		logger.Logger.Warn("Link_Referer_Fail", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", "unknown ReferralCode")
+		return
+	}
+
+	newReferral := *referral
+	newReferral.RefereeId = registerUser.ID
+	newReferral.AcceptAt = time.Now()
+
+	err = a.referralRepo.UpdateReferralByReferralCode(newReferral)
+	if err != nil {
+		logger.Logger.Error("Link_Referer_Fail", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", err.Error())
+		return
+	}
+	logger.Logger.Info("Link_Referer_success", "userId", registerUser.ID, "ReferrerId", referral.ReferrerId)
+}
+
+// TODO: configure to turn targo.
+func (a *AuthService) rewardReferer(registerUser auth.User) {
+	referral, _ := a.referralRepo.GetUniqueReferralByRefereeId(registerUser.ID)
+	if referral == nil {
+		return
+	}
+
+	gift, _ := a.getGift(ReferralGift, giftCacheTimeout)
+
+	if gift == nil || !gift.IsValid() {
+		return
+	}
+
+	reward := transaction.Reward{
+		Type:        transaction.RewardTypeReferal,
+		Description: fmt.Sprintf("Referral reward by %v %v", registerUser.FirstName, registerUser.LastName),
+		Amt:         gift.Amt,
+		OwnerId:     referral.ReferrerId,
+		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
+	}
+
+	_, err := a.rewardRepo.InsertReward(context.TODO(), reward)
+	if err != nil {
+		logger.Logger.Error("Referral_Reward_Fail", "refereeId", registerUser.ID, "referrerId", referral.ReferrerId, "cause", err.Error())
+	}
+}
+
+func (a *AuthService) rewardOnboard(registerUser auth.User) {
+
+	gift, _ := a.getGift(OnboardGift, giftCacheTimeout)
+
+	if gift == nil || !gift.IsValid() {
+		return
+	}
+
+	reward := transaction.Reward{
+		Type:        transaction.RewardTypeReferal,
+		Description: "Onboard reward",
+		Amt:         gift.Amt,
+		OwnerId:     registerUser.ID,
+		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
+	}
+
+	_, err := a.rewardRepo.InsertReward(context.TODO(), reward)
+	if err != nil {
+		logger.Logger.Error("Onboard_Reward_Fail", "refereeId", registerUser.ID, "referrerId", referral.ReferrerId, "cause", err.Error())
+	}
+}
+
+// TODO: Initial gift. Gift should alway exits in cache.
+func (a *AuthService) getGift(giftCode string, validIn time.Duration) (*promotion.Gift, error) {
+	a.giftCacheRWLock.RLock()
+	giftCache, ok := a.giftCache[giftCode]
+	a.giftCacheRWLock.RUnlock()
+
+	if ok && giftCache.createdAt.Add(validIn).After(time.Now()) {
+		return &giftCache.item, nil
+	}
+
+	gift, err := a.giftRepo.GetUniqueGiftByCode(context.TODO(), giftCode)
+	if err != nil {
+		logger.Logger.Error("Gift_Fail", "giftCode", giftCode, "cause", err.Error())
+		return nil, err
+	}
+
+	if gift != nil {
+		logger.Logger.Warn("Gift_Fail", "giftCode", giftCode, "cause", "gift no found")
+		return nil, fmt.Errorf("Gift no found with giftCode `%v`", giftCode)
+	}
+
+	// Update gift
+	// Make sure at least one thread can update the cache.
+	func() {
+		a.giftCacheUpdateLock.TryLock()
+		defer a.giftCacheUpdateLock.Unlock()
+		a.giftCacheRWLock.Lock()
+		defer a.giftCacheRWLock.Unlock()
+		a.giftCache[giftCode] = CacheItem[promotion.Gift]{
+			item:      *gift,
+			createdAt: time.Now(),
+		}
+	}()
+
+	return gift, nil
 }
 
 func verifySession(session *auth.Session) transport.HError {

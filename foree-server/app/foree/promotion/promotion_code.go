@@ -1,4 +1,4 @@
-package transaction
+package promotion
 
 import (
 	"context"
@@ -36,9 +36,7 @@ func (p *PromoCode) IsValid() bool {
 		return false
 	}
 
-	now := time.Now().Unix()
-
-	if now > p.StartTime.Unix() || (now > p.EndTime.Unix() && !p.EndTime.IsZero()) {
+	if now := time.Now().Unix(); now > p.StartTime.Unix() || (now > p.EndTime.Unix() && !p.EndTime.IsZero()) {
 		return false
 	}
 	return true

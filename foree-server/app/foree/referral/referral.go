@@ -120,7 +120,7 @@ func (repo *ReferralRepo) GetUniqueReferralByReferralCode(referralCode string) (
 	return f, nil
 }
 
-func (repo *ReferralRepo) GetUniqueReferralByRefereeId(refereeId string) (*Referral, error) {
+func (repo *ReferralRepo) GetUniqueReferralByRefereeId(refereeId int64) (*Referral, error) {
 	rows, err := repo.db.Query(sQLReferralGetUniqueByRefereeId, refereeId)
 
 	if err != nil {

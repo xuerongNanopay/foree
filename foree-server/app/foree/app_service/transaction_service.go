@@ -18,16 +18,11 @@ import (
 	"xue.io/go-pay/server/transport"
 )
 
-var (
+const (
 	rateCacheTimeout      time.Duration = 30 * time.Minute
 	quoteRateCacheTimeout time.Duration = 15 * time.Minute
 	feeCacheTimeout       time.Duration = time.Hour
 )
-
-type CacheItem[T any] struct {
-	item      T
-	createdAt time.Time
-}
 
 func NewTransactionService(
 	db *sql.DB,
