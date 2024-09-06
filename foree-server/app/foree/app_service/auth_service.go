@@ -658,7 +658,7 @@ func (a *AuthService) rewardOnboard(registerUser auth.User) {
 
 	_, err := a.rewardRepo.InsertReward(context.TODO(), reward)
 	if err != nil {
-		logger.Logger.Error("Onboard_Reward_Fail", "refereeId", registerUser.ID, "referrerId", referral.ReferrerId, "cause", err.Error())
+		logger.Logger.Error("Onboard_Reward_Fail", "userId", registerUser.ID, "cause", err.Error())
 	}
 }
 
