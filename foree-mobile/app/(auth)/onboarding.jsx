@@ -66,13 +66,12 @@ const Onboarding = () => {
       try {
         console.log(form)
         await payload.OnboardingScheme.validate(form, {abortEarly: false})
+        setErrors({})
       } catch (err) {
         let e = {}
         for ( let i of err.inner ) {
           e[i.path] =  e[i.path] ?? i.errors[0]
-          console.log(i.path, i.errors)
         }
-        setErrors(e)
       }
     }
     validate()
@@ -84,7 +83,7 @@ const Onboarding = () => {
       setIsSubmitting(false)
       console.log(form)
       // router.replace("/verify_email")
-    }, 1000);
+    }, 4000);
   }
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -279,7 +278,11 @@ const Onboarding = () => {
       titleView: PersonalDetailFieldTitle,
       formView: PersonalDetailField,
       canGoNext: () => {
-        return true
+        return !errors.dob && 
+          !errors.pob && 
+          !errors.nationality &&
+          !errors.identificationType &&
+          !errors.identificationValue
       }
     },
     {
@@ -297,13 +300,8 @@ const Onboarding = () => {
         steps={() => OnboardingFlow}
         onSumbit={submit}
         containerStyle=""
+        isSubmitting={isSubmitting}
       />
-      {/* <ScrollView
-        className="bg-slate-100"
-        automaticallyAdjustKeyboardInsets
-      >
-        <MultiStepForm/>
-      </ScrollView> */}
     </SafeAreaView>
   )
 }
