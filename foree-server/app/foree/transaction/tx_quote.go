@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
+	uuid_util "xue.io/go-pay/util/uuid"
 )
 
 //Store exactly same payload as ForeeTx.
@@ -94,7 +94,7 @@ func (repo *TxQuoteRepo) GetUniqueById(ctx context.Context, id string) *TxQuote 
 }
 
 func generateTxQuoteId(bucketId int) string {
-	return fmt.Sprintf("%08d-%s", bucketId, uuid.New().String())
+	return fmt.Sprintf("%08d-%s", bucketId, uuid_util.UUID())
 }
 
 func parseBucketId(quoteId string) (int, error) {

@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
+	uuid_util "xue.io/go-pay/util/uuid"
 )
 
 // How do we store the session. // Redis?
@@ -154,7 +154,7 @@ func (repo *SessionRepo) GetSessionUniqueById(id string) *Session {
 }
 
 func generateSessionId(bucketId int) string {
-	return fmt.Sprintf("%06d-%s", bucketId, uuid.New().String())
+	return fmt.Sprintf("%06d-%s", bucketId, uuid_util.UUID())
 }
 
 func parseBucketId(sessionId string) (int, error) {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	uuid_util "xue.io/go-pay/util/uuid"
 )
 
 type ReferralType string
@@ -165,5 +165,5 @@ func scanRowIntoReferral(rows *sql.Rows) (*Referral, error) {
 }
 
 func GenerateReferralCode(id int64) string {
-	return fmt.Sprintf("%09d-%s", id, uuid.New().String())
+	return fmt.Sprintf("%09d-%s", id, uuid_util.UUID())
 }
