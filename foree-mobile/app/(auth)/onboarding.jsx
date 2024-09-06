@@ -73,7 +73,6 @@ const Onboarding = () => {
           console.log(i.path, i.errors)
         }
         setErrors(e)
-        console.log(e)
       }
     }
     validate()
@@ -195,6 +194,7 @@ const Onboarding = () => {
           ...form,
           dob:e
         })}
+        keyboardType="numbers-and-punctuation"
       />
       <FieldItem title="Place of Birth" value={form.pob}
         handleChangeText={(e) => setForm({
@@ -257,14 +257,22 @@ const Onboarding = () => {
       titleView: NameFieldTitle,
       formView: NameField,
       canGoNext: () => {
-        return true
+        return !errors.firstName && 
+          !errors.middleName && 
+          !errors.lastName
       }
     },
     {
       titleView: AddressFieldTitle,
       formView: AddressField,
       canGoNext: () => {
-        return true
+        return !errors.address1 && 
+          !errors.address2 && 
+          !errors.city &&
+          !errors.province &&
+          !errors.country &&
+          !errors.postalCode &&
+          !errors.phoneNumber
       }
     },
     {

@@ -59,6 +59,20 @@ const AlphaOnlyScheme = ({
   return ret.matches(regex, "invalid character").min(min, min!==max ? `at least ${min} characters`: `must be ${min} characters`).max(max, min!==max ? `at most ${max} characters`: `must be ${max} characters`)
 }
 
+const CountryISOScheme = ({
+  required=true
+}) => AlphaOnlyScheme({upperCaseOnly: true, min:2, max:2, required})
+
+const ProvinceISOScheme = ({
+  required=true
+}) => {
+  const min = 5
+  const max = 5
+  const ret = required ? string().trim().required("required") : string().trim()
+  const regex = new RegExp(emptyRegexWrapper("[A-Z]{2}\\-[A-Z]{2}$"))
+  return ret.matches(regex, "invalid character").min(min, min!==max ? `at least ${min} characters`: `must be ${min} characters`).max(max, min!==max ? `at most ${max} characters`: `must be ${max} characters`)
+}
+
 const DateOnlyScheme =({
   required=true
 }) => {
@@ -149,7 +163,9 @@ export default {
   PositiveFloatScheme,
   PasswordScheme,
   PostalCodeScheme,
+  CountryISOScheme,
   PhoneNumber,
+  ProvinceISOScheme,
   PasswdMinFourOneLetterOneNumber,
   PasswdMinEightOneLetterOneNumber,
   PasswdMinEightOneLetterOneNumberOneSpecial,

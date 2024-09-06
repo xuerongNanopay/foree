@@ -4,7 +4,7 @@ const Countries = {
 		isoCode3: "CAN",
 		Num:   "124",
 		Name:  "Canada",
-    phoneRegex: "^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]\\d{3}[\\s.-]\\d{4}$",
+    phoneRegex: "^(\\+\\d{1,2}\\s?)?1?\\-?\\.?\\s?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$",
     postalCodeRegex: "^[A-Za-z]\\d[A-Za-z][ -]?\\d[A-Za-z]\\d$"
 	},
 	"PK": {
@@ -20,7 +20,7 @@ const Countries = {
 		isoCode3: "USA",
 		Num:   "840",
 		Name:  "United States of America",
-    phoneRegex: "^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]\\d{3}[\\s.-]\\d{4}$",
+    phoneRegex: "^(\\+\\d{1,2}\\s?)?1?\\-?\\.?\\s?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$",
     postalCodeRegex: "^\\d{5}(?:[-\\s]\\d{4})?$"
 	},
 }

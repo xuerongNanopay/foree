@@ -70,7 +70,9 @@ const MultiStepForm = ({
             <CustomButton
               title={"< Previous"}
               isLoading={isSubmitting}
-              handlePress={()=>{setCurIdx(curIdx-1)}}
+              handlePress={()=>{
+                setCurIdx(curIdx-1)
+              }}
               containerStyles={"w-[49%]"}
               variant="bordered"
                 // isLoading={isSubmitting}
@@ -80,7 +82,7 @@ const MultiStepForm = ({
             !isLast ? 
             <CustomButton
               title={"Next >"}
-              isLoading={isSubmitting}
+              isLoading={isSubmitting || !formStep[curIdx].canGoNext()}
               handlePress={()=>{setCurIdx(curIdx+1)}}
               containerStyles={isFirst ? "w-[100%]" : "w-[49%]"}
                 // isLoading={isSubmitting}
@@ -90,7 +92,7 @@ const MultiStepForm = ({
             isLast ? 
             <CustomButton
               title={submitTintTitle}
-              isLoading={isSubmitting}
+              isLoading={isSubmitting || !formStep[curIdx].canGoNext()}
               handlePress={onSumbit}
               containerStyles={isFirst ? "w-[100%]" : "w-[49%]"}
                 // isLoading={isSubmitting}
