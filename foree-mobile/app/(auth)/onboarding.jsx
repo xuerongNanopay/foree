@@ -42,6 +42,7 @@ const ReviewItem = ({
 const Onboarding = () => {
 
   const [errors, setErrors] = useState({});
+
   const [form, setForm] = useState({
     firstName: '',
     middleName: '',
@@ -50,7 +51,7 @@ const Onboarding = () => {
     address2: '',
     city: '',
     province: '',
-    country: 'Canada',
+    country: 'CA',
     postalCode: '',
     phoneNumber: '',
     dob: '',
@@ -61,8 +62,21 @@ const Onboarding = () => {
   })
 
   useEffect(() => {
-    const error = payload.OnboardingScheme.validate(form)
-    console.log(error)
+    async function validate() {
+      try {
+        console.log(form)
+        await payload.OnboardingScheme.validate(form, {abortEarly: false})
+      } catch (err) {
+        let e = {}
+        for ( let i of err.inner ) {
+          e[i.path] =  e[i.path] ?? i.errors[0]
+          console.log(i.path, i.errors)
+        }
+        setErrors(e)
+        console.log(e)
+      }
+    }
+    validate()
   }, [form])
 
   const submit = () => {

@@ -32,17 +32,18 @@ const ForgetPasswdUpdateScheme = object({
 const OnboardingScheme = object({
   firstName: fieldScheme.NameScheme({}),
   middleName: fieldScheme.NameScheme({required: false}),
-  LastName: fieldScheme.NameScheme({}),
-  address1: string().trim().required(),
-  address2: string(),
-  city: string().trim().required(),
-  province: string().trim().required(),
-  country: string().trim().required(),
-  phoneNumber: string().trim().required(),
+  lastName: fieldScheme.NameScheme({}),
+  address1: fieldScheme.String({}),
+  address2: fieldScheme.String({required: false}),
+  city: fieldScheme.String({}),
+  province: fieldScheme.String({}),
+  country: fieldScheme.AlphaOnlyScheme({upperCaseOnly: true, min:2, max:2}),
+  postalCode: fieldScheme.PostalCodeScheme({countryCode:"CA"}),
+  phoneNumber: fieldScheme.PhoneNumber({countryCode:"CA"}),
   dob: fieldScheme.DateOnlyScheme({}),
-  nationality: string().trim().required(),
-  identificationType: string().trim().required(),
-  identificationValue: string().trim().required(),
+  nationality: fieldScheme.AlphaOnlyScheme({upperCaseOnly: true, min:2, max:2}),
+  identificationType: fieldScheme.String({}),
+  identificationValue: fieldScheme.String({}),
 })
 
 export default {
