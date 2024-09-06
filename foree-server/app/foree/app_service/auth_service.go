@@ -575,3 +575,11 @@ func loadRealIp(ctx context.Context) string {
 	}
 	return strings.Split(xforward, ",")[0]
 }
+
+func loadUserAgent(ctx context.Context) string {
+	req, ok := ctx.Value(constant.CKHttpRequest).(*http.Request)
+	if !ok {
+		return ""
+	}
+	return req.Header.Get("User-Agent")
+}
