@@ -176,11 +176,8 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 
 func (a *AuthService) allowVerifyEmail(sessionId string) (*auth.Session, transport.HError) {
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
-	if session == nil || session.EmailPasswd == nil {
-		return nil, transport.NewPreconditionRequireError(
-			transport.PreconditionRequireMsgLogin,
-			transport.RequireActionLogin,
-		)
+	if session == nil {
+		return nil, transport.NewUnauthorizedRequestError()
 	}
 	if session.EmailPasswd.Status != auth.EPStatusWaitingVerify {
 		return nil, transport.NewPreconditionRequireError(
@@ -262,11 +259,8 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 
 func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transport.HError) {
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
-	if session == nil || session.EmailPasswd == nil {
-		return nil, transport.NewPreconditionRequireError(
-			transport.PreconditionRequireMsgLogin,
-			transport.RequireActionLogin,
-		)
+	if session == nil {
+		return nil, transport.NewUnauthorizedRequestError()
 	}
 
 	if session.EmailPasswd.Status == auth.EPStatusWaitingVerify {
@@ -276,7 +270,7 @@ func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transpor
 		)
 	}
 
-	if session.User != nil && session.User.Status == auth.UserStatusInitial {
+	if session.User.Status != auth.UserStatusInitial {
 		return nil, transport.NewPreconditionRequireError(
 			transport.PreconditionRequireMsgToMain,
 			transport.RequireActionToMain,
@@ -691,11 +685,8 @@ func (a *AuthService) getGift(giftCode string, validIn time.Duration) (*promotio
 }
 
 func verifySession(session *auth.Session) transport.HError {
-	if session == nil || session.EmailPasswd == nil {
-		return transport.NewPreconditionRequireError(
-			transport.PreconditionRequireMsgLogin,
-			transport.RequireActionLogin,
-		)
+	if session == nil {
+		return transport.NewUnauthorizedRequestError()
 	}
 	if session.EmailPasswd.Status == auth.EPStatusWaitingVerify {
 		return transport.NewPreconditionRequireError(
@@ -703,7 +694,7 @@ func verifySession(session *auth.Session) transport.HError {
 			transport.RequireActionVerifyEmail,
 		)
 	}
-	if session.User == nil || session.User.Status == auth.UserStatusInitial {
+	if session.User.Status == auth.UserStatusInitial {
 		return transport.NewPreconditionRequireError(
 			transport.PreconditionRequireMsgCreateUser,
 			transport.RequireActionCreateUser,
