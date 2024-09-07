@@ -203,7 +203,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*Use
 		return nil, err
 	}
 
-	if session.EmailPasswd.VerifyCode != req.Code || session.EmailPasswd.VerifyCodeExpiredAt.After(time.Now()) {
+	if session.EmailPasswd.VerifyCode != req.Code || session.EmailPasswd.VerifyCodeExpiredAt.Before(time.Now()) {
 		logger.Logger.Warn("VerifyEmail_Fail", "userId", session.UserId, "cause", "verify code unmatch or expired")
 		return nil, transport.NewFormError("Invalid VerifyEmail Requst", "verifyCode", "please resend verify code")
 	}
@@ -538,13 +538,83 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*UserDTO, transp
 	return NewUserDTO(session), nil
 }
 
-// func (a *AuthService) ForgetPassword(ctx context.Context, email string) {
+func (a *AuthService) ForgetPassword(ctx context.Context, req ForgetPasswordReq) (any, transport.HError) {
+	// Verify email and password
+	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
 
-// }
+	if err != nil {
+		logger.Logger.Error("ForgetPassword_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
 
-// func (a *AuthService) ForgetPasswordUpdate(ctx context.Context, req ForgetPasswordUpdateReq) {
+	}
 
-// }
+	if ep == nil {
+		logger.Logger.Warn("ForgetPassword_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
+		return nil, transport.NewFormError("Invaild forget password", "email", "invalid email")
+	}
+
+	newEP := *ep
+	newEP.RetrieveToken = auth.GenerateVerifyCode()
+	newEP.VerifyCodeExpiredAt = time.Now().Add(5 * time.Minute)
+
+	err = a.emailPasswordRepo.UpdateEmailPasswdByEmail(context.Background(), newEP)
+	if err != nil {
+		logger.Logger.Error("ForgetPassword_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		transport.WrapInteralServerError(err)
+	}
+
+	logger.Logger.Info("ForgetPassword_Success", "ip", loadRealIp(ctx), "email", req.Email)
+
+	//TODO: send email with code
+
+	return nil, nil
+}
+
+func (a *AuthService) ForgetPasswordUpdate(ctx context.Context, req ForgetPasswordUpdateReq) (any, transport.HError) {
+	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
+
+	if err != nil {
+		logger.Logger.Error("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+
+	}
+
+	if ep == nil {
+		logger.Logger.Warn("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
+		return nil, transport.NewFormError("Invaild forget password", "email", "invalid email")
+	}
+
+	if ep.RetrieveTokenExpiredAt.Before(time.Now()) {
+		logger.Logger.Warn("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "retrieve code expire")
+		return nil, transport.NewFormError("Invaild forget password", "retrieveCode", "retrieve code expired")
+	}
+
+	if ep.RetrieveToken != req.RetrieveCode {
+		logger.Logger.Warn("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "invalid retrieve code")
+		return nil, transport.NewFormError("Invaild forget password", "retrieveCode", "invalid retrieve code")
+	}
+
+	hashedPasswd, err := auth.HashPassword(req.NewPassword)
+	if err != nil {
+		logger.Logger.Error("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	newEP := *ep
+	newEP.Passwd = hashedPasswd
+
+	err = a.emailPasswordRepo.UpdateEmailPasswdByEmail(context.Background(), newEP)
+
+	if err != nil {
+		logger.Logger.Error("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		transport.WrapInteralServerError(err)
+	}
+
+	//TODO: send email to user for notice
+
+	logger.Logger.Info("ForgetPasswordUpdate_Success", "ip", loadRealIp(ctx), "email", req.Email)
+	return nil, nil
+}
 
 func (a *AuthService) Logout(ctx context.Context, session transport.SessionReq) (*auth.Session, transport.HError) {
 	a.sessionRepo.Delete(session.SessionId)
