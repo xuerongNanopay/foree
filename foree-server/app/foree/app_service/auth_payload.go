@@ -70,6 +70,7 @@ type CreateUserReq struct {
 	LastName            string    `json:"lastName" validate:"required"`
 	Age                 int       `json:"age"`
 	Dob                 ForeeDate `json:"dob"`
+	Pob                 string    `json:"pob" validate:"required"`
 	Nationality         string    `json:"nationality" validate:"required"`
 	Address1            string    `json:"address1" validate:"required"`
 	Address2            string    `json:"address2"`

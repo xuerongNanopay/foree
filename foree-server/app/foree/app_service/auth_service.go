@@ -57,6 +57,7 @@ type AuthService struct {
 	userIdentificationRepo *foree_auth.UserIdentificationRepo
 	interacAccountRepo     *account.InteracAccountRepo
 	userGroupRepo          *auth.UserGroupRepo
+	userExtraRepo          *foree_auth.UserExtraRepo
 	referralRepo           *referral.ReferralRepo
 	rewardRepo             *transaction.RewardRepo
 	giftRepo               *promotion.GiftRepo
@@ -340,8 +341,6 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	newUser.PhoneNumber = req.PhoneNumber
 	newUser.Email = session.EmailPasswd.Email
 
-	//TODO: user extra
-
 	updateErr := a.userRepo.UpdateUserById(ctx, newUser)
 
 	if updateErr != nil {
@@ -350,8 +349,20 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		return nil, transport.WrapInteralServerError(updateErr)
 	}
 
+	userExtra := foree_auth.UserExtra{
+		Nationality: req.Nationality,
+		Pob:         req.Pob,
+	}
+
+	_, er := a.userExtraRepo.InsertUserExtra(ctx, userExtra)
+	if er != nil {
+		dTx.Rollback()
+		logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", er.Error())
+		return nil, transport.WrapInteralServerError(er)
+	}
+
 	//Create userGroup
-	_, er := a.userGroupRepo.InsertUserGroup(ctx, auth.UserGroup{
+	_, er = a.userGroupRepo.InsertUserGroup(ctx, auth.UserGroup{
 		RoleGroup:             foree_constant.DefaultRoleGroup,
 		TransactionLimitGroup: foree_constant.DefaultTransactionLimitGroup,
 		OwnerId:               newUser.ID,
