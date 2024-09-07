@@ -5,16 +5,8 @@ import (
 
 	"xue.io/go-pay/app/foree/account"
 	foree_constant "xue.io/go-pay/app/foree/constant"
-	"xue.io/go-pay/auth"
 	"xue.io/go-pay/server/transport"
 )
-
-func generateInteracAddressFromUser(user *auth.User) string {
-	if user.Address2 == "" {
-		return fmt.Sprintf("%s,%s,%s,%s,%s", user.Address1, user.City, user.Province, user.PostalCode, user.Country)
-	}
-	return fmt.Sprintf("%s,%s,%s,%s,%s,%s", user.Address1, user.Address2, user.City, user.Province, user.PostalCode, user.Country)
-}
 
 type CreateContactReq struct {
 	transport.SessionReq
