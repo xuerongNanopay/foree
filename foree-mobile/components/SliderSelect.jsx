@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-const SliderDropDown = () => {
+const SliderSelect = () => {
   return (
     <View>
-      <Text>SliderDropDown</Text>
+      <Text>SliderSelect</Text>
     </View>
   )
 }
 
-export default SliderDropDown
+export default SliderSelect
