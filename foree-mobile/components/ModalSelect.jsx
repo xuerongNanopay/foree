@@ -22,6 +22,7 @@ const Touchable = ({text="select a country"}) => {
 }
 const ModalSelect = ({
   title="Nationality",
+  modalTitle="select a country",
   value,
   containerStyles,
   inputStyles,
@@ -63,13 +64,23 @@ const ModalSelect = ({
         </View>
       </View>
       <Modal 
-        visible={visible} 
+        visible={visible}
         onTouchCancel={() => setVisible(false)} 
         animationType='slide'
       >
         <SafeAreaView>
-          <View>
-            <Text>Title</Text>
+          <View
+            className="flex flex-row items-center border-b-2 border-slate-400"
+          >
+            <Text
+              onPress={() => setVisible(false)}
+              className="py-2 pl-4 pr-8 text-2xl font-bold text-slate-600"
+            >
+              &lt;
+            </Text>
+            <Text
+              className="font-psemibold text-xl text-slate-600"
+            >{modalTitle}</Text>
           </View>
           <View>
             <Text>Can Create</Text>
