@@ -88,7 +88,7 @@ const ModalSelect = ({
             >
               <Text className="px-2">&#128270;</Text>
               <TextInput
-                className={`flex-1 font-pregular text-base`}
+                className={`flex-1 h-full font-pregular text-base`}
                 // value={"aaa"}
                 placeholder="searching..."
                 editable={true}

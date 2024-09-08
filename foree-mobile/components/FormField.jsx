@@ -36,13 +36,13 @@ const FormField = ({
         `}
       >
         <TextInput
-          className={`flex-1 font-psemibold text-base ${inputStyles}`}
+          className={`flex-1 h-full font-psemibold text-base ${inputStyles}`}
           value={value}
           placeholder={placeholder}
           placeholderTextColor="#BDBDBD"
           onChangeText={handleChangeText}
           secureTextEntry={title === 'Password' && !showPassword}
-          keyboardType={keyboardType}
+          keyboardType={keyboardType} 
           editable={editable}
         />
 
