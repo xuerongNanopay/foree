@@ -1,7 +1,5 @@
-import { View, Text, TextInput, TouchableOpacity, Modal, SafeAreaView, ScrollView } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView, SafeAreaView } from 'react-native'
 import React, { useState } from 'react'
-
-import Countries from '../constants/country'
 import string_util from '../util/string_util'
 
 const variants = {
@@ -32,7 +30,8 @@ const ModalSelect = ({
   inputContainerStyles,
   onPress=()=>{},
   variant='bordered',
-  placeholder
+  placeholder,
+  errorMessage
 }) => {
   const [showList, setShowList] = useState(list)
   const [visible, setVisible] = useState(false)
@@ -40,7 +39,7 @@ const ModalSelect = ({
     <View>
       {/* <TouchableComponent>ModalSelect</TouchableComponent> */}
       <View className={`space-y-2 ${containerStyles}`}>
-      { !!title ? (<Text className="test-base test-gray-100 font-pmedium">{title}</Text>) : null }
+        { !!title ? (<Text className="test-base test-gray-100 font-pmedium">{title}</Text>) : null }
         <View
           className={`
             w-full h-12 bg-slate-100 ${variants[variant] ?? variants.bordered}
@@ -57,27 +56,27 @@ const ModalSelect = ({
             // onChangeText={handleChangeText}
             editable={false}
           />
-
-          {/* <View>
-            <Text 
-              className="mx-4 text-2xl font-bold text-[#BDBDBD]"
-            >
-              &gt;
-            </Text>
-          </View> */}
         </View>
+          {
+            !!errorMessage ?
+            <View>
+              <Text className="text-red-600">{errorMessage}</Text>
+            </View> : null
+          }
       </View>
       <Modal 
         visible={visible}
-        onTouchCancel={() => setVisible(false)} 
         animationType='slide'
       >
-        <SafeAreaView>
+        <SafeAreaView className="h-full flex flex-col">
           <View
             className="flex flex-row items-center border-b-[1px] border-slate-400"
           >
             <Text
-              onPress={() => setVisible(false)}
+              onPress={() => {
+                setVisible(false)
+                setShowList(list)
+              }}
               className="py-2 pl-4 pr-8 text-2xl font-bold text-slate-600"
             >
               &#8592;
@@ -86,7 +85,9 @@ const ModalSelect = ({
               className="font-psemibold text-xl text-slate-600"
             >{modalTitle}</Text>
           </View>
-          <View className="px-2">
+          <View 
+            className="px-2 flex-1"
+          >
             {
               allowSearch ? <View
                 className="w-full h-14 my-2 border-2 border-secondary rounded-full flex-row items-center"
@@ -124,29 +125,35 @@ const ModalSelect = ({
               }
               
             </View>
-            <ScrollView className="h-full">
-              { !showList || showList.length === 0 ? 
-                <View className="w-full border-b-[1px] border-slate-300">
-                  <Text 
-                    className="font-psemibold text-center py-4 text-xl"
-                  >🚫 Empty</Text> 
-                </View>
-                :
-                showList.map((v) => 
-                (
-                  <TouchableOpacity
-                    onPress={() => {
-                      onPress(v)
-                      setVisible(false)
-                    }}
-                    className="w-full border-b-[1px] border-slate-300"
-                    key={v[searchKey]}
-                  >
-                    {listView(v)}
-                  </TouchableOpacity>
-                ))
-              }
-            </ScrollView>
+            <View className="flex-1">
+              <ScrollView 
+                className=""
+                showsVerticalScrollIndicator={false}
+              >
+                { !showList || showList.length === 0 ? 
+                  <View className="w-full border-b-[1px] border-slate-300">
+                    <Text 
+                      className="font-psemibold text-center py-4 text-xl"
+                    >🚫 Empty</Text> 
+                  </View>
+                  :
+                  showList.map((v) => 
+                  (
+                    <TouchableOpacity
+                      onPress={() => {
+                        onPress(v)
+                        setVisible(false)
+                        setShowList(list)
+                      }}
+                      className="w-full border-b-[1px] border-slate-300"
+                      key={v[searchKey]}
+                    >
+                      {listView(v)}
+                    </TouchableOpacity>
+                  ))
+                }
+              </ScrollView>
+            </View>
           </View>
         </SafeAreaView>
       </Modal>

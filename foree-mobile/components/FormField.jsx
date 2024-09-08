@@ -20,6 +20,7 @@ const FormField = ({
   variant='bordered',
   keyboardType='default', 
   editable=true,
+  errorMessage,
   ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false)
@@ -58,6 +59,12 @@ const FormField = ({
           </TouchableOpacity>
         )}
       </View>
+      {
+        !!errorMessage ?
+        <View>
+          <Text className="text-red-600">{errorMessage}</Text>
+        </View> : null
+      }
     </View>
   )
 }

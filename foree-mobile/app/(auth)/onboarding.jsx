@@ -13,7 +13,8 @@ const FieldItem = ({
   value,
   handleChangeText,
   editable=true,
-  keyboardType='ascii-capable'
+  keyboardType='ascii-capable',
+  errorMessage,
 }) => (
   <FormField
     title={title}
@@ -23,6 +24,7 @@ const FieldItem = ({
     containerStyles="mt-2"
     variant='flat'
     editable={editable}
+    errorMessage={errorMessage}
   />
 )
 
@@ -46,9 +48,15 @@ const IDTypes = {
 }
 
 
-const SelectIDTypesItem =(idType) => (
+const SelectIDTypesItem = (idType) => (
   <Text className="font-pregular py-3 text-xl">
     {idType["name"]}
+  </Text>
+)
+
+const SelectProvinceItem = (province) => (
+  <Text className="font-pregular py-3 text-xl">
+    {province["name"]}
   </Text>
 )
 
@@ -91,6 +99,7 @@ const Onboarding = () => {
     identificationValue: '',
   })
 
+
   useEffect(() => {
     async function validate() {
       try {
@@ -101,7 +110,7 @@ const Onboarding = () => {
         for ( let i of err.inner ) {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
-        // setErrors(e)
+        setErrors(e)
       }
     }
     validate()
@@ -130,18 +139,21 @@ const Onboarding = () => {
       </Text>
 
       <FieldItem title="First Name" value={form.firstName}
+        errorMessage={errors['firstName']}
         handleChangeText={(e) => setForm({
           ...form,
           firstName:e
         })}
       />
       <FieldItem title="Middle Name" value={form.middleName}
+        errorMessage={errors['middleName']}
         handleChangeText={(e) => setForm({
           ...form,
           middleName:e
         })}
       />
       <FieldItem title="Last Name" value={form.lastName}
+        errorMessage={errors['lastName']}
         handleChangeText={(e) => setForm({
           ...form,
           lastName:e
@@ -162,30 +174,47 @@ const Onboarding = () => {
       </Text>
 
       <FieldItem title="Address Line 1" value={form.address1}
+        errorMessage={errors['address1']}
         handleChangeText={(e) => setForm({
           ...form,
           address1:e
         })}
       />
       <FieldItem title="Address Line 2" value={form.address2}
+        errorMessage={errors['address2']}
         handleChangeText={(e) => setForm({
           ...form,
           address2:e
         })}
       />
       <FieldItem title="City" value={form.city}
+        errorMessage={errors['city']}
         handleChangeText={(e) => setForm({
           ...form,
           city:e
         })}
       />
-      <FieldItem title="Province" value={form.province}
-        handleChangeText={(e) => setForm({
-          ...form,
-          province:e
-        })}
+      <ModalSelect
+        title="Province"
+        modalTitle="select a province"
+        errorMessage={errors['province']}
+        containerStyles="mt-2"
+        allowAdd={false}
+        value={Regions[form.country]?.[form.province]?.name}
+        variant='flat'
+        searchKey="name"
+        listView={SelectProvinceItem}
+        list={Object.values(Regions[form.country])}
+        onPress={(o) => {
+          setForm({
+            ...form,
+            province: o.isoCode
+          })
+        }}
+        placeholder="select a province"
       />
       <FieldItem title="Country" value={Countries[form.country]?.name}
+        errorMessage={errors['country']}
         handleChangeText={(e) => setForm({
           ...form,
           country:e
@@ -193,12 +222,14 @@ const Onboarding = () => {
         editable={false}
       />
       <FieldItem title="Postal Code" value={form.postalCode}
+        errorMessage={errors['postalCode']}
         handleChangeText={(e) => setForm({
           ...form,
           postalCode:e
         })}
       />
       <FieldItem title="Phone Number" value={form.phoneNumber}
+        errorMessage={errors['phoneNumber']}
         handleChangeText={(e) => setForm({
           ...form,
           phoneNumber:e
@@ -220,6 +251,7 @@ const Onboarding = () => {
         Almost done! Infomation below is requested by xxxxx xxxxx of xxxxxxx, our Foree Remittance payout parter, inorder to process your transfers under ...... regulatory guidelines
       </Text>
       <FieldItem title="Date of Birth(YYYY-MM-DD)" value={form.dob}
+        errorMessage={errors['dob']}
         handleChangeText={(e) => setForm({
           ...form,
           dob:e
@@ -229,6 +261,7 @@ const Onboarding = () => {
       <ModalSelect
         title="Place of Birth"
         modalTitle="select a country"
+        containerStyles="mt-2"
         allowAdd={false}
         value={Countries[form.pob]?.name}
         variant='flat'
@@ -246,6 +279,7 @@ const Onboarding = () => {
       <ModalSelect
         title="Nationality"
         modalTitle="select a country"
+        containerStyles="mt-2"
         allowAdd={false}
         value={Countries[form.nationality]?.name}
         variant='flat'
@@ -263,6 +297,7 @@ const Onboarding = () => {
       <ModalSelect
         title="Identification Document Type"
         modalTitle="select identification type"
+        containerStyles="mt-2"
         allowAdd={false}
         allowSearch={false}
         value={IDTypes[form.identificationType]?.name}
@@ -279,6 +314,7 @@ const Onboarding = () => {
         placeholder="select ID type"
       />
       <FieldItem title="Identification Number" value={form.identificationValue}
+        errorMessage={errors['identificationValue']}
         handleChangeText={(e) => setForm({
           ...form,
           identificationValue:e
