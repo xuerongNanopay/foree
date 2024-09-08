@@ -6,11 +6,13 @@ import FormField from '../../components/FormField'
 import Countries from '../../constants/country'
 import Regions from '../../constants/region'
 import payload from '../../service/payload'
+import ModalSelect, { SelectCountryItem } from '../../components/ModalSelect'
 
 const FieldItem = ({
   title,
   value,
   handleChangeText,
+  editable=true,
   keyboardType='ascii-capable'
 }) => (
   <FormField
@@ -20,6 +22,7 @@ const FieldItem = ({
     keyboardType={keyboardType}
     containerStyles="mt-2"
     variant='flat'
+    editable={editable}
   />
 )
 
@@ -65,7 +68,6 @@ const Onboarding = () => {
   useEffect(() => {
     async function validate() {
       try {
-        console.log(form)
         await payload.OnboardingScheme.validate(form, {abortEarly: false})
         setErrors({})
       } catch (err) {
@@ -73,6 +75,7 @@ const Onboarding = () => {
         for ( let i of err.inner ) {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
+        // setErrors(e)
       }
     }
     validate()
@@ -156,11 +159,12 @@ const Onboarding = () => {
           province:e
         })}
       />
-      <FieldItem title="Country" value={form.country}
+      <FieldItem title="Country" value={Countries[form.country]?.name}
         handleChangeText={(e) => setForm({
           ...form,
           country:e
         })}
+        editable={false}
       />
       <FieldItem title="Postal Code" value={form.postalCode}
         handleChangeText={(e) => setForm({
@@ -196,17 +200,35 @@ const Onboarding = () => {
         })}
         keyboardType="numbers-and-punctuation"
       />
-      <FieldItem title="Place of Birth" value={form.pob}
-        handleChangeText={(e) => setForm({
-          ...form,
-          pob:e
-        })}
+      <ModalSelect
+        title="Place of Birth"
+        allowAdd={false}
+        value={Countries[form.pob]?.name}
+        variant='flat'
+        listView={SelectCountryItem}
+        list={Object.values(Countries)}
+        onPress={(o) => {
+          setForm({
+            ...form,
+            pob: o.isoCode
+          })
+        }}
+        placeholder="select a country"
       />
-      <FieldItem title="Nationality" value={form.nationality}
-        handleChangeText={(e) => setForm({
-          ...form,
-          nationality:e
-        })}
+      <ModalSelect
+        title="Nationality"
+        allowAdd={false}
+        value={Countries[form.nationality]?.name}
+        variant='flat'
+        listView={SelectCountryItem}
+        list={Object.values(Countries)}
+        onPress={(o) => {
+          setForm({
+            ...form,
+            nationality: o.isoCode
+          })
+        }}
+        placeholder="select a country"
       />
       <FieldItem title="Identification Document Type" value={form.identificationType}
         handleChangeText={(e) => setForm({

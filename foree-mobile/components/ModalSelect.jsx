@@ -8,7 +8,7 @@ const variants = {
   flat: "border-b-2"
   
 }
-
+const aaa = Object.values(Countries)
 const SelectCountryItem =(country) => (
   <Text className="font-pregular py-3 text-xl">
     {`${country["unicodeIcon"]}`} {country["name"]}
@@ -16,23 +16,23 @@ const SelectCountryItem =(country) => (
 )
 
 const ModalSelect = ({
-  title="Nationality",
+  title,
   modalTitle="select a country",
   value,
   containerStyles,
   inputStyles,
   allowSearch=true,
   searchKey="name",
-  list=[],
+  list,
   listView,
   allowAdd=true,
-  addTitle="Add New Contact",
+  addTitle,
   addHandler,
   inputContainerStyles,
+  onPress=()=>{},
   variant='bordered',
-  placeholder="select an option"
+  placeholder
 }) => {
-  // const { TouchableComponent }  = Touchable(placeHolder)
   const [showList, setShowList] = useState(list)
   const [visible, setVisible] = useState(false)
   return (
@@ -129,7 +129,10 @@ const ModalSelect = ({
                 showList.map((v) => 
                 (
                   <TouchableOpacity
-                    onPress={() => {alert(v)}}
+                    onPress={() => {
+                      onPress(v)
+                      setVisible(false)
+                    }}
                     className="w-full border-b-[1px] border-slate-300"
                     key={v[searchKey]}
                   >
@@ -146,3 +149,6 @@ const ModalSelect = ({
 }
 
 export default ModalSelect
+export {
+  SelectCountryItem
+}
