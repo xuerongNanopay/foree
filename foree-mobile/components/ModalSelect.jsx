@@ -76,7 +76,7 @@ const ModalSelect = ({
               onPress={() => setVisible(false)}
               className="py-2 pl-4 pr-8 text-2xl font-bold text-slate-600"
             >
-              &lt;
+              &#8592;
             </Text>
             <Text
               className="font-psemibold text-xl text-slate-600"
