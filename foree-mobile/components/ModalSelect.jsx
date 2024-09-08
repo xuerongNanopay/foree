@@ -39,14 +39,14 @@ const ModalSelect = ({
       { !!title ? (<Text className="test-base test-gray-100 font-pmedium">{title}</Text>) : null }
         <View
           className={`
-            w-full h-12 px-4 bg-slate-100 ${variants[variant] ?? variants.bordered}
+            w-full h-12 bg-slate-100 ${variants[variant] ?? variants.bordered}
             border-slate-400 focus:border-secondary-200
             items-center flex-row ${inputContainerStyles}
           `}
         >
           <TextInput
             onPress={() => setVisible(true)}
-            className={`flex-1 font-psemibold text-base ${inputStyles}`}
+            className={`h-full w-full px-4 flex-1 font-psemibold text-base ${inputStyles}`}
             value={value}
             placeholder={placeholder}
             placeholderTextColor="#BDBDBD"
@@ -54,13 +54,13 @@ const ModalSelect = ({
             editable={false}
           />
 
-          <View>
+          {/* <View>
             <Text 
-              className="text-2xl font-bold text-[#BDBDBD]"
+              className="mx-4 text-2xl font-bold text-[#BDBDBD]"
             >
               &gt;
             </Text>
-          </View>
+          </View> */}
         </View>
       </View>
       <Modal 
@@ -70,7 +70,7 @@ const ModalSelect = ({
       >
         <SafeAreaView>
           <View
-            className="flex flex-row items-center border-b-2 border-slate-400"
+            className="flex flex-row items-center border-b-[1px] border-slate-400"
           >
             <Text
               onPress={() => setVisible(false)}
@@ -82,14 +82,29 @@ const ModalSelect = ({
               className="font-psemibold text-xl text-slate-600"
             >{modalTitle}</Text>
           </View>
-          <View>
-            <Text>Can Create</Text>
-          </View>
-          <View>
-            <Text>Can search</Text>
-          </View>
-          <View>
-            <Text>List</Text>
+          <View className="px-2">
+            <View
+              className="w-full h-14 my-2 border-2 border-slate-400 rounded-full flex-row items-center"
+            >
+              <Text className="px-2">&#128270;</Text>
+              <TextInput
+                className={`flex-1 font-pregular text-base`}
+                // value={"aaa"}
+                placeholder="searching..."
+                editable={true}
+                keyboardType="default"
+                placeholderTextColor="#BDBDBD"
+                onChangeText={()=>{}}
+              />
+                
+              {/* <Text>Search</Text> */}
+            </View>
+            <View>
+              <Text>Can search</Text>
+            </View>
+            <View>
+              <Text>List</Text>
+            </View>
           </View>
         </SafeAreaView>
       </Modal>
