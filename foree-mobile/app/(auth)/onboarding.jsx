@@ -189,7 +189,7 @@ const Onboarding = () => {
       <Text className="font-pregular text-center mb-4">
         Almost done! Infomation below is requested by xxxxx xxxxx of xxxxxxx, our Foree Remittance payout parter, inorder to process your transfers under ...... regulatory guidelines
       </Text>
-      <FieldItem title="Date of Birth" value={form.dob}
+      <FieldItem title="Date of Birth(YYYY-MM-DD)" value={form.dob}
         handleChangeText={(e) => setForm({
           ...form,
           dob:e
