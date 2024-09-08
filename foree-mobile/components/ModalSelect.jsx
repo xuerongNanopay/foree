@@ -2,6 +2,7 @@ import { View, Text, TextInput, TouchableOpacity, Modal, SafeAreaView, ScrollVie
 import React, { useState } from 'react'
 
 import Countries from '../constants/country'
+import string_util from '../util/string_util'
 
 const variants = {
   bordered: "border-2 rounded-2xl",
@@ -22,7 +23,7 @@ const ModalSelect = ({
   containerStyles,
   inputStyles,
   allowSearch=true,
-  searchKey="name",
+  searchKey,
   list,
   listView,
   allowAdd=true,
@@ -98,7 +99,12 @@ const ModalSelect = ({
                   editable={true}
                   keyboardType="default"
                   placeholderTextColor="#BDBDBD"
-                  onChangeText={()=>{}}
+                  onChangeText={(t)=>{
+                    if ( !t ) setShowList(list)
+                    else {
+                      setShowList(list.filter(v => string_util.containSubsequence(v[searchKey], t, {caseInsensitive:true})))
+                    }
+                  }}
                 />
                   
                 {/* <Text>Search</Text> */}

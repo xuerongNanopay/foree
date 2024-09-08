@@ -205,6 +205,7 @@ const Onboarding = () => {
         allowAdd={false}
         value={Countries[form.pob]?.name}
         variant='flat'
+        searchKey="name"
         listView={SelectCountryItem}
         list={Object.values(Countries)}
         onPress={(o) => {
