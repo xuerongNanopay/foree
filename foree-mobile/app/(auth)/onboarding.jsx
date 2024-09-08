@@ -18,7 +18,8 @@ const FieldItem = ({
     value={value}
     handleChangeText={handleChangeText}
     keyboardType={keyboardType}
-    otherStyles="mt-2"
+    containerStyles="mt-2"
+    variant='flat'
   />
 )
 
@@ -31,7 +32,7 @@ const ReviewItem = ({
     value={value}
     handleChangeText={() => {}}
     keyboardType="ascii-capable"
-    otherStyles="mt-2"
+    containerStyles="mt-2"
     variant="flat"
     inputStyles="text-slate-500"
     inputContainerStyles="border-slate-700 h-7"

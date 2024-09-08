@@ -74,7 +74,7 @@ const Login = () => {
                 ...form,
                 email:e
               })}
-              otherStyles="mt-4"
+              containerStyles="mt-4"
               keyboardType="email-address"
             />
             <FormField
@@ -84,7 +84,7 @@ const Login = () => {
                 ...form,
                 password:e
               })}
-              otherStyles="mt-7"
+              containerStyles="mt-7"
             />
             <Link 
                 href="/forget_password" 

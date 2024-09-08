@@ -50,7 +50,7 @@ const VerifyEmail = () => {
               })}
               inputStyles="text-center"
               variant="flat"
-              otherStyles="mt-1"
+              containerStyles="mt-1"
               keyboardType="numeric"
 
             />

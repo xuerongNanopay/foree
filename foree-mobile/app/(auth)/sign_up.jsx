@@ -53,7 +53,7 @@ const SignUp = () => {
               ...form,
               email:e
             })}
-            otherStyles="mt-7"
+            containerStyles="mt-7"
             keyboardType="email-address"
           />
           <FormField
@@ -63,7 +63,7 @@ const SignUp = () => {
               ...form,
               password:e
             })}
-            otherStyles="mt-7"
+            containerStyles="mt-7"
           />
           <CustomButton
             title="Sign Up"

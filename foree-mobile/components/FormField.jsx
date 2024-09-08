@@ -14,7 +14,7 @@ const FormField = ({
   value, 
   placeholder, 
   handleChangeText, 
-  otherStyles,
+  containerStyles,
   inputStyles,
   inputContainerStyles,
   variant='bordered',
@@ -26,7 +26,7 @@ const FormField = ({
 
 
   return (
-    <View className={`space-y-2 ${otherStyles}`}>
+    <View className={`space-y-2 ${containerStyles}`}>
       { !!title ? (<Text className="test-base test-gray-100 font-pmedium">{title}</Text>) : null }
       <View 
         className={`

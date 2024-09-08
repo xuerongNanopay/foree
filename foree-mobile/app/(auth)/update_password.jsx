@@ -41,7 +41,7 @@ const UpdatePassword = () => {
               ...form,
               password:e
             })}
-            otherStyles="mt-7"
+            containerStyles="mt-7"
             keyboardType="email-address"
           />
           <CustomButton

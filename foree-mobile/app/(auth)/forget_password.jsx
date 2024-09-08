@@ -42,7 +42,7 @@ const ForgetPassword = () => {
                 ...form,
                 email:e
               })}
-              otherStyles="mt-1"
+              containerStyles="mt-1"
               keyboardType="email-address"
             />
             <CustomButton
