@@ -30,7 +30,8 @@ const ModalSelect = ({
   searchKey,
   list,
   listView,
-  allowAdd,
+  allowAdd=true,
+  addTitle="Add New Contact",
   addHandler,
   inputContainerStyles,
   variant='bordered',
@@ -91,7 +92,7 @@ const ModalSelect = ({
           <View className="px-2">
             {
               allowSearch ? <View
-                className="w-full h-14 my-2 border-2 border-slate-400 rounded-full flex-row items-center"
+                className="w-full h-14 my-2 border-2 border-secondary rounded-full flex-row items-center"
               >
                 <Text className="px-2">&#128270;</Text>
                 <TextInput
@@ -108,7 +109,18 @@ const ModalSelect = ({
               </View> : null
             }
             <View>
-              <Text>Can search</Text>
+              {
+                allowAdd ? <View
+                  className="w-full h-14 my-2 border-2 border-secondary rounded-full flex-row items-center"
+                >
+                  <TouchableOpacity
+                    className="w-full"
+                  >
+                    <Text className="text-center font-semibold text-secondary text-xl"><Text className="text-2xl">+</Text> {addTitle}</Text>
+                  </TouchableOpacity>
+                </View> : null
+              }
+              
             </View>
             <View>
               <Text>List</Text>
