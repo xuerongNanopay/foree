@@ -2,8 +2,8 @@ containSubsequence = (s, q, {caseInsensitive=false}) => {
     if ( typeof s !== 'string' && typeof s !== typeof q) return false
     if ( q.length > s.length ) return false
     if ( caseInsensitive ) {
-        s.toLowerCase()
-        q.toLowerCase()
+        s = s.toLowerCase()
+        q = q.toLowerCase()
     }
 
     let p1 = 0;

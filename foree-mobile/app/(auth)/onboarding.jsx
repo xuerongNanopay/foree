@@ -26,6 +26,32 @@ const FieldItem = ({
   />
 )
 
+const IDTypes = {
+  "PASSPORT": {
+    id: "PASSPORT",
+    name: "Passport"
+  },
+  "DRIVER_LICENSE": {
+    id: "DRIVER_LICENSE",
+    name: "Driver License"
+  },
+  "PROVINCIAL_ID": {
+    id: "PROVINCIAL_ID",
+    name: "Provincial Id"
+  },
+  "NATIONAL_ID": {
+    id: "NATIONAL_ID",
+    name: "Nation Id"
+  }
+}
+
+
+const SelectIDTypesItem =(idType) => (
+  <Text className="font-pregular py-3 text-xl">
+    {idType["name"]}
+  </Text>
+)
+
 const ReviewItem = ({
   title,
   value,
@@ -202,6 +228,7 @@ const Onboarding = () => {
       />
       <ModalSelect
         title="Place of Birth"
+        modalTitle="select a country"
         allowAdd={false}
         value={Countries[form.pob]?.name}
         variant='flat'
@@ -218,9 +245,11 @@ const Onboarding = () => {
       />
       <ModalSelect
         title="Nationality"
+        modalTitle="select a country"
         allowAdd={false}
         value={Countries[form.nationality]?.name}
         variant='flat'
+        searchKey="name"
         listView={SelectCountryItem}
         list={Object.values(Countries)}
         onPress={(o) => {
@@ -231,11 +260,23 @@ const Onboarding = () => {
         }}
         placeholder="select a country"
       />
-      <FieldItem title="Identification Document Type" value={form.identificationType}
-        handleChangeText={(e) => setForm({
-          ...form,
-          identificationType:e
-        })}
+      <ModalSelect
+        title="Identification Document Type"
+        modalTitle="select identification type"
+        allowAdd={false}
+        allowSearch={false}
+        value={IDTypes[form.identificationType]?.name}
+        variant='flat'
+        searchKey="name"
+        listView={SelectIDTypesItem}
+        list={Object.values(IDTypes)}
+        onPress={(o) => {
+          setForm({
+            ...form,
+            identificationType: o["id"]
+          })
+        }}
+        placeholder="select ID type"
       />
       <FieldItem title="Identification Number" value={form.identificationValue}
         handleChangeText={(e) => setForm({

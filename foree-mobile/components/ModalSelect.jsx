@@ -9,7 +9,7 @@ const variants = {
   flat: "border-b-2"
   
 }
-const aaa = Object.values(Countries)
+
 const SelectCountryItem =(country) => (
   <Text className="font-pregular py-3 text-xl">
     {`${country["unicodeIcon"]}`} {country["name"]}
@@ -18,7 +18,7 @@ const SelectCountryItem =(country) => (
 
 const ModalSelect = ({
   title,
-  modalTitle="select a country",
+  modalTitle,
   value,
   containerStyles,
   inputStyles,
@@ -142,7 +142,7 @@ const ModalSelect = ({
                     className="w-full border-b-[1px] border-slate-300"
                     key={v[searchKey]}
                   >
-                    {SelectCountryItem(v)}
+                    {listView(v)}
                   </TouchableOpacity>
                 ))
               }
