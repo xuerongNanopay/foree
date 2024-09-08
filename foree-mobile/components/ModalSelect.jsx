@@ -1,25 +1,20 @@
-import { View, Image, Text, TextInput, TouchableOpacity, Modal, SafeAreaView } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, Modal, SafeAreaView, ScrollView } from 'react-native'
 import React, { useState } from 'react'
 
-import { icons } from '../constants'
+import Countries from '../constants/country'
+
 const variants = {
   bordered: "border-2 rounded-2xl",
   flat: "border-b-2"
   
 }
 
-const Touchable = ({text="select a country"}) => {
-  const TouchableComponent = () => (
-    <TouchableOpacity
-      onPress={() => {
-        alert('touch')
-      }}
-    >
-      <Text>{text}</Text>
-    </TouchableOpacity>
-  )
-  return {TouchableComponent}
-}
+const SelectCountryItem =(country) => (
+  <Text className="font-pregular py-3 text-xl">
+    {`${country["unicodeIcon"]}`} {country["name"]}
+  </Text>
+)
+
 const ModalSelect = ({
   title="Nationality",
   modalTitle="select a country",
@@ -27,8 +22,8 @@ const ModalSelect = ({
   containerStyles,
   inputStyles,
   allowSearch=true,
-  searchKey,
-  list,
+  searchKey="name",
+  list=[],
   listView,
   allowAdd=true,
   addTitle="Add New Contact",
@@ -38,6 +33,7 @@ const ModalSelect = ({
   placeholder="select an option"
 }) => {
   // const { TouchableComponent }  = Touchable(placeHolder)
+  const [showList, setShowList] = useState(list)
   const [visible, setVisible] = useState(false)
   return (
     <View>
@@ -122,9 +118,26 @@ const ModalSelect = ({
               }
               
             </View>
-            <View>
-              <Text>List</Text>
-            </View>
+            <ScrollView className="h-full">
+              { !showList || showList.length === 0 ? 
+                <View className="w-full border-b-[1px] border-slate-300">
+                  <Text 
+                    className="font-psemibold text-center py-4 text-xl"
+                  >🚫 Empty</Text> 
+                </View>
+                :
+                showList.map((v) => 
+                (
+                  <TouchableOpacity
+                    onPress={() => {alert(v)}}
+                    className="w-full border-b-[1px] border-slate-300"
+                    key={v[searchKey]}
+                  >
+                    {SelectCountryItem(v)}
+                  </TouchableOpacity>
+                ))
+              }
+            </ScrollView>
           </View>
         </SafeAreaView>
       </Modal>
