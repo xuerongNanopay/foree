@@ -68,7 +68,7 @@ func (repo *ConditionRepo) GetUniqueConditionByName(ctx context.Context, name st
 		}
 	}
 
-	if f.Name == "" {
+	if f == nil || f.Name == "" {
 		return nil, nil
 	}
 
