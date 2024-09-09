@@ -8,7 +8,7 @@ const MultiStepForm = ({
   submitTintTitle = 'Submit',
   onSumbit = () => {},
   steps = () => [],
-  isSubmitting=false
+  submitDisabled=false
 }) => {
   const scrollRef = useRef()
   const formStep = steps()
@@ -69,33 +69,30 @@ const MultiStepForm = ({
             !isFirst ?
             <CustomButton
               title={"< Previous"}
-              isLoading={isSubmitting}
+              disabled={false}
               handlePress={()=>{
                 setCurIdx(curIdx-1)
               }}
               containerStyles={"w-[49%]"}
               variant="bordered"
-                // isLoading={isSubmitting}
             /> : null
           }
           {
             !isLast ? 
             <CustomButton
               title={"Next >"}
-              isLoading={isSubmitting || !formStep[curIdx].canGoNext()}
+              disabled={!formStep[curIdx].canGoNext()}
               handlePress={()=>{setCurIdx(curIdx+1)}}
               containerStyles={isFirst ? "w-[100%]" : "w-[49%]"}
-                // isLoading={isSubmitting}
             /> : null
           }
           {
             isLast ? 
             <CustomButton
               title={submitTintTitle}
-              isLoading={isSubmitting || !formStep[curIdx].canGoNext()}
+              disabled={submitDisabled || !formStep[curIdx].canGoNext()}
               handlePress={onSumbit}
               containerStyles={isFirst ? "w-[100%]" : "w-[49%]"}
-                // isLoading={isSubmitting}
             /> : null
           }
         </View>

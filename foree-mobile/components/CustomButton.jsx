@@ -17,7 +17,7 @@ const CustomButton = ({
   handlePress, 
   containerStyles, 
   textStyles, 
-  isLoading,
+  disabled,
   variant='solid'
 }) => {
   return (
@@ -27,9 +27,9 @@ const CustomButton = ({
         className={`
             ${variants[variant].buttonStyle} rounded-xl min-h-[48px] justify-center items-center
             ${containerStyles}
-            ${isLoading ? 'opacity-50' : ''}
+            ${disabled ? 'opacity-50' : ''}
         `}
-        disabled={isLoading}
+        disabled={disabled}
     >
     <Text 
         className={`${variants[variant].textStyle} font-psemibold text-lg ${textStyles}`}

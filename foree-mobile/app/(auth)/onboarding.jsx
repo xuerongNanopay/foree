@@ -5,7 +5,7 @@ import MultiStepForm from '../../components/MultiStepForm'
 import FormField from '../../components/FormField'
 import Countries from '../../constants/country'
 import Regions from '../../constants/region'
-import { OnboardingScheme } from '../../service'
+import { authPayload } from '../../service'
 import ModalSelect, { SelectCountryItem } from '../../components/ModalSelect'
 
 const FieldItem = ({
@@ -79,6 +79,7 @@ const ReviewItem = ({
 
 const Onboarding = () => {
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
@@ -103,7 +104,7 @@ const Onboarding = () => {
   useEffect(() => {
     async function validate() {
       try {
-        await OnboardingScheme.validate(form, {abortEarly: false})
+        await authPayload.OnboardingScheme.validate(form, {abortEarly: false})
         setErrors({})
       } catch (err) {
         let e = {}
@@ -125,7 +126,6 @@ const Onboarding = () => {
     }, 4000);
   }
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const NameFieldTitle = () => (
     <View>
@@ -401,7 +401,7 @@ const Onboarding = () => {
         steps={() => OnboardingFlow}
         onSumbit={submit}
         containerStyle=""
-        isSubmitting={isSubmitting}
+        submitDisabled={isSubmitting}
       />
     </SafeAreaView>
   )
