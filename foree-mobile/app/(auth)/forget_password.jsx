@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native'
 
 import CustomButton from '../../components/CustomButton'
 import FormField from '../../components/FormField'
+import { authService } from '../../service'
 
 const ForgetPassword = () => {
 
@@ -14,12 +15,11 @@ const ForgetPassword = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const submit = () => {
+  const submit = async () => {
     setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      router.replace({pathname:"/update_password", params:{token: "TODO: retrieve token"}})
-    }, 2000);
+    const resp = await authService.forgetPassword(form)
+    console.log(resp)
+    setIsSubmitting(false)
   }
 
   return (

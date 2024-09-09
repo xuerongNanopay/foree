@@ -5,7 +5,7 @@ import MultiStepForm from '../../components/MultiStepForm'
 import FormField from '../../components/FormField'
 import Countries from '../../constants/country'
 import Regions from '../../constants/region'
-import payload from '../../service/payload'
+import { OnboardingScheme } from '../../service'
 import ModalSelect, { SelectCountryItem } from '../../components/ModalSelect'
 
 const FieldItem = ({
@@ -103,7 +103,7 @@ const Onboarding = () => {
   useEffect(() => {
     async function validate() {
       try {
-        await payload.OnboardingScheme.validate(form, {abortEarly: false})
+        await OnboardingScheme.validate(form, {abortEarly: false})
         setErrors({})
       } catch (err) {
         let e = {}
