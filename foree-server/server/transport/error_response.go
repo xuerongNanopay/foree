@@ -22,7 +22,7 @@ const (
 )
 
 func NewFormError(message string, errors ...string) *BadRequestError {
-	details := make([]ErrorDetail, len(errors)/2)
+	details := make([]ErrorDetail, 0)
 	for i := 0; i < len(errors); i += 2 {
 		details = append(details, ErrorDetail{
 			Severity: SeverityError,
@@ -48,7 +48,7 @@ type BadRequestError struct {
 }
 
 type ErrorDetail struct {
-	Severity Severity `json:"dseverity"`
+	Severity Severity `json:"severity"`
 	Field    string   `json:"field"`
 	Message  string   `json:"message"`
 }
