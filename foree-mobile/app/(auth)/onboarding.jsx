@@ -213,7 +213,7 @@ const Onboarding = () => {
         }}
         placeholder="select a province"
       />
-      <FieldItem title="Country" value={Countries[form.country]?.name}
+      <FieldItem title="Country" value={`${Countries[form.country]?.unicodeIcon} ${Countries[form.country]?.name}`}
         errorMessage={errors['country']}
         handleChangeText={(e) => setForm({
           ...form,
@@ -264,7 +264,7 @@ const Onboarding = () => {
         errorMessage={errors['pob']}
         containerStyles="mt-2"
         allowAdd={false}
-        value={Countries[form.pob]?.name}
+        value={Countries[form.pob]?`${Countries[form.pob]?.unicodeIcon} ${Countries[form.pob]?.name}`: ""}
         variant='flat'
         searchKey="name"
         listView={SelectCountryItem}
@@ -283,7 +283,7 @@ const Onboarding = () => {
         containerStyles="mt-2"
         errorMessage={errors['nationality']}
         allowAdd={false}
-        value={Countries[form.nationality]?.name}
+        value={Countries[form.nationality]?`${Countries[form.nationality]?.unicodeIcon} ${Countries[form.nationality]?.name}`: ""}
         variant='flat'
         searchKey="name"
         listView={SelectCountryItem}
@@ -344,12 +344,12 @@ const Onboarding = () => {
       <ReviewItem title="Address Line 2" value={form.address2}/>
       <ReviewItem title="City" value={form.city}/>
       <ReviewItem title="Province" value={Regions[form.country]?.[form.province]?.name}/>
-      <ReviewItem title="Country" value={Countries[form.country]?.name}/>
+      <ReviewItem title="Country" value={Countries[form.country]?`${Countries[form.country]?.unicodeIcon} ${Countries[form.country]?.name}`: ""}/>
       <ReviewItem title="Postal Code" value={form.postalCode}/>
       <ReviewItem title="Phone Number" value={form.phoneNumber}/>
       <ReviewItem title="Date of Birth" value={form.dob}/>
-      <ReviewItem title="Place of Birth" value={Countries[form.pob]?.name}/>
-      <ReviewItem title="Nationality" value={Countries[form.nationality]?.name}/>
+      <ReviewItem title="Place of Birth" value={Countries[form.pob]?`${Countries[form.pob]?.unicodeIcon} ${Countries[form.pob]?.name}`: ""}/>
+      <ReviewItem title="Nationality" value={Countries[form.nationality]?`${Countries[form.nationality]?.unicodeIcon} ${Countries[form.nationality]?.name}`: ""}/>
       <ReviewItem title="Identification Document Type" value={IDTypes[form.identificationType]?.name}/>
       <ReviewItem title="Identification Number" value={form.identificationValue}/>
     </View>
