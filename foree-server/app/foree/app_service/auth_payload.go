@@ -131,7 +131,7 @@ func (q CreateUserReq) Validate() *transport.BadRequestError {
 }
 
 type ForgetPasswordUpdateReq struct {
-	Email        string `json:"email" validate:"email"`
+	Email        string `json:"email" validate:"email,required"`
 	RetrieveCode string `json:"retrieveCode" validate:"required"`
 	NewPassword  string `json:"newPassword" validate:"required"`
 }
@@ -144,7 +144,7 @@ func (q ForgetPasswordUpdateReq) Validate() *transport.BadRequestError {
 }
 
 type ForgetPasswordReq struct {
-	Email string `json:"email" validate:"required"`
+	Email string `json:"email" validate:"email,required"`
 }
 
 func (q ForgetPasswordReq) Validate() *transport.BadRequestError {

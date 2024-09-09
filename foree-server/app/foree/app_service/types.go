@@ -1,6 +1,7 @@
 package foree_service
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -34,7 +35,7 @@ func validateStruct(s any, errMsg string) *transport.BadRequestError {
 	if err := validate.Struct(s); err != nil {
 		errors := err.(validator.ValidationErrors)
 		for _, e := range errors {
-			ret.AddDetails(e.Field(), e.Error())
+			ret.AddDetails(e.Field(), fmt.Sprintf("Invalid %s", e.Field()))
 		}
 	}
 	return ret
