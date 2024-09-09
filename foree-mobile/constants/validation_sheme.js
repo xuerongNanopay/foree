@@ -5,66 +5,66 @@ const internationalNameRegex = /^[a-zA-Zàáâäãåąčćęèéêëėįìíîï
 
 //Excape empty string check
 const emptyRegexWrapper = (regex) => `(${regex})|(^$)`
-const String = ({
-  min=0,
-  max=256,
-  required=true
+const String = ({min=0, max=256, required=true}={
+  min,
+  max,
+  required
 }) => {
   const ret = required ? string().trim().required("required") : string().trim()
   return ret.min(min, min!==max ? `at least ${min} characters`: `must be ${min} characters`).max(max, min!==max ? `at most ${max} characters`: `must be ${max} characters`)
 }
 
-const NameScheme = ({
-  min=0,
-  max=256,
-  required=true
+const NameScheme = ({min=0, max=256, required=true}={
+  min,
+  max,
+  required
 }) => {
   const ret = required ? string().trim().required("required") : string().trim()
   return ret.matches(new RegExp(emptyRegexWrapper("^[A-Za-z ,.'-]+$")), "invalid character").min(min, min!==max ? `at least ${min} characters`: `must be ${min} characters`).max(max, min!==max ? `at most ${max} characters`: `must be ${max} characters`)
 }
 
-const AlphaNumberScheme = ({
-  min=0,
-  max=256,
-  required=true
+const AlphaNumberScheme = ({min=0, max=256, required=true}={
+  min,
+  max,
+  required
 }) => {
   const ret = required ? string().trim().required("required") : string().trim()
   return ret.alphanum().min(min, min!==max ? `at least ${min} characters`: `must be ${min} characters`).max(max, min!==max ? `at most ${max} characters`: `must be ${max} characters`)
 }
 
-const EmailScheme = ({
-  required=true
+const EmailScheme = ({required=true}={
+  required
 })=> {
   const ret = required ? string().trim().required("required") : string().trim()
   return ret.email("invalid email")
 }
 
-const NumberOnlyScheme = ({
-  min=0,
-  max=256, 
-  required=true
+const NumberOnlyScheme = ({min=0, max=256, required=true}={
+  min,
+  max, 
+  required
 }) => {
   const ret = required ? string().trim().required("required") : string().trim()
   return ret.matches(new RegExp(emptyRegexWrapper("^\\d+$")), "").min(min, min!==max ? `at least ${min} characters`: `must be ${min} characters`).max(max, min!==max ? `at most ${max} characters`: `must be ${max} characters`)
 }
 
-const AlphaOnlyScheme = ({
-  min=0,
-  max=256,
-  upperCaseOnly=false,
-  required=true
+const AlphaOnlyScheme = ({min=0, max=256, required=true, upperCaseOnly=false}={
+  min,
+  max,
+  upperCaseOnly,
+  required
 }) => {
   const ret = required ? string().trim().required("required") : string().trim()
   const regex = upperCaseOnly ? new RegExp(emptyRegexWrapper("[A-Z]+$")) : new RegExp(emptyRegexWrapper("^[A-Za-z]+$"))
   return ret.matches(regex, "invalid character").min(min, min!==max ? `at least ${min} characters`: `must be ${min} characters`).max(max, min!==max ? `at most ${max} characters`: `must be ${max} characters`)
 }
 
-const CountryISOScheme = ({
-  required=true
+const CountryISOScheme = ({required=true}={
+  required
 }) => AlphaOnlyScheme({upperCaseOnly: true, min:2, max:2, required})
 
-const ProvinceISOScheme = ({
-  required=true
+const ProvinceISOScheme = ({required=true}={
+  required
 }) => {
   const min = 5
   const max = 5
@@ -73,16 +73,16 @@ const ProvinceISOScheme = ({
   return ret.matches(regex, "invalid character").min(min, min!==max ? `at least ${min} characters`: `must be ${min} characters`).max(max, min!==max ? `at most ${max} characters`: `must be ${max} characters`)
 }
 
-const DateOnlyScheme =({
-  required=true
+const DateOnlyScheme =({required=true}={
+  required
 }) => {
   const ret = required ? string().trim().required("required") : string().trim()
   return ret.matches(new RegExp(emptyRegexWrapper("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$")), "must be YYYY-MM-DD")
 }
 
-const AgeScheme =({
-  minAge=19,
-  required=true
+const AgeScheme =({minAge=19, required=true}={
+  minAge,
+  required
 }) => {
   const ret = required ? string().trim().required("required") : string().trim()
   return ret
@@ -100,10 +100,10 @@ const AgeScheme =({
           })
 }
 
-const IntegerScheme = ({
+const IntegerScheme = ({min, max, required=true}={
   min,
   max, 
-  required=true
+  required
 }) => {
   let ret = required ? number().integer("must be integer").required('required') : number().integer()
   ret = typeof(min) != "undefined" ? ret.min(min, `at least ${min}`) : ret
@@ -111,17 +111,17 @@ const IntegerScheme = ({
   return ret
 }
 
-const PositiveIntegerScheme = ({
+const PositiveIntegerScheme = ({max, required=true}={
   max, 
-  required=true
+  required
 }) => {
   return IntegerScheme({min: 0, max, required})
 }
 
-const FloatScheme = ({
+const FloatScheme = ({min, max, required=true}={
   min,
   max, 
-  required=true
+  required
 }) => {
   let ret = required ? number().required('required') : number()
   ret = typeof(min) != "undefined" ? ret.min(min, `at least ${min}`) : ret
@@ -129,9 +129,9 @@ const FloatScheme = ({
   return ret
 }
 
-const PositiveFloatScheme = ({
+const PositiveFloatScheme = ({max, required=true}={
   max, 
-  required=true
+  required
 }) => {
   return FloatScheme({min: 0, max, required})
 }
@@ -147,22 +147,22 @@ const PasswdMinEightOneUpperOneLowerOneNumber = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)
 // Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character
 const PasswdMinEightOneUpperOneLowerOneNumberOneSepcia = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
 
-const PasswordScheme = ({
-  passwdLevel=PasswdMinFourOneLetterOneNumber
+const PasswordScheme = ({passwdLevel=PasswdMinFourOneLetterOneNumber}={
+  passwdLevel
 }) => {
   return string().trim().required("required").matches(passwdLevel)
 }
 
-const PostalCodeScheme = ({
-  required=true,
+const PostalCodeScheme = ({required=true, countryCode}={
+  required,
   countryCode,
 }) => {
   const ret = required ? string().trim().required("required") : string().trim()
   return ret.matches(new RegExp(emptyRegexWrapper(Countries[countryCode].postalCodeRegex)), "invalid postal code")
 }
 
-const PhoneNumber = ({
-  required=true,
+const PhoneNumber = ({required=true, countryCode}={
+  required,
   countryCode,
 }) => {
   const ret = required ? string().trim().required("required") : string().trim()
