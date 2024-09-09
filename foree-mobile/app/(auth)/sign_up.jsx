@@ -69,7 +69,7 @@ const SignUp = () => {
             title="Sign Up"
             handlePress={submit}
             containerStyles="mt-7"
-            isLoading={isSubmitting}
+            disabled={isSubmitting}
           />
         </View>
       </ScrollView>

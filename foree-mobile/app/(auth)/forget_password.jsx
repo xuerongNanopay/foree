@@ -68,7 +68,7 @@ const ForgetPassword = () => {
               title="Submit"
               handlePress={submit}
               containerStyles="mt-7"
-              isLoading={isSubmitting}
+              disabled={isSubmitting}
             />
           </View>
         </View>

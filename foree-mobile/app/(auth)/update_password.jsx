@@ -48,7 +48,7 @@ const UpdatePassword = () => {
             title="Update"
             handlePress={submit}
             containerStyles="mt-7"
-            isLoading={isSubmitting}
+            disabled={isSubmitting}
           />
         </View>
       </ScrollView>

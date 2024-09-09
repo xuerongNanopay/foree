@@ -59,7 +59,7 @@ const VerifyEmail = () => {
               title="Submit"
               handlePress={submit}
               containerStyles="mt-7"
-              isLoading={isSubmitting}
+              disabled={isSubmitting}
             />
             <View className="flex-row items-center justify-center mt-4">
               <Text>Do not receive code?</Text>
@@ -67,7 +67,7 @@ const VerifyEmail = () => {
                 onPress={resendSubmit}
                 title="Resend"
                 color="#26a69a"
-                isSubmitting={isSubmitting}
+                disabled={isSubmitting}
               />
             </View>
           </View>
