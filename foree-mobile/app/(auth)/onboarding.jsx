@@ -111,7 +111,7 @@ const Onboarding = () => {
         for ( let i of err.inner ) {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
-        setErrors(e)
+        // setErrors(e)
       }
     }
     validate()
@@ -195,6 +195,7 @@ const Onboarding = () => {
         })}
       />
       <ModalSelect
+        key={"province"}
         title="Province"
         modalTitle="select a province"
         errorMessage={errors['province']}
@@ -259,6 +260,7 @@ const Onboarding = () => {
         keyboardType="numbers-and-punctuation"
       />
       <ModalSelect
+        key={"pob"}
         title="Place of Birth"
         modalTitle="select a country"
         containerStyles="mt-2"
@@ -277,6 +279,7 @@ const Onboarding = () => {
         placeholder="select a country"
       />
       <ModalSelect
+        key={"nationality"}
         title="Nationality"
         modalTitle="select a country"
         containerStyles="mt-2"
@@ -295,6 +298,7 @@ const Onboarding = () => {
         placeholder="select a country"
       />
       <ModalSelect
+        key={"identificationType"}
         title="Identification Document Type"
         modalTitle="select identification type"
         containerStyles="mt-2"
@@ -302,7 +306,7 @@ const Onboarding = () => {
         allowSearch={false}
         value={IDTypes[form.identificationType]?.name}
         variant='flat'
-        searchKey="name"
+        searchKey="id"
         listView={SelectIDTypesItem}
         list={Object.values(IDTypes)}
         onPress={(o) => {

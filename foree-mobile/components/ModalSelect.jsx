@@ -22,7 +22,7 @@ const ModalSelect = ({
   inputStyles,
   allowSearch=true,
   searchKey,
-  list,
+  list=[],
   listView,
   allowAdd=true,
   addTitle,
