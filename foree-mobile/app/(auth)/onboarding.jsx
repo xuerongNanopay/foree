@@ -349,7 +349,7 @@ const Onboarding = () => {
       <ReviewItem title="Phone Number" value={form.phoneNumber}/>
       <ReviewItem title="Date of Birth" value={form.dob}/>
       <ReviewItem title="Place of Birth" value={Countries[form.pob]?.name}/>
-      <ReviewItem title="Nationality" value={Countries[form.nationality]?.namey}/>
+      <ReviewItem title="Nationality" value={Countries[form.nationality]?.name}/>
       <ReviewItem title="Identification Document Type" value={IDTypes[form.identificationType]?.name}/>
       <ReviewItem title="Identification Number" value={form.identificationValue}/>
     </View>
