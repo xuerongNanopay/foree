@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native'
 
 import CustomButton from '../../components/CustomButton'
 import FormField from '../../components/FormField'
-import { authService, ForgetPasswdScheme } from '../../service'
+import { authService, authPayload } from '../../service'
 
 const ForgetPassword = () => {
 
@@ -18,7 +18,7 @@ const ForgetPassword = () => {
   useEffect(() => {
     async function validate() {
       try {
-        await ForgetPasswdScheme.validate(form, {abortEarly: false})
+        await authPayload.ForgetPasswdScheme.validate(form, {abortEarly: false})
         setErrors({})
       } catch (err) {
         let e = {}

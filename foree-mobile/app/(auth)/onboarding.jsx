@@ -195,7 +195,6 @@ const Onboarding = () => {
         })}
       />
       <ModalSelect
-        key={"province"}
         title="Province"
         modalTitle="select a province"
         errorMessage={errors['province']}
@@ -260,9 +259,9 @@ const Onboarding = () => {
         keyboardType="numbers-and-punctuation"
       />
       <ModalSelect
-        key={"pob"}
         title="Place of Birth"
         modalTitle="select a country"
+        errorMessage={errors['pob']}
         containerStyles="mt-2"
         allowAdd={false}
         value={Countries[form.pob]?.name}
@@ -279,10 +278,10 @@ const Onboarding = () => {
         placeholder="select a country"
       />
       <ModalSelect
-        key={"nationality"}
         title="Nationality"
         modalTitle="select a country"
         containerStyles="mt-2"
+        errorMessage={errors['nationality']}
         allowAdd={false}
         value={Countries[form.nationality]?.name}
         variant='flat'
@@ -298,8 +297,8 @@ const Onboarding = () => {
         placeholder="select a country"
       />
       <ModalSelect
-        key={"identificationType"}
         title="Identification Document Type"
+        errorMessage={errors['identificationType']}
         modalTitle="select identification type"
         containerStyles="mt-2"
         allowAdd={false}
