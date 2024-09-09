@@ -35,9 +35,14 @@ const ForgetPassword = () => {
 
   const submit = async () => {
     setIsSubmitting(true)
-    const resp = await authService.forgetPassword(form)
-    console.log(resp)
-    setIsSubmitting(false)
+    try {
+      const resp = await authService.forgetPassword(form)
+      console.log('respaaa', resp)
+    } catch (e) {
+      console.error("forget password", e)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
