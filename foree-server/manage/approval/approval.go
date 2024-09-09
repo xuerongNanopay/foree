@@ -125,7 +125,7 @@ func (repo *ApprovalRepo) GetUniqueApprovalById(id int64) (*Approval, error) {
 		}
 	}
 
-	if u.ID == 0 {
+	if u == nil || u.ID == 0 {
 		return nil, nil
 	}
 

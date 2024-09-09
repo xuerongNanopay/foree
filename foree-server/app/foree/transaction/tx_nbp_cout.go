@@ -137,7 +137,7 @@ func (repo *NBPCOTxRepo) GetUniqueNBPCOTxById(ctx context.Context, id int64) (*N
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 
@@ -161,7 +161,7 @@ func (repo *NBPCOTxRepo) GetUniqueNBPCOTxByParentTxId(ctx context.Context, id in
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 

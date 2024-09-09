@@ -163,7 +163,7 @@ func (repo *InteracCITxRepo) GetUniqueInteracCITxByParentTxId(ctx context.Contex
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 
@@ -196,7 +196,7 @@ func (repo *InteracCITxRepo) GetUniqueInteracCITxByScotiaPaymentId(ctx context.C
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 
@@ -220,7 +220,7 @@ func (repo *InteracCITxRepo) GetUniqueInteracCITxById(ctx context.Context, id in
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 

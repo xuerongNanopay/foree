@@ -204,7 +204,7 @@ func (repo *UserRepo) GetUniqueUserById(id int64) (*User, error) {
 		}
 	}
 
-	if u.ID == 0 {
+	if u == nil || u.ID == 0 {
 		return nil, nil
 	}
 

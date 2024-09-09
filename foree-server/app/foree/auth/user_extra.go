@@ -106,7 +106,7 @@ func (repo *UserExtraRepo) GetUniqueUserExtraByOwnerId(ownerId int64) (*UserExtr
 		}
 	}
 
-	if u.ID == 0 {
+	if u == nil || u.ID == 0 {
 		return nil, nil
 	}
 

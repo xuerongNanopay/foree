@@ -139,7 +139,7 @@ func (repo *InteracRefundTxRepo) GetUniqueInteracRefundTxByParentTxId(ctx contex
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 
@@ -163,7 +163,7 @@ func (repo *InteracRefundTxRepo) GetUniqueInteracRefundTxById(ctx context.Contex
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 

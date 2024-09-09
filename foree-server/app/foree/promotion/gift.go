@@ -66,7 +66,7 @@ func (repo *GiftRepo) GetUniqueGiftByCode(ctx context.Context, code string) (*Gi
 		}
 	}
 
-	if f.Code == "" {
+	if f == nil || f.Code == "" {
 		return nil, nil
 	}
 

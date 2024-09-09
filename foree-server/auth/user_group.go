@@ -126,7 +126,7 @@ func (repo *UserGroupRepo) GetUniqueUserGroupByOwnerId(ownerId int64) (*UserGrou
 		}
 	}
 
-	if u.ID == 0 {
+	if u == nil || u.ID == 0 {
 		return nil, nil
 	}
 

@@ -157,7 +157,7 @@ func (repo *RewardRepo) GetUniqueRewardById(ctx context.Context, id int64) (*Rew
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 

@@ -244,7 +244,7 @@ func (repo *TxSummaryRepo) GetUniqueTxSummaryByOwnerAndId(ctx context.Context, u
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 
@@ -268,7 +268,7 @@ func (repo *TxSummaryRepo) GetUniqueTxSummaryByParentTxId(ctx context.Context, p
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 

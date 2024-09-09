@@ -67,7 +67,7 @@ func (repo *PromoCodeRepo) GetUniquePromoCodeByCode(ctx context.Context, code st
 		}
 	}
 
-	if f.Code == "" {
+	if f == nil || f.Code == "" {
 		return nil, nil
 	}
 

@@ -179,7 +179,7 @@ func (repo *FeeRepo) GetUniqueFeeByName(ctx context.Context, name string) (*Fee,
 		}
 	}
 
-	if f.Name == "" {
+	if f == nil || f.Name == "" {
 		return nil, nil
 	}
 

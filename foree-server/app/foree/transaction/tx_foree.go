@@ -231,7 +231,7 @@ func (repo *ForeeTxRepo) GetUniqueForeeTxById(ctx context.Context, id int64) (*F
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 
@@ -265,7 +265,7 @@ func (repo *ForeeTxRepo) GetUniqueForeeTxForUpdateById(ctx context.Context, id i
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 

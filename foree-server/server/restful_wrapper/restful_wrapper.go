@@ -38,7 +38,7 @@ func RestGetWrapper[P any, Q any](
 			var resp Q
 			var herr transport.HError
 			herr = beforeProcess(r, req)
-			if herr == nil {
+			if reflect_util.IsNil(herr) {
 				ctx := context.Background()
 				ctx = context.WithValue(ctx, constant.CKHttpRequest, r)
 				resp, herr = handler(ctx, req)
@@ -48,13 +48,13 @@ func RestGetWrapper[P any, Q any](
 			w.Header().Add("Content-Type", "application/json")
 
 			var err error
-			if herr != nil {
+			if !reflect_util.IsNil(herr) {
 				err = json_util.SerializeToResponseWriter(w, herr.GetStatusCode(), herr)
 			} else {
 				err = json_util.SerializeToResponseWriter(w, http.StatusOK, transport.NewHttpResponse(http.StatusOK, "Success", resp))
 			}
 
-			if herr != nil {
+			if !reflect_util.IsNil(herr) {
 				var nilResp Q
 				return nilResp, herr
 			} else if err != nil {
@@ -98,7 +98,7 @@ func RestPostWrapper[P any, Q any](
 			}
 
 			herr = beforeProcess(r, req)
-			if herr == nil {
+			if reflect_util.IsNil(herr) {
 				ctx := context.Background()
 				ctx = context.WithValue(ctx, constant.CKHttpRequest, r)
 				resp, herr = handler(ctx, req)
@@ -108,13 +108,13 @@ func RestPostWrapper[P any, Q any](
 			w.Header().Add("Content-Type", "application/json")
 
 		SKIP_PROCESS:
-			if herr != nil {
+			if !reflect_util.IsNil(herr) {
 				err = json_util.SerializeToResponseWriter(w, herr.GetStatusCode(), herr)
 			} else {
 				err = json_util.SerializeToResponseWriter(w, http.StatusOK, transport.NewHttpResponse(http.StatusOK, "Success", resp))
 			}
 
-			if herr != nil {
+			if !reflect_util.IsNil(herr) {
 				var nilResp Q
 				return nilResp, herr
 			} else if err != nil {

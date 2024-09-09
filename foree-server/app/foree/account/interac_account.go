@@ -210,7 +210,7 @@ func (repo *InteracAccountRepo) GetUniqueActiveInteracAccountByOwnerAndId(ctx co
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 
@@ -244,7 +244,7 @@ func (repo *InteracAccountRepo) GetUniqueActiveInteracAccountForUpdateByOwnerAnd
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 
@@ -268,7 +268,7 @@ func (repo *InteracAccountRepo) GetUniqueInteracAccountById(ctx context.Context,
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 

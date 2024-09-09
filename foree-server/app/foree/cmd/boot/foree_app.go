@@ -12,12 +12,14 @@ import (
 	foree_service "xue.io/go-pay/app/foree/app_service"
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_config "xue.io/go-pay/app/foree/cmd/config"
+	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/referral"
 	"xue.io/go-pay/app/foree/sys_router"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/config"
 	ms "xue.io/go-pay/db/mysql"
+	"xue.io/go-pay/logger"
 	"xue.io/go-pay/partner/idm"
 	"xue.io/go-pay/partner/nbp"
 	"xue.io/go-pay/partner/scotia"
@@ -72,6 +74,13 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	if err := config.LoadFromFile(&cfg, envFilePath); err != nil {
 		return err
 	}
+
+	//Initial Logger
+	l, err := logger.NewZapLogger("debug", "/tmp/zap_out")
+	if err != nil {
+		panic(err)
+	}
+	foree_logger.Logger = l
 
 	//Initial DB
 	db, err := ms.NewMysqlPool(mysql.Config{

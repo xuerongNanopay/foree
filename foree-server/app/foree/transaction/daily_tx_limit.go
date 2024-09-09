@@ -126,7 +126,7 @@ func (repo *DailyTxLimitRepo) GetUniqueDailyTxLimitByReference(ctx context.Conte
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 

@@ -246,7 +246,7 @@ func (repo *ContactAccountRepo) GetUniqueContactAccountById(ctx context.Context,
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 
@@ -270,7 +270,7 @@ func (repo *ContactAccountRepo) GetUniqueActiveContactAccountByOwnerAndId(ctx co
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 

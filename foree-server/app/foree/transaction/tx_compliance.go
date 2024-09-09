@@ -165,7 +165,7 @@ func (repo *IdmTxRepo) GetUniqueIDMTxById(ctx context.Context, id int64) (*IDMTx
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 
@@ -189,7 +189,7 @@ func (repo *IdmTxRepo) GetUniqueIDMTxByParentTxId(ctx context.Context, parentTxI
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 
@@ -281,7 +281,7 @@ func (repo *IDMComplianceRepo) GetUniqueIDMComplianceById(ctx context.Context, i
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 
@@ -305,7 +305,7 @@ func (repo *IDMComplianceRepo) GetUniqueIDMComplianceByIDMTxId(ctx context.Conte
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 

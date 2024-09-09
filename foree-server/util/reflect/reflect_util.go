@@ -6,6 +6,23 @@ import (
 	"strconv"
 )
 
+func IsNil(x interface{}) bool {
+	if x == nil {
+		return true
+	}
+
+	value := reflect.ValueOf(x)
+	kind := value.Kind()
+
+	switch kind {
+	case reflect.Chan, reflect.Func, reflect.Map, reflect.Ptr, reflect.UnsafePointer, reflect.Interface, reflect.Slice:
+		return value.IsNil()
+	default:
+		return false
+	}
+
+}
+
 func TrySetStuctValueFromString(o interface{}, f, v string) {
 	SetStuctValueFromString(o, f, v)
 }

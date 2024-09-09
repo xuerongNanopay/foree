@@ -95,7 +95,7 @@ func (repo *RateRepo) GetUniqueRateById(ctx context.Context, id string) (*Rate, 
 		}
 	}
 
-	if f.ID == "" {
+	if f == nil || f.ID == "" {
 		return nil, nil
 	}
 

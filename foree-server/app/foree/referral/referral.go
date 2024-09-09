@@ -113,7 +113,7 @@ func (repo *ReferralRepo) GetUniqueReferralByReferralCode(referralCode string) (
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 
@@ -137,7 +137,7 @@ func (repo *ReferralRepo) GetUniqueReferralByRefereeId(refereeId int64) (*Referr
 		}
 	}
 
-	if f.ID == 0 {
+	if f == nil || f.ID == 0 {
 		return nil, nil
 	}
 

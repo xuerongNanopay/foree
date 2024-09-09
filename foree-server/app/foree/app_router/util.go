@@ -4,17 +4,20 @@ import (
 	"context"
 	"net/http"
 
-	"xue.io/go-pay/app/foree/logger"
+	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/server/restful_wrapper"
 	"xue.io/go-pay/server/transport"
+	reflect_util "xue.io/go-pay/util/reflect"
 )
 
 func commonEndFunc[P any, Q any](req P, resp Q, hErr transport.HError) {
+	if reflect_util.IsNil(hErr) {
+		return
+	}
+
 	if v, is := hErr.(*transport.InteralServerError); is {
 		// use logger.
-		logger.Logger.Error("System Error", "cause", v.OriginalError.Error())
-	} else {
-		logger.Logger.Warn("API Warning", "case", v.Error())
+		foree_logger.Logger.Error("System Error", "cause", v.OriginalError.Error())
 	}
 }
 

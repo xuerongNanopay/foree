@@ -1,5 +1,5 @@
-package logger
+package foree_logger
 
-import core_logger "xue.io/go-pay/logger"
+import "xue.io/go-pay/logger"
 
-var Logger core_logger.Logger
+var Logger logger.Logger

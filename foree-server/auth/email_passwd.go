@@ -174,7 +174,7 @@ func (repo *EmailPasswdRepo) GetUniqueEmailPasswdByEmail(email string) (*EmailPa
 		}
 	}
 
-	if ep.ID == 0 {
+	if ep == nil || ep.ID == 0 {
 		return nil, nil
 	}
 
@@ -198,7 +198,7 @@ func (repo *EmailPasswdRepo) GetUniqueEmailPasswdById(id int64) (*EmailPasswd, e
 		}
 	}
 
-	if ep.ID == 0 {
+	if ep == nil || ep.ID == 0 {
 		return nil, nil
 	}
 
