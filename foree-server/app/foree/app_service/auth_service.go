@@ -550,7 +550,7 @@ func (a *AuthService) ForgetPassword(ctx context.Context, req ForgetPasswordReq)
 
 	if ep == nil {
 		foree_logger.Logger.Warn("ForgetPassword_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
-		return nil, transport.NewFormError("Invaild forget password", "email", "invalid email")
+		return nil, transport.NewFormError("Invaild forget password request", "email", "invalid email")
 	}
 
 	newEP := *ep
