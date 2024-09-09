@@ -69,7 +69,7 @@ const MultiStepForm = ({
             !isFirst ?
             <CustomButton
               title={"< Previous"}
-              disabled={false}
+              disabled={submitDisabled}
               handlePress={()=>{
                 setCurIdx(curIdx-1)
               }}
