@@ -17,6 +17,7 @@ func commonEndFunc[P any, Q any](req P, resp Q, hErr transport.HError) {
 
 	if v, is := hErr.(*transport.InteralServerError); is {
 		// use logger.
+		// TODO: alarm.
 		foree_logger.Logger.Error("System Error", "cause", v.OriginalError.Error())
 	}
 }
