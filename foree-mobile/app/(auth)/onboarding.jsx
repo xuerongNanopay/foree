@@ -111,7 +111,7 @@ const Onboarding = () => {
         for ( let i of err.inner ) {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
-        // setErrors(e)
+        setErrors(e)
       }
     }
     validate()
