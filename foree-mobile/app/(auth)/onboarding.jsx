@@ -340,14 +340,14 @@ const Onboarding = () => {
       <ReviewItem title="Address Line 1" value={form.address1}/>
       <ReviewItem title="Address Line 2" value={form.address2}/>
       <ReviewItem title="City" value={form.city}/>
-      <ReviewItem title="Province" value={form.province}/>
-      <ReviewItem title="Country" value={form.country}/>
+      <ReviewItem title="Province" value={Regions[form.country]?.[form.province]?.name}/>
+      <ReviewItem title="Country" value={Countries[form.country]?.name}/>
       <ReviewItem title="Postal Code" value={form.postalCode}/>
       <ReviewItem title="Phone Number" value={form.phoneNumber}/>
       <ReviewItem title="Date of Birth" value={form.dob}/>
-      <ReviewItem title="Place of Birth" value={form.pob}/>
-      <ReviewItem title="Nationality" value={form.nationality}/>
-      <ReviewItem title="Identification Document Type" value={form.identificationType}/>
+      <ReviewItem title="Place of Birth" value={Countries[form.pob]?.name}/>
+      <ReviewItem title="Nationality" value={Countries[form.nationality]?.namey}/>
+      <ReviewItem title="Identification Document Type" value={IDTypes[form.identificationType]?.name}/>
       <ReviewItem title="Identification Number" value={form.identificationValue}/>
     </View>
   )
