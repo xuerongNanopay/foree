@@ -40,7 +40,7 @@ const OnboardingScheme = object({
   country: fieldScheme.CountryISOScheme({}),
   postalCode: fieldScheme.PostalCodeScheme({countryCode:"CA"}),
   phoneNumber: fieldScheme.PhoneNumber({countryCode:"CA"}),
-  dob: fieldScheme.DateOnlyScheme({}),
+  dob: fieldScheme.AgeScheme({}),
   pob: fieldScheme.CountryISOScheme({}),
   nationality: fieldScheme.CountryISOScheme({}),
   identificationType: fieldScheme.String({}),

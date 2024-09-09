@@ -80,6 +80,26 @@ const DateOnlyScheme =({
   return ret.matches(new RegExp(emptyRegexWrapper("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$")), "must be YYYY-MM-DD")
 }
 
+const AgeScheme =({
+  minAge=19,
+  required=true
+}) => {
+  const ret = required ? string().trim().required("required") : string().trim()
+  return ret
+          .matches(new RegExp(emptyRegexWrapper("^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$")), "must be YYYY-MM-DD")
+          .test("ageTest", `require ${minAge} years old`, async (value)=> {
+            try {
+              const birth = Date.parse(value)
+              if ( !isNaN(birth) ) {
+                const now = new Date()
+                return (now.getTime()-birth)/(3600000*24*365) > 19
+              }
+            } catch (e) {
+              console.log("AgeScheme", e)
+            }
+          })
+}
+
 const IntegerScheme = ({
   min,
   max, 
@@ -166,6 +186,7 @@ export default {
   CountryISOScheme,
   PhoneNumber,
   ProvinceISOScheme,
+  AgeScheme,
   PasswdMinFourOneLetterOneNumber,
   PasswdMinEightOneLetterOneNumber,
   PasswdMinEightOneLetterOneNumberOneSpecial,
