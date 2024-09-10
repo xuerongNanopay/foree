@@ -11,7 +11,7 @@ import (
 const (
 	sQLPromotionGetUniqueByCode = `
 		SELECT
-			g.code, g.description, g.amount, g.currency, g,require_min
+			g.code, g.description, g.amount, g.currency,
 			g.is_enable, g.start_time, g.end_time, g.created_at, g.updated_at
 		FROM promotion as g
 		Where g.code = ?

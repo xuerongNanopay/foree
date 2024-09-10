@@ -54,6 +54,7 @@ func NewAuthService(
 		referralRepo:           referralRepo,
 		rewardRepo:             rewardRepo,
 		promotionRepo:          promotionRepo,
+		promotionCache:         make(map[string]CacheItem[promotion.Promotion], 8),
 	}
 }
 
@@ -802,40 +803,39 @@ func (a *AuthService) rewardOnboard(registerUser auth.User) {
 }
 
 // TODO: using atomic interger to limit peak volumn
-func (a *AuthService) getPromotion(promotionCode string, validIn time.Duration) (*promotion.Promotion, error) {
+func (a *AuthService) getPromotion(code string, validIn time.Duration) (*promotion.Promotion, error) {
 	a.promotionCacheRWLock.RLock()
-	promotionCache, ok := a.promotionCache[promotionCode]
+	promotionCache, ok := a.promotionCache[code]
 	a.promotionCacheRWLock.RUnlock()
 
 	if ok && promotionCache.createdAt.Add(validIn).After(time.Now()) {
 		return &promotionCache.item, nil
 	}
 
-	gift, err := a.promotionRepo.GetUniquePromotionByCode(context.TODO(), promotionCode)
+	promo, err := a.promotionRepo.GetUniquePromotionByCode(context.TODO(), code)
 	if err != nil {
-		foree_logger.Logger.Error("Promotion_Fail", "promotionCode", promotionCode, "cause", err.Error())
+		foree_logger.Logger.Error("Promotion_Fail", "code", code, "cause", err.Error())
 		return nil, err
 	}
 
-	if gift != nil {
-		foree_logger.Logger.Warn("Promotion_Fail", "promotionCode", promotionCode, "cause", "gift no found")
-		return nil, fmt.Errorf("Promotion no found with code `%v`", promotionCode)
+	if promo == nil {
+		foree_logger.Logger.Warn("Promotion_Fail", "code", code, "cause", "promotion no found")
+		return nil, fmt.Errorf("promotion no found with code `%v`", code)
 	}
 
-	// Update gift
 	// Make sure at least one thread can update the cache.
 	func() {
 		a.promotionCacheUpdateLock.TryLock()
 		defer a.promotionCacheUpdateLock.Unlock()
 		a.promotionCacheRWLock.Lock()
 		defer a.promotionCacheRWLock.Unlock()
-		a.promotionCache[promotionCode] = CacheItem[promotion.Promotion]{
-			item:      *gift,
+		a.promotionCache[code] = CacheItem[promotion.Promotion]{
+			item:      *promo,
 			createdAt: time.Now(),
 		}
 	}()
 
-	return gift, nil
+	return promo, nil
 }
 
 func verifySession(session *auth.Session) transport.HError {

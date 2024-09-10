@@ -408,3 +408,15 @@ CREATE TABLE IF NOT EXISTS tx_summary(
     FOREIGN KEY (owner_id) REFERENCES users(id),
     FOREIGN KEY (parent_tx_id) REFERENCES foree_tx(id)
 );
+
+CREATE TABLE IF NOT EXISTS promotion(
+    `code` VARCHAR(128) NOT NULL PRIMARY KEY,
+    `description` VARCHAR(256) DEFAULT '',
+    `amount` DECIMAL(11, 2) NOT NULL,
+    `currency` CHAR(3) NOT NULL,
+    `is_enable` BOOL NOT NULL,
+    `start_time` DATETIME,
+    `end_time` DATETIME,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
