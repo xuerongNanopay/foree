@@ -4,14 +4,41 @@ import AuthService from "./auth_service"
 import authPayload from "./auth_payload"
 import { Alert } from 'react-native'
 import { router } from 'expo-router'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
+const SessionIdKey = "SESSION_ID"
 // Config axios
 axios.defaults.baseURL = 'http://192.168.2.30:8080/app/v1'
+axios.interceptors.request.use(
+  async (config) => {
+    try {
+      const session = await AsyncStorage.getItem(SessionIdKey)
+      if ( !!session ) {
+        config.headers[SessionIdKey] = session
+      }
+    } catch (e) {
+      console.error("get session error", e)
+      //TODO: send error
+    } finally {
+      return config
+    }
+  }
+)
 axios.interceptors.response.use(
-  (response) => response,
+  async (response) => {
+    console.log("aaa", response.data)
+    try {
+      if (!!response.data && !!response.data.sessionId) {
+        await AsyncStorage.setItem(SessionIdKey, response.data.sessionId)
+      }
+    } catch (e) {
+      console.error("update session error", e)
+      //TODO: send error
+    } finally {
+      return Promise.resolve(response)
+    }
+  },
   (error) => {
-    //Need text
-    // return Promise.resolve(error)
     if (!error.response) {
       Alert.alert("Error", "please try later", [
         {text: 'OK', onPress: () => {}},
