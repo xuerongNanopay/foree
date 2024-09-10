@@ -129,6 +129,8 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 		return nil, transport.WrapInteralServerError(err)
 	}
 
+	foree_logger.Logger.Info("Signup_Success", "userId", userId, "emailPassword", epId)
+
 	user, err := a.userRepo.GetUniqueUserById(userId)
 	if err != nil {
 		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())

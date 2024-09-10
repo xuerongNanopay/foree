@@ -13,8 +13,8 @@ import (
 const (
 	sQLEmailPasswdInsert = `
 		INSERT INTO email_passwd(	 
-			status, email, username, passwd, verify_code, owner_id
-		) VALUES (?,?,?,?,?,?)
+			status, email, username, passwd, verify_code, verify_code_expired_at, owner_id
+		) VALUES (?,?,?,?,?,?,?)
 	`
 	sQLEmailPasswdUpdateByEmail = `
 		UPDATE email_passwd SET 
@@ -97,6 +97,7 @@ func (repo *EmailPasswdRepo) InsertEmailPasswd(ctx context.Context, ep EmailPass
 			ep.Username,
 			ep.Passwd,
 			ep.VerifyCode,
+			ep.VerifyCodeExpiredAt,
 			ep.OwnerId,
 		)
 	} else {
@@ -107,6 +108,7 @@ func (repo *EmailPasswdRepo) InsertEmailPasswd(ctx context.Context, ep EmailPass
 			ep.Username,
 			ep.Passwd,
 			ep.VerifyCode,
+			ep.VerifyCodeExpiredAt,
 			ep.OwnerId,
 		)
 	}
