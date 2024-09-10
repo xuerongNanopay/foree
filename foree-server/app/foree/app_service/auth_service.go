@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 
@@ -19,6 +18,7 @@ import (
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
 	"xue.io/go-pay/server/transport"
+	http_util "xue.io/go-pay/util/http"
 )
 
 const maxLoginAttempts = 4
@@ -814,28 +814,12 @@ func verifySession(session *auth.Session) transport.HError {
 	return nil
 }
 
-func loadXForwardFor(ctx context.Context) string {
-	req, ok := ctx.Value(constant.CKHttpRequest).(*http.Request)
-	if !ok {
-		return ""
-	}
-	return req.Header.Get("X-Forwarded-For")
-}
-
-func loadIp(ctx context.Context) string {
-	req, ok := ctx.Value(constant.CKHttpRequest).(*http.Request)
-	if !ok {
-		return ""
-	}
-	return req.RemoteAddr
-}
-
 func loadRealIp(ctx context.Context) string {
-	xforward := loadXForwardFor(ctx)
-	if xforward != "" && len(strings.Split(xforward, ",")) == 0 {
-		return loadIp(ctx)
+	req, ok := ctx.Value(constant.CKHttpRequest).(*http.Request)
+	if !ok {
+		return ""
 	}
-	return strings.Split(xforward, ",")[0]
+	return http_util.LoadRealIp(req)
 }
 
 func loadUserAgent(ctx context.Context) string {
