@@ -19,14 +19,7 @@ class AuthService {
 
 
   async forgetPassword(req, {signal}={signal}) {
-    try {
-      const resp = await axios.post("/forget_password", req, {signal})
-      const data = resp.data
-      return data
-    } catch (err) {
-      console.log('catch', err.response.status)
-      throw err
-    }
+    return await axios.post("/forget_password", req, {signal})
   }
 
   onboard() {

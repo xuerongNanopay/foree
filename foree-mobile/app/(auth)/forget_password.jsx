@@ -1,4 +1,4 @@
-import { View, Text, ScrollView } from 'react-native'
+import { View, Text, ScrollView, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native'
@@ -37,9 +37,13 @@ const ForgetPassword = () => {
     setIsSubmitting(true)
     try {
       const resp = await authService.forgetPassword(form)
-      console.log('respaaa', resp)
-    } catch (e) {
-      console.error("forget password", e)
+      if ( resp.status / 100 !== 2 ) {
+        console.info("forget_password", resp.status, resp.data)
+        return
+      }
+      //TODO: normal logic
+    } catch (err) {
+      console.error(err)
     } finally {
       setIsSubmitting(false)
     }
@@ -63,7 +67,7 @@ const ForgetPassword = () => {
               value={form.email}
               handleChangeText={(e) => setForm({
                 ...form,
-                email:e
+                email:e.toLowerCase()
               })}
               containerStyles="mt-1"
               keyboardType="email-address"
