@@ -20,8 +20,8 @@ class AuthService {
     return await axios.post("/sign_up", req, {signal})
   }
 
-  onboard() {
-
+  async onboard(req, {signal}={signal}) {
+    return await axios.post("/onboard", req, {signal})
   }
 }
 

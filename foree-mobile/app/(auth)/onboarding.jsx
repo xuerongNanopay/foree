@@ -5,7 +5,7 @@ import MultiStepForm from '../../components/MultiStepForm'
 import FormField from '../../components/FormField'
 import Countries from '../../constants/country'
 import Regions from '../../constants/region'
-import { authPayload } from '../../service'
+import { authPayload, authService } from '../../service'
 import ModalSelect, { SelectCountryItem } from '../../components/ModalSelect'
 
 const FieldItem = ({
@@ -117,13 +117,21 @@ const Onboarding = () => {
     validate()
   }, [form])
 
-  const submit = () => {
+  const submit = async () => {
+    console.log('aaa')
     setIsSubmitting(true)
-    setTimeout(() => {
+    try {
+      const resp = await authService.onboard(form)
+      if ( resp.status / 100 !== 2 ) {
+        console.log("onboarding", resp.status, resp.data)
+        return
+      }
+      console.log("onboard success", resp.data)
+    } catch (err) {
+      console.error("onboarding", err)
+    } finally {
       setIsSubmitting(false)
-      console.log(form)
-      // router.replace("/verify_email")
-    }, 4000);
+    }
   }
 
 
