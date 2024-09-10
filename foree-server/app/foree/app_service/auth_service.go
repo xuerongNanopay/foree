@@ -323,7 +323,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	dTx, dErr := a.db.Begin()
 	if dErr != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", dErr.Error())
+		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", dErr.Error())
 		return nil, transport.WrapInteralServerError(dErr)
 	}
 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
@@ -339,7 +339,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	_, ier := a.userIdentificationRepo.InsertUserIdentification(ctx, identification)
 	if ier != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", ier.Error())
+		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", ier.Error())
 		return nil, transport.WrapInteralServerError(ier)
 	}
 
@@ -350,7 +350,6 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	newUser.LastName = req.LastName
 	newUser.Age = req.Age
 	newUser.Dob = &req.Dob.Time
-	// newUser.Nationality = req.Nationality
 	newUser.Address1 = req.Address1
 	newUser.Address2 = req.Address2
 	newUser.City = req.City
@@ -376,7 +375,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	_, er := a.userExtraRepo.InsertUserExtra(ctx, userExtra)
 	if er != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", er.Error())
+		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", er.Error())
 		return nil, transport.WrapInteralServerError(er)
 	}
 
@@ -388,26 +387,27 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	})
 	if er != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", er.Error())
-		return nil, transport.WrapInteralServerError(er)
-	}
-
-	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(newUser.ID)
-	if er != nil {
-		dTx.Rollback()
-		foree_logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", er.Error())
+		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", er.Error())
 		return nil, transport.WrapInteralServerError(er)
 	}
 
 	if err := dTx.Commit(); err != nil {
-		foree_logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", err.Error())
+		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
+	}
+
+	foree_logger.Logger.Info("CreateUser_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
+
+	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(newUser.ID)
+	if er != nil {
+		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", er.Error())
+		return nil, transport.WrapInteralServerError(er)
 	}
 
 	// Get Permission.
 	rolePermissions, pErr := a.rolePermissionRepo.GetAllEnabledRolePermissionByRoleName(userGroup.RoleGroup)
 	if pErr != nil {
-		foree_logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", pErr.Error())
+		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", pErr.Error())
 		return nil, transport.WrapInteralServerError(pErr)
 	}
 
@@ -420,11 +420,9 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 
 	updateSession, sessionErr := a.sessionRepo.UpdateSession(newSession)
 	if sessionErr != nil {
-		foree_logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", sessionErr.Error())
+		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", sessionErr.Error())
 		return nil, transport.WrapInteralServerError(sessionErr)
 	}
-
-	foree_logger.Logger.Info("CreateUser_Success", "userId", session.UserId)
 
 	go func() {
 		// Create default Interac Account for the user.
@@ -447,7 +445,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		}
 		_, derr := a.interacAccountRepo.InsertInteracAccount(ctx, acc)
 		if derr != nil {
-			foree_logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", derr.Error())
+			foree_logger.Logger.Error("Default_Interac_Account_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", derr.Error())
 		}
 	}()
 
