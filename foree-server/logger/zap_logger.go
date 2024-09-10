@@ -1,41 +1,48 @@
 package logger
 
 import (
-	"encoding/json"
-	"fmt"
+	"os"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func NewZapLogger(level, outputPath string) (*ZapLogger, error) {
-	encoderCfg := zap.NewProductionEncoderConfig()
-	encoderCfg.TimeKey = "timestamp"
-	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
-	encoderCfg.MessageKey = "event"
-	encoderCfg.LevelKey = "level"
-	encoderCfg.EncodeLevel = zapcore.CapitalLevelEncoder
+	stdout := zapcore.AddSync(os.Stdout)
+	file := zapcore.AddSync(&lumberjack.Logger{
+		Filename:   outputPath,
+		MaxSize:    10, // megabytes
+		MaxBackups: 3,
+		MaxAge:     7, // days
+	})
+
+	l := zap.NewAtomicLevelAt(zap.InfoLevel)
+
+	productionCfg := zap.NewProductionEncoderConfig()
+	productionCfg.TimeKey = "timestamp"
+	productionCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+	productionCfg.MessageKey = "event"
+	productionCfg.LevelKey = "level"
+	productionCfg.EncodeLevel = zapcore.CapitalLevelEncoder
 	//TODO: custom empty encode caller
-	encoderCfg.EncodeCaller = zapcore.ShortCallerEncoder
+	productionCfg.EncodeCaller = zapcore.ShortCallerEncoder
+	productionCfg.StacktraceKey = "stacktrace"
 
-	rawJSON := []byte(fmt.Sprintf(`{
-		"level": "%s",
-		"encoding": "json",
-		"outputPaths": ["stdout", "%s"],
-		"errorOutputPaths": ["stderr", "%s"]
-	}`, level, outputPath, outputPath))
+	developmentCfg := zap.NewDevelopmentEncoderConfig()
+	developmentCfg.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	developmentCfg.StacktraceKey = "stacktrace"
 
-	var cfg zap.Config
-	if err := json.Unmarshal(rawJSON, &cfg); err != nil {
-		return nil, err
-	}
+	consoleEncoder := zapcore.NewConsoleEncoder(developmentCfg)
+	fileEncoder := zapcore.NewJSONEncoder(productionCfg)
 
-	cfg.EncoderConfig = encoderCfg
-
-	logger := zap.Must(cfg.Build()).Sugar()
+	core := zapcore.NewTee(
+		zapcore.NewCore(consoleEncoder, stdout, l),
+		zapcore.NewCore(fileEncoder, file, l),
+	)
 
 	return &ZapLogger{
-		log: logger,
+		log: zap.New(core, zap.WithCaller(false), zap.AddStacktrace(zap.ErrorLevel)).Sugar(),
 	}, nil
 }
 

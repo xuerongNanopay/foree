@@ -93,6 +93,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(err)
 	}
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
 
 	// Create User
 	userId, err := a.userRepo.InsertUser(ctx, auth.User{
@@ -106,27 +107,14 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	user, err := a.userRepo.GetUniqueUserById(userId)
-	if err != nil {
-		dTx.Rollback()
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
-		return nil, transport.WrapInteralServerError(err)
-	}
-
-	if user == nil {
-		dTx.Rollback()
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "userId", userId, "cause", "unable to get user")
-		return nil, transport.NewInteralServerError("unable to get user with id: `%v`", userId)
-	}
-
 	// Create EmailPasswd
-	id, err := a.emailPasswordRepo.InsertEmailPasswd(ctx, auth.EmailPasswd{
+	epId, err := a.emailPasswordRepo.InsertEmailPasswd(ctx, auth.EmailPasswd{
 		Email:               req.Email,
 		Passwd:              hashedPasswd,
 		Status:              auth.EPStatusWaitingVerify,
 		VerifyCode:          auth.GenerateVerifyCode(),
 		VerifyCodeExpiredAt: time.Now().Add(10 * time.Minute),
-		OwnerId:             user.ID,
+		OwnerId:             userId,
 	})
 
 	if err != nil {
@@ -135,23 +123,32 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdById(id)
+	if err = dTx.Commit(); err != nil {
+		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	user, err := a.userRepo.GetUniqueUserById(userId)
+	if err != nil {
+		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	if user == nil {
+		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "userId", userId, "cause", "unable to get user")
+		return nil, transport.NewInteralServerError("unable to get user with id: `%v`", userId)
+	}
+
+	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdById(epId)
 
 	if err != nil {
-		dTx.Rollback()
 		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if ep == nil {
-		dTx.Rollback()
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "emailPasswordId", id, "cause", "unable to get created emailPassword")
-		return nil, transport.NewInteralServerError("unable to get EmailPasswd with id: `%v`", id)
-	}
-
-	if err = dTx.Commit(); err != nil {
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
-		return nil, transport.WrapInteralServerError(err)
+		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "emailPasswordId", epId, "cause", "unable to get created emailPassword")
+		return nil, transport.NewInteralServerError("unable to get EmailPasswd with id: `%v`", epId)
 	}
 
 	go a.linkReferer(*user, req)
@@ -308,6 +305,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		foree_logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", dErr.Error())
 		return nil, transport.WrapInteralServerError(dErr)
 	}
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
 
 	// Create identification(Store Identification first)
 	identification := foree_auth.UserIdentification{

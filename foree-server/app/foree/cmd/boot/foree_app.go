@@ -76,7 +76,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	}
 
 	//Initial Logger
-	l, err := logger.NewZapLogger("debug", "/tmp/zap_out")
+	l, err := logger.NewZapLogger("debug", "/tmp/foree.log")
 	if err != nil {
 		panic(err)
 	}
