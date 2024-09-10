@@ -21,7 +21,7 @@ func (c *AuthRouter) RegisterRouter(router *mux.Router) {
 	// Verify email
 	router.HandleFunc("/verify_email", simplePostWrapper(c.authService.VerifyEmail)).Methods("POST")
 	// Resend verify code
-	router.HandleFunc("/resend_code", simpleGetWrapper(c.authService.VerifyEmail)).Methods("GET")
+	router.HandleFunc("/resend_code", simpleGetWrapper(c.authService.ResendVerifyCode)).Methods("GET")
 	// Signup
 	router.HandleFunc("/sign_up", simplePostWrapper(c.authService.SignUp)).Methods("POST")
 	// Logout

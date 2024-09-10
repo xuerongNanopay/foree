@@ -111,6 +111,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 	verifyCodeExpiredAt := time.Now().Add(10 * time.Minute)
 	epId, err := a.emailPasswordRepo.InsertEmailPasswd(ctx, auth.EmailPasswd{
 		Email:               req.Email,
+		Username:            req.Email,
 		Passwd:              hashedPasswd,
 		Status:              auth.EPStatusWaitingVerify,
 		VerifyCode:          auth.GenerateVerifyCode(),
@@ -129,7 +130,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	foree_logger.Logger.Info("Signup_Success", "userId", userId, "emailPasswordId", epId)
+	foree_logger.Logger.Info("Signup_Success", "ip", loadRealIp(ctx), "userId", userId, "emailPasswordId", epId)
 
 	user, err := a.userRepo.GetUniqueUserById(userId)
 	if err != nil {
@@ -199,12 +200,12 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*Use
 		if session != nil {
 			userId = session.UserId
 		}
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", userId, err.Error())
+		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", userId, "cause", err.Error())
 		return nil, err
 	}
 
 	if session.EmailPasswd.VerifyCode != req.Code || (session.EmailPasswd.VerifyCodeExpiredAt == nil && session.EmailPasswd.VerifyCodeExpiredAt.Before(time.Now())) {
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "userId", session.UserId, "cause", "verify code unmatch or expired")
+		foree_logger.Logger.Warn("VerifyEmail_Fail", "userId", session.UserId, "cause", "invalid code")
 		return nil, transport.NewFormError("Invalid VerifyEmail Requst", "verifyCode", "please resend verify code")
 	}
 
@@ -214,7 +215,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*Use
 
 	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP)
 	if e != nil {
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "userId", session.UserId, "cause", err.Error())
+		foree_logger.Logger.Warn("VerifyEmail_Fail", "userId", session.UserId, "cause", e.Error())
 		return nil, transport.WrapInteralServerError(e)
 	}
 
@@ -239,7 +240,7 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 		if session != nil {
 			userId = session.UserId
 		}
-		foree_logger.Logger.Warn("ResendVerifyCode_Fail", "ip", loadRealIp(ctx), "userId", userId, err.Error())
+		foree_logger.Logger.Warn("ResendVerifyCode_Fail", "ip", loadRealIp(ctx), "userId", userId, "cause", err.Error())
 		return nil, err
 	}
 
