@@ -9,17 +9,17 @@ import (
 )
 
 const (
-	sQLGiftGetUniqueByCode = `
+	sQLPromotionGetUniqueByCode = `
 		SELECT
 			g.code, g.description, g.amount, g.currency, g,require_min
 			g.is_enable, g.start_time, g.end_time, g.created_at, g.updated_at
-		FROM gift as g
+		FROM promotion as g
 		Where g.code = ?
 	`
 )
 
 // Control the life cycle of promotion.
-type Gift struct {
+type Promotion struct {
 	Code        string           `json:"code"`
 	Description string           `json:"description"`
 	Amt         types.AmountData `json:"Amt"`
@@ -30,7 +30,7 @@ type Gift struct {
 	UpdatedAt   *time.Time       `json:"updatedAt"`
 }
 
-func (p *Gift) IsValid() bool {
+func (p *Promotion) IsValid() bool {
 	if !p.IsEnable {
 		return false
 	}
@@ -56,26 +56,26 @@ func (p *Gift) IsValid() bool {
 	return false
 }
 
-func NewGiftRepo(db *sql.DB) *GiftRepo {
-	return &GiftRepo{db: db}
+func NewPromotionRepo(db *sql.DB) *PromotionRepo {
+	return &PromotionRepo{db: db}
 }
 
-type GiftRepo struct {
+type PromotionRepo struct {
 	db *sql.DB
 }
 
-func (repo *GiftRepo) GetUniqueGiftByCode(ctx context.Context, code string) (*Gift, error) {
-	rows, err := repo.db.Query(sQLGiftGetUniqueByCode, code)
+func (repo *PromotionRepo) GetUniquePromotionByCode(ctx context.Context, code string) (*Promotion, error) {
+	rows, err := repo.db.Query(sQLPromotionGetUniqueByCode, code)
 
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var f *Gift
+	var f *Promotion
 
 	for rows.Next() {
-		f, err = scanRowIntoGift(rows)
+		f, err = scanRowIntoPromotion(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -88,8 +88,8 @@ func (repo *GiftRepo) GetUniqueGiftByCode(ctx context.Context, code string) (*Gi
 	return f, nil
 }
 
-func scanRowIntoGift(rows *sql.Rows) (*Gift, error) {
-	p := new(Gift)
+func scanRowIntoPromotion(rows *sql.Rows) (*Promotion, error) {
+	p := new(Promotion)
 	err := rows.Scan(
 		&p.Code,
 		&p.Description,

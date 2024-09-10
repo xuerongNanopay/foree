@@ -13,6 +13,7 @@ import (
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_config "xue.io/go-pay/app/foree/cmd/config"
 	foree_logger "xue.io/go-pay/app/foree/logger"
+	"xue.io/go-pay/app/foree/promotion"
 	"xue.io/go-pay/app/foree/referral"
 	"xue.io/go-pay/app/foree/sys_router"
 	"xue.io/go-pay/app/foree/transaction"
@@ -52,6 +53,7 @@ type ForeeApp struct {
 	nbpCOTxRepo            *transaction.NBPCOTxRepo
 	txQuoteRepo            *transaction.TxQuoteRepo
 	txSummaryRepo          *transaction.TxSummaryRepo
+	promotionRepo          *promotion.PromotionRepo
 	authService            *foree_service.AuthService
 	accountService         *foree_service.AccountService
 	transactionService     *foree_service.TransactionService
@@ -122,6 +124,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.nbpCOTxRepo = transaction.NewNBPCOTxRepo(db)
 	app.txQuoteRepo = transaction.NewTxQuoteRepo(5, 2048)
 	app.txSummaryRepo = transaction.NewTxSummaryRepo(db)
+	app.promotionRepo = promotion.NewPromotionRepo(db)
 
 	//Initial vendors
 	app.scotiaClient = scotia.NewMockScotiaClient()
@@ -190,6 +193,10 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.userIdnetificationRepo,
 		app.interacAccountRepo,
 		app.userGroupRepo,
+		app.userExtraRepo,
+		app.referralRepo,
+		app.rewardRepo,
+		app.promotionRepo,
 	)
 
 	app.accountService = foree_service.NewAccountService(

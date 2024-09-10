@@ -22,9 +22,9 @@ import (
 )
 
 const maxLoginAttempts = 4
-const OnboardGift = "ONBOARD_GIFT"
-const ReferralGift = "REFERRAL_GIFT"
-const giftCacheTimeout = 15 * time.Minute
+const PromotionOnboard = "ONBOARD_PROMOTION"
+const PromotionReferral = "REFERRAL_PROMOTION"
+const promotionCacheTimeout = 15 * time.Minute
 const verifyCodeExpiry = 4 * time.Minute
 
 func NewAuthService(
@@ -36,6 +36,10 @@ func NewAuthService(
 	userIdentificationRepo *foree_auth.UserIdentificationRepo,
 	interacAccountRepo *account.InteracAccountRepo,
 	userGroupRepo *auth.UserGroupRepo,
+	userExtraRepo *foree_auth.UserExtraRepo,
+	referralRepo *referral.ReferralRepo,
+	rewardRepo *transaction.RewardRepo,
+	promotionRepo *promotion.PromotionRepo,
 ) *AuthService {
 	return &AuthService{
 		db:                     db,
@@ -46,25 +50,29 @@ func NewAuthService(
 		userIdentificationRepo: userIdentificationRepo,
 		interacAccountRepo:     interacAccountRepo,
 		userGroupRepo:          userGroupRepo,
+		userExtraRepo:          userExtraRepo,
+		referralRepo:           referralRepo,
+		rewardRepo:             rewardRepo,
+		promotionRepo:          promotionRepo,
 	}
 }
 
 type AuthService struct {
-	db                     *sql.DB
-	sessionRepo            *auth.SessionRepo
-	userRepo               *auth.UserRepo
-	emailPasswordRepo      *auth.EmailPasswdRepo
-	rolePermissionRepo     *auth.RolePermissionRepo
-	userIdentificationRepo *foree_auth.UserIdentificationRepo
-	interacAccountRepo     *account.InteracAccountRepo
-	userGroupRepo          *auth.UserGroupRepo
-	userExtraRepo          *foree_auth.UserExtraRepo
-	referralRepo           *referral.ReferralRepo
-	rewardRepo             *transaction.RewardRepo
-	giftRepo               *promotion.GiftRepo
-	giftCache              map[string]CacheItem[promotion.Gift]
-	giftCacheRWLock        sync.RWMutex
-	giftCacheUpdateLock    sync.RWMutex
+	db                       *sql.DB
+	sessionRepo              *auth.SessionRepo
+	userRepo                 *auth.UserRepo
+	emailPasswordRepo        *auth.EmailPasswdRepo
+	rolePermissionRepo       *auth.RolePermissionRepo
+	userIdentificationRepo   *foree_auth.UserIdentificationRepo
+	interacAccountRepo       *account.InteracAccountRepo
+	userGroupRepo            *auth.UserGroupRepo
+	userExtraRepo            *foree_auth.UserExtraRepo
+	referralRepo             *referral.ReferralRepo
+	rewardRepo               *transaction.RewardRepo
+	promotionRepo            *promotion.PromotionRepo
+	promotionCache           map[string]CacheItem[promotion.Promotion]
+	promotionCacheRWLock     sync.RWMutex
+	promotionCacheUpdateLock sync.RWMutex
 }
 
 func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, transport.HError) {
@@ -310,14 +318,27 @@ func (a *AuthService) allowCreateUser(sessionId string) (*auth.Session, transpor
 
 func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserDTO, transport.HError) {
 	// Check allow to create user
-	session, err := a.allowCreateUser(req.SessionId)
-	if err != nil {
+	session, sErr := a.allowCreateUser(req.SessionId)
+	if sErr != nil {
 		var userId int64
 		if session != nil {
 			userId = session.UserId
 		}
-		foree_logger.Logger.Warn("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", userId, "cause", err.Error())
-		return nil, err
+		foree_logger.Logger.Warn("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", userId, "cause", sErr.Error())
+		return nil, sErr
+	}
+
+	curUser, err := a.userRepo.GetUniqueUserById(session.UserId)
+	if err != nil {
+		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	// Ask user login
+	if curUser.Status != auth.UserStatusInitial {
+		a.sessionRepo.Delete(req.SessionId)
+		foree_logger.Logger.Warn("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", fmt.Sprintf("user in status `%v`", curUser.Status))
+		return nil, transport.NewUnauthorizedRequestError()
 	}
 
 	dTx, dErr := a.db.Begin()
@@ -345,6 +366,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 
 	// Create a new user by updating essential fields.
 	newUser := *session.User
+	newUser.Status = auth.UserStatusActive
 	newUser.FirstName = req.FirstName
 	newUser.MiddleName = req.MiddleName
 	newUser.LastName = req.LastName
@@ -370,6 +392,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	userExtra := foree_auth.UserExtra{
 		Nationality: req.Nationality,
 		Pob:         req.Pob,
+		OwnerId:     session.UserId,
 	}
 
 	_, er := a.userExtraRepo.InsertUserExtra(ctx, userExtra)
@@ -443,7 +466,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 			Status:           account.AccountStatusActive,
 			LatestActivityAt: &now,
 		}
-		_, derr := a.interacAccountRepo.InsertInteracAccount(ctx, acc)
+		_, derr := a.interacAccountRepo.InsertInteracAccount(context.TODO(), acc)
 		if derr != nil {
 			foree_logger.Logger.Error("Default_Interac_Account_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", derr.Error())
 		}
@@ -736,16 +759,16 @@ func (a *AuthService) rewardReferer(registerUser auth.User) {
 		return
 	}
 
-	gift, _ := a.getGift(ReferralGift, giftCacheTimeout)
+	promotion, _ := a.getPromotion(PromotionReferral, promotionCacheTimeout)
 
-	if gift == nil || !gift.IsValid() {
+	if promotion == nil || !promotion.IsValid() {
 		return
 	}
 
 	reward := transaction.Reward{
 		Type:        transaction.RewardTypeReferal,
 		Description: fmt.Sprintf("Referral reward by %v %v", registerUser.FirstName, registerUser.LastName),
-		Amt:         gift.Amt,
+		Amt:         promotion.Amt,
 		OwnerId:     referral.ReferrerId,
 		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
 	}
@@ -758,7 +781,7 @@ func (a *AuthService) rewardReferer(registerUser auth.User) {
 
 func (a *AuthService) rewardOnboard(registerUser auth.User) {
 
-	gift, _ := a.getGift(OnboardGift, giftCacheTimeout)
+	gift, _ := a.getPromotion(PromotionOnboard, promotionCacheTimeout)
 
 	if gift == nil || !gift.IsValid() {
 		return
@@ -779,34 +802,34 @@ func (a *AuthService) rewardOnboard(registerUser auth.User) {
 }
 
 // TODO: using atomic interger to limit peak volumn
-func (a *AuthService) getGift(giftCode string, validIn time.Duration) (*promotion.Gift, error) {
-	a.giftCacheRWLock.RLock()
-	giftCache, ok := a.giftCache[giftCode]
-	a.giftCacheRWLock.RUnlock()
+func (a *AuthService) getPromotion(promotionCode string, validIn time.Duration) (*promotion.Promotion, error) {
+	a.promotionCacheRWLock.RLock()
+	promotionCache, ok := a.promotionCache[promotionCode]
+	a.promotionCacheRWLock.RUnlock()
 
-	if ok && giftCache.createdAt.Add(validIn).After(time.Now()) {
-		return &giftCache.item, nil
+	if ok && promotionCache.createdAt.Add(validIn).After(time.Now()) {
+		return &promotionCache.item, nil
 	}
 
-	gift, err := a.giftRepo.GetUniqueGiftByCode(context.TODO(), giftCode)
+	gift, err := a.promotionRepo.GetUniquePromotionByCode(context.TODO(), promotionCode)
 	if err != nil {
-		foree_logger.Logger.Error("Gift_Fail", "giftCode", giftCode, "cause", err.Error())
+		foree_logger.Logger.Error("Promotion_Fail", "promotionCode", promotionCode, "cause", err.Error())
 		return nil, err
 	}
 
 	if gift != nil {
-		foree_logger.Logger.Warn("Gift_Fail", "giftCode", giftCode, "cause", "gift no found")
-		return nil, fmt.Errorf("Gift no found with giftCode `%v`", giftCode)
+		foree_logger.Logger.Warn("Promotion_Fail", "promotionCode", promotionCode, "cause", "gift no found")
+		return nil, fmt.Errorf("Promotion no found with code `%v`", promotionCode)
 	}
 
 	// Update gift
 	// Make sure at least one thread can update the cache.
 	func() {
-		a.giftCacheUpdateLock.TryLock()
-		defer a.giftCacheUpdateLock.Unlock()
-		a.giftCacheRWLock.Lock()
-		defer a.giftCacheRWLock.Unlock()
-		a.giftCache[giftCode] = CacheItem[promotion.Gift]{
+		a.promotionCacheUpdateLock.TryLock()
+		defer a.promotionCacheUpdateLock.Unlock()
+		a.promotionCacheRWLock.Lock()
+		defer a.promotionCacheRWLock.Unlock()
+		a.promotionCache[promotionCode] = CacheItem[promotion.Promotion]{
 			item:      *gift,
 			createdAt: time.Now(),
 		}

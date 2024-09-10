@@ -12,7 +12,7 @@ const (
 	sQLUserGroupInsert = `
 		INSERT INTO user_group(
 			role_group, transaction_limit_group, fee_group, owner_id
-		) VALUES(?,?,?)
+		) VALUES(?,?,?,?)
 	`
 	sQLUserGoupUpdate = `
 		UPDATE user_group SET

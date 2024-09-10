@@ -27,7 +27,7 @@ func validatePayloadBeforeProcess[P transport.ForeeRequest](r *http.Request, req
 	err := req.Validate()
 	if err != nil {
 		foree_logger.Logger.Warn(
-			"Invalid Input Error",
+			"Payload_Validation_Error",
 			"ip", http_util.LoadRealIp(r),
 			"sessionId", r.Header.Get("SESSION_ID"),
 			"requestType", fmt.Sprintf("%T", req),

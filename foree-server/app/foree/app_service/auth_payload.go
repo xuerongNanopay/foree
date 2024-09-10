@@ -97,25 +97,30 @@ func (q CreateUserReq) Validate() *transport.BadRequestError {
 
 	q.Age = int(age)
 
-	// Country/Region
+	// Country
 	if q.Country != "CA" {
 		ret.AddDetails("country", fmt.Sprintf("invalid country `%v`", q.Country))
 	}
 
+	// Province
 	_, ok := constant.Regions["CA"][q.Province]
 	if !ok {
 		ret.AddDetails("province", fmt.Sprintf("invalid province `%v`", q.Province))
 	}
 
-	//TODO: Postal Code
+	country := constant.Countires[q.Country]
+
+	// Postal code
+	ok, _ = regexp.MatchString(country.PostalCodeRegex, q.PostalCode)
+	if !ok {
+		ret.AddDetails("postalCode", fmt.Sprintf("invalid postal code `%v`", q.PostalCode))
+	}
 
 	// Phone number
-	phoneNumber := phoneNumberReplayer.Replace(q.PhoneNumber)
-	ok, _ = regexp.MatchString(foree_constant.NineDigitReg, phoneNumber)
+	ok, _ = regexp.MatchString(country.PhoneRegex, q.PhoneNumber)
 	if !ok {
 		ret.AddDetails("phoneNumber", fmt.Sprintf("invalid phone number `%v`", q.PhoneNumber))
 	}
-	q.PhoneNumber = phoneNumber
 
 	// Identification type
 	_, ok = foree_constant.AllowIdentificationTypes[fAuth.IdentificationType(q.IdentificationType)]
