@@ -620,6 +620,40 @@ func (a *AuthService) ForgetPassword(ctx context.Context, req ForgetPasswordReq)
 	return nil, nil
 }
 
+func (a *AuthService) ForgetPasswordVerify(ctx context.Context, req ForgetPasswordVerifyReq) (any, transport.HError) {
+	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
+
+	if err != nil {
+		foree_logger.Logger.Error("ForgetPasswordVerify_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+
+	}
+
+	if ep.LatestForgetPasswdUpdatedAt != nil && ep.LatestForgetPasswdUpdatedAt.After(time.Now().Add(-1*forgetPasswordUpdateInterval)) {
+		foree_logger.Logger.Warn("ForgetPasswordVerify_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "forget password update is to frequent")
+		return nil, transport.NewFormError("Invaild forget password request", "email", "password update too frequent")
+	}
+
+	if ep == nil {
+		foree_logger.Logger.Warn("ForgetPasswordVerify_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
+		return nil, transport.NewFormError("Invaild forget password", "email", "invalid email")
+	}
+
+	if ep.RetrieveTokenExpiredAt == nil || ep.RetrieveTokenExpiredAt.Before(time.Now()) {
+		foree_logger.Logger.Warn("ForgetPasswordVerify_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "retrieve code expire")
+		return nil, transport.NewFormError("Invaild forget password", "retrieveCode", "retrieve code expired")
+	}
+
+	if ep.RetrieveToken != req.RetrieveCode {
+		foree_logger.Logger.Warn("ForgetPasswordVerify_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "invalid retrieve code")
+		return nil, transport.NewFormError("Invaild forget password", "retrieveCode", "invalid retrieve code")
+	}
+
+	foree_logger.Logger.Info("ForgetPasswordVerify_Success", "ip", loadRealIp(ctx), "email", req.Email)
+
+	return nil, nil
+}
+
 func (a *AuthService) ForgetPasswordUpdate(ctx context.Context, req ForgetPasswordUpdateReq) (any, transport.HError) {
 	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
 
@@ -630,7 +664,7 @@ func (a *AuthService) ForgetPasswordUpdate(ctx context.Context, req ForgetPasswo
 	}
 
 	if ep.LatestForgetPasswdUpdatedAt != nil && ep.LatestForgetPasswdUpdatedAt.After(time.Now().Add(-1*forgetPasswordUpdateInterval)) {
-		foree_logger.Logger.Warn("ForgetPassword_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "forget password update is to frequent")
+		foree_logger.Logger.Warn("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "forget password update is to frequent")
 		return nil, transport.NewFormError("Invaild forget password request", "email", "password update too frequent")
 	}
 

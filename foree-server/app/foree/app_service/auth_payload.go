@@ -135,6 +135,29 @@ func (q CreateUserReq) Validate() *transport.BadRequestError {
 	return nil
 }
 
+type ForgetPasswordReq struct {
+	Email string `json:"email" validate:"email,required"`
+}
+
+func (q ForgetPasswordReq) Validate() *transport.BadRequestError {
+	if ret := validateStruct(q, "Invalid forget password request"); len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
+}
+
+type ForgetPasswordVerifyReq struct {
+	Email        string `json:"email" validate:"email,required"`
+	RetrieveCode string `json:"retrieveCode" validate:"required"`
+}
+
+func (q ForgetPasswordVerifyReq) Validate() *transport.BadRequestError {
+	if ret := validateStruct(q, "Invalid forget password request"); len(ret.Details) > 0 {
+		return ret
+	}
+	return nil
+}
+
 type ForgetPasswordUpdateReq struct {
 	Email        string `json:"email" validate:"email,required"`
 	RetrieveCode string `json:"retrieveCode" validate:"required"`
@@ -143,17 +166,6 @@ type ForgetPasswordUpdateReq struct {
 
 func (q ForgetPasswordUpdateReq) Validate() *transport.BadRequestError {
 	if ret := validateStruct(q, "Invalid new password request"); len(ret.Details) > 0 {
-		return ret
-	}
-	return nil
-}
-
-type ForgetPasswordReq struct {
-	Email string `json:"email" validate:"email,required"`
-}
-
-func (q ForgetPasswordReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid forget password request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
