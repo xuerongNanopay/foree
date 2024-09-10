@@ -4,22 +4,12 @@ class AuthService {
   constructor() {
   }
 
-  async login(req) {
-    // this.#axiosClient.post('')
-    // this.#axiosClient.post("/")
+  async signUp(req, {signal}={signal}) {
+    return await axios.post("/sign_up", req, {signal})
   }
-
-  signIn() {
-
-  }
-
-  signUp() {
-
-  }
-
 
   async forgetPassword(req, {signal}={signal}) {
-    return await axios.post("/forget_password", req, {signal})
+    return await axios.post("/sign_up", req, {signal})
   }
 
   onboard() {

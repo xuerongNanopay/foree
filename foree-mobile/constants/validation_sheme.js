@@ -136,21 +136,36 @@ const PositiveFloatScheme = ({max, required=true}={
   return FloatScheme({min: 0, max, required})
 }
 
+// Minimum four characters, at least one letter and one number:
+const PasswdMinFourOneLetterOneNumber = {
+  regex: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,}$/,
+  message: "minimum four characters, at least one letter and one number"
+}
 // Minimum eight characters, at least one letter and one number:
-const PasswdMinFourOneLetterOneNumber = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,}$/
-// Minimum eight characters, at least one letter and one number:
-const PasswdMinEightOneLetterOneNumber = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/
+const PasswdMinEightOneLetterOneNumber = {
+  regex: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+  message: "minimum eight characters, at least one letter and one number"
+}
 // Minimum eight characters, at least one letter, one number and one special character:
-const PasswdMinEightOneLetterOneNumberOneSpecial = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
+const PasswdMinEightOneLetterOneNumberOneSpecial = {
+  regex: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+  message: "minimum eight characters, at least one letter, one number and one special character"
+}
 // Minimum eight characters, at least one uppercase letter, one lowercase letter and one number:
-const PasswdMinEightOneUpperOneLowerOneNumber = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/
+const PasswdMinEightOneUpperOneLowerOneNumber = {
+  regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/,
+  message: "minimum eight characters, at least one uppercase letter, one lowercase letter and one number"
+}
 // Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character
-const PasswdMinEightOneUpperOneLowerOneNumberOneSepcia = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+const PasswdMinEightOneUpperOneLowerOneNumberOneSepcia = {
+  regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+  message: "minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character"
+}
 
-const PasswordScheme = ({passwdLevel=PasswdMinFourOneLetterOneNumber}={
-  passwdLevel
+const PasswordScheme = ({passwordValidator=PasswdMinFourOneLetterOneNumber}={
+  passwordValidator
 }) => {
-  return string().trim().required("required").matches(passwdLevel)
+  return string().trim().required("required").matches(passwordValidator.regex, passwordValidator.message)
 }
 
 const PostalCodeScheme = ({required=true, countryCode}={

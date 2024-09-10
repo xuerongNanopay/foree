@@ -1,26 +1,54 @@
 import { ScrollView, Text, View, Image } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, router } from 'expo-router'
 import { SafeAreaView } from 'react-native'
 
 import { images } from '../../constants'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
+import { authPayload, authService } from '../../service'
 
 const SignUp = () => {
+  const [errors, setErrors] = useState({});
+
   const [form, setForm] = useState({
     email: '',
     password: '',
   })
 
+  useEffect(() => {
+    async function validate() {
+      try {
+        await authPayload.SignUpScheme.validate(form, {abortEarly: false})
+        setErrors({})
+      } catch (err) {
+        let e = {}
+        for ( let i of err.inner ) {
+          e[i.path] =  e[i.path] ?? i.errors[0]
+        }
+        setErrors(e)
+      }
+    }
+    validate()
+  }, [form])
+
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const submit = () => {
+  const submit = async () => {
     setIsSubmitting(true)
-    setTimeout(() => {
+    try {
+      const resp = await authService.signUp(form)
+      if ( resp.status / 100 !== 2 ) {
+        console.info("sign_up", resp.status, resp.data)
+        return
+      }
+      console.log(resp.data)
+      //TODO: normal logic
+    } catch (err) {
+      console.error(err)
+    } finally {
       setIsSubmitting(false)
-      router.replace("/verify_email")
-    }, 2000);
+    }
   }
 
   return (
@@ -51,9 +79,10 @@ const SignUp = () => {
             value={form.email}
             handleChangeText={(e) => setForm({
               ...form,
-              email:e
+              email:e.toLowerCase()
             })}
             containerStyles="mt-7"
+            errorMessage={errors['email']}
             keyboardType="email-address"
           />
           <FormField
@@ -63,6 +92,7 @@ const SignUp = () => {
               ...form,
               password:e
             })}
+            errorMessage={errors['password']}
             containerStyles="mt-7"
           />
           <CustomButton
