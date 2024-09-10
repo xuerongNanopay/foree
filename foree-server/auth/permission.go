@@ -34,11 +34,11 @@ const (
 )
 
 type RolePermission struct {
-	RoleName   string    `json:"roleName"`
-	Permission string    `json:"permission"`
-	IsEnable   bool      `json:"isEnable"`
-	CreatedAt  time.Time `json:"createdAt"`
-	UpdatedAt  time.Time `json:"updatedAt"`
+	RoleName   string     `json:"roleName"`
+	Permission string     `json:"permission"`
+	IsEnable   bool       `json:"isEnable"`
+	CreatedAt  *time.Time `json:"createdAt"`
+	UpdatedAt  *time.Time `json:"updatedAt"`
 }
 
 func NewRolePermission(db *sql.DB) *RolePermissionRepo {

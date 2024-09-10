@@ -25,9 +25,9 @@ type Session struct {
 	RolePermissions []*RolePermission `json:"rolePermissions"`
 	UserAgent       string            `json:"userAgent"`
 	Ip              string            `json:"ip"`
-	LatestActiveAt  time.Time         `json:"latestActiveAt"`
-	ExpireAt        time.Time         `json:"expireAt"`
-	CreatedAt       time.Time         `json:"createdAt"`
+	LatestActiveAt  *time.Time        `json:"latestActiveAt"`
+	ExpireAt        *time.Time        `json:"expireAt"`
+	CreatedAt       *time.Time        `json:"createdAt"`
 }
 
 // 13 buckets, 1024 sesson of each bucket, and 12 hours session expiry
@@ -69,9 +69,11 @@ type SessionRepo struct {
 }
 
 func (repo *SessionRepo) InsertSession(session Session) (string, error) {
-	session.CreatedAt = time.Now()
-	session.LatestActiveAt = time.Now()
-	session.ExpireAt = time.Now().Add(time.Duration(time.Hour * time.Duration(repo.expireInHour)))
+	now := time.Now()
+	session.CreatedAt = &now
+	session.LatestActiveAt = &now
+	expireAt := time.Now().Add(time.Duration(time.Hour * time.Duration(repo.expireInHour)))
+	session.ExpireAt = &expireAt
 
 	repo.rwLock.Lock()
 	defer repo.rwLock.Unlock()
@@ -89,7 +91,8 @@ func (repo *SessionRepo) InsertSession(session Session) (string, error) {
 }
 
 func (repo *SessionRepo) UpdateSession(session Session) (*Session, error) {
-	session.LatestActiveAt = time.Now()
+	now := time.Now()
+	session.LatestActiveAt = &now
 	idx, err := parseBucketId(session.ID)
 	if err != nil {
 		return nil, err
@@ -149,7 +152,7 @@ func (repo *SessionRepo) GetSessionUniqueById(id string) *Session {
 		go repo.Delete(id)
 		return nil
 	}
-	s.LatestActiveAt = now
+	s.LatestActiveAt = &now
 	return s
 }
 
