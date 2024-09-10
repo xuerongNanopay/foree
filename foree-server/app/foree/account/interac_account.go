@@ -84,9 +84,9 @@ type InteracAccount struct {
 	AccountHash      string        `json:"accountHash"`
 	OwnerId          int64         `json:"ownerId"`
 	Status           AccountStatus `json:"status"`
-	LatestActivityAt time.Time     `json:"latestActivityAt"`
-	CreatedAt        time.Time     `json:"createdAt"`
-	UpdatedAt        time.Time     `json:"updatedAt"`
+	LatestActivityAt *time.Time    `json:"latestActivityAt"`
+	CreatedAt        *time.Time    `json:"createdAt"`
+	UpdatedAt        *time.Time    `json:"updatedAt"`
 }
 
 func (c *InteracAccount) GetLegalName() string {

@@ -92,9 +92,9 @@ type ContactAccount struct {
 	AccountHash           string             `json:"accountHash"`
 	RelationshipToContact string             `json:"relationshipToContact"`
 	OwnerId               int64              `json:"owerId"`
-	LatestActivityAt      time.Time          `json:"latestActivityAt"`
-	CreatedAt             time.Time          `json:"createdAt"`
-	UpdatedAt             time.Time          `json:"updatedAt"`
+	LatestActivityAt      *time.Time         `json:"latestActivityAt"`
+	CreatedAt             *time.Time         `json:"createdAt"`
+	UpdatedAt             *time.Time         `json:"updatedAt"`
 }
 
 func (c *ContactAccount) GetLegalName() string {
@@ -225,7 +225,8 @@ func (repo *ContactAccountRepo) UpdateActiveContactAccountByIdAndOwner(ctx conte
 }
 
 func (repo *ContactAccountRepo) RefreshContactLatestActivityAtAndOwner(ctx context.Context, acc ContactAccount) error {
-	acc.LatestActivityAt = time.Now()
+	now := time.Now()
+	acc.LatestActivityAt = &now
 	return repo.UpdateActiveContactAccountByIdAndOwner(ctx, acc)
 }
 

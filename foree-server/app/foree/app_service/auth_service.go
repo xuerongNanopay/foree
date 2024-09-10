@@ -408,6 +408,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 
 	go func() {
 		// Create default Interac Account for the user.
+		now := time.Now()
 		acc := account.InteracAccount{
 			FirstName:        newUser.FirstName,
 			MiddleName:       newUser.MiddleName,
@@ -422,7 +423,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 			Email:            newUser.Email,
 			OwnerId:          newUser.ID,
 			Status:           account.AccountStatusActive,
-			LatestActivityAt: time.Now(),
+			LatestActivityAt: &now,
 		}
 		_, derr := a.interacAccountRepo.InsertInteracAccount(ctx, acc)
 		if derr != nil {

@@ -32,7 +32,7 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 	if err != nil {
 		return nil, err
 	}
-
+	now := time.Now()
 	newAcc := account.ContactAccount{
 		Status:                account.AccountStatusActive,
 		Type:                  account.ContactAccountType(req.TransferMethod),
@@ -50,7 +50,7 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 		AccountNumber:         req.AccountNoOrIBAN,
 		RelationshipToContact: req.RelationshipToContact,
 		OwnerId:               session.User.ID,
-		LatestActivityAt:      time.Now(),
+		LatestActivityAt:      &now,
 	}
 
 	newAcc.HashMyself()
