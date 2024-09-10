@@ -51,9 +51,9 @@ type Referral struct {
 	ReferralCode  string       `json:"referralCode"`
 	ReferrerId    int64        `json:"referrerId"`
 	RefereeId     int64        `json:"refereeId"`
-	AcceptAt      time.Time    `json:"acceptAt"`
-	CreatedAt     time.Time    `json:"createdAt"`
-	UpdatedAt     time.Time    `json:"updatedAt"`
+	AcceptAt      *time.Time   `json:"acceptAt"`
+	CreatedAt     *time.Time   `json:"createdAt"`
+	UpdatedAt     *time.Time   `json:"updatedAt"`
 }
 
 func NewReferralRepo(db *sql.DB) *ReferralRepo {

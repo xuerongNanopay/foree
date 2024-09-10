@@ -700,7 +700,8 @@ func (a *AuthService) linkReferer(registerUser auth.User, req SignUpReq) {
 
 	newReferral := *referral
 	newReferral.RefereeId = registerUser.ID
-	newReferral.AcceptAt = time.Now()
+	now := time.Now()
+	newReferral.AcceptAt = &now
 
 	err = a.referralRepo.UpdateReferralByReferralCode(newReferral)
 	if err != nil {

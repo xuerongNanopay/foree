@@ -25,10 +25,10 @@ type PromoCode struct {
 	MinAmt      types.AmountData `json:"minAmt"`
 	LimitPerAcc int              `json:"limit_per_acc"`
 	IsEnable    bool             `json:"isEnable"`
-	StartTime   time.Time        `json:"startTime"`
-	EndTime     time.Time        `json:"endTime"`
-	CreatedAt   time.Time        `json:"createdAt"`
-	UpdatedAt   time.Time        `json:"updatedAt"`
+	StartTime   *time.Time       `json:"startTime"`
+	EndTime     *time.Time       `json:"endTime"`
+	CreatedAt   *time.Time       `json:"createdAt"`
+	UpdatedAt   *time.Time       `json:"updatedAt"`
 }
 
 func (p *PromoCode) IsValid() bool {
@@ -36,10 +36,25 @@ func (p *PromoCode) IsValid() bool {
 		return false
 	}
 
-	if now := time.Now().Unix(); now > p.StartTime.Unix() || (now > p.EndTime.Unix() && !p.EndTime.IsZero()) {
-		return false
+	if p.StartTime == nil && p.EndTime == nil {
+		return true
 	}
-	return true
+
+	now := time.Now()
+
+	if p.StartTime == nil && now.Before(*p.EndTime) {
+		return true
+	}
+
+	if p.EndTime == nil && now.After(*p.StartTime) {
+		return true
+	}
+
+	if now.After(*p.StartTime) && now.Before(*p.EndTime) {
+		return true
+	}
+
+	return false
 }
 
 func NewPromoCodeRepo(db *sql.DB) *PromoCodeRepo {
