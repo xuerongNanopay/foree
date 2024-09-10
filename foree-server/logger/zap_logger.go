@@ -13,8 +13,8 @@ func NewZapLogger(level, outputPath string) (*ZapLogger, error) {
 	file := zapcore.AddSync(&lumberjack.Logger{
 		Filename:   outputPath,
 		MaxSize:    10, // megabytes
-		MaxBackups: 3,
-		MaxAge:     7, // days
+		MaxBackups: 0,
+		MaxAge:     0, // days
 	})
 
 	l := zap.NewAtomicLevelAt(zap.InfoLevel)
