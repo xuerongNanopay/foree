@@ -13,7 +13,7 @@ import (
 const (
 	sQLEmailPasswdInsert = `
 		INSERT INTO email_passwd(	 
-			u.status, u.email, u.username, u.passwd, u.verify_code, u.owner_id
+			status, email, username, passwd, verify_code, owner_id
 		) VALUES (?,?,?,?,?)
 	`
 	sQLEmailPasswdUpdateByEmail = `
