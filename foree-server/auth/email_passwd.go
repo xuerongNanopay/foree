@@ -14,7 +14,7 @@ const (
 	sQLEmailPasswdInsert = `
 		INSERT INTO email_passwd(	 
 			status, email, username, passwd, verify_code, owner_id
-		) VALUES (?,?,?,?,?)
+		) VALUES (?,?,?,?,?,?)
 	`
 	sQLEmailPasswdUpdateByEmail = `
 		UPDATE email_passwd SET 
