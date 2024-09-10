@@ -27,7 +27,7 @@ const (
 		SELECT 
 			u.id, u.status, u.email, u.username, u.passwd,
 			u.verify_code, u.verify_code_expired_at, u.login_attempts,
-			u.retrieve_token, u.retrieve_token_expired_at, u.latest_forget_passwd_updated_at
+			u.retrieve_token, u.retrieve_token_expired_at, u.latest_forget_passwd_updated_at,
 			u.owner_id, u.created_at, u.updated_at
 		FROM email_passwd as u 
 		WHERE u.id = ?
@@ -36,7 +36,7 @@ const (
 		SELECT 
 			u.id, u.status, u.email, u.username, u.passwd,
 			u.verify_code, u.verify_code_expired_at, u.login_attempts,
-			u.retrieve_token, u.retrieve_token_expired_at, u.latest_forget_passwd_updated_at
+			u.retrieve_token, u.retrieve_token_expired_at, u.latest_forget_passwd_updated_at,
 			u.owner_id, u.created_at, u.updated_at
 		FROM email_passwd as u 
 		WHERE u.email = ?
@@ -45,7 +45,7 @@ const (
 		SELECT 
 			u.id, u.status, u.email, u.username, u.passwd,
 			u.verify_code, u.verify_code_expired_at, u.login_attempts,
-			u.retrieve_token, u.retrieve_token_expired_at, u.latest_forget_passwd_updated_at
+			u.retrieve_token, u.retrieve_token_expired_at, u.latest_forget_passwd_updated_at,
 			u.owner_id, u.created_at, u.updated_at
 		FROM email_passwd as u
 	`
