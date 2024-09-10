@@ -17,7 +17,15 @@ class AuthService {
   }
 
   async forgetPassword(req, {signal}={signal}) {
-    return await axios.post("/sign_up", req, {signal})
+    return await axios.post("/forget_password", req, {signal})
+  }
+
+  async forgetPasswordVerify(req, {signal}={signal}) {
+    return await axios.post("/forget_password_verify", req, {signal})
+  }
+
+  async forgetPasswordUpdate(req, {signal}={signal}) {
+    return await axios.post("/forget_password_update", req, {signal})
   }
 
   async onboard(req, {signal}={signal}) {

@@ -8,9 +8,7 @@ import FormField from '../../components/FormField'
 import { authService, authPayload } from '../../service'
 
 const ForgetPassword = () => {
-
   const [errors, setErrors] = useState({});
-
   const [form, setForm] = useState({
     email: ''
   })
@@ -41,7 +39,7 @@ const ForgetPassword = () => {
         console.info("forget_password", resp.status, resp.data)
         return
       }
-      //TODO: normal logic
+      router.replace({ pathname: `/forget_password_verify`, params: form });
     } catch (err) {
       console.error(err)
     } finally {
@@ -74,7 +72,7 @@ const ForgetPassword = () => {
               errorMessage={errors['email']}
             />
             <CustomButton
-              title="Submit"
+              title="Retrieve"
               handlePress={submit}
               containerStyles="mt-7"
               disabled={isSubmitting}

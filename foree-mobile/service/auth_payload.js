@@ -24,7 +24,13 @@ const ForgetPasswdScheme = object({
   email: fieldScheme.EmailScheme(),
 })
 
+const ForgetPasswordVerifycheme = object({
+  email: string().required(),
+  retrieveCode: fieldScheme.NumberOnlyScheme({min:6, max:6}),
+})
+
 const ForgetPasswdUpdateScheme = object({
+  email: fieldScheme.NumberOnlyScheme({min:6, max:6}),
   retrieveCode: string().required(),
   newPassword: fieldScheme.PasswordScheme(),
 })
@@ -53,6 +59,7 @@ export default {
   ChangePasswdScheme,
   LoginScheme,
   ForgetPasswdScheme,
+  ForgetPasswordVerifycheme,
   ForgetPasswdUpdateScheme,
   OnboardingScheme
 }

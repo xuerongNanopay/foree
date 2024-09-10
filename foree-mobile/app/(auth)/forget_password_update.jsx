@@ -4,23 +4,50 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { SafeAreaView } from 'react-native'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
+import { authService, authPayload } from '../../service'
 
-const UpdatePassword = () => {
-  const { token } = useLocalSearchParams()
+const ForgetPasswordUpdate = () => {
+  const { preForm } = useLocalSearchParams()
 
+  const [errors, setErrors] = useState({});
   const [form, setForm] = useState({
-    token,
-    password: '',
+    email: preForm.email,
+    retrieveCode: preForm.retrieveCode,
+    newPassword: '',
   })
+
+  useEffect(() => {
+    async function validate() {
+      try {
+        await authPayload.ForgetPasswdUpdateScheme.validate(form, {abortEarly: false})
+        setErrors({})
+      } catch (err) {
+        let e = {}
+        for ( let i of err.inner ) {
+          e[i.path] =  e[i.path] ?? i.errors[0]
+        }
+        setErrors(e)
+      }
+    }
+    validate()
+  }, [form])
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const submit = () => {
+  const submit = async () => {
     setIsSubmitting(true)
-    setTimeout(() => {
+    try {
+      const resp = await authService.forgetPasswordUpdate(form)
+      if ( resp.status / 100 !== 2 ) {
+        console.info("forget_password_verify", resp.status, resp.data)
+        return
+      }
+      router.replace({ pathname: `/login`});
+    } catch (err) {
+      console.error(err)
+    } finally {
       setIsSubmitting(false)
-      router.replace("/login")
-    }, 2000);
+    }
   }
 
   return (
@@ -35,12 +62,13 @@ const UpdatePassword = () => {
             Please provide new password for login.
           </Text>
           <FormField
-            title="Password"
+            title="New Password"
             value={form.email}
             handleChangeText={(e) => setForm({
               ...form,
               password:e
             })}
+            errorMessage={errors['newPassword']}
             containerStyles="mt-7"
             keyboardType="email-address"
           />
@@ -56,4 +84,4 @@ const UpdatePassword = () => {
   )
 }
 
-export default UpdatePassword
+export default ForgetPasswordUpdate

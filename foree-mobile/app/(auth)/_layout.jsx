@@ -42,7 +42,15 @@ const AuthLayout = () => {
           }}
         />
         <Stack.Screen
-          name="update_password"
+          name="forget_password_verify"
+          options={{
+            headerShown: true,
+            headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
+            headerLeft: () => <Button onPress={() => router.replace("/login")} title="Login" color="#004d40"/>
+          }}
+        />
+        <Stack.Screen
+          name="forget_password_update"
           options={{
             headerShown: true,
             headerTitle: props => (<Image source={images.logoSmall} resizeMode='contain' className="w-[24px] h-[24px]" />),
