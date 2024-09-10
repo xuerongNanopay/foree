@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS email_passwd(
     `login_attempts` INT DEFAULT 0,
     `retrieve_token` VARCHAR(128) DEFAULT '',
     `retrieve_token_expired_at` DATETIME,
+    `latest_forget_passwd_updated_at` DATETIME,
     `owner_id` BIGINT UNSIGNED NOT NULL UNIQUE,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
