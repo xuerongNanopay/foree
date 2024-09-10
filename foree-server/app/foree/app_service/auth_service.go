@@ -781,16 +781,16 @@ func (a *AuthService) rewardReferer(registerUser auth.User) {
 
 func (a *AuthService) rewardOnboard(registerUser auth.User) {
 
-	gift, _ := a.getPromotion(PromotionOnboard, promotionCacheTimeout)
+	promotion, _ := a.getPromotion(PromotionOnboard, promotionCacheTimeout)
 
-	if gift == nil || !gift.IsValid() {
+	if promotion == nil || !promotion.IsValid() {
 		return
 	}
 
 	reward := transaction.Reward{
 		Type:        transaction.RewardTypeReferal,
-		Description: "Onboard reward",
-		Amt:         gift.Amt,
+		Description: "Onboard Reward",
+		Amt:         promotion.Amt,
 		OwnerId:     registerUser.ID,
 		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
 	}
