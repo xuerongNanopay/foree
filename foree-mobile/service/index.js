@@ -39,7 +39,7 @@ axios.interceptors.response.use(
       {text: 'OK', onPress: () => {}},
     ])
   
-    //TODO: send error log
+    //TODO: send error log, error.message, error, error.request, error.response, user
     return Promise.reject(error)
   }
 )
