@@ -1,5 +1,5 @@
 import { View, Text, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { router, useLocalSearchParams } from 'expo-router'
 import { SafeAreaView } from 'react-native'
 import FormField from '../../components/FormField'
@@ -7,12 +7,12 @@ import CustomButton from '../../components/CustomButton'
 import { authService, authPayload } from '../../service'
 
 const ForgetPasswordUpdate = () => {
-  const { preForm } = useLocalSearchParams()
+  const { email, retrieveCode } = useLocalSearchParams()
 
   const [errors, setErrors] = useState({});
   const [form, setForm] = useState({
-    email: preForm.email,
-    retrieveCode: preForm.retrieveCode,
+    email,
+    retrieveCode,
     newPassword: '',
   })
 
@@ -63,10 +63,10 @@ const ForgetPasswordUpdate = () => {
           </Text>
           <FormField
             title="New Password"
-            value={form.email}
+            value={form.newPassword}
             handleChangeText={(e) => setForm({
               ...form,
-              password:e
+              newPassword:e
             })}
             errorMessage={errors['newPassword']}
             containerStyles="mt-7"

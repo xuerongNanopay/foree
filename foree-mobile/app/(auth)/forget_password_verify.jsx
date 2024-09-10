@@ -1,5 +1,5 @@
 import { View, Text, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { router, useLocalSearchParams } from 'expo-router'
 import { SafeAreaView } from 'react-native'
 import FormField from '../../components/FormField'
@@ -7,12 +7,12 @@ import CustomButton from '../../components/CustomButton'
 import { authService, authPayload } from '../../service'
 
 const ForgetPasswordVerify = () => {
-  const { preForm } = useLocalSearchParams()
-
+  const { email } = useLocalSearchParams()
+  console.log(email)
   const [errors, setErrors] = useState({});
   const [form, setForm] = useState({
-    email: preForm.email,
-    retrieveCode,
+    email,
+    retrieveCode:""
   })
 
   useEffect(() => {
@@ -64,7 +64,7 @@ const ForgetPasswordVerify = () => {
               value={form.retrieveCode}
               handleChangeText={(e) => setForm({
                 ...form,
-                retrieveCoderetrieveCode:e
+                retrieveCode:e
               })}
               errorMessage={errors['retrieveCode']}
               inputStyles="text-center"

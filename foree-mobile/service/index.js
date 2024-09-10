@@ -14,7 +14,7 @@ axios.interceptors.request.use(
     try {
       const session = await AsyncStorage.getItem(SessionIdKey)
       if ( !!session ) {
-        console.log("Request Session: ", session)
+        console.debug("Request Session: ", session)
         config.headers[SessionIdKey] = session
       }
     } catch (e) {
@@ -50,7 +50,7 @@ axios.interceptors.response.use(
     }
 
     resp = error.response
-    console.log("url", error.request.responseURL)
+    // console.debug("url", error.request.responseURL)
     if (
       resp.status == 400 && !!resp?.data?.details && resp?.data?.details.length > 0
     ) {
