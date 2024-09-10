@@ -25,6 +25,7 @@ const maxLoginAttempts = 4
 const OnboardGift = "ONBOARD_GIFT"
 const ReferralGift = "REFERRAL_GIFT"
 const giftCacheTimeout = 15 * time.Minute
+const verifyCodeExpiry = 4 * time.Minute
 
 func NewAuthService(
 	db *sql.DB,
@@ -108,7 +109,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 	}
 
 	// Create EmailPasswd
-	verifyCodeExpiredAt := time.Now().Add(10 * time.Minute)
+	verifyCodeExpiredAt := time.Now().Add(verifyCodeExpiry)
 	epId, err := a.emailPasswordRepo.InsertEmailPasswd(ctx, auth.EmailPasswd{
 		Email:               req.Email,
 		Username:            req.Email,
@@ -194,19 +195,31 @@ func (a *AuthService) allowVerifyEmail(sessionId string) (*auth.Session, transpo
 
 func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*UserDTO, transport.HError) {
 	// Check Allow to VerifyEmail
-	session, err := a.allowVerifyEmail(req.SessionId)
-	if err != nil {
+	session, sErr := a.allowVerifyEmail(req.SessionId)
+	if sErr != nil {
 		var userId int64
 		if session != nil {
 			userId = session.UserId
 		}
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", userId, "cause", err.Error())
-		return nil, err
+		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", userId, "cause", sErr.Error())
+		return nil, sErr
 	}
 
-	if session.EmailPasswd.VerifyCode != req.Code || (session.EmailPasswd.VerifyCodeExpiredAt == nil && session.EmailPasswd.VerifyCodeExpiredAt.Before(time.Now())) {
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "userId", session.UserId, "cause", "invalid code")
-		return nil, transport.NewFormError("Invalid VerifyEmail Requst", "verifyCode", "please resend verify code")
+	curEP, err := a.emailPasswordRepo.GetUniqueEmailPasswdById(session.EmailPasswd.ID)
+
+	if err != nil {
+		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	if curEP.VerifyCode != req.Code {
+		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", "invalid code")
+		return nil, transport.NewFormError("Invalid VerifyEmail Requst", "code", "invalid code")
+	}
+
+	if curEP.VerifyCodeExpiredAt == nil || curEP.VerifyCodeExpiredAt.Before(time.Now()) {
+		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", "code expired")
+		return nil, transport.NewFormError("Invalid VerifyEmail Requst", "code", "code expired")
 	}
 
 	// VerifyEmail and update EmailPasswd.
@@ -215,7 +228,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*Use
 
 	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP)
 	if e != nil {
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "userId", session.UserId, "cause", e.Error())
+		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", e.Error())
 		return nil, transport.WrapInteralServerError(e)
 	}
 
@@ -225,10 +238,10 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*Use
 
 	session, e = a.sessionRepo.UpdateSession(newSession)
 	if e != nil {
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "userId", session.UserId, "cause", e.Error())
+		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", e.Error())
 		return nil, transport.WrapInteralServerError(e)
 	}
-	foree_logger.Logger.Info("VerifyEmail_Success", "userId", session.UserId)
+	foree_logger.Logger.Info("VerifyEmail_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
 	return NewUserDTO(session), nil
 }
 
@@ -245,12 +258,14 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 	}
 
 	// Change VerifyCode
+	verifyCodeExpiredAt := time.Now().Add(verifyCodeExpiry)
 	newEP := *session.EmailPasswd
 	newEP.VerifyCode = auth.GenerateVerifyCode()
+	newEP.VerifyCodeExpiredAt = &verifyCodeExpiredAt
 
 	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP)
 	if e != nil {
-		foree_logger.Logger.Warn("ResendVerifyCode_Fail", "userId", session.UserId, "cause", e.Error())
+		foree_logger.Logger.Warn("ResendVerifyCode_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", e.Error())
 		return nil, transport.WrapInteralServerError(e)
 	}
 
@@ -262,9 +277,11 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 
 	_, e = a.sessionRepo.UpdateSession(newSession)
 	if e != nil {
-		foree_logger.Logger.Warn("ResendVerifyCode_Fail", "userId", session.UserId, "cause", e.Error())
+		foree_logger.Logger.Warn("ResendVerifyCode_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", e.Error())
 		return nil, transport.WrapInteralServerError(e)
 	}
+
+	foree_logger.Logger.Info("ResendVerifyCode_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
 	return NewUserDTO(session), nil
 }
 
