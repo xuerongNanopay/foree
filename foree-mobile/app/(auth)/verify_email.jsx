@@ -1,32 +1,70 @@
-import { View, Text, ScrollView, Button } from 'react-native'
-import React, { useState } from 'react'
+import { View, Text, ScrollView, Button, Alert } from 'react-native'
+import React, { useState, useEffect } from 'react'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native'
+import { authPayload, authService } from '../../service'
 
 import CustomButton from '../../components/CustomButton'
 import FormField from '../../components/FormField'
 
 
 const VerifyEmail = () => {
+  const [errors, setErrors] = useState({});
+
   const [form, setForm] = useState({
     code: ''
   })
 
+  useEffect(() => {
+    async function validate() {
+      try {
+        await authPayload.VerifyEmailScheme.validate(form, {abortEarly: false})
+        setErrors({})
+      } catch (err) {
+        let e = {}
+        for ( let i of err.inner ) {
+          e[i.path] =  e[i.path] ?? i.errors[0]
+        }
+        setErrors(e)
+      }
+    }
+    validate()
+  }, [form])
+
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const submit = () => {
+  const submit = async () => {
     setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
+    try {
+      const resp = await authService.verifyEmail(form)
+      if ( resp.status / 100 !== 2 ) {
+        console.log("verify_email", resp.status, resp.data)
+        return
+      }
       router.replace("/onboarding")
-    }, 1000);
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const resendSubmit = () => {
+  const resendSubmit = async () => {
     setIsSubmitting(true)
-    setTimeout(() => {
+    try {
+      const resp = await authService.resendCode()
+      if ( resp.status / 100 !== 2 ) {
+        console.log("recend_code", resp.status, resp.data)
+        return
+      }
+      Alert.alert("New code sent", "please check your email", [
+        {text: 'OK', onPress: () => {}},
+      ])
+    } catch (err) {
+      console.error(err)
+    } finally {
       setIsSubmitting(false)
-    }, 1000);
+    }
   }
 
   return (
@@ -48,6 +86,7 @@ const VerifyEmail = () => {
                 ...form,
                 code:e
               })}
+              errorMessage={errors['code']}
               inputStyles="text-center"
               variant="flat"
               containerStyles="mt-1"

@@ -14,6 +14,7 @@ axios.interceptors.request.use(
     try {
       const session = await AsyncStorage.getItem(SessionIdKey)
       if ( !!session ) {
+        console.log("Request Session: ", session)
         config.headers[SessionIdKey] = session
       }
     } catch (e) {
@@ -26,10 +27,10 @@ axios.interceptors.request.use(
 )
 axios.interceptors.response.use(
   async (response) => {
-    console.log("aaa", response.data)
     try {
-      if (!!response.data && !!response.data.sessionId) {
-        await AsyncStorage.setItem(SessionIdKey, response.data.sessionId)
+      const body = response.data
+      if ( !!body?.data?.sessionId ) {
+        await AsyncStorage.setItem(SessionIdKey, body.data.sessionId)
       }
     } catch (e) {
       console.error("update session error", e)

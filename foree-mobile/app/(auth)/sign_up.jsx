@@ -39,11 +39,10 @@ const SignUp = () => {
     try {
       const resp = await authService.signUp(form)
       if ( resp.status / 100 !== 2 ) {
-        console.info("sign_up", resp.status, resp.data)
+        console.log("sign_up", resp.status, resp.data)
         return
       }
-      console.log(resp.data)
-      //TODO: normal logic
+      router.replace("/verify_email")
     } catch (err) {
       console.error(err)
     } finally {
