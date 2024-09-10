@@ -18,12 +18,13 @@ const (
 	`
 	sQLEmailPasswdUpdateByEmail = `
 		UPDATE email_passwd SET 
-			status = ?, passwd = ?, verify_code = ?, verify_code_expired_at = ?, login_attempts = ?, retrieve_token = ?, retrieve_token_expired_at = ?
+			status = ?, passwd = ?, verify_code = ?, verify_code_expired_at = ?, 
+			login_attempts = ?, retrieve_token = ?, retrieve_token_expired_at = ?
 		WHERE email = ?
 	`
 	sQLEmailPasswdGetUniqueById = `
 		SELECT 
-			u.id, u.email, u.username, u.passwd, u.status,
+			u.id, u.status, u.email, u.username, u.passwd,
 			u.verify_code, u.verify_code_expired_at, u.login_attempts,
 			u.retrieve_token, u.retrieve_token_expired_at,
 			u.owner_id, u.created_at, u.updated_at
@@ -32,7 +33,7 @@ const (
 `
 	sQLEmailPasswdGetUniqueByEmail = `
 		SELECT 
-			u.id, u.email, u.username, u.passwd, u.status,
+			u.id, u.status, u.email, u.username, u.passwd,
 			u.verify_code, u.verify_code_expired_at, u.login_attempts,
 			u.retrieve_token, u.retrieve_token_expired_at,
 			u.owner_id, u.created_at, u.updated_at
@@ -41,7 +42,7 @@ const (
 	`
 	sQLEmailPasswdGetAll = `
 		SELECT 
-			u.id, u.email, u.username, u.passwd, u.status,
+			u.id, u.status, u.email, u.username, u.passwd,
 			u.verify_code, u.verify_code_expired_at, u.login_attempts,
 			u.retrieve_token, u.retrieve_token_expired_at,
 			u.owner_id, u.created_at, u.updated_at
@@ -65,13 +66,13 @@ type EmailPasswd struct {
 	Username               string            `json:"username"`
 	Passwd                 string            `json:"-"`
 	VerifyCode             string            `json:"-"`
-	VerifyCodeExpiredAt    time.Time         `json:"verifyCodeExpiredAt"`
+	VerifyCodeExpiredAt    *time.Time        `json:"verifyCodeExpiredAt"`
 	RetrieveToken          string            `json:"-"`
-	RetrieveTokenExpiredAt time.Time         `json:"retrieveTokenExpiredAt"`
+	RetrieveTokenExpiredAt *time.Time        `json:"retrieveTokenExpiredAt"`
 	LoginAttempts          int32             `json:"loginAttempts"`
 	OwnerId                int64             `json:"ownerId"`
-	CreatedAt              time.Time         `json:"createdAt"`
-	UpdatedAt              time.Time         `json:"updatedAt"`
+	CreatedAt              *time.Time        `json:"createdAt"`
+	UpdatedAt              *time.Time        `json:"updatedAt"`
 }
 
 func NewEmailPasswdRepo(db *sql.DB) *EmailPasswdRepo {
@@ -240,6 +241,7 @@ func scanRowIntoEmailPasswd(rows *sql.Rows) (*EmailPasswd, error) {
 		&p.Passwd,
 		&p.VerifyCode,
 		&p.VerifyCodeExpiredAt,
+		&p.LoginAttempts,
 		&p.RetrieveToken,
 		&p.RetrieveTokenExpiredAt,
 		&p.OwnerId,

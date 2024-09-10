@@ -334,7 +334,7 @@ func (p *NBPTxProcessor) buildLoadRemittanceRequest(fTx transaction.ForeeTx) (*n
 		RemitterName:                    fTx.CI.CashInAcc.GetLegalName(),
 		RemitterEmail:                   fTx.CI.CashInAcc.Email,
 		RemitterContact:                 fTx.CI.CashInAcc.PhoneNumber,
-		RemitterDOB:                     (*nbp.NBPDate)(&fTx.Owner.Dob),
+		RemitterDOB:                     (*nbp.NBPDate)(fTx.Owner.Dob),
 		RemitterAddress:                 generateLoadRemittanceFromInteracAccount(fTx.CI.CashInAcc),
 		RemitterIdType:                  mapNBPRemitterIdType(identification.Type),
 		RemitterId:                      identification.Value,

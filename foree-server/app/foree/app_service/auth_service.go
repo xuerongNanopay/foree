@@ -76,7 +76,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 
 	if oldEmail != nil {
 		foree_logger.Logger.Warn("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "email already exists")
-		return nil, transport.NewFormError("Invaild signup", "email", "Duplicate email")
+		return nil, transport.NewFormError("Invaild signup", "email", "invalid email")
 	}
 
 	// Hashing password.
@@ -108,12 +108,13 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 	}
 
 	// Create EmailPasswd
+	verifyCodeExpiredAt := time.Now().Add(10 * time.Minute)
 	epId, err := a.emailPasswordRepo.InsertEmailPasswd(ctx, auth.EmailPasswd{
 		Email:               req.Email,
 		Passwd:              hashedPasswd,
 		Status:              auth.EPStatusWaitingVerify,
 		VerifyCode:          auth.GenerateVerifyCode(),
-		VerifyCodeExpiredAt: time.Now().Add(10 * time.Minute),
+		VerifyCodeExpiredAt: &verifyCodeExpiredAt,
 		OwnerId:             userId,
 	})
 
@@ -200,7 +201,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*Use
 		return nil, err
 	}
 
-	if session.EmailPasswd.VerifyCode != req.Code || session.EmailPasswd.VerifyCodeExpiredAt.Before(time.Now()) {
+	if session.EmailPasswd.VerifyCode != req.Code || (session.EmailPasswd.VerifyCodeExpiredAt == nil && session.EmailPasswd.VerifyCodeExpiredAt.Before(time.Now())) {
 		foree_logger.Logger.Warn("VerifyEmail_Fail", "userId", session.UserId, "cause", "verify code unmatch or expired")
 		return nil, transport.NewFormError("Invalid VerifyEmail Requst", "verifyCode", "please resend verify code")
 	}
@@ -328,7 +329,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	newUser.MiddleName = req.MiddleName
 	newUser.LastName = req.LastName
 	newUser.Age = req.Age
-	newUser.Dob = req.Dob.Time
+	newUser.Dob = &req.Dob.Time
 	// newUser.Nationality = req.Nationality
 	newUser.Address1 = req.Address1
 	newUser.Address2 = req.Address2
@@ -552,8 +553,9 @@ func (a *AuthService) ForgetPassword(ctx context.Context, req ForgetPasswordReq)
 	}
 
 	newEP := *ep
+	retrieveTokenExpiredAt := time.Now().Add(5 * time.Minute)
 	newEP.RetrieveToken = auth.GenerateVerifyCode()
-	newEP.VerifyCodeExpiredAt = time.Now().Add(5 * time.Minute)
+	newEP.RetrieveTokenExpiredAt = &retrieveTokenExpiredAt
 
 	err = a.emailPasswordRepo.UpdateEmailPasswdByEmail(context.Background(), newEP)
 	if err != nil {
@@ -582,7 +584,7 @@ func (a *AuthService) ForgetPasswordUpdate(ctx context.Context, req ForgetPasswo
 		return nil, transport.NewFormError("Invaild forget password", "email", "invalid email")
 	}
 
-	if ep.RetrieveTokenExpiredAt.Before(time.Now()) {
+	if ep.RetrieveTokenExpiredAt == nil && ep.RetrieveTokenExpiredAt.Before(time.Now()) {
 		foree_logger.Logger.Warn("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "retrieve code expire")
 		return nil, transport.NewFormError("Invaild forget password", "retrieveCode", "retrieve code expired")
 	}

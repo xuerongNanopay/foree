@@ -60,7 +60,7 @@ type User struct {
 	MiddleName  string     `json:"middleName"`
 	LastName    string     `json:"lastName"`
 	Age         int        `json:"age"`
-	Dob         time.Time  `json:"dob"`
+	Dob         *time.Time `json:"dob"`
 	Address1    string     `json:"address1"`
 	Address2    string     `json:"address2"`
 	City        string     `json:"city"`
@@ -70,8 +70,8 @@ type User struct {
 	PhoneNumber string     `json:"phoneNumber"`
 	Email       string     `json:"email"`
 	AvatarUrl   string     `json:"avatarUrl"`
-	CreatedAt   time.Time  `json:"createdAt"`
-	UpdatedAt   time.Time  `json:"updatedAt"`
+	CreatedAt   *time.Time `json:"createdAt"`
+	UpdatedAt   *time.Time `json:"updatedAt"`
 }
 
 func NewUserRepo(db *sql.DB) *UserRepo {
