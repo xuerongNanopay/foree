@@ -88,7 +88,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 
 	if oldEmail != nil {
 		foree_logger.Logger.Warn("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "email already exists")
-		return nil, transport.NewFormError("Invaild signup", "email", "invalid email")
+		return nil, transport.NewFormError("Invaild signup", "email", "account already exists")
 	}
 
 	// Hashing password.
