@@ -38,6 +38,7 @@ const FormField = ({
       >
         <TextInput
           className={`flex-1 h-full font-psemibold text-base ${inputStyles}`}
+          autoCorrect={false}
           value={value}
           placeholder={placeholder}
           placeholderTextColor="#BDBDBD"

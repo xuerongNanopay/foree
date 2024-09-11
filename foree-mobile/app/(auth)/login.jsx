@@ -9,6 +9,8 @@ import CustomButton from '../../components/CustomButton'
 import { authService, authPayload } from '../../service'
 
 const Login = () => {
+  const [errors, setErrors] = useState({})
+  const [isError, setIsError] = useState(true)
   const navigation = useNavigation()
   useEffect(() => {
     console.log("TODO: clean token")
@@ -22,7 +24,8 @@ const Login = () => {
   useEffect(() => {
     async function validate() {
       try {
-        await authPayload.ForgetPasswdScheme.validate(form, {abortEarly: false})
+        await authPayload.LoginScheme.validate(form, {abortEarly: false})
+        setIsError(false)
         setErrors({})
       } catch (err) {
         let e = {}
@@ -30,19 +33,28 @@ const Login = () => {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
         setErrors(e)
+        setIsError(true)
       }
     }
     validate()
   }, [form])
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const submit = () => {
+  const submit = async () => {
     setIsSubmitting(true)
-    setTimeout(() => {
+    try {
+      const resp = await authService.forgetPassword(form)
+      if ( resp.status / 100 !== 2 ) {
+        console.info("forget_password", resp.status, resp.data)
+        return
+      }
+      console.log("login", resp.data)
+    } catch (err) {
+      console.error(err)
+    } finally {
       setIsSubmitting(false)
-      router.push('/verify_email')
-    }, 1000);
+    }
   }
 
   return (
@@ -89,10 +101,11 @@ const Login = () => {
               value={form.email}
               handleChangeText={(e) => setForm({
                 ...form,
-                email:e
+                email:e.toLowerCase()
               })}
               containerStyles="mt-4"
               keyboardType="email-address"
+              errorMessage={errors['email']}
             />
             <FormField
               title="Password"
@@ -101,18 +114,19 @@ const Login = () => {
                 ...form,
                 password:e
               })}
+              errorMessage={errors['password']}
               containerStyles="mt-7"
             />
-            <Link 
-                href="/forget_password" 
-                className="text-slate-500 p-2"
-              >Forget Password?</Link>
             <CustomButton
               title="Sign In"
               handlePress={submit}
               containerStyles="mt-7"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isError}
             />
+            <Link 
+              href="/forget_password" 
+              className="text-slate-500 mt-4"
+            >Forget Password?</Link>
           </View>
         </View>
       </ScrollView>

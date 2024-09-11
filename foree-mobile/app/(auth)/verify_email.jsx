@@ -10,6 +10,7 @@ import FormField from '../../components/FormField'
 
 const VerifyEmail = () => {
   const [errors, setErrors] = useState({});
+  const [isError, setIsError] = useState(true);
 
   const [form, setForm] = useState({
     code: ''
@@ -19,6 +20,7 @@ const VerifyEmail = () => {
     async function validate() {
       try {
         await authPayload.VerifyEmailScheme.validate(form, {abortEarly: false})
+        setIsError(false)
         setErrors({})
       } catch (err) {
         let e = {}
@@ -26,6 +28,7 @@ const VerifyEmail = () => {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
         setErrors(e)
+        setIsError(true)
       }
     }
     validate()
@@ -98,7 +101,7 @@ const VerifyEmail = () => {
               title="Submit"
               handlePress={submit}
               containerStyles="mt-7"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isError}
             />
             <View className="flex-row items-center justify-center mt-4">
               <Text>Do not receive code?</Text>

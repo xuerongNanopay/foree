@@ -8,7 +8,8 @@ import FormField from '../../components/FormField'
 import { authService, authPayload } from '../../service'
 
 const ForgetPassword = () => {
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({})
+  const [isError, setIsError] = useState(true)
   const [form, setForm] = useState({
     email: ''
   })
@@ -17,6 +18,7 @@ const ForgetPassword = () => {
     async function validate() {
       try {
         await authPayload.ForgetPasswdScheme.validate(form, {abortEarly: false})
+        setIsError(false)
         setErrors({})
       } catch (err) {
         let e = {}
@@ -24,6 +26,7 @@ const ForgetPassword = () => {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
         setErrors(e)
+        setIsError(true)
       }
     }
     validate()
@@ -75,7 +78,7 @@ const ForgetPassword = () => {
               title="Retrieve"
               handlePress={submit}
               containerStyles="mt-7"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isError}
             />
           </View>
         </View>

@@ -8,8 +8,8 @@ import { authService, authPayload } from '../../service'
 
 const ForgetPasswordUpdate = () => {
   const { email, retrieveCode } = useLocalSearchParams()
-
-  const [errors, setErrors] = useState({});
+  const [isError, setIsError] = useState(true)
+  const [errors, setErrors] = useState({})
   const [form, setForm] = useState({
     email,
     retrieveCode,
@@ -20,6 +20,7 @@ const ForgetPasswordUpdate = () => {
     async function validate() {
       try {
         await authPayload.ForgetPasswdUpdateScheme.validate(form, {abortEarly: false})
+        setIsError(false)
         setErrors({})
       } catch (err) {
         let e = {}
@@ -27,6 +28,7 @@ const ForgetPasswordUpdate = () => {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
         setErrors(e)
+        setIsError(true)
       }
     }
     validate()
@@ -76,7 +78,7 @@ const ForgetPasswordUpdate = () => {
             title="Update"
             handlePress={submit}
             containerStyles="mt-7"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isError}
           />
         </View>
       </ScrollView>

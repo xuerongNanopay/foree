@@ -10,6 +10,7 @@ import { authPayload, authService } from '../../service'
 
 const SignUp = () => {
   const [errors, setErrors] = useState({});
+  const [isError, setIsError] = useState(true);
 
   const [form, setForm] = useState({
     email: '',
@@ -20,6 +21,7 @@ const SignUp = () => {
     async function validate() {
       try {
         await authPayload.SignUpScheme.validate(form, {abortEarly: false})
+        setIsError(false)
         setErrors({})
       } catch (err) {
         let e = {}
@@ -27,6 +29,7 @@ const SignUp = () => {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
         setErrors(e)
+        setIsError(true)
       }
     }
     validate()
@@ -98,7 +101,7 @@ const SignUp = () => {
             title="Sign Up"
             handlePress={submit}
             containerStyles="mt-7"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isError}
           />
         </View>
       </ScrollView>

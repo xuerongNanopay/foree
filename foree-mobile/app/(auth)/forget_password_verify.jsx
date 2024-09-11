@@ -8,7 +8,8 @@ import { authService, authPayload } from '../../service'
 
 const ForgetPasswordVerify = () => {
   const { email } = useLocalSearchParams()
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({})
+  const [isError, setIsError] = useState(true)
   const [form, setForm] = useState({
     email,
     retrieveCode:""
@@ -18,6 +19,7 @@ const ForgetPasswordVerify = () => {
     async function validate() {
       try {
         await authPayload.ForgetPasswordVerifycheme.validate(form, {abortEarly: false})
+        setIsError(false)
         setErrors({})
       } catch (err) {
         let e = {}
@@ -25,6 +27,7 @@ const ForgetPasswordVerify = () => {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
         setErrors(e)
+        setIsError(true)
       }
     }
     validate()
@@ -76,7 +79,7 @@ const ForgetPasswordVerify = () => {
             title="Verify"
             handlePress={submit}
             containerStyles="mt-7"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isError}
           />
         </View>
       </ScrollView>

@@ -79,7 +79,7 @@ axios.interceptors.response.use(
     ])
   
     //TODO: send error log, error.message, error, error.request, error.response, user
-    return Promise.reject(error)
+    return resp.status == 500 ? Promise.resolve(resp) : Promise.reject(error)
   }
 )
 

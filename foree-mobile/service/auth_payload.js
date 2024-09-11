@@ -17,7 +17,7 @@ const ChangePasswdScheme = object({
 
 const LoginScheme = object({
   email: fieldScheme.EmailScheme(),
-  password: fieldScheme.PasswordScheme(),
+  password: fieldScheme.String(),
 })
 
 const ForgetPasswdScheme = object({
