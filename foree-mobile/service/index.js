@@ -61,6 +61,17 @@ axios.interceptors.response.use(
     } else if (resp.status == 401 ) {
       router.replace("/login")
       return Promise.resolve(resp)
+    } else if ( resp.status = 428 && resp?.data?.require === "TO_MAIN" ) {
+
+    } else if ( resp.status = 428 && resp?.data?.require === "LOGIN" ) {
+      router.replace("/login")
+      return Promise.resolve(resp)
+    } else if ( resp.status = 428 && resp?.data?.require === "VERIFY_EMAIL" ) {
+      router.replace("/verify_email")
+      return Promise.resolve(resp)
+    } else if ( resp.status = 428 && resp?.data?.require === "CREATE_USER" ) {
+      router.replace("/onboarding")
+      return Promise.resolve(resp)
     }
 
     Alert.alert("Error", "please try later", [
