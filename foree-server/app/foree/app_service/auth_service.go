@@ -430,6 +430,11 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		return nil, transport.WrapInteralServerError(er)
 	}
 
+	if userGroup == nil {
+		foree_logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", fmt.Sprintf("userGroup not found for owner `%v`", newUser.ID))
+		return nil, transport.NewInteralServerError("userGroup not found for owner `%v`", newUser.ID)
+	}
+
 	// Get Permission.
 	rolePermissions, pErr := a.rolePermissionRepo.GetAllEnabledRolePermissionByRoleName(userGroup.RoleGroup)
 	if pErr != nil {
@@ -545,8 +550,8 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*UserDTO, transp
 	}
 	//User group must exists
 	if userGroup == nil {
-		foree_logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("userGroup not found with owener `%v`", ep.OwnerId))
-		return nil, transport.NewInteralServerError("User `%v` do not exists", ep.OwnerId)
+		foree_logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("userGroup not found with owner `%v`", ep.OwnerId))
+		return nil, transport.NewInteralServerError("userGroup not found with owner `%v`", ep.OwnerId)
 	}
 
 	// Load permissions
