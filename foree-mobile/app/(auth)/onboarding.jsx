@@ -118,7 +118,6 @@ const Onboarding = () => {
   }, [form])
 
   const submit = async () => {
-    console.log('aaa')
     setIsSubmitting(true)
     try {
       const resp = await authService.onboard(form)
@@ -126,7 +125,7 @@ const Onboarding = () => {
         console.log("onboarding", resp.status, resp.data)
         return
       }
-      console.log("onboard success", resp.data)
+      console.log("TODO: router to home", resp.data)
     } catch (err) {
       console.error("onboarding", err)
     } finally {

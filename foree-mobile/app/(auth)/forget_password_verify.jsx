@@ -8,7 +8,6 @@ import { authService, authPayload } from '../../service'
 
 const ForgetPasswordVerify = () => {
   const { email } = useLocalSearchParams()
-  console.log(email)
   const [errors, setErrors] = useState({});
   const [form, setForm] = useState({
     email,

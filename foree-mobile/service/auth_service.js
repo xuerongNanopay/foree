@@ -4,6 +4,10 @@ class AuthService {
   constructor() {
   }
 
+  async login(req, {signal}={signal}) {
+    return await axios.post("/login", req, {signal})
+  }
+
   async signUp(req, {signal}={signal}) {
     return await axios.post("/sign_up", req, {signal})
   }

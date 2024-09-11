@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native'
 import { images } from '../../constants'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
+import { authService, authPayload } from '../../service'
 
 const Login = () => {
   const navigation = useNavigation()
@@ -18,6 +19,22 @@ const Login = () => {
     password: ''
   })
 
+  useEffect(() => {
+    async function validate() {
+      try {
+        await authPayload.ForgetPasswdScheme.validate(form, {abortEarly: false})
+        setErrors({})
+      } catch (err) {
+        let e = {}
+        for ( let i of err.inner ) {
+          e[i.path] =  e[i.path] ?? i.errors[0]
+        }
+        setErrors(e)
+      }
+    }
+    validate()
+  }, [form])
+  
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const submit = () => {
