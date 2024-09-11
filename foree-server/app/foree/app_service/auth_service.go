@@ -224,7 +224,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*Use
 		if session != nil {
 			userId = session.UserId
 		}
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", userId, "cause", sErr.Error())
+		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
 		return nil, sErr
 	}
 
@@ -264,7 +264,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*Use
 		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", e.Error())
 		return nil, transport.WrapInteralServerError(e)
 	}
-	foree_logger.Logger.Info("VerifyEmail_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
+	foree_logger.Logger.Info("VerifyEmail_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
 	return NewUserDTO(session), nil
 }
 
@@ -276,7 +276,7 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 		if session != nil {
 			userId = session.UserId
 		}
-		foree_logger.Logger.Warn("ResendVerifyCode_Fail", "ip", loadRealIp(ctx), "userId", userId, "cause", err.Error())
+		foree_logger.Logger.Warn("ResendVerifyCode_Fail", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, err
 	}
 
@@ -304,7 +304,7 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 		return nil, transport.WrapInteralServerError(e)
 	}
 
-	foree_logger.Logger.Info("ResendVerifyCode_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
+	foree_logger.Logger.Info("ResendVerifyCode_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
 	return NewUserDTO(session), nil
 }
 
@@ -339,7 +339,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		if session != nil {
 			userId = session.UserId
 		}
-		foree_logger.Logger.Warn("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", userId, "cause", sErr.Error())
+		foree_logger.Logger.Warn("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
 		return nil, sErr
 	}
 
@@ -422,7 +422,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	foree_logger.Logger.Info("CreateUser_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
+	foree_logger.Logger.Info("CreateUser_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
 
 	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(newUser.ID)
 	if er != nil {
@@ -713,20 +713,29 @@ func (a *AuthService) ForgetPasswordUpdate(ctx context.Context, req ForgetPasswo
 	return nil, nil
 }
 
-func (a *AuthService) Logout(ctx context.Context, session transport.SessionReq) (*auth.Session, transport.HError) {
-	a.sessionRepo.Delete(session.SessionId)
-	return nil, transport.NewPreconditionRequireError(
-		transport.PreconditionRequireMsgLogin,
-		transport.RequireActionLogin,
-	)
+func (a *AuthService) Logout(ctx context.Context, req transport.SessionReq) (*auth.Session, transport.HError) {
+	oldSession, _ := a.VerifySession(ctx, req.SessionId)
+	a.sessionRepo.Delete(req.SessionId)
+	if oldSession != nil {
+		foree_logger.Logger.Info("Logout_Success", "ip", loadRealIp(ctx), "userId", oldSession.UserId, "sessionId", req.SessionId)
+	} else {
+		foree_logger.Logger.Info("Logout_Success", "ip", loadRealIp(ctx), "sessionId", req.SessionId)
+	}
+	return nil, nil
 }
 
 func (a *AuthService) GetUser(ctx context.Context, req transport.SessionReq) (*UserDTO, transport.HError) {
 	session, sErr := a.VerifySession(ctx, req.SessionId)
 	if sErr != nil {
+		var userId int64
+		if session != nil {
+			userId = session.UserId
+		}
+		// Normal error when the token expired
+		foree_logger.Logger.Info("GetUser_Fail", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
 		return nil, sErr
 	}
-
+	foree_logger.Logger.Info("GetUser_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
 	return NewUserDTO(session), nil
 }
 
