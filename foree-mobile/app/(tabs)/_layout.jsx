@@ -1,5 +1,5 @@
 import React from 'react'
-import { Tabs, Redirect } from 'expo-router'
+import { Tabs } from 'expo-router'
 import { Image, View, Text } from 'react-native'
 
 import { icons } from '../../constants'

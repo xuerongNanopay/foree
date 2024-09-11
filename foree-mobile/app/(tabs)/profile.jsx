@@ -1,11 +1,15 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import { Link } from 'expo-router'
 
 const Profile = () => {
   return (
-    <View>
-      <Text>Profile</Text>
-    </View>
+    <SafeAreaView>
+      <View>
+        <Text>Profile</Text>
+        <Link href="/login">Logout</Link>
+      </View>
+    </SafeAreaView>
   )
 }
 
