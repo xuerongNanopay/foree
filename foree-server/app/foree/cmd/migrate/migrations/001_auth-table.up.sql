@@ -423,3 +423,6 @@ CREATE TABLE IF NOT EXISTS promotion(
 );
 
 CREATE INDEX idx_tab_email_passwd_col_email ON email_passwd(email);
+CREATE INDEX idx_tab_user_extra_col_owner_id ON user_extra(owner_id);
+CREATE INDEX idx_tab_user_group_col_owner_id ON user_group(owner_id);
+CREATE INDEX idx_tab_user_identifications_col_owner_id ON user_identifications(owner_id);
