@@ -83,9 +83,22 @@ axios.interceptors.response.use(
   }
 )
 
-const authService = new AuthService()
+localLogout = async () => {
+  await AsyncStorage.removeItem(SessionIdKey)
+}
+
+const hasLocalSession = async () => {
+  try {
+    return await AsyncStorage.getItem(SessionIdKey)
+  } catch (e) {
+    return null
+  }
+}
+
+const authService = new AuthService(localLogout)
 
 export {
   authService,
-  authPayload
+  authPayload,
+  hasLocalSession
 }

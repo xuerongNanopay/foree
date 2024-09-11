@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react"
 
-import { authService } from "../service"
+import { authService, hasLocalSession } from "../service"
 
 const GlobalContext = createContext()
 
@@ -15,6 +15,9 @@ export const GlobalProvider = ({ children }) => {
     const getUser = async () => {
       setIsLoading(true)
       try {
+        if (!( await hasLocalSession()) ) {
+          return
+        }
         const resp = await authService.getUser()
         if ( resp.status / 100 !== 2 ) {
           setIsLoggedIn(false)
@@ -25,6 +28,7 @@ export const GlobalProvider = ({ children }) => {
         }
       } catch (e) {
         setIsLoggedIn(false)
+        setUser(null)
       } finally {
         setIsLoading(false)
       }

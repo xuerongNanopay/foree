@@ -20,7 +20,14 @@ const Login = () => {
   const [isError, setIsError] = useState(true)
   const navigation = useNavigation()
   useEffect(() => {
-    console.log("TODO: clean token")
+    async function logout() {
+      try {
+        await authService.logout()
+      } catch(e) {
+        console.log("logout", e)
+      }
+    }
+    logout()
   }, [navigation])
 
   const [form, setForm] = useState({

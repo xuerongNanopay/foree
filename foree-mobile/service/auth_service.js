@@ -1,7 +1,9 @@
 import axios from 'axios'
 
 class AuthService {
-  constructor() {
+  #localLogout
+  constructor(localLogout) {
+    this.#localLogout = localLogout
   }
 
   async login(req, {signal}={signal}) {
@@ -37,9 +39,22 @@ class AuthService {
   }
 
   async resendCode({signal}={signal}) {
+    return await axios.get("/resend_code", {signal})
+  }
+
+  async getUser({signal}={signal}) {
     return await axios.get("/user", {signal})
   }
 
+  async logout({signal}={signal}) {
+    try {
+      await axios.get("/logout", {signal})
+      await this.#localLogout()
+    } catch(e) {
+      console.error(e)
+      //TODO: send error
+    }
+  }
 }
 
 export default AuthService
