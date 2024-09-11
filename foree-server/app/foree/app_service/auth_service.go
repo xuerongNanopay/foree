@@ -137,6 +137,18 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 		return nil, transport.WrapInteralServerError(err)
 	}
 
+	//Create userGroup
+	_, err = a.userGroupRepo.InsertUserGroup(ctx, auth.UserGroup{
+		RoleGroup:             foree_constant.DefaultRoleGroup,
+		TransactionLimitGroup: foree_constant.DefaultTransactionLimitGroup,
+		OwnerId:               userId,
+	})
+	if err != nil {
+		dTx.Rollback()
+		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "userId", userId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+
 	if err = dTx.Commit(); err != nil {
 		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
@@ -399,18 +411,6 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	}
 
 	_, er := a.userExtraRepo.InsertUserExtra(ctx, userExtra)
-	if er != nil {
-		dTx.Rollback()
-		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", er.Error())
-		return nil, transport.WrapInteralServerError(er)
-	}
-
-	//Create userGroup
-	_, er = a.userGroupRepo.InsertUserGroup(ctx, auth.UserGroup{
-		RoleGroup:             foree_constant.DefaultRoleGroup,
-		TransactionLimitGroup: foree_constant.DefaultTransactionLimitGroup,
-		OwnerId:               newUser.ID,
-	})
 	if er != nil {
 		dTx.Rollback()
 		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", er.Error())
