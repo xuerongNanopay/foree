@@ -62,7 +62,7 @@ axios.interceptors.response.use(
       router.replace("/login")
       return Promise.resolve(resp)
     } else if ( resp.status = 428 && resp?.data?.require === "TO_MAIN" ) {
-
+      router.replace("/home")
     } else if ( resp.status = 428 && resp?.data?.require === "LOGIN" ) {
       router.replace("/login")
       return Promise.resolve(resp)

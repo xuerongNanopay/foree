@@ -30,8 +30,8 @@ const ForgetPasswordVerifycheme = object({
 })
 
 const ForgetPasswdUpdateScheme = object({
-  email: fieldScheme.NumberOnlyScheme({min:6, max:6}),
-  retrieveCode: string().required(),
+  email: fieldScheme.EmailScheme({min:6, max:6}),
+  retrieveCode: fieldScheme.NumberOnlyScheme({min:6, max:6}),
   newPassword: fieldScheme.PasswordScheme(),
 })
 

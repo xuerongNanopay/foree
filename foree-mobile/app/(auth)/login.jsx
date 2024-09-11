@@ -8,6 +8,13 @@ import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import { authService, authPayload } from '../../service'
 
+const EPStatusWaitingVerify = "WAITING_VERIFY"
+const EPStatusActive        = "ACTIVE"
+const EPStatusSuspend       = "SUSPEND"
+const UserStatusInitial = "INITIAL"
+const UserStatusActive  = "ACTIVE"
+const UserStatusSuspend = "SUSPEND"
+
 const Login = () => {
   const [errors, setErrors] = useState({})
   const [isError, setIsError] = useState(true)
@@ -49,7 +56,16 @@ const Login = () => {
         console.info("forget_password", resp.status, resp.data)
         return
       }
-      console.log("login", resp.data)
+      se = resp.data.data
+      if ( se.loginStatus == EPStatusWaitingVerify ) {
+        router.replace('/verify_email')
+      } else if ( se.userStatus == UserStatusInitial ) {
+        router.replace('/onboarding')
+      } else if ( se.loginStatus == EPStatusActive && se.userStatus == UserStatusActive ) {
+        router.replace('/home')
+      } else {
+        console.error("login unknow status", se)
+      }
     } catch (err) {
       console.error(err)
     } finally {

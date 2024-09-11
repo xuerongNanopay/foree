@@ -1,6 +1,8 @@
 import { View, Text, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native'
 import React, { useEffect, useState } from 'react'
+import { router } from 'expo-router'
+
 import MultiStepForm from '../../components/MultiStepForm'
 import FormField from '../../components/FormField'
 import Countries from '../../constants/country'
@@ -122,10 +124,10 @@ const Onboarding = () => {
     try {
       const resp = await authService.onboard(form)
       if ( resp.status / 100 !== 2 ) {
-        console.log("onboarding", resp.status, resp.data)
+        console.warn("onboarding", resp.status, resp.data)
         return
       }
-      console.log("TODO: router to home", resp.data)
+      router.replace("/home")
     } catch (err) {
       console.error("onboarding", err)
     } finally {
