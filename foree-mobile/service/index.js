@@ -41,7 +41,7 @@ axios.interceptors.response.use(
   },
   (error) => {
     if (!error.response) {
-      Alert.alert("Error", "please try later", [
+      Alert.alert("Error", "please try again later or contact us", [
         {text: 'OK', onPress: () => {}},
       ])
 
@@ -74,7 +74,7 @@ axios.interceptors.response.use(
       return Promise.resolve(resp)
     }
 
-    Alert.alert("Error", "please try later", [
+    Alert.alert("Error", "please try again later or contact us", [
       {text: 'OK', onPress: () => {}},
     ])
   
