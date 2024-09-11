@@ -35,6 +35,11 @@ class AuthService {
   async onboard(req, {signal}={signal}) {
     return await axios.post("/onboard", req, {signal})
   }
+
+  async resendCode({signal}={signal}) {
+    return await axios.get("/user", {signal})
+  }
+
 }
 
 export default AuthService
