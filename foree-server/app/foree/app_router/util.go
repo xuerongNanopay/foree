@@ -23,7 +23,7 @@ func commonEndFunc[P any, Q any](ctx context.Context, req P, resp Q, hErr transp
 	}
 }
 
-func validatePayloadBeforeProcess[P transport.ForeeRequest](ctx context.Context, r *http.Request, req P) transport.HError {
+func validatePayloadBeforeProcess[P transport.ForeeRequest](ctx context.Context, r *http.Request, req P) (context.Context, transport.HError) {
 	err := req.Validate()
 	if err != nil {
 		foree_logger.Logger.Warn(
@@ -33,11 +33,11 @@ func validatePayloadBeforeProcess[P transport.ForeeRequest](ctx context.Context,
 			"requestType", fmt.Sprintf("%T", req),
 			"cause", req.Validate().Error())
 	}
-	return err
+	return ctx, err
 }
 
-func emptyAfterProcess[Q any](ctx context.Context, w http.ResponseWriter, resp Q, hErr transport.HError) http.ResponseWriter {
-	return w
+func emptyAfterProcess[Q any](ctx context.Context, w http.ResponseWriter, resp Q, hErr transport.HError) (context.Context, http.ResponseWriter) {
+	return ctx, w
 }
 
 func simpleGetWrapper[P transport.ForeeRequest, Q any](handler func(context.Context, P) (Q, transport.HError)) func(http.ResponseWriter, *http.Request) {
