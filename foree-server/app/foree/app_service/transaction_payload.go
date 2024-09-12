@@ -132,7 +132,7 @@ func (q CancelTransactionReq) Validate() *transport.BadRequestError {
 
 type GetRateReq struct {
 	SrcCurrency  string `json:"srcCurrency" validate:"eq=CAD"`
-	DestCurrency string `json:"DestCurrency" validate:"eq=PKR"`
+	DestCurrency string `json:"destCurrency" validate:"eq=PKR"`
 }
 
 func (q GetRateReq) Validate() *transport.BadRequestError {

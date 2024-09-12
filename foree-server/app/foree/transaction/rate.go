@@ -30,7 +30,7 @@ const (
 			r.dest_amount, r.dest_currency, 
 			r.created_at, r.updated_at
         FROM rate r
-        where t.id = ?
+        where r.id = ?
 	`
 )
 

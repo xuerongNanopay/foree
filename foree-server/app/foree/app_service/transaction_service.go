@@ -121,6 +121,10 @@ func (t *TransactionService) getRate(ctx context.Context, src, dest string, vali
 		return nil, err
 	}
 
+	if rate == nil {
+		return nil, nil
+	}
+
 	//There is a change that write lock never work.
 	//But if this case happen, we already a big company.
 	if !t.rateCacheRWLock.TryLock() {
