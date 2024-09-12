@@ -40,6 +40,22 @@ const CreateContact = () => {
     validate()
   }, [form])
 
+  const submit = async () => {
+    setIsSubmitting(true)
+    try {
+    } catch (err) {
+      console.error("create contact", err)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const ContactInfoField = () => (
+    <View>
+      
+    </View>
+  )
+
   return (
     <View>
       <Text>CreateContact</Text>

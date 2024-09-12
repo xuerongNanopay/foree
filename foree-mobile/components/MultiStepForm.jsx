@@ -83,7 +83,10 @@ const MultiStepForm = ({
             <CustomButton
               title={"Next >"}
               disabled={!formStep[curIdx].canGoNext()}
-              handlePress={()=>{setCurIdx(curIdx+1)}}
+              handlePress={async ()=>{
+                if ( !!formStep[curIdx].goNext ) await formStep[curIdx].goNext()
+                setCurIdx(curIdx+1)
+              }}
               containerStyles={isFirst ? "w-[100%]" : "w-[49%]"}
             /> : null
           }
