@@ -20,8 +20,8 @@ type CreateContactReq struct {
 	Country               string `json:"country" validate:"required"`
 	PostalCode            string `json:"postalCode"`
 	PhoneNumber           string `json:"phoneNumber"`
-	RelationshipToContact string `json:"relationshipToContact"`
-	TransferMethod        string `json:"transferMethod"`
+	RelationshipToContact string `json:"relationshipToContact" validate:"required"`
+	TransferMethod        string `json:"transferMethod" validate:"required"`
 	BankName              string `json:"bankName"`
 	AccountNoOrIBAN       string `json:"accountNoOrIBAN"`
 }

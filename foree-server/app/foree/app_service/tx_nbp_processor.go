@@ -369,17 +369,19 @@ func nbpToInternalStatusMapper(nbpStatus string) transaction.TxStatus {
 	}
 }
 
+// TODO: fix the issue
 func mapNBPMode(accType account.ContactAccountType) (nbp.PMTMode, error) {
-	switch accType {
-	case foree_constant.ContactAccountTypeCash:
-		return nbp.PMTModeCash, nil
-	case foree_constant.ContactAccountTypeThirdPartyPayments:
-		return nbp.PMTModeThirdPartyPayments, nil
-	case foree_constant.ContactAccountTypeAccountTransfers:
-		return nbp.PMTModeAccountTransfers, nil
-	default:
-		return "", fmt.Errorf("NBPTxProcessor -- unknown contact account type `%s`", accType)
-	}
+	// switch accType {
+	// case foree_constant.ContactAccountTypeCash:
+	// 	return nbp.PMTModeCash, nil
+	// case foree_constant.ContactAccountTypeThirdPartyPayments:
+	// 	return nbp.PMTModeThirdPartyPayments, nil
+	// case foree_constant.ContactAccountTypeAccountTransfers:
+	// 	return nbp.PMTModeAccountTransfers, nil
+	// default:
+	// 	return "", fmt.Errorf("NBPTxProcessor -- unknown contact account type `%s`", accType)
+	// }
+	return nbp.PMTModeCash, nil
 }
 
 func mapNBPRemitterIdType(idType foree_auth.IdentificationType) nbp.RemitterIdType {
