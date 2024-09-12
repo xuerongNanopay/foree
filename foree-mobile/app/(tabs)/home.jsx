@@ -1,13 +1,15 @@
-import { View, Text, SafeAreaView, FlatList, ScrollView } from 'react-native'
-import { Link } from 'expo-router'
+import { View, Text, SafeAreaView, FlatList, ScrollView, Image } from 'react-native'
+import { Link, useNavigation } from 'expo-router'
 import React, { useEffect, useState } from 'react'
+
+import { images } from '../../constants'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { transactionService } from '../../service'
-
 import Currency from '../../constants/currency'
 
 const Home = () => {
   const { user } = useGlobalContext()
+  // const navigation = useNavigation()
   const [ cpRate , setCPRate ] = useState({
     srcAmount: 0,
     srcCurrency: "CAD",
@@ -35,12 +37,20 @@ const Home = () => {
     }
     getRate()
   }, [])
+
   return (
-    <SafeAreaView className="h-full flex flex-row items-center mb-16">
+    <SafeAreaView className="h-full flex flex-row items-center mb-28">
       <View className="px-4 pt-4">
-        <View className="mb-4">
-          <Text className="font-pregular text-xl">Welcome Back</Text>
-          <Text className="font-pbold text-2xl text-slate-700">{user?.firstName} {user?.lastName}</Text>
+        <View className="mb-2 pb-2 border-b-[1px] border-slate-400 flex-row items-center justify-between">
+          <View className="">
+            <Text className="font-pregular text-xl">Welcome Back</Text>
+            <Text className="font-pbold text-2xl text-slate-700">{user?.firstName} {user?.lastName}</Text>
+          </View>
+          <Image
+            source={images.logoSmall}
+            resizeMode='contain'
+            className="w-[36px] h-[36px]"
+          />
         </View>
         <ScrollView 
           showsVerticalScrollIndicator={false}
@@ -83,7 +93,6 @@ const Home = () => {
                 <Text>{item.id}</Text>
               )}
             /> */}
-            {/* <Text>1111</Text>
             <Text>1111</Text>
             <Text>1111</Text>
             <Text>1111</Text>
@@ -97,7 +106,8 @@ const Home = () => {
             <Text>1111</Text>
             <Text>1111</Text>
             <Text>1111</Text>
-            <Text>1111</Text> */}
+            <Text>1111</Text>
+            <Text>1111</Text>
             <View className="px-4 border-t-[1px] border-[#b6d4c7]">
               <Link href="/profile" className="pt-2">
                 <Text className="font-pregular text-center">See more...</Text>
