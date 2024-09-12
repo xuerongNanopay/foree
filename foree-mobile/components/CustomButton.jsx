@@ -22,14 +22,14 @@ const CustomButton = ({
 }) => {
   return (
     <TouchableOpacity
-        onPress={handlePress}
-        activeOpacity={0.7}
-        className={`
-            ${variants[variant].buttonStyle} rounded-xl min-h-[48px] justify-center items-center
-            ${containerStyles}
-            ${disabled ? 'opacity-50' : ''}
-        `}
-        disabled={disabled}
+      onPress={handlePress}
+      activeOpacity={0.7}
+      className={`
+          ${variants[variant].buttonStyle} rounded-xl min-h-[48px] justify-center items-center
+          ${containerStyles}
+          ${disabled ? 'opacity-50' : ''}
+      `}
+      disabled={disabled}
     >
     <Text 
         className={`${variants[variant].textStyle} font-psemibold text-lg ${textStyles}`}

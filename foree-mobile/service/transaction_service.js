@@ -6,7 +6,7 @@ class TransactionService {
     this.#httpClient = httpClient
   }
 
-  async getCADToPRKRate(req, {signal}={signal}) {
+  async getCADToPRKRate({signal}={signal}) {
     return await this.#httpClient.post("/rate", {
       srcCurrency: "CAD",
       destCurrency: "PKR"

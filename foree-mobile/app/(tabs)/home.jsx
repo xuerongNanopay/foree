@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView, FlatList, ScrollView, Image } from 'react-native'
-import { Link, useNavigation } from 'expo-router'
-import React, { useEffect, useState } from 'react'
+import { Link, useFocusEffect } from 'expo-router'
+import React, { useEffect, useState, useCallback } from 'react'
 
 import { images } from '../../constants'
 import { useGlobalContext } from '../../context/GlobalProvider'
@@ -17,26 +17,29 @@ const Home = () => {
     destCurrency: "PKR",
   })
   
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
+    controller = new AbortController()
     const getRate = async() => {
       try {
-        resp = await transactionService.getCADToPRKRate()
+        resp = await transactionService.getCADToPRKRate({signal: controller.signal})
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("get rate", resp.status, resp.data)
         } else {
-          console.log(resp.data.data)
           setCPRate({
             ...cpRate,
             ...resp.data.data
           })
         }
       } catch (e) {
-        console.error("get rate", e.response?.status, e.response?.data)
+        console.error("get rate", e, e.response, e.response?.status, e.response?.data)
       }
   
     }
     getRate()
-  }, [])
+    return () => {
+      controller.abort()
+    }
+  }, []))
 
   return (
     <SafeAreaView className="h-full flex flex-row items-center mb-28">
