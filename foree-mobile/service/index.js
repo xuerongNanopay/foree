@@ -2,6 +2,7 @@ import axios from 'axios'
 
 import AuthService from "./auth_service"
 import authPayload from "./auth_payload"
+import accountPayload from './account_payload'
 import { Alert } from 'react-native'
 import { router } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -175,6 +176,7 @@ const transactionService = new TransactionService(httpFormClient, httpClient)
 export {
   authService,
   authPayload,
+  accountPayload,
   hasLocalSession,
   transactionService
 }

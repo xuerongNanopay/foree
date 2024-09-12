@@ -9,19 +9,31 @@ const CreateContactScheme = object({
   address2: fieldScheme.String({required: false}),
   city: fieldScheme.String(),
   province: fieldScheme.ProvinceISOScheme(),
-  country: 'PK',
+  country: fieldScheme.String(),
   postalCode: fieldScheme.PostalCodeScheme({countryCode:"CA", required: false}),
   phoneNumber: fieldScheme.PhoneNumber({countryCode:"CA", required: false}),
   relationshipToContact: fieldScheme.String(),
   transferMethod: fieldScheme.String(),
-  bankName: string().when(["transferMethod"], {
-    is: (transferMethod) => transferMethod !== "CASH_PICKUP",
-    then: fieldScheme.String()
+  bankName: string().when(["transferMethod"], ([transferMethod]) => {
+    switch (transferMethod) {
+      case "":
+        return fieldScheme.String({required: false})
+      case "CASH_PICKUP":
+        return fieldScheme.String({required: false})
+      default:
+        return fieldScheme.String()
+    }
   }),
-  accountNoOrIBAN: string().when(["transferMethod"], {
-    is: (transferMethod) => transferMethod !== "CASH_PICKUP",
-    then: fieldScheme.String()
-  })
+  accountNoOrIBAN: string().when(["transferMethod"], ([transferMethod]) => {
+    switch (transferMethod) {
+      case "":
+        return fieldScheme.String({required: false})
+      case "CASH_PICKUP":
+        return fieldScheme.String({required: false})
+      default:
+        return fieldScheme.String()
+    }
+  }),
 })
 
 export default {

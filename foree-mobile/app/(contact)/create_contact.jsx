@@ -1,5 +1,7 @@
-import { View, Text } from 'react-native'
+import { View, Text, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
+
+import { accountPayload } from '../../service'
 
 const CreateContact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -22,9 +24,25 @@ const CreateContact = () => {
     accountNoOrIBAN: ''
   })
 
+  useEffect(() => {
+    async function validate() {
+      try {
+        await accountPayload.CreateContactScheme.validate(form, {abortEarly: false})
+        setErrors({})
+      } catch (err) {
+        let e = {}
+        for ( let i of err.inner ) {
+          e[i.path] =  e[i.path] ?? i.errors[0]
+        }
+        setErrors(e)
+      }
+    }
+    validate()
+  }, [form])
+
   return (
     <View>
-    <Text>CreateContact</Text>
+      <Text>CreateContact</Text>
     </View>
   )
 }
