@@ -5,8 +5,8 @@ const Currency = {
     decimal:  2,
     unicodeIcon: "\u{1F1E8}\u{1F1E6}"
   },
-  "PRK": {
-    isoCode:  "PRK",
+  "PKR": {
+    isoCode:  "PKR",
     isoNum:   "586",
     decimal:  2,
     unicodeIcon: "\u{1F1F5}\u{1F1F0}"

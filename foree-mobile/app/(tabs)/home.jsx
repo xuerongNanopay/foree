@@ -12,7 +12,7 @@ const Home = () => {
     srcAmount: 0,
     srcCurrency: "CAD",
     destAmount: 0,
-    destCurrency: "PRK",
+    destCurrency: "PKR",
   })
   
   useEffect(() => {
@@ -22,8 +22,9 @@ const Home = () => {
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.warn("fetch cad to pkr rate", resp.status, resp.data)
         } else {
+          console.log(resp.data.data)
           setCPRate({
-            cpRate,
+            ...cpRate,
             ...resp.data.data
           })
         }
@@ -48,7 +49,7 @@ const Home = () => {
             <View className="flex-1">
               <Text className="font-pbold text-lg">Current Rate</Text>
               {/* <Text className="font-psemibold text-lg">🇨🇦 $1.00 CAD = 🇵🇰 $208.00 PKR</Text> */}
-              <Text className="font-psemibold text-lg">{`${Currency[cpRate.srcCurrency]["unicodeIcon"]} $${cpRate.srcAmount.toFixed(2)} ${cpRate.srcCurrency} = ${Currency[cpRate.destCurrency]["unicodeIcon"]} $${cpRate.destAmount.toFixed(2)} ${cpRate.destCurrency}`}</Text>
+              <Text className="font-psemibold text-lg">{`${Currency[cpRate.srcCurrency]?.["unicodeIcon"]} $${cpRate.srcAmount.toFixed(2)} ${cpRate.srcCurrency} = ${Currency[cpRate.destCurrency]?.["unicodeIcon"]} $${cpRate.destAmount.toFixed(2)} ${cpRate.destCurrency}`}</Text>
             </View>
             <View>
               <View className="mt-4 p-2 rounded-xl bg-[#1A6B54]">
