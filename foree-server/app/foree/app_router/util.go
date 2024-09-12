@@ -12,7 +12,7 @@ import (
 	reflect_util "xue.io/go-pay/util/reflect"
 )
 
-func commonEndFunc[P any, Q any](req P, resp Q, hErr transport.HError) {
+func commonEndFunc[P any, Q any](ctx context.Context, req P, resp Q, hErr transport.HError) {
 	if reflect_util.IsNil(hErr) {
 		return
 	}
@@ -23,7 +23,7 @@ func commonEndFunc[P any, Q any](req P, resp Q, hErr transport.HError) {
 	}
 }
 
-func validatePayloadBeforeProcess[P transport.ForeeRequest](r *http.Request, req P) transport.HError {
+func validatePayloadBeforeProcess[P transport.ForeeRequest](ctx context.Context, r *http.Request, req P) transport.HError {
 	err := req.Validate()
 	if err != nil {
 		foree_logger.Logger.Warn(
@@ -36,7 +36,7 @@ func validatePayloadBeforeProcess[P transport.ForeeRequest](r *http.Request, req
 	return err
 }
 
-func emptyAfterProcess[Q any](w http.ResponseWriter, resp Q, hErr transport.HError) http.ResponseWriter {
+func emptyAfterProcess[Q any](ctx context.Context, w http.ResponseWriter, resp Q, hErr transport.HError) http.ResponseWriter {
 	return w
 }
 

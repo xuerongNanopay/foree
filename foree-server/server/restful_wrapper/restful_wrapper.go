@@ -13,12 +13,14 @@ import (
 
 func RestGetWrapper[P any, Q any](
 	handler func(context.Context, P) (Q, transport.HError),
-	beforeProcess func(*http.Request, P) transport.HError,
-	afterProcess func(http.ResponseWriter, Q, transport.HError) http.ResponseWriter,
-	endFunc func(P, Q, transport.HError), asyncEnd bool,
+	beforeProcess func(context.Context, *http.Request, P) transport.HError,
+	afterProcess func(context.Context, http.ResponseWriter, Q, transport.HError) http.ResponseWriter,
+	endFunc func(context.Context, P, Q, transport.HError), asyncEnd bool,
 ) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req P
+		ctx := context.Background()
+
 		resp, herr := func() (Q, transport.HError) {
 			params := mux.Vars(r)
 			for k, v := range params {
@@ -37,13 +39,12 @@ func RestGetWrapper[P any, Q any](
 
 			var resp Q
 			var herr transport.HError
-			herr = beforeProcess(r, req)
+			herr = beforeProcess(ctx, r, req)
 			if reflect_util.IsNil(herr) {
-				ctx := context.Background()
 				ctx = context.WithValue(ctx, constant.CKHttpRequest, r)
 				resp, herr = handler(ctx, req)
 			}
-			w = afterProcess(w, resp, herr)
+			w = afterProcess(ctx, w, resp, herr)
 
 			w.Header().Add("Content-Type", "application/json")
 
@@ -67,22 +68,23 @@ func RestGetWrapper[P any, Q any](
 		}()
 
 		if asyncEnd {
-			go endFunc(req, resp, herr)
+			go endFunc(ctx, req, resp, herr)
 		} else {
-			endFunc(req, resp, herr)
+			endFunc(ctx, req, resp, herr)
 		}
 	}
 }
 
 func RestPostWrapper[P any, Q any](
 	handler func(context.Context, P) (Q, transport.HError),
-	beforeProcess func(*http.Request, P) transport.HError,
-	afterProcess func(http.ResponseWriter, Q, transport.HError) http.ResponseWriter,
-	endFunc func(P, Q, transport.HError),
+	beforeProcess func(context.Context, *http.Request, P) transport.HError,
+	afterProcess func(context.Context, http.ResponseWriter, Q, transport.HError) http.ResponseWriter,
+	endFunc func(context.Context, P, Q, transport.HError),
 	asyncEnd bool,
 ) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req P
+		ctx := context.Background()
 		resp, herr := func() (Q, transport.HError) {
 
 			sessionId := r.Header.Get("SESSION_ID")
@@ -97,13 +99,13 @@ func RestPostWrapper[P any, Q any](
 				goto SKIP_PROCESS
 			}
 
-			herr = beforeProcess(r, req)
+			herr = beforeProcess(ctx, r, req)
 			if reflect_util.IsNil(herr) {
 				ctx := context.Background()
 				ctx = context.WithValue(ctx, constant.CKHttpRequest, r)
 				resp, herr = handler(ctx, req)
 			}
-			w = afterProcess(w, resp, herr)
+			w = afterProcess(ctx, w, resp, herr)
 
 			w.Header().Add("Content-Type", "application/json")
 
@@ -127,9 +129,9 @@ func RestPostWrapper[P any, Q any](
 		}()
 
 		if asyncEnd {
-			go endFunc(req, resp, herr)
+			go endFunc(ctx, req, resp, herr)
 		} else {
-			endFunc(req, resp, herr)
+			endFunc(ctx, req, resp, herr)
 		}
 	}
 }
