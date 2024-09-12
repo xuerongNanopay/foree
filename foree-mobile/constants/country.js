@@ -25,7 +25,7 @@ const Countries = {
     unicodeIcon: "\u{1F1FA}\u{1F1F8}",
     phoneRegex: "^(\\+\\d{1,2}\\s?)?1?\\-?\\.?\\s?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$",
     postalCodeRegex: "^\\d{5}(?:[-\\s]\\d{4})?$"
-  },
+  }
 }
 
 export default Countries

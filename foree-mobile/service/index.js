@@ -5,6 +5,7 @@ import authPayload from "./auth_payload"
 import { Alert } from 'react-native'
 import { router } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import TransactionService from './transaction_service'
 
 const SessionIdKey = "SESSION_ID"
 // Config axios
@@ -96,9 +97,10 @@ const hasLocalSession = async () => {
 }
 
 const authService = new AuthService(localLogout)
-
+const transactionService = new TransactionService()
 export {
   authService,
   authPayload,
-  hasLocalSession
+  hasLocalSession,
+  transactionService
 }

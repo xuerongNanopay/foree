@@ -7,6 +7,7 @@ import { images } from '../../constants'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import { authService, authPayload } from '../../service'
+import { useGlobalContext } from '../../context/GlobalProvider'
 
 const EPStatusWaitingVerify = "WAITING_VERIFY"
 const EPStatusActive        = "ACTIVE"
@@ -16,6 +17,7 @@ const UserStatusActive  = "ACTIVE"
 const UserStatusSuspend = "SUSPEND"
 
 const Login = () => {
+  const { setUser } = useGlobalContext()
   const [errors, setErrors] = useState({})
   const [isError, setIsError] = useState(true)
   const navigation = useNavigation()
@@ -64,6 +66,7 @@ const Login = () => {
         return
       }
       se = resp.data.data
+      setUser(se)
       if ( se.loginStatus == EPStatusWaitingVerify ) {
         router.replace('/verify_email')
       } else if ( se.userStatus == UserStatusInitial ) {
@@ -73,6 +76,7 @@ const Login = () => {
       } else {
         console.error("login unknow status", se)
       }
+
     } catch (err) {
       console.error(err)
     } finally {

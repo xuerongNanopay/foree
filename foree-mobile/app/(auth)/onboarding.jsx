@@ -9,6 +9,7 @@ import Countries from '../../constants/country'
 import Regions from '../../constants/region'
 import { authPayload, authService } from '../../service'
 import ModalSelect, { SelectCountryItem } from '../../components/ModalSelect'
+import { useGlobalContext } from '../../context/GlobalProvider'
 
 const FieldItem = ({
   title,
@@ -80,7 +81,7 @@ const ReviewItem = ({
 )
 
 const Onboarding = () => {
-
+  const { setUser } = useGlobalContext()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState({});
 
@@ -127,6 +128,8 @@ const Onboarding = () => {
         console.warn("onboarding", resp.status, resp.data)
         return
       }
+      se = resp.data.data
+      setUser(se)
       router.replace("/home")
     } catch (err) {
       console.error("onboarding", err)

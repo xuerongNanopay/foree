@@ -1,11 +1,39 @@
 import { View, Text, SafeAreaView, FlatList, ScrollView } from 'react-native'
 import { Link } from 'expo-router'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useGlobalContext } from '../../context/GlobalProvider'
+import { transactionService } from '../../service'
+
+import Currency from '../../constants/currency'
 
 const Home = () => {
   const { user } = useGlobalContext()
-
+  const [ cpRate , setCPRate ] = useState({
+    srcAmount: 0,
+    srcCurrency: "CAD",
+    destAmount: 0,
+    destCurrency: "PRK",
+  })
+  
+  useEffect(() => {
+    const getRate = async() => {
+      try {
+        resp = await transactionService.getCADToPRKRate()
+        if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
+          console.warn("fetch cad to pkr rate", resp.status, resp.data)
+        } else {
+          setCPRate({
+            cpRate,
+            ...resp.data.data
+          })
+        }
+      } catch (e) {
+        console.error("get rate", e)
+      }
+  
+    }
+    getRate()
+  }, [])
   return (
     <SafeAreaView className="h-full flex flex-row items-center mb-16">
       <View className="px-4 pt-4">
@@ -19,7 +47,8 @@ const Home = () => {
           <View className="bg-[#d0f2e4] rounded-2xl p-4 my-4">
             <View className="flex-1">
               <Text className="font-pbold text-lg">Current Rate</Text>
-              <Text className="font-psemibold text-lg">🇨🇦 $1.00 CAD = 🇵🇰 $208.00 PKR</Text>
+              {/* <Text className="font-psemibold text-lg">🇨🇦 $1.00 CAD = 🇵🇰 $208.00 PKR</Text> */}
+              <Text className="font-psemibold text-lg">{`${Currency[cpRate.srcCurrency]["unicodeIcon"]} $${cpRate.srcAmount.toFixed(2)} ${cpRate.srcCurrency} = ${Currency[cpRate.destCurrency]["unicodeIcon"]} $${cpRate.destAmount.toFixed(2)} ${cpRate.destCurrency}`}</Text>
             </View>
             <View>
               <View className="mt-4 p-2 rounded-xl bg-[#1A6B54]">
@@ -42,8 +71,8 @@ const Home = () => {
             </View>
             <Text className="font-psemibold mt-2">Refer today & start earning the rewards</Text>
           </View>
-          <View className="bg-[#d0f2e4] rounded-2xl p-4 my-4">
-            <View className="mb-2 border-b-[1px] border-slate-400">
+          <View className="bg-[#d0f2e4] rounded-2xl py-4 my-4">
+            <View className="px-4 pb-2 border-b-[1px] border-[#b6d4c7]">
               <Text className="font-pbold text-lg">Recent Activities</Text>
             </View>
             {/* <FlatList
@@ -53,6 +82,7 @@ const Home = () => {
                 <Text>{item.id}</Text>
               )}
             /> */}
+            {/* <Text>1111</Text>
             <Text>1111</Text>
             <Text>1111</Text>
             <Text>1111</Text>
@@ -66,9 +96,8 @@ const Home = () => {
             <Text>1111</Text>
             <Text>1111</Text>
             <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <View className="mt-2 border-t-[1px] border-slate-400">
+            <Text>1111</Text> */}
+            <View className="px-4 border-t-[1px] border-[#b6d4c7]">
               <Link href="/profile" className="pt-2">
                 <Text className="font-pregular text-center">See more...</Text>
               </Link>
