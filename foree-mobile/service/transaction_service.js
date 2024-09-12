@@ -9,7 +9,7 @@ class TransactionService {
   async getCADToPRKRate(req, {signal}={signal}) {
     return await this.#httpClient.post("/rate", {
       srcCurrency: "CAD",
-      destCurrency: "PRK"
+      destCurrency: "PKR"
     }, {signal})
   }
 }
