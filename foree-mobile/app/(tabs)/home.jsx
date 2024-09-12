@@ -20,7 +20,7 @@ const Home = () => {
       try {
         resp = await transactionService.getCADToPRKRate()
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
-          console.warn("fetch cad to pkr rate", resp.status, resp.data)
+          console.error("get rate", resp.status, resp.data)
         } else {
           console.log(resp.data.data)
           setCPRate({
@@ -29,7 +29,7 @@ const Home = () => {
           })
         }
       } catch (e) {
-        console.error("get rate", e)
+        console.error("get rate", e.response?.status, e.response?.data)
       }
   
     }
