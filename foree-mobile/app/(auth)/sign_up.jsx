@@ -9,7 +9,7 @@ import CustomButton from '../../components/CustomButton'
 import { authPayload, authService } from '../../service'
 
 const SignUp = () => {
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({})
   const [isError, setIsError] = useState(true);
 
   const [form, setForm] = useState({

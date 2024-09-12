@@ -9,7 +9,7 @@ import FormField from '../../components/FormField'
 
 
 const VerifyEmail = () => {
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({})
   const [isError, setIsError] = useState(true);
 
   const [form, setForm] = useState({

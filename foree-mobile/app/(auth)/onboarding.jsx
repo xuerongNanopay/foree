@@ -83,8 +83,7 @@ const ReviewItem = ({
 const Onboarding = () => {
   const { setUser } = useGlobalContext()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errors, setErrors] = useState({});
-
+  const [errors, setErrors] = useState({})
   const [form, setForm] = useState({
     firstName: '',
     middleName: '',

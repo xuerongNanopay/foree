@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from 'react-native'
-import { useFocusEffect } from 'expo-router'
+import { router, useFocusEffect } from 'expo-router'
 import React, { useEffect, useState, useCallback } from 'react'
 
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -7,9 +7,10 @@ import SearchInput from '../../components/SearchInput'
 
 const Contact = () => {
 
+  const [searchText, setSearchText] = useState("")
   useFocusEffect(
     useCallback(() => {
-      console.log('Hello, I am focused!');
+      setSearchText("")
 
       return () => {
         console.log('This route is now unfocused.');
@@ -24,7 +25,7 @@ const Contact = () => {
           <View className="flex flex-row items-center">
             <Text className="flex-1 font-pbold text-2xl">Contacts</Text>
             <TouchableOpacity
-              onPress={()=> {console.log("TODO: contact creation")}}
+              onPress={()=> {router.push("/create_contact")}}
               activeOpacity={0.7}
               className="bg-[#1A6B54] py-2 px-4 rounded-full"
               disabled={false}
@@ -36,6 +37,8 @@ const Contact = () => {
             <SearchInput
               placeholder="search name..."
               variant='bordered'
+              value={searchText}
+              handleChangeText={(e) => setSearchText(e.toLowerCase())}
               containerStyles="mt-4"
             />
           </View>

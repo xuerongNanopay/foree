@@ -1,6 +1,6 @@
 import { ScrollView, Text, View, Image } from 'react-native'
-import React, { useState, useEffect } from 'react'
-import { Link, router, useNavigation } from 'expo-router'
+import React, { useState, useEffect, useCallback } from 'react'
+import { Link, router, useFocusEffect } from 'expo-router'
 import { SafeAreaView } from 'react-native'
 
 import { images } from '../../constants'
@@ -20,17 +20,19 @@ const Login = () => {
   const { setUser } = useGlobalContext()
   const [errors, setErrors] = useState({})
   const [isError, setIsError] = useState(true)
-  const navigation = useNavigation()
-  useEffect(() => {
-    async function logout() {
-      try {
-        await authService.logout()
-      } catch(e) {
-        console.log("logout", e)
+  
+  useFocusEffect(
+    useCallback(() => {
+      async function logout() {
+        try {
+          await authService.logout()
+        } catch(e) {
+          console.log("logout", e)
+        }
       }
-    }
-    logout()
-  }, [navigation])
+      logout()
+    }, [])
+  )
 
   const [form, setForm] = useState({
     email: '',
