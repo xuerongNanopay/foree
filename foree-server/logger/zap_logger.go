@@ -17,7 +17,8 @@ func NewZapLogger(level, outputPath string) (*ZapLogger, error) {
 		MaxAge:     0, // days
 	})
 
-	l := zap.NewAtomicLevelAt(zap.InfoLevel)
+	infoLevel := zap.NewAtomicLevelAt(zap.InfoLevel)
+	debugLevel := zap.NewAtomicLevelAt(zap.DebugLevel)
 
 	productionCfg := zap.NewProductionEncoderConfig()
 	productionCfg.TimeKey = "timestamp"
@@ -37,8 +38,8 @@ func NewZapLogger(level, outputPath string) (*ZapLogger, error) {
 	fileEncoder := zapcore.NewJSONEncoder(productionCfg)
 
 	core := zapcore.NewTee(
-		zapcore.NewCore(consoleEncoder, stdout, l),
-		zapcore.NewCore(fileEncoder, file, l),
+		zapcore.NewCore(consoleEncoder, stdout, debugLevel),
+		zapcore.NewCore(fileEncoder, file, infoLevel),
 	)
 
 	return &ZapLogger{

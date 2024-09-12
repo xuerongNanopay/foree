@@ -717,9 +717,9 @@ func (a *AuthService) Logout(ctx context.Context, req transport.SessionReq) (*au
 	oldSession, _ := a.VerifySession(ctx, req.SessionId)
 	a.sessionRepo.Delete(req.SessionId)
 	if oldSession != nil {
-		foree_logger.Logger.Info("Logout_Success", "ip", loadRealIp(ctx), "userId", oldSession.UserId, "sessionId", req.SessionId)
+		foree_logger.Logger.Debug("Logout_Success", "ip", loadRealIp(ctx), "userId", oldSession.UserId, "sessionId", req.SessionId)
 	} else {
-		foree_logger.Logger.Info("Logout_Success", "ip", loadRealIp(ctx), "sessionId", req.SessionId)
+		foree_logger.Logger.Debug("Logout_Success", "ip", loadRealIp(ctx), "sessionId", req.SessionId)
 	}
 	return nil, nil
 }

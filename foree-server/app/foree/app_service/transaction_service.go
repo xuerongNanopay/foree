@@ -9,6 +9,7 @@ import (
 
 	"xue.io/go-pay/app/foree/account"
 	foree_constant "xue.io/go-pay/app/foree/constant"
+	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/auth"
@@ -102,6 +103,7 @@ func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*Rate
 			fmt.Sprintf("unsupport destCurrency %s", req.DestCurrency),
 		)
 	}
+	foree_logger.Logger.Debug("GetRate_Success", "ip", loadRealIp(ctx), "rate", fmt.Sprintf("`%v`", rate))
 	return NewRateDTO(rate), nil
 }
 
