@@ -27,6 +27,43 @@ type AccountService struct {
 	interacAccountRepo *account.InteracAccountRepo
 }
 
+func (a *AccountService) VerifyContact(ctx context.Context, req CreateContactReq) (*VerifyContactDTO, transport.HError) {
+	_, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactWrite)
+	if err != nil {
+		return nil, err
+	}
+
+	//TODO: user real services.
+	// var resp *nbp.AccountEnquiryResponse
+	// if req.AccountNoOrIBAN == "1111" {
+	// 	resp = &nbp.AccountEnquiryResponse{
+	// 		ResponseCommon: nbp.ResponseCommon{
+	// 			ResponseCode: "407",
+	// 		},
+	// 	}
+	// } else {
+	// 	resp = &nbp.AccountEnquiryResponse{
+	// 		ResponseCommon: nbp.ResponseCommon{
+	// 			ResponseCode: "201",
+	// 		},
+	// 	}
+	// }
+
+	if req.AccountNoOrIBAN == "1111" {
+		return &VerifyContactDTO{
+			AccountStatus: "Closed",
+		}, nil
+	} else if req.AccountNoOrIBAN == "4444" {
+		return &VerifyContactDTO{
+			AccountStatus: "BUSINESS",
+		}, nil
+	} else {
+		return &VerifyContactDTO{
+			AccountStatus: "Active",
+		}, nil
+	}
+}
+
 func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq) (*ContactAccountDetailDTO, transport.HError) {
 	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactWrite)
 	if err != nil {

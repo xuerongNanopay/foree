@@ -178,3 +178,12 @@ func NewInteracAccountSummaryDTO(account *account.InteracAccount) *InteracAccoun
 		Email:      account.Email,
 	}
 }
+
+type VerifyContactDTO struct {
+	AccountNo     string `json:"accountNo,omitempty"`
+	Iban          string `json:"iban,omitempty"`
+	BankName      string `json:"bankName,omitempty"`
+	BranchCode    string `json:"branchCode,omitempty"`
+	AccountTitle  string `json:"accountTitle,omitempty"`
+	AccountStatus string `json:"accountStatus,omitempty"`
+}
