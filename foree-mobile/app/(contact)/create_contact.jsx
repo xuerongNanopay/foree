@@ -8,7 +8,7 @@ import { accountPayload } from '../../service'
 import Countries from '../../constants/country'
 import Regions from '../../constants/region'
 import ModalSelect from '../../components/ModalSelect'
-import { PersonalRelationships } from '../../constants/contacts'
+import { ContactTransferMethods, PersonalRelationships } from '../../constants/contacts'
 
 const FieldItem = ({
   title,
@@ -69,7 +69,6 @@ const CreateContact = () => {
     postalCode: '',
     phoneNumber: '',
     relationshipToContact: '',
-    identificationType: '',
     transferMethod: '',
     bankName: '',
     accountNoOrIBAN: ''
@@ -253,6 +252,28 @@ const CreateContact = () => {
           })
         }}
         placeholder="choose relationship..."
+      />
+      <ModalSelect
+        title="Transfer Method"
+        errorMessage={errors['transferMethod']}
+        modalTitle="select transfer method"
+        containerStyles="mt-2"
+        allowAdd={false}
+        allowSearch={false}
+        value={ContactTransferMethods[form.transferMethod]?.name}
+        variant='flat'
+        keyExtractor="name"
+        valueExtractor="value"
+        listView={SelectPersonalRelationshipItem}
+        list={Object.values(ContactTransferMethods)}
+        onPress={(o) => {
+          console.log(o)
+          setForm({
+            ...form,
+            transferMethod: o
+          })
+        }}
+        placeholder="choose transfer method"
       />
     </View>
   )

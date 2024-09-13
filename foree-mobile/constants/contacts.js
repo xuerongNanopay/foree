@@ -16,19 +16,16 @@ export const PersonalRelationships = {
   },
 }
 
-export const ContactTransferMethods = [
-  {
-    id: "cash",
+export const ContactTransferMethods = {
+  "CASH_PICKUP": {
     name: "Cash Pickup",
     value: "CASH_PICKUP"
   },
-  {
-    id: "bankAccount",
+  "BANK_ACCOUNT": {
     name: "Bank Account",
     value: "BANK_ACCOUNT"
   },
-  {
-    id: "mobileWallet",
+  "MOBILE_WALLET": {
     name: "Mobile Wallet",
     value: "MOBILE_WALLET"
   },
@@ -37,7 +34,7 @@ export const ContactTransferMethods = [
   //   name: "Roshan Digital Account",
   //   value: "ROSHAN_DIGITAL_ACCOUNT"
   // }
-]
+}
 
 export const ContactTransferBank = {
   "bankAccount": [
