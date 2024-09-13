@@ -8,7 +8,7 @@ import { accountPayload } from '../../service'
 import Countries from '../../constants/country'
 import Regions from '../../constants/region'
 import ModalSelect from '../../components/ModalSelect'
-import { ContactTransferMethods, PersonalRelationships } from '../../constants/contacts'
+import { ContactTransferBank, ContactTransferMethods, PersonalRelationships } from '../../constants/contacts'
 
 const FieldItem = ({
   title,
@@ -50,7 +50,7 @@ const SelectTransferMethodItem = (transferMethod) => (
 
 const SelectBankItem = (bank) => (
   <Text className="font-pregular py-3 text-xl">
-    {transferMethod["bankName"]}
+    {bank["bankName"]}
   </Text>
 )
 
@@ -264,17 +264,56 @@ const CreateContact = () => {
         variant='flat'
         keyExtractor="name"
         valueExtractor="value"
-        listView={SelectPersonalRelationshipItem}
+        listView={SelectTransferMethodItem}
         list={Object.values(ContactTransferMethods)}
         onPress={(o) => {
           console.log(o)
           setForm({
             ...form,
-            transferMethod: o
+            transferMethod: o,
+            bankName: "",
+            accountNoOrIBAN: ""
           })
         }}
         placeholder="choose transfer method"
       />
+      {
+        !!form.transferMethod && form.transferMethod !== "CASH_PICKUP" ? 
+        <>
+          <ModalSelect
+            key={form.transferMethod}
+            title="Bank Name"
+            errorMessage={errors['bankName']}
+            modalTitle="select bank"
+            containerStyles="mt-2"
+            allowAdd={false}
+            allowSearch={true}
+            value={form.bankName}
+            variant='flat'
+            searchKey="bankName"
+            keyExtractor="bankName"
+            valueExtractor="bankName"
+            listView={SelectBankItem}
+            list={ContactTransferBank[form.transferMethod]}
+            onPress={(o) => {
+              console.log(o)
+              setForm({
+                ...form,
+                bankName: o,
+                accountNoOrIBAN: ""
+              })
+            }}
+            placeholder="choose transfer method"
+          />
+          <FieldItem title="Account No or IBAN" value={form.accountNoOrIBAN}
+            errorMessage={errors['accountNoOrIBAN']}
+            handleChangeText={(e) => setForm({
+              ...form,
+              accountNoOrIBAN:e
+            })}
+          />
+        </> : null
+      }
     </View>
   )
 

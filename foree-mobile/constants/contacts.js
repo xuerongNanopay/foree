@@ -37,7 +37,7 @@ export const ContactTransferMethods = {
 }
 
 export const ContactTransferBank = {
-  "bankAccount": [
+  "BANK_ACCOUNT": [
     { "bankName": "ALLIED BANK LIMITED", "bankAbbr": "ABL" },
     { "bankName": "AL BARAKA BANK", "bankAbbr": "Bank Albaraka" },
     { "bankName": "APNA BANK", "bankAbbr": "Apna Bank" },
@@ -78,7 +78,7 @@ export const ContactTransferBank = {
     { "bankName": "NRSP MICROFINANCE BANK", "bankAbbr": "NRSP Microfinance Bank" },
     { "bankName": "TAG", "bankAbbr": "TAG" }
   ],
-  "mobileWallet": [
+  "MOBILE_WALLET": [
     { "bankName": "ALFA", "bankAbbr": "Alfa" },
     { "bankName": "ASKARI MOBILE WALLET", "bankAbbr": "Askari Mobile" },
     { "bankName": "TELENOR BANK/EASYPAISA", "bankAbbr": "Telenor Bank" },
