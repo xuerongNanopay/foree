@@ -40,7 +40,7 @@ const EmailScheme = ({required=true}={
   return ret.email("invalid email")
 }
 
-const NumberOnlyScheme = ({min=5, max=256, required=true}={
+const NumberOnlyScheme = ({min=0, max=256, required=true}={
   min,
   max, 
   required
