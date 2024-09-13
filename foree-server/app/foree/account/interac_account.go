@@ -283,7 +283,7 @@ func (repo *InteracAccountRepo) GetAllActiveInteracAccountByOwnerId(ctx context.
 	}
 	defer rows.Close()
 
-	accounts := make([]*InteracAccount, 16)
+	accounts := make([]*InteracAccount, 0)
 	for rows.Next() {
 		p, err := scanRowIntoInteracAccount(rows)
 		if err != nil {

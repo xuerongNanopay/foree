@@ -57,7 +57,7 @@ func (repo *RolePermissionRepo) GetAllEnabledRolePermissionByRoleName(roleName s
 	}
 	defer rows.Close()
 
-	ps := make([]*RolePermission, 16)
+	ps := make([]*RolePermission, 0)
 	for rows.Next() {
 		p, err := scanRowIntoRolePermission(rows)
 		if err != nil {

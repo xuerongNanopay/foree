@@ -286,7 +286,7 @@ func (repo *ContactAccountRepo) GetAllActiveContactAccountByOwnerId(ctx context.
 	}
 	defer rows.Close()
 
-	accounts := make([]*ContactAccount, 16)
+	accounts := make([]*ContactAccount, 0)
 	for rows.Next() {
 		p, err := scanRowIntoContactAccount(rows)
 		if err != nil {
@@ -310,7 +310,7 @@ func (repo *ContactAccountRepo) QueryActiveContactAccountByOwnerIdWithPagination
 	}
 	defer rows.Close()
 
-	accounts := make([]*ContactAccount, 16)
+	accounts := make([]*ContactAccount, 0)
 	for rows.Next() {
 		p, err := scanRowIntoContactAccount(rows)
 		if err != nil {

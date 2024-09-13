@@ -194,7 +194,7 @@ func (repo *FeeRepo) GetAllFee() ([]*Fee, error) {
 	}
 	defer rows.Close()
 
-	fees := make([]*Fee, 16)
+	fees := make([]*Fee, 0)
 	for rows.Next() {
 		p, err := scanRowIntoFee(rows)
 		if err != nil {
@@ -255,7 +255,7 @@ func (repo *FeeJointRepo) GetAllFeeJointbyParentTxId(transactionId int64) ([]*Fe
 	}
 	defer rows.Close()
 
-	feeJoints := make([]*FeeJoint, 16)
+	feeJoints := make([]*FeeJoint, 0)
 	for rows.Next() {
 		p, err := scanRowIntoFeeJoint(rows)
 		if err != nil {

@@ -235,7 +235,7 @@ func (repo *InteracCITxRepo) GetAllInteracCITxByStatus(ctx context.Context, stat
 	}
 	defer rows.Close()
 
-	txs := make([]*InteracCITx, 16)
+	txs := make([]*InteracCITx, 0)
 	for rows.Next() {
 		p, err := scanRowIntoInteracCITx(rows)
 		if err != nil {

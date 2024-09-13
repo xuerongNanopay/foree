@@ -172,7 +172,7 @@ func (repo *RewardRepo) GetAllRewardByAppliedTransactionId(ctx context.Context, 
 	}
 	defer rows.Close()
 
-	rewards := make([]*Reward, 16)
+	rewards := make([]*Reward, 0)
 	for rows.Next() {
 		p, err := scanRowIntoReward(rows)
 		if err != nil {
@@ -196,7 +196,7 @@ func (repo *RewardRepo) GetAllActiveRewardByOwnerId(ctx context.Context, ownerId
 	}
 	defer rows.Close()
 
-	rewards := make([]*Reward, 16)
+	rewards := make([]*Reward, 0)
 	for rows.Next() {
 		p, err := scanRowIntoReward(rows)
 		if err != nil {

@@ -140,7 +140,7 @@ func (repo *ApprovalRepo) QueryAllApprovalByTypeWithPagination(t string, limit, 
 	}
 	defer rows.Close()
 
-	approvals := make([]*Approval, 16)
+	approvals := make([]*Approval, 0)
 	for rows.Next() {
 		p, err := scanRowIntoApproval(rows)
 		if err != nil {
@@ -165,7 +165,7 @@ func (repo *ApprovalRepo) QueryAllApprovalByTypeAndStatusWithPagination(t, s str
 	}
 	defer rows.Close()
 
-	approvals := make([]*Approval, 16)
+	approvals := make([]*Approval, 0)
 	for rows.Next() {
 		p, err := scanRowIntoApproval(rows)
 		if err != nil {

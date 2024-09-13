@@ -766,7 +766,14 @@ func (a *AuthService) Authorize(ctx context.Context, sessionId string, permissio
 	if err != nil {
 		return session, err
 	}
+	if session.RolePermissions == nil {
+		return session, transport.NewForbiddenError(permission)
+	}
+
 	for _, p := range session.RolePermissions {
+		if p == nil {
+			continue
+		}
 		ok := auth.IsPermissionGrand(permission, p.Permission)
 		if ok {
 			return session, nil

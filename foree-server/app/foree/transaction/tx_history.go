@@ -97,7 +97,7 @@ func (repo *TxHistoryRepo) GetAllTxHistoryByTransactionId(parentTxId int64) ([]*
 	}
 	defer rows.Close()
 
-	hist := make([]*TxHistory, 16)
+	hist := make([]*TxHistory, 0)
 	for rows.Next() {
 		p, err := scanRowIntoTxHistory(rows)
 		if err != nil {

@@ -283,7 +283,7 @@ func (repo *TxSummaryRepo) GetAllTxSummaryByOwnerIdWithPagination(ctx context.Co
 	}
 	defer rows.Close()
 
-	accounts := make([]*TxSummary, 16)
+	accounts := make([]*TxSummary, 0)
 	for rows.Next() {
 		p, err := scanRowIntoTxSummary(rows)
 		if err != nil {
@@ -307,7 +307,7 @@ func (repo *TxSummaryRepo) QueryTxSummaryByOwnerIdAndStatusWithPagination(ctx co
 	}
 	defer rows.Close()
 
-	accounts := make([]*TxSummary, 16)
+	accounts := make([]*TxSummary, 0)
 	for rows.Next() {
 		p, err := scanRowIntoTxSummary(rows)
 		if err != nil {
