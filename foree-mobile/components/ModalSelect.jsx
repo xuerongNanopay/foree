@@ -22,6 +22,7 @@ const ModalSelect = ({
   inputStyles,
   allowSearch=true,
   searchKey,
+  keyExtractor,
   list=[],
   listView,
   allowAdd=true,
@@ -146,7 +147,7 @@ const ModalSelect = ({
                         setShowList(list)
                       }}
                       className="w-full border-b-[1px] border-slate-300"
-                      key={v[searchKey]}
+                      key={v[keyExtractor]}
                     >
                       {listView(v)}
                     </TouchableOpacity>

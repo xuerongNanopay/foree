@@ -10,8 +10,9 @@ const CreateContactScheme = object({
   city: fieldScheme.String(),
   province: fieldScheme.ProvinceISOScheme(),
   country: fieldScheme.String(),
-  postalCode: fieldScheme.PostalCodeScheme({countryCode:"CA", required: false}),
-  phoneNumber: fieldScheme.PhoneNumber({countryCode:"CA", required: false}),
+  postalCode: fieldScheme.PostalCodeScheme({countryCode:"PK", required: false}),
+  // phoneNumber: fieldScheme.PhoneNumber({countryCode:"PK", required: false}),
+  phoneNumber: fieldScheme.NumberOnlyScheme({required:false}),
   relationshipToContact: fieldScheme.String(),
   transferMethod: fieldScheme.String(),
   bankName: string().when(["transferMethod"], ([transferMethod]) => {

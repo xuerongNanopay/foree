@@ -3,6 +3,7 @@ import Countries from './country'
 
 const internationalNameRegex = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžæÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
 
+// TODO: min and max is not working well with not required.
 //Excape empty string check
 const emptyRegexWrapper = (regex) => `(${regex})|(^$)`
 const String = ({min=0, max=256, required=true}={
@@ -39,13 +40,13 @@ const EmailScheme = ({required=true}={
   return ret.email("invalid email")
 }
 
-const NumberOnlyScheme = ({min=0, max=256, required=true}={
+const NumberOnlyScheme = ({min=5, max=256, required=true}={
   min,
   max, 
   required
 }) => {
-  const ret = required ? string().trim().required("required") : string().trim()
-  return ret.matches(new RegExp(emptyRegexWrapper("^\\d+$")), "").min(min, min!==max ? `at least ${min} characters`: `must be ${min} characters`).max(max, min!==max ? `at most ${max} characters`: `must be ${max} characters`)
+  const ret = required ? string().trim().required("required") : string()
+  return ret.matches(new RegExp(emptyRegexWrapper("^\\d+$")), "invalid digits").min(min, min!==max ? `at least ${min} characters`: `must be ${min} characters`).max(max, min!==max ? `at most ${max} characters`: `must be ${max} characters`)
 }
 
 const AlphaOnlyScheme = ({min=0, max=256, required=true, upperCaseOnly=false}={

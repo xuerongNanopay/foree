@@ -214,6 +214,7 @@ const Onboarding = () => {
         value={Regions[form.country]?.[form.province]?.name}
         variant='flat'
         searchKey="name"
+        keyExtractor="name"
         listView={SelectProvinceItem}
         list={Object.values(Regions[form.country])}
         onPress={(o) => {
@@ -278,6 +279,7 @@ const Onboarding = () => {
         value={Countries[form.pob]?`${Countries[form.pob]?.unicodeIcon} ${Countries[form.pob]?.name}`: ""}
         variant='flat'
         searchKey="name"
+        keyExtractor="name"
         listView={SelectCountryItem}
         list={Object.values(Countries)}
         onPress={(o) => {
@@ -297,6 +299,7 @@ const Onboarding = () => {
         value={Countries[form.nationality]?`${Countries[form.nationality]?.unicodeIcon} ${Countries[form.nationality]?.name}`: ""}
         variant='flat'
         searchKey="name"
+        keyExtractor="name"
         listView={SelectCountryItem}
         list={Object.values(Countries)}
         onPress={(o) => {
@@ -317,6 +320,7 @@ const Onboarding = () => {
         value={IDTypes[form.identificationType]?.name}
         variant='flat'
         searchKey="id"
+        keyExtractor="id"
         listView={SelectIDTypesItem}
         list={Object.values(IDTypes)}
         onPress={(o) => {
