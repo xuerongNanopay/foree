@@ -80,10 +80,10 @@ const SignUp = () => {
           <FormField
             title="Email"
             value={form.email}
-            handleChangeText={(e) => setForm({
+            handleChangeText={(e) => setForm(string_util.trimStringInObject({
               ...form,
               email:e.toLowerCase()
-            })}
+            }))}
             containerStyles="mt-7"
             errorMessage={errors['email']}
             keyboardType="email-address"
@@ -91,10 +91,10 @@ const SignUp = () => {
           <FormField
             title="Password"
             value={form.password}
-            handleChangeText={(e) => setForm({
+            handleChangeText={(e) => setForm(string_util.trimStringInObject({
               ...form,
               password:e
-            })}
+            }))}
             errorMessage={errors['password']}
             containerStyles="mt-7"
           />

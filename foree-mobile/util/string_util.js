@@ -27,8 +27,8 @@ containSubsequence = (s, q, {caseInsensitive=false}) => {
 trimStringInObject = (o) => {
   if ( typeof o !== 'object' ) return o
   let newO = {}
-  for (const [key, value] of Object.entries(object1)) {
-    newO[key] = value === 'string' ? value.trim() : value
+  for (const [key, value] of Object.entries(o)) {
+    newO[key] = typeof value === 'string' ? value.trim() : value
   }
 
   return newO

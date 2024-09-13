@@ -65,10 +65,10 @@ const ForgetPasswordVerify = () => {
           </Text>
           <FormField
               value={form.retrieveCode}
-              handleChangeText={(e) => setForm({
+              handleChangeText={(e) => setForm(string_util.trimStringInObject({
                 ...form,
                 retrieveCode:e
-              })}
+              }))}
               errorMessage={errors['retrieveCode']}
               inputStyles="text-center"
               variant="flat"

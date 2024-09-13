@@ -86,10 +86,10 @@ const VerifyEmail = () => {
           <View className="px-2 mt-4">
             <FormField
               value={form.code}
-              handleChangeText={(e) => setForm({
+              handleChangeText={(e) => setForm(string_util.trimStringInObject({
                 ...form,
                 code:e
-              })}
+              }))}
               errorMessage={errors['code']}
               inputStyles="text-center"
               variant="flat"

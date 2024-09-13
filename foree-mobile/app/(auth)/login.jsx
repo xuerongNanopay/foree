@@ -129,10 +129,10 @@ const Login = () => {
             <FormField
               title="Email"
               value={form.email}
-              handleChangeText={(e) => setForm({
+              handleChangeText={(e) => setForm(string_util.trimStringInObject({
                 ...form,
                 email:e.toLowerCase()
-              })}
+              }))}
               containerStyles="mt-4"
               keyboardType="email-address"
               errorMessage={errors['email']}
@@ -140,10 +140,10 @@ const Login = () => {
             <FormField
               title="Password"
               value={form.password}
-              handleChangeText={(e) => setForm({
+              handleChangeText={(e) => setForm(string_util.trimStringInObject({
                 ...form,
                 password:e
-              })}
+              }))}
               errorMessage={errors['password']}
               containerStyles="mt-7"
             />

@@ -67,10 +67,10 @@ const ForgetPassword = () => {
             <FormField
               title="Email"
               value={form.email}
-              handleChangeText={(e) => setForm({
+              handleChangeText={(e) => setForm(string_util.trimStringInObject({
                 ...form,
                 email:e.toLowerCase()
-              })}
+              }))}
               containerStyles="mt-1"
               keyboardType="email-address"
               errorMessage={errors['email']}
