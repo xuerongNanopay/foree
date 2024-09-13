@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"fmt"
+	"strings"
 	"time"
 
 	"xue.io/go-pay/constant"
@@ -19,7 +20,7 @@ const (
 			last_name, address1, address2, city, province,
 			country, postal_code, phone_number, institution_name, branch_number, account_number,
 			account_hash, relationship_to_contact, owner_id, latest_activity_at
-		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	sQLContactAccountUpdateActiveByIdAndOwner = `
 		UPDATE contact_accounts SET 
@@ -106,18 +107,17 @@ func (c *ContactAccount) GetLegalName() string {
 
 func (c *ContactAccount) HashMyself() {
 	s := fmt.Sprintf(
-		"%s%s%s%s%s%s%s%s%s%s%s",
-		c.FirstName,
-		c.MiddleName,
-		c.LastName,
-		c.Address1,
-		c.Address2,
-		c.City,
-		c.Province,
-		c.Country,
-		c.InstitutionName,
-		c.BranchNumber,
-		c.AccountNumber,
+		"%s%s%s%s%s%s%s%s%s%s",
+		strings.ReplaceAll(strings.ToLower(c.FirstName), " ", ""),
+		strings.ReplaceAll(strings.ToLower(c.MiddleName), " ", ""),
+		strings.ReplaceAll(strings.ToLower(c.LastName), " ", ""),
+		strings.ReplaceAll(strings.ToLower(c.Address1), " ", ""),
+		strings.ReplaceAll(strings.ToLower(c.City), " ", ""),
+		strings.ReplaceAll(strings.ToLower(c.Province), " ", ""),
+		strings.ReplaceAll(strings.ToLower(c.Country), " ", ""),
+		strings.ReplaceAll(strings.ToLower(c.InstitutionName), " ", ""),
+		strings.ReplaceAll(strings.ToLower(c.BranchNumber), " ", ""),
+		strings.ReplaceAll(strings.ToLower(c.AccountNumber), " ", ""),
 	)
 	hash := md5.Sum([]byte(s))
 	c.AccountHash = hex.EncodeToString(hash[:])

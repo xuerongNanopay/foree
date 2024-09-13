@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
+	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/server/transport"
 )
 
@@ -28,9 +29,15 @@ type AccountService struct {
 }
 
 func (a *AccountService) VerifyContact(ctx context.Context, req CreateContactReq) (*VerifyContactDTO, transport.HError) {
-	_, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactWrite)
-	if err != nil {
-		return nil, err
+	session, sErr := a.authService.Authorize(ctx, req.SessionId, PermissionContactWrite)
+	if sErr != nil {
+		var userId int64
+		if session != nil {
+			userId = session.UserId
+		}
+		// Normal error when the token expired
+		foree_logger.Logger.Info("VerifyContact", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		return nil, sErr
 	}
 
 	//TODO: user real services.
@@ -57,6 +64,8 @@ func (a *AccountService) VerifyContact(ctx context.Context, req CreateContactReq
 		return &VerifyContactDTO{
 			AccountStatus: "BUSINESS",
 		}, nil
+	} else if req.AccountNoOrIBAN == "5555" {
+		return &VerifyContactDTO{}, nil
 	} else {
 		return &VerifyContactDTO{
 			AccountStatus: "Active",
@@ -65,10 +74,17 @@ func (a *AccountService) VerifyContact(ctx context.Context, req CreateContactReq
 }
 
 func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq) (*ContactAccountDetailDTO, transport.HError) {
-	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactWrite)
-	if err != nil {
-		return nil, err
+	session, sErr := a.authService.Authorize(ctx, req.SessionId, PermissionContactWrite)
+	if sErr != nil {
+		var userId int64
+		if session != nil {
+			userId = session.UserId
+		}
+		// Normal error when the token expired
+		foree_logger.Logger.Info("CreateContact_Fail", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		return nil, sErr
 	}
+
 	now := time.Now()
 	newAcc := account.ContactAccount{
 		Status:                account.AccountStatusActive,
@@ -92,44 +108,55 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 
 	newAcc.HashMyself()
 
-	accId, derr := a.contactAccountRepo.InsertContactAccount(ctx, newAcc)
+	accId, err := a.contactAccountRepo.InsertContactAccount(ctx, newAcc)
+	if err != nil {
+		foree_logger.Logger.Error("CreateContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	nAcc, err := a.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, accId)
+	if err != nil {
+		foree_logger.Logger.Error("CreateContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	if nAcc == nil {
+		foree_logger.Logger.Error("CreateContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", fmt.Errorf("can not retrieve created contact with id `%v`", accId))
+		return nil, transport.WrapInteralServerError(fmt.Errorf("can not retrieve created contact with id `%v`", accId))
+	}
+
+	foree_logger.Logger.Info("CreateContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId)
+	return NewContactAccountDetailDTO(nAcc), nil
+}
+
+func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq) (*ContactAccountDetailDTO, transport.HError) {
+	session, sErr := a.authService.Authorize(ctx, req.SessionId, PermissionContactWrite)
+	if sErr != nil {
+		var userId int64
+		if session != nil {
+			userId = session.UserId
+		}
+		// Normal error when the token expired
+		foree_logger.Logger.Info("DeleteContact_Fail", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		return nil, sErr
+	}
+
+	acc, derr := a.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
 	if derr != nil {
 		return nil, transport.WrapInteralServerError(derr)
 	}
 
-	nAcc, nErr := a.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, accId)
-	if nErr != nil {
-		return nil, transport.WrapInteralServerError(nErr)
-	}
-
-	if nAcc == nil {
-		return nil, transport.WrapInteralServerError(fmt.Errorf("can not retrieve created contact `%v`", accId))
-	}
-
-	return NewContactAccountDetailDTO(nAcc), nil
-}
-
-func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq) transport.HError {
-	session, err := a.authService.Authorize(ctx, req.SessionId, PermissionContactWrite)
-	if err != nil {
-		return err
-	}
-	acc, derr := a.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
-	if derr != nil {
-		return transport.WrapInteralServerError(derr)
-	}
-
 	if acc == nil {
-		return transport.NewFormError("Invaild contact deletion", "contactId", "Invalid contactId")
+		return nil, transport.NewFormError("Invaild contact deletion", "contactId", "Invalid contactId")
 	}
 
 	newAcc := *acc
 	newAcc.Status = account.AccountStatusDelete
 	derr = a.contactAccountRepo.UpdateActiveContactAccountByIdAndOwner(ctx, newAcc)
 	if derr != nil {
-		return transport.WrapInteralServerError(derr)
+		return nil, transport.WrapInteralServerError(derr)
 	}
-	return nil
+	return nil, nil
 }
 
 func (a *AccountService) GetActiveContact(ctx context.Context, req GetContactReq) (*ContactAccountDetailDTO, transport.HError) {
