@@ -41,7 +41,7 @@ const ModalSelect = ({
   const [showList, setShowList] = useState(list)
   const [visible, setVisible] = useState(false)
   const [cache, setCache] = useState(new Map(list.map((obj) => [obj[valueExtractor], obj])))
-
+  console.log(value)
   return (
     <View>
       {/* <TouchableComponent>ModalSelect</TouchableComponent> */}
@@ -57,7 +57,7 @@ const ModalSelect = ({
           <TextInput
             onPress={() => setVisible(true)}
             className={`h-full w-full px-4 flex-1 font-psemibold text-base ${inputStyles}`}
-            value={cache.get(value)?.[showExtractor]}
+            value={typeof value === "string" ? cache.get(value)?.[showExtractor] : value()}
             placeholder={placeholder}
             placeholderTextColor="#BDBDBD"
             // onChangeText={handleChangeText}

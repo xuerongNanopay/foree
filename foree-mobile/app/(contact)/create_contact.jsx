@@ -110,7 +110,7 @@ const CreateContact = () => {
 
   const submit = async () => {
     setIsSubmitting(true)
-    console.log(form)
+    console.log(string_util.trimStringInObject(form))
     try {
     } catch (err) {
       console.error("create contact", err)

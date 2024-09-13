@@ -32,24 +32,24 @@ const FieldItem = ({
   />
 )
 
-const IDTypes = {
-  "PASSPORT": {
+const IDTypes = [
+  {
     id: "PASSPORT",
     name: "Passport"
   },
-  "DRIVER_LICENSE": {
+  {
     id: "DRIVER_LICENSE",
     name: "Driver License"
   },
-  "PROVINCIAL_ID": {
+  {
     id: "PROVINCIAL_ID",
     name: "Provincial Id"
   },
-  "NATIONAL_ID": {
+  {
     id: "NATIONAL_ID",
     name: "Nation Id"
   }
-}
+]
 
 
 const SelectIDTypesItem = (idType) => (
@@ -114,7 +114,7 @@ const Onboarding = () => {
         for ( let i of err.inner ) {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
-        setErrors(e)
+        // setErrors(e)
       }
     }
     validate()
@@ -212,10 +212,11 @@ const Onboarding = () => {
         errorMessage={errors['province']}
         containerStyles="mt-2"
         allowAdd={false}
-        value={Regions[form.country]?.[form.province]?.name}
+        value={form.province}
         variant='flat'
         searchKey="name"
         keyExtractor="name"
+        showExtractor="name"
         valueExtractor="isoCode"
         listView={SelectProvinceItem}
         list={Object.values(Regions[form.country])}
@@ -278,7 +279,9 @@ const Onboarding = () => {
         errorMessage={errors['pob']}
         containerStyles="mt-2"
         allowAdd={false}
-        value={Countries[form.pob]?`${Countries[form.pob]?.unicodeIcon} ${Countries[form.pob]?.name}`: ""}
+        value={() => {
+          return Countries[form.pob] ? `${Countries[form.pob]?.unicodeIcon} ${Countries[form.pob]?.name}` : ""
+        }}
         variant='flat'
         searchKey="name"
         keyExtractor="name"
@@ -299,7 +302,9 @@ const Onboarding = () => {
         containerStyles="mt-2"
         errorMessage={errors['nationality']}
         allowAdd={false}
-        value={Countries[form.nationality]?`${Countries[form.nationality]?.unicodeIcon} ${Countries[form.nationality]?.name}`: ""}
+        value={() => {
+          return Countries[form.nationality] ? `${Countries[form.nationality]?.unicodeIcon} ${Countries[form.nationality]?.name}` : ""
+        }}
         variant='flat'
         searchKey="name"
         keyExtractor="name"
@@ -321,10 +326,11 @@ const Onboarding = () => {
         containerStyles="mt-2"
         allowAdd={false}
         allowSearch={false}
-        value={IDTypes[form.identificationType]?.name}
+        value={form.identificationType}
         variant='flat'
         searchKey="id"
         keyExtractor="id"
+        showExtractor="name"
         valueExtractor="id"
         listView={SelectIDTypesItem}
         list={Object.values(IDTypes)}
@@ -370,7 +376,7 @@ const Onboarding = () => {
       <ReviewItem title="Date of Birth" value={form.dob}/>
       <ReviewItem title="Place of Birth" value={Countries[form.pob]?`${Countries[form.pob]?.unicodeIcon} ${Countries[form.pob]?.name}`: ""}/>
       <ReviewItem title="Nationality" value={Countries[form.nationality]?`${Countries[form.nationality]?.unicodeIcon} ${Countries[form.nationality]?.name}`: ""}/>
-      <ReviewItem title="Identification Document Type" value={IDTypes[form.identificationType]?.name}/>
+      <ReviewItem title="Identification Document Type" value={IDTypes.find(i => i.id === form.identificationType)?.name}/>
       <ReviewItem title="Identification Number" value={form.identificationValue}/>
     </View>
   )
