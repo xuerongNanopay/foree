@@ -39,7 +39,7 @@ const ForgetPasswordVerify = () => {
   const submit = async () => {
     setIsSubmitting(true)
     try {
-      const resp = await authService.forgetPasswordVerify(form)
+      const resp = await authService.forgetPasswordVerify(string_util.trimStringInObject(form))
       if ( resp.status / 100 !== 2 ) {
         console.info("forget_password_verify", resp.status, resp.data)
         return
@@ -65,10 +65,10 @@ const ForgetPasswordVerify = () => {
           </Text>
           <FormField
               value={form.retrieveCode}
-              handleChangeText={(e) => setForm(string_util.trimStringInObject({
+              handleChangeText={(e) => setForm({
                 ...form,
                 retrieveCode:e
-              }))}
+              })}
               errorMessage={errors['retrieveCode']}
               inputStyles="text-center"
               variant="flat"

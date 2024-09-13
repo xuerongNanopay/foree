@@ -40,7 +40,7 @@ const VerifyEmail = () => {
   const submit = async () => {
     setIsSubmitting(true)
     try {
-      const resp = await authService.verifyEmail(form)
+      const resp = await authService.verifyEmail(string_util.trimStringInObject(form))
       if ( resp.status / 100 !== 2 ) {
         console.log("verify_email", resp.status, resp.data)
         return
@@ -86,10 +86,10 @@ const VerifyEmail = () => {
           <View className="px-2 mt-4">
             <FormField
               value={form.code}
-              handleChangeText={(e) => setForm(string_util.trimStringInObject({
+              handleChangeText={(e) => setForm({
                 ...form,
                 code:e
-              }))}
+              })}
               errorMessage={errors['code']}
               inputStyles="text-center"
               variant="flat"

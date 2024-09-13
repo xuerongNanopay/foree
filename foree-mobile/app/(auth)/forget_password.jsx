@@ -38,7 +38,7 @@ const ForgetPassword = () => {
   const submit = async () => {
     setIsSubmitting(true)
     try {
-      const resp = await authService.forgetPassword(form)
+      const resp = await authService.forgetPassword(string_util.trimStringInObject(form))
       if ( resp.status / 100 !== 2 ) {
         console.info("forget_password", resp.status, resp.data)
         return
@@ -67,10 +67,10 @@ const ForgetPassword = () => {
             <FormField
               title="Email"
               value={form.email}
-              handleChangeText={(e) => setForm(string_util.trimStringInObject({
+              handleChangeText={(e) => setForm({
                 ...form,
                 email:e.toLowerCase()
-              }))}
+              })}
               containerStyles="mt-1"
               keyboardType="email-address"
               errorMessage={errors['email']}

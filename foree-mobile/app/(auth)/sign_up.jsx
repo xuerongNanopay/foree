@@ -41,7 +41,7 @@ const SignUp = () => {
   const submit = async () => {
     setIsSubmitting(true)
     try {
-      const resp = await authService.signUp(form)
+      const resp = await authService.signUp(string_util.trimStringInObject(form))
       if ( resp.status / 100 !== 2 ) {
         console.log("sign_up", resp.status, resp.data)
         return
@@ -80,10 +80,10 @@ const SignUp = () => {
           <FormField
             title="Email"
             value={form.email}
-            handleChangeText={(e) => setForm(string_util.trimStringInObject({
+            handleChangeText={(e) => setForm({
               ...form,
               email:e.toLowerCase()
-            }))}
+            })}
             containerStyles="mt-7"
             errorMessage={errors['email']}
             keyboardType="email-address"
@@ -91,10 +91,10 @@ const SignUp = () => {
           <FormField
             title="Password"
             value={form.password}
-            handleChangeText={(e) => setForm(string_util.trimStringInObject({
+            handleChangeText={(e) => setForm({
               ...form,
               password:e
-            }))}
+            })}
             errorMessage={errors['password']}
             containerStyles="mt-7"
           />

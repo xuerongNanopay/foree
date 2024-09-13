@@ -40,7 +40,7 @@ const ForgetPasswordUpdate = () => {
   const submit = async () => {
     setIsSubmitting(true)
     try {
-      const resp = await authService.forgetPasswordUpdate(form)
+      const resp = await authService.forgetPasswordUpdate(string_util.trimStringInObject(form))
       if ( resp.status / 100 !== 2 ) {
         console.info("forget_password_verify", resp.status, resp.data)
         return
@@ -67,10 +67,10 @@ const ForgetPasswordUpdate = () => {
           <FormField
             title="New Password"
             value={form.newPassword}
-            handleChangeText={(e) => setForm(string_util.trimStringInObject({
+            handleChangeText={(e) => setForm({
               ...form,
               newPassword:e
-            }))}
+            })}
             errorMessage={errors['newPassword']}
             containerStyles="mt-7"
             keyboardType="email-address"

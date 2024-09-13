@@ -9,6 +9,7 @@ import Countries from '../../constants/country'
 import Regions from '../../constants/region'
 import ModalSelect from '../../components/ModalSelect'
 import { ContactTransferBank, ContactTransferMethods, PersonalRelationships } from '../../constants/contacts'
+import string_util from '../../util/string_util'
 
 const FieldItem = ({
   title,
@@ -109,6 +110,7 @@ const CreateContact = () => {
 
   const submit = async () => {
     setIsSubmitting(true)
+    console.log(form)
     try {
     } catch (err) {
       console.error("create contact", err)
@@ -193,10 +195,11 @@ const CreateContact = () => {
         containerStyles="mt-2"
         allowSearch={false}
         allowAdd={false}
-        value={Regions[form.country]?.[form.province]?.name}
+        value={form.province}
         variant='flat'
         searchKey="name"
         keyExtractor="code"
+        showExtractor="name"
         valueExtractor="isoCode"
         listView={SelectProvinceItem}
         list={Object.values(Regions[form.country])}
@@ -253,10 +256,11 @@ const CreateContact = () => {
         containerStyles="mt-2"
         allowAdd={false}
         allowSearch={false}
-        value={PersonalRelationships[form.relationshipToContact]?.name}
+        value={form.relationshipToContact}
         variant='flat'
         searchKey="name"
         keyExtractor="name"
+        showExtractor="name"
         valueExtractor="name"
         listView={SelectPersonalRelationshipItem}
         list={Object.values(PersonalRelationships)}
@@ -275,9 +279,10 @@ const CreateContact = () => {
         containerStyles="mt-2"
         allowAdd={false}
         allowSearch={false}
-        value={ContactTransferMethods[form.transferMethod]?.name}
+        value={form.transferMethod}
         variant='flat'
         keyExtractor="name"
+        showExtractor="name"
         valueExtractor="value"
         listView={SelectTransferMethodItem}
         list={Object.values(ContactTransferMethods)}
@@ -305,8 +310,9 @@ const CreateContact = () => {
             value={form.bankName}
             variant='flat'
             searchKey="bankName"
-            keyExtractor="bankName"
-            valueExtractor="bankName"
+            keyExtractor="bankAbbr"
+            showExtractor="bankName"
+            valueExtractor="bankAbbr"
             listView={SelectBankItem}
             list={ContactTransferBank[form.transferMethod]}
             onPress={(o) => {

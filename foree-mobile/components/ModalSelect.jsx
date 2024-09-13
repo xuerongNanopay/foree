@@ -25,6 +25,7 @@ const ModalSelect = ({
   allowSearch=true,
   searchKey,
   keyExtractor,
+  showExtractor,
   valueExtractor,
   list=[],
   listView,
@@ -39,7 +40,8 @@ const ModalSelect = ({
 }) => {
   const [showList, setShowList] = useState(list)
   const [visible, setVisible] = useState(false)
-  const [cache, setCache] = useState(new Map(arr.map((list) => [obj[valueExtractor], obj])))
+  const [cache, setCache] = useState(new Map(list.map((obj) => [obj[valueExtractor], obj])))
+
   return (
     <View>
       {/* <TouchableComponent>ModalSelect</TouchableComponent> */}
@@ -55,7 +57,7 @@ const ModalSelect = ({
           <TextInput
             onPress={() => setVisible(true)}
             className={`h-full w-full px-4 flex-1 font-psemibold text-base ${inputStyles}`}
-            value={value}
+            value={cache.get(value)?.[showExtractor]}
             placeholder={placeholder}
             placeholderTextColor="#BDBDBD"
             // onChangeText={handleChangeText}
