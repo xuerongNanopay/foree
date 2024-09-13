@@ -8,6 +8,7 @@ import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import { authService, authPayload } from '../../service'
 import { useGlobalContext } from '../../context/GlobalProvider'
+import string_util from '../../util/string_util'
 
 const EPStatusWaitingVerify = "WAITING_VERIFY"
 const EPStatusActive        = "ACTIVE"

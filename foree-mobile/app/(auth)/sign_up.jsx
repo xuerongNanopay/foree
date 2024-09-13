@@ -7,6 +7,7 @@ import { images } from '../../constants'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import { authPayload, authService } from '../../service'
+import string_util from '../../util/string_util'
 
 const SignUp = () => {
   const [errors, setErrors] = useState({})

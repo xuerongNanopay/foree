@@ -10,6 +10,7 @@ import Regions from '../../constants/region'
 import { authPayload, authService } from '../../service'
 import ModalSelect, { SelectCountryItem } from '../../components/ModalSelect'
 import { useGlobalContext } from '../../context/GlobalProvider'
+import string_util from '../../util/string_util'
 
 const FieldItem = ({
   title,
@@ -151,24 +152,24 @@ const Onboarding = () => {
 
       <FieldItem title="First Name" value={form.firstName}
         errorMessage={errors['firstName']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm(string_util.trimStringInObject({
           ...form,
           firstName:e
-        })}
+        }))}
       />
       <FieldItem title="Middle Name" value={form.middleName}
         errorMessage={errors['middleName']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm(string_util.trimStringInObject({
           ...form,
           middleName:e
-        })}
+        }))}
       />
       <FieldItem title="Last Name" value={form.lastName}
         errorMessage={errors['lastName']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm(string_util.trimStringInObject({
           ...form,
           lastName:e
-        })}
+        }))}
       />
     </View>
   )
@@ -186,24 +187,24 @@ const Onboarding = () => {
 
       <FieldItem title="Address Line 1" value={form.address1}
         errorMessage={errors['address1']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm(string_util.trimStringInObject({
           ...form,
           address1:e
-        })}
+        }))}
       />
       <FieldItem title="Address Line 2" value={form.address2}
         errorMessage={errors['address2']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm(string_util.trimStringInObject({
           ...form,
           address2:e
-        })}
+        }))}
       />
       <FieldItem title="City" value={form.city}
         errorMessage={errors['city']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm(string_util.trimStringInObject({
           ...form,
           city:e
-        })}
+        }))}
       />
       <ModalSelect
         title="Province"
@@ -219,34 +220,34 @@ const Onboarding = () => {
         listView={SelectProvinceItem}
         list={Object.values(Regions[form.country])}
         onPress={(o) => {
-          setForm({
+          setForm(string_util.trimStringInObject({
             ...form,
             province: o
-          })
+          }))
         }}
         placeholder="select a province"
       />
       <FieldItem title="Country" value={`${Countries[form.country]?.unicodeIcon} ${Countries[form.country]?.name}`}
         errorMessage={errors['country']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm(string_util.trimStringInObject({
           ...form,
           country:e
-        })}
+        }))}
         editable={false}
       />
       <FieldItem title="Postal Code" value={form.postalCode}
         errorMessage={errors['postalCode']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm(string_util.trimStringInObject({
           ...form,
           postalCode:e
-        })}
+        }))}
       />
       <FieldItem title="Phone Number" value={form.phoneNumber}
         errorMessage={errors['phoneNumber']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm(string_util.trimStringInObject({
           ...form,
           phoneNumber:e
-        })}
+        }))}
         keyboardType="phone-pad"
       />
     </View>
@@ -265,10 +266,10 @@ const Onboarding = () => {
       </Text>
       <FieldItem title="Date of Birth(YYYY-MM-DD)" value={form.dob}
         errorMessage={errors['dob']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm(string_util.trimStringInObject({
           ...form,
           dob:e
-        })}
+        }))}
         keyboardType="numbers-and-punctuation"
       />
       <ModalSelect
@@ -285,10 +286,10 @@ const Onboarding = () => {
         listView={SelectCountryItem}
         list={Object.values(Countries)}
         onPress={(o) => {
-          setForm({
+          setForm(string_util.trimStringInObject({
             ...form,
             pob: o
-          })
+          }))
         }}
         placeholder="select a country"
       />
@@ -306,10 +307,10 @@ const Onboarding = () => {
         listView={SelectCountryItem}
         list={Object.values(Countries)}
         onPress={(o) => {
-          setForm({
+          setForm(string_util.trimStringInObject({
             ...form,
             nationality: o
-          })
+          }))
         }}
         placeholder="select a country"
       />
@@ -328,19 +329,19 @@ const Onboarding = () => {
         listView={SelectIDTypesItem}
         list={Object.values(IDTypes)}
         onPress={(o) => {
-          setForm({
+          setForm(string_util.trimStringInObject({
             ...form,
             identificationType: o
-          })
+          }))
         }}
         placeholder="select ID type"
       />
       <FieldItem title="Identification Number" value={form.identificationValue}
         errorMessage={errors['identificationValue']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm(string_util.trimStringInObject({
           ...form,
           identificationValue:e
-        })}
+        }))}
       />
     </View>
   )

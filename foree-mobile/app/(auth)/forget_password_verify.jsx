@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import { authService, authPayload } from '../../service'
+import string_util from '../../util/string_util'
 
 const ForgetPasswordVerify = () => {
   const { email } = useLocalSearchParams()

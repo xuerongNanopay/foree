@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native'
 import CustomButton from '../../components/CustomButton'
 import FormField from '../../components/FormField'
 import { authService, authPayload } from '../../service'
+import string_util from '../../util/string_util'
 
 const ForgetPassword = () => {
   const [errors, setErrors] = useState({})

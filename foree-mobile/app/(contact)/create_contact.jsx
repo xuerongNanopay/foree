@@ -102,7 +102,6 @@ const CreateContact = () => {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
         setErrors(e)
-        console.log(e)
       }
     }
     validate()
@@ -262,7 +261,6 @@ const CreateContact = () => {
         listView={SelectPersonalRelationshipItem}
         list={Object.values(PersonalRelationships)}
         onPress={(o) => {
-          console.log(o)
           setForm({
             ...form,
             relationshipToContact: o
@@ -284,7 +282,6 @@ const CreateContact = () => {
         listView={SelectTransferMethodItem}
         list={Object.values(ContactTransferMethods)}
         onPress={(o) => {
-          console.log(o)
           setForm({
             ...form,
             transferMethod: o,
@@ -313,7 +310,6 @@ const CreateContact = () => {
             listView={SelectBankItem}
             list={ContactTransferBank[form.transferMethod]}
             onPress={(o) => {
-              console.log(o)
               setForm({
                 ...form,
                 bankName: o,

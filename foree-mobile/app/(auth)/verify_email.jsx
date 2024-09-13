@@ -6,6 +6,7 @@ import { authPayload, authService } from '../../service'
 
 import CustomButton from '../../components/CustomButton'
 import FormField from '../../components/FormField'
+import string_util from '../../util/string_util'
 
 
 const VerifyEmail = () => {

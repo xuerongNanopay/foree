@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import { authService, authPayload } from '../../service'
+import string_util from '../../util/string_util'
 
 const ForgetPasswordUpdate = () => {
   const { email, retrieveCode } = useLocalSearchParams()
@@ -66,10 +67,10 @@ const ForgetPasswordUpdate = () => {
           <FormField
             title="New Password"
             value={form.newPassword}
-            handleChangeText={(e) => setForm({
+            handleChangeText={(e) => setForm(string_util.trimStringInObject({
               ...form,
               newPassword:e
-            })}
+            }))}
             errorMessage={errors['newPassword']}
             containerStyles="mt-7"
             keyboardType="email-address"
