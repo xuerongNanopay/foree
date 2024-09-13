@@ -1,31 +1,31 @@
-export const PersonalRelationships = {
-  "Extended Family": {
+export const PersonalRelationships = [
+  {
     name: "Extended Family"
   },
-  "Friend": {
+  {
     name: "Friend"
   },
-  "Immediate Family": {
+  {
     name: "Immediate Family"
   },
-  "Other": {
+  {
     name: "Other"
   },
-  "Self": {
+  {
     name: "Self"
   },
-}
+]
 
-export const ContactTransferMethods = {
-  "CASH_PICKUP": {
+export const ContactTransferMethods = [
+  {
     name: "Cash Pickup",
     value: "CASH_PICKUP"
   },
-  "BANK_ACCOUNT": {
+  {
     name: "Bank Account",
     value: "BANK_ACCOUNT"
   },
-  "MOBILE_WALLET": {
+  {
     name: "Mobile Wallet",
     value: "MOBILE_WALLET"
   },
@@ -34,7 +34,7 @@ export const ContactTransferMethods = {
   //   name: "Roshan Digital Account",
   //   value: "ROSHAN_DIGITAL_ACCOUNT"
   // }
-}
+]
 
 export const ContactTransferBank = {
   "BANK_ACCOUNT": [

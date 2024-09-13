@@ -263,7 +263,7 @@ const CreateContact = () => {
         showExtractor="name"
         valueExtractor="name"
         listView={SelectPersonalRelationshipItem}
-        list={Object.values(PersonalRelationships)}
+        list={PersonalRelationships}
         onPress={(o) => {
           setForm({
             ...form,
@@ -285,7 +285,7 @@ const CreateContact = () => {
         showExtractor="name"
         valueExtractor="value"
         listView={SelectTransferMethodItem}
-        list={Object.values(ContactTransferMethods)}
+        list={ContactTransferMethods}
         onPress={(o) => {
           setForm({
             ...form,
@@ -357,13 +357,13 @@ const CreateContact = () => {
       <ReviewItem title="Country" value={Countries[form.country]?`${Countries[form.country]?.unicodeIcon} ${Countries[form.country]?.name}`: ""}/>
       <ReviewItem title="Postal Code" value={form.postalCode}/>
       <ReviewItem title="Phone Number" value={form.phoneNumber}/>
-      <ReviewItem title="Relationship to Contact" value={PersonalRelationships[form.relationshipToContact]?.name}/>
-      <ReviewItem title="Transfer Method" value={ContactTransferMethods[form.transferMethod]?.name}/>
+      <ReviewItem title="Relationship to Contact" value={PersonalRelationships.find(r => r.name === form.PersonalRelationships)?.["name"]}/>
+      <ReviewItem title="Transfer Method" value={ContactTransferMethods.find(r => r.value === form.transferMethod)?.["name"]}/>
       {
         !!form.transferMethod && form.transferMethod !== "CASH_PICKUP" ? 
         (
           <>
-            <ReviewItem title="Bank Name" value={form.bankName}/>
+            <ReviewItem title="Bank Name" value={ContactTransferBank[form.transferMethod]?.find(r => r.bankAbbr === form.bankName)?.["bankName"]}/>
             <ReviewItem title="Account No or IBAN" value={form.accountNoOrIBAN}/>
           </>
         ) : null
