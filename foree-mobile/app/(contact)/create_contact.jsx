@@ -54,6 +54,23 @@ const SelectBankItem = (bank) => (
   </Text>
 )
 
+const ReviewItem = ({
+  title,
+  value,
+}) => (
+  <FormField
+    title={title}
+    value={value}
+    handleChangeText={() => {}}
+    keyboardType="ascii-capable"
+    containerStyles="mt-2"
+    variant="flat"
+    inputStyles="text-slate-500"
+    inputContainerStyles="border-slate-700 h-7"
+    editable={false}
+  />
+)
+
 const CreateContact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState({})
@@ -317,6 +334,41 @@ const CreateContact = () => {
     </View>
   )
 
+  const ReviewTitle = () => (
+    <View>
+      <Text className="text-lg font-pbold text-center">Review</Text>
+    </View>
+  )
+
+  const Review = () => (
+    <View>
+      <Text className="font-pregular text-center mb-4">
+        Please review your information.
+      </Text>
+      <ReviewItem title="First Name" value={form.firstName}/>
+      <ReviewItem title="Middle Name" value={form.middleName}/>
+      <ReviewItem title="Last Name" value={form.lastName}/>
+      <ReviewItem title="Address Line 1" value={form.address1}/>
+      <ReviewItem title="Address Line 2" value={form.address2}/>
+      <ReviewItem title="City" value={form.city}/>
+      <ReviewItem title="Province" value={Regions[form.country]?.[form.province]?.name}/>
+      <ReviewItem title="Country" value={Countries[form.country]?`${Countries[form.country]?.unicodeIcon} ${Countries[form.country]?.name}`: ""}/>
+      <ReviewItem title="Postal Code" value={form.postalCode}/>
+      <ReviewItem title="Phone Number" value={form.phoneNumber}/>
+      <ReviewItem title="Relationship to Contact" value={PersonalRelationships[form.relationshipToContact]?.name}/>
+      <ReviewItem title="Transfer Method" value={ContactTransferMethods[form.transferMethod]?.name}/>
+      {
+        !!form.transferMethod && form.transferMethod !== "CASH_PICKUP" ? 
+        (
+          <>
+            <ReviewItem title="Bank Name" value={form.bankName}/>
+            <ReviewItem title="Account No or IBAN" value={form.accountNoOrIBAN}/>
+          </>
+        ) : null
+      }
+    </View>
+  )
+
   const CreateContactFlow = [
     {
       titleView: ContactNameTitle,
@@ -348,6 +400,13 @@ const CreateContact = () => {
           !errors.transferMethod && 
           !errors.bankName &&
           !errors.accountNoOrIBAN
+      }
+    },
+    {
+      titleView: ReviewTitle,
+      formView: Review,
+      canGoNext: () => {
+        return true
       }
     },
   ]
