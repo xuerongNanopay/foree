@@ -125,7 +125,7 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 		return nil, transport.WrapInteralServerError(fmt.Errorf("can not retrieve created contact with id `%v`", accId))
 	}
 
-	foree_logger.Logger.Info("CreateContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId)
+	foree_logger.Logger.Info("CreateContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "contactId", accId)
 	return NewContactAccountDetailDTO(nAcc), nil
 }
 
@@ -141,21 +141,26 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 		return nil, sErr
 	}
 
-	acc, derr := a.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
-	if derr != nil {
-		return nil, transport.WrapInteralServerError(derr)
+	acc, err := a.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
+	if err != nil {
+		foree_logger.Logger.Error("DeleteContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if acc == nil {
+		foree_logger.Logger.Error("DeleteContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", fmt.Sprintf("can't find ative contact with id `%v`", req.ContactId))
 		return nil, transport.NewFormError("Invaild contact deletion", "contactId", "Invalid contactId")
 	}
 
 	newAcc := *acc
 	newAcc.Status = account.AccountStatusDelete
-	derr = a.contactAccountRepo.UpdateActiveContactAccountByIdAndOwner(ctx, newAcc)
-	if derr != nil {
-		return nil, transport.WrapInteralServerError(derr)
+	err = a.contactAccountRepo.UpdateActiveContactAccountByIdAndOwner(ctx, newAcc)
+	if err != nil {
+		foree_logger.Logger.Error("DeleteContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
 	}
+
+	foree_logger.Logger.Error("DeleteContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "contactId", req.ContactId)
 	return nil, nil
 }
 

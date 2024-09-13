@@ -583,7 +583,7 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*UserDTO, transp
 		return nil, transport.NewInteralServerError("sesson `%s` not found", sessionId)
 	}
 
-	foree_logger.Logger.Info("Login_Success", "ip", loadRealIp(ctx), "email", req.Email, "userAgent", loadUserAgent(ctx))
+	foree_logger.Logger.Info("Login_Success", "ip", loadRealIp(ctx), "email", req.Email, "userAgent", loadUserAgent(ctx), "userId", user.ID)
 	return NewUserDTO(session), nil
 }
 
