@@ -14,6 +14,8 @@ const SelectCountryItem =(country) => (
   </Text>
 )
 
+//TODO: Redesign value currently is bonded by value Extractor
+// the real value for the form may different compare with value that show in UI.
 const ModalSelect = ({
   title,
   modalTitle,
