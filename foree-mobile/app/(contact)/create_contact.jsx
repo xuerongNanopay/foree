@@ -8,6 +8,7 @@ import { accountPayload } from '../../service'
 import Countries from '../../constants/country'
 import Regions from '../../constants/region'
 import ModalSelect from '../../components/ModalSelect'
+import { PersonalRelationships } from '../../constants/contacts'
 
 const FieldItem = ({
   title,
@@ -35,6 +36,23 @@ const SelectProvinceItem = (province) => (
   </Text>
 )
 
+const SelectPersonalRelationshipItem = (relationship) => (
+  <Text className="font-pregular py-3 text-xl">
+    {relationship["name"]}
+  </Text>
+)
+
+const SelectTransferMethodItem = (transferMethod) => (
+  <Text className="font-pregular py-3 text-xl">
+    {transferMethod["name"]}
+  </Text>
+)
+
+const SelectBankItem = (bank) => (
+  <Text className="font-pregular py-3 text-xl">
+    {transferMethod["bankName"]}
+  </Text>
+)
 
 const CreateContact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -68,6 +86,7 @@ const CreateContact = () => {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
         setErrors(e)
+        console.log(e)
       }
     }
     validate()
@@ -163,12 +182,13 @@ const CreateContact = () => {
         variant='flat'
         searchKey="name"
         keyExtractor="code"
+        valueExtractor="isoCode"
         listView={SelectProvinceItem}
         list={Object.values(Regions[form.country])}
         onPress={(o) => {
           setForm({
             ...form,
-            province: o.isoCode
+            province: o
           })
         }}
         placeholder="select a province"
@@ -199,6 +219,44 @@ const CreateContact = () => {
     </View>
   )
 
+  const ContactBankInfoTitle = () => (
+    <View>
+      <Text className="text-lg font-pbold text-center">Contact Bank Info</Text>
+    </View>
+  )
+
+  const ContactBankInfo = () => (
+    <View>
+      <Text className="font-pregular text-center mb-4">
+        Please provide contact banking information.
+      </Text>
+  
+      <ModalSelect
+        title="Relationship to Contact"
+        errorMessage={errors['relationshipToContact']}
+        modalTitle="select relationship"
+        containerStyles="mt-2"
+        allowAdd={false}
+        allowSearch={false}
+        value={PersonalRelationships[form.relationshipToContact]?.name}
+        variant='flat'
+        searchKey="name"
+        keyExtractor="name"
+        valueExtractor="name"
+        listView={SelectPersonalRelationshipItem}
+        list={Object.values(PersonalRelationships)}
+        onPress={(o) => {
+          console.log(o)
+          setForm({
+            ...form,
+            relationshipToContact: o
+          })
+        }}
+        placeholder="choose relationship..."
+      />
+    </View>
+  )
+
   const CreateContactFlow = [
     {
       titleView: ContactNameTitle,
@@ -222,7 +280,18 @@ const CreateContact = () => {
           !errors.phoneNumber
       }
     },
+    {
+      titleView: ContactBankInfoTitle,
+      formView: ContactBankInfo,
+      canGoNext: () => {
+        return !errors.relationshipToContact && 
+          !errors.transferMethod && 
+          !errors.bankName &&
+          !errors.accountNoOrIBAN
+      }
+    },
   ]
+
   return (
     <SafeAreaView className="bg-slate-100">
       <MultiStepForm

@@ -1,3 +1,21 @@
+export const PersonalRelationships = {
+  "Extended Family": {
+    name: "Extended Family"
+  },
+  "Friend": {
+    name: "Friend"
+  },
+  "Immediate Family": {
+    name: "Immediate Family"
+  },
+  "Other": {
+    name: "Other"
+  },
+  "Self": {
+    name: "Self"
+  },
+}
+
 export const ContactTransferMethods = [
   {
     id: "cash",

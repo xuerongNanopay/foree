@@ -23,6 +23,7 @@ const ModalSelect = ({
   allowSearch=true,
   searchKey,
   keyExtractor,
+  valueExtractor,
   list=[],
   listView,
   allowAdd=true,
@@ -142,7 +143,7 @@ const ModalSelect = ({
                   (
                     <TouchableOpacity
                       onPress={() => {
-                        onPress(v)
+                        onPress(v[valueExtractor])
                         setVisible(false)
                         setShowList(list)
                       }}

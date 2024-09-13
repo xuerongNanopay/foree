@@ -215,12 +215,13 @@ const Onboarding = () => {
         variant='flat'
         searchKey="name"
         keyExtractor="name"
+        valueExtractor="isoCode"
         listView={SelectProvinceItem}
         list={Object.values(Regions[form.country])}
         onPress={(o) => {
           setForm({
             ...form,
-            province: o.isoCode
+            province: o
           })
         }}
         placeholder="select a province"
@@ -280,12 +281,13 @@ const Onboarding = () => {
         variant='flat'
         searchKey="name"
         keyExtractor="name"
+        valueExtractor="isoCode"
         listView={SelectCountryItem}
         list={Object.values(Countries)}
         onPress={(o) => {
           setForm({
             ...form,
-            pob: o.isoCode
+            pob: o
           })
         }}
         placeholder="select a country"
@@ -300,12 +302,13 @@ const Onboarding = () => {
         variant='flat'
         searchKey="name"
         keyExtractor="name"
+        valueExtractor="isoCode"
         listView={SelectCountryItem}
         list={Object.values(Countries)}
         onPress={(o) => {
           setForm({
             ...form,
-            nationality: o.isoCode
+            nationality: o
           })
         }}
         placeholder="select a country"
@@ -321,12 +324,13 @@ const Onboarding = () => {
         variant='flat'
         searchKey="id"
         keyExtractor="id"
+        valueExtractor="id"
         listView={SelectIDTypesItem}
         list={Object.values(IDTypes)}
         onPress={(o) => {
           setForm({
             ...form,
-            identificationType: o["id"]
+            identificationType: o
           })
         }}
         placeholder="select ID type"
