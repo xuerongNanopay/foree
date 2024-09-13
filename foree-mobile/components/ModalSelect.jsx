@@ -41,7 +41,7 @@ const ModalSelect = ({
   const [showList, setShowList] = useState(list)
   const [visible, setVisible] = useState(false)
   const [cache, setCache] = useState(new Map(list.map((obj) => [obj[valueExtractor], obj])))
-  console.log(value)
+
   return (
     <View>
       {/* <TouchableComponent>ModalSelect</TouchableComponent> */}

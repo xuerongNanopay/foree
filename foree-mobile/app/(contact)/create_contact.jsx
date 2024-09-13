@@ -1,15 +1,16 @@
-import { View, Text } from 'react-native'
+import { View, Text, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 
 import MultiStepForm from '../../components/MultiStepForm'
 import FormField from '../../components/FormField'
-import { accountPayload } from '../../service'
+import { accountPayload, accountService } from '../../service'
 import Countries from '../../constants/country'
 import Regions from '../../constants/region'
 import ModalSelect from '../../components/ModalSelect'
 import { ContactTransferBank, ContactTransferMethods, PersonalRelationships } from '../../constants/contacts'
 import string_util from '../../util/string_util'
+import { router } from 'expo-router'
 
 const FieldItem = ({
   title,
@@ -108,10 +109,44 @@ const CreateContact = () => {
     validate()
   }, [form])
 
+  const submitNewContact = async () => {
+    setIsSubmitting(true)
+    try {
+      const resp = await accountService.createContact(string_util.trimStringInObject(form))
+      if ( resp.status / 100 !== 2 ) {
+        console.warn("create contact", resp.status, resp.data)
+        return
+      }
+    } catch (err) {
+      console.error("create contact", err, err.response.data)
+    } finally {
+      router.replace('/contact')
+      setIsSubmitting(false)
+    }
+  }
+
   const submit = async () => {
     setIsSubmitting(true)
-    console.log(string_util.trimStringInObject(form))
     try {
+      if ( form.transferMethod === "CASH_PICKUP" ) {
+        submitNewContact()
+      } else {
+        const resp = await accountService.verifyContact(string_util.trimStringInObject(form))
+        if ( resp.status / 100 === 2 && 
+          (resp?.data?.data?.accountStatus === "Active" || resp?.data?.data?.accountStatus === "Dormant or Inoperative")
+        ) {
+          submitNewContact()
+        } else if ( resp.status / 100 === 2 && !!resp?.data?.data?.accountStatus ) {
+          Alert.alert("Error", `We can't send fund to a ${resp?.data?.data?.accountStatus} account.`, [
+            {text: 'OK', onPress: () => {}},
+          ])
+        }  else {
+          Alert.alert("Warming", "We can't verify your contact bank details through NBP. if you are sure it is correct, please click 'continue'", [
+            {text: 'Cancel', onPress: () => {}},
+            {text: 'Continue', onPress: () => {submitNewContact()}},
+          ])
+        }
+      }
     } catch (err) {
       console.error("create contact", err)
     } finally {
