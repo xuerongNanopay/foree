@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import SearchInput from '../../components/SearchInput'
 import { accountService } from '../../service'
 
-const Contact = () => {
+const ContactTab = () => {
 
   const [searchText, setSearchText] = useState("")
   useFocusEffect(useCallback(() => {
@@ -32,7 +32,7 @@ const Contact = () => {
           <View className="flex flex-row items-center">
             <Text className="flex-1 font-pbold text-2xl">Contacts</Text>
             <TouchableOpacity
-              onPress={()=> {router.push("/create_contact")}}
+              onPress={()=> {router.push("/contact/contact_create")}}
               activeOpacity={0.7}
               className="bg-[#1A6B54] py-2 px-4 rounded-full"
               disabled={false}
@@ -55,4 +55,4 @@ const Contact = () => {
   )
 }
 
-export default Contact
+export default ContactTab

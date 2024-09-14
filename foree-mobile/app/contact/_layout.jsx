@@ -15,7 +15,7 @@ const ContactLayout = () => {
         }}
       >
       <Stack.Screen
-        name="create_contact"
+        name="contact_create"
         options={{
           headerShown: true,
           title:"Create Contact",
@@ -24,7 +24,7 @@ const ContactLayout = () => {
             if ( router.canGoBack() ) {
               router.back()
             } else {
-              router.replace("/contact")
+              router.replace("/contact_tab")
             }
           }} title="Back" color="#004d40"/>
         }}
