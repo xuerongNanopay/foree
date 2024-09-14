@@ -210,10 +210,9 @@ func (a *AccountService) GetAllActiveContacts(ctx context.Context, req transport
 	}
 
 	ret := make([]*ContactAccountSummaryDTO, len(accs))
-	for _, v := range accs {
-		ret = append(ret, NewContactAccountSummaryDTO(v))
+	for i, v := range accs {
+		ret[i] = NewContactAccountSummaryDTO(v)
 	}
-
 	foree_logger.Logger.Debug("GetAllActiveContacts_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
 	return ret, nil
 }
@@ -237,8 +236,8 @@ func (a *AccountService) QueryActiveContacts(ctx context.Context, req QueryConta
 	}
 
 	ret := make([]*ContactAccountSummaryDTO, len(accs))
-	for _, v := range accs {
-		ret = append(ret, NewContactAccountSummaryDTO(v))
+	for i, v := range accs {
+		ret[i] = NewContactAccountSummaryDTO(v)
 	}
 
 	foree_logger.Logger.Debug("QueryActiveContacts_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
@@ -264,8 +263,8 @@ func (a *AccountService) GetAllActiveInteracs(ctx context.Context, req transport
 	}
 
 	ret := make([]*InteracAccountSummaryDTO, len(accs))
-	for _, v := range accs {
-		ret = append(ret, NewInteracAccountSummaryDTO(v))
+	for i, v := range accs {
+		ret[i] = NewInteracAccountSummaryDTO(v)
 	}
 
 	foree_logger.Logger.Debug("GetAllActiveInteracs_Success", "ip", loadRealIp(ctx), "userId", session.UserId)

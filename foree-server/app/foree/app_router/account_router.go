@@ -21,6 +21,6 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 	router.HandleFunc("/create_contact_account", simplePostWrapper(c.accountService.CreateContact)).Methods("POST")
 	router.HandleFunc("/delete_contact_account", simplePostWrapper(c.accountService.DeleteContact)).Methods("POST")
 	router.HandleFunc("/contact_accounts/{ContactId}", simpleGetWrapper(c.accountService.GetActiveContact)).Methods("GET")
-	router.HandleFunc("/contact_accounts", simpleGetWrapper(c.accountService.QueryActiveContacts)).Methods("GET")
+	router.HandleFunc("/contact_accounts", simpleGetWrapper(c.accountService.GetAllActiveContacts)).Methods("GET")
 	router.HandleFunc("/interac_accounts", simpleGetWrapper(c.accountService.GetAllActiveInteracs)).Methods("GET")
 }

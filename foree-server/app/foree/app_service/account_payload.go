@@ -118,8 +118,8 @@ func NewContactAccountSummaryDTO(account *account.ContactAccount) *ContactAccoun
 		TransferMethod:  account.Type,
 		BankName:        account.InstitutionName,
 		AccountNoOrIBAN: account.BranchNumber,
-		CreateAt:        account.CreatedAt.UnixMicro(),
-		LatestActiveAt:  account.LatestActivityAt.UnixMicro(),
+		CreateAt:        account.CreatedAt.UnixMilli(),
+		LatestActiveAt:  account.LatestActivityAt.UnixMilli(),
 	}
 }
 
@@ -162,8 +162,8 @@ func NewContactAccountDetailDTO(account *account.ContactAccount) *ContactAccount
 		TransferMethod:        account.Type,
 		BankName:              account.InstitutionName,
 		AccountNoOrIBAN:       account.BranchNumber,
-		CreateAt:              account.CreatedAt.UnixMicro(),
-		LatestActiveAt:        account.LatestActivityAt.UnixMicro(),
+		CreateAt:              account.CreatedAt.UnixMilli(),
+		LatestActiveAt:        account.LatestActivityAt.UnixMilli(),
 	}
 }
 
