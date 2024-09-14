@@ -117,7 +117,7 @@ func NewContactAccountSummaryDTO(account *account.ContactAccount) *ContactAccoun
 		LastName:        account.LastName,
 		TransferMethod:  account.Type,
 		BankName:        account.InstitutionName,
-		AccountNoOrIBAN: account.BranchNumber,
+		AccountNoOrIBAN: account.AccountNumber,
 		CreateAt:        account.CreatedAt.UnixMilli(),
 		LatestActiveAt:  account.LatestActivityAt.UnixMilli(),
 	}
