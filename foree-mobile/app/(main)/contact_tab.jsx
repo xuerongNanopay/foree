@@ -6,10 +6,12 @@ import { SafeAreaView } from 'react-native'
 import SearchInput from '../../components/SearchInput'
 import { accountService } from '../../service'
 import { ContactTransferCashPickup } from '../../constants/contacts'
+import string_util from '../../util/string_util'
 
 const ContactTab = () => {
   const [searchText, setSearchText] = useState("")
   const [contacts, setContacts] = useState([])
+  const [showContacts, setShowContacts] = useState([])
 
   useFocusEffect(useCallback(() => {
     const controller = new AbortController()
@@ -26,6 +28,13 @@ const ContactTab = () => {
       controller.abort()
     }
   }, []))
+
+  useEffect(() => {
+    if ( !searchText ) setShowContacts(contacts)
+    else {
+      setShowContacts(contacts.filter(c => string_util.containSubsequence(`${c.firstName}${c.middleName ?? ""}${c.lastName}`, searchText, {caseInsensitive:true})))
+    }
+  }, [searchText])
 
   return (
     <SafeAreaView className="">
@@ -57,7 +66,7 @@ const ContactTab = () => {
           showsVerticalScrollIndicator={false}
         >
           {
-            contacts.map(contact => {
+            showContacts.map(contact => {
               return (
                 <TouchableOpacity 
                   key={contact.id}
