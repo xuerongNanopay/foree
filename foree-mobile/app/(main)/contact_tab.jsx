@@ -51,7 +51,7 @@ const ContactTab = () => {
             />
           </View>
         </View>
-        <ScrollView className="flex-1 border-2 border-black">
+        <ScrollView className="flex-1 border-2 mb-2 border-black">
           {
             contacts.map(contact => {
               return <ContactListItem key={contact.id} contact={contact}/>
