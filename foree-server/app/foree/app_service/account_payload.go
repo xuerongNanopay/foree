@@ -104,6 +104,8 @@ type ContactAccountSummaryDTO struct {
 	TransferMethod  account.ContactAccountType `json:"transferMethod,omitempty"`
 	BankName        string                     `json:"bankName,omitempty"`
 	AccountNoOrIBAN string                     `json:"accountNoOrIBAN,omitempty"`
+	LatestActiveAt  int64                      `json:"latestActiveAt,omitempty"`
+	CreateAt        int64                      `json:"createAt,omitempty"`
 }
 
 func NewContactAccountSummaryDTO(account *account.ContactAccount) *ContactAccountSummaryDTO {
@@ -116,6 +118,8 @@ func NewContactAccountSummaryDTO(account *account.ContactAccount) *ContactAccoun
 		TransferMethod:  account.Type,
 		BankName:        account.InstitutionName,
 		AccountNoOrIBAN: account.BranchNumber,
+		CreateAt:        account.CreatedAt.UnixMicro(),
+		LatestActiveAt:  account.LatestActivityAt.UnixMicro(),
 	}
 }
 
@@ -136,6 +140,8 @@ type ContactAccountDetailDTO struct {
 	TransferMethod        account.ContactAccountType `json:"transferMethod,omitempty"`
 	BankName              string                     `json:"bankName,omitempty"`
 	AccountNoOrIBAN       string                     `json:"accountNoOrIBAN,omitempty"`
+	LatestActiveAt        int64                      `json:"latestActiveAt,omitempty"`
+	CreateAt              int64                      `json:"createAt,omitempty"`
 }
 
 func NewContactAccountDetailDTO(account *account.ContactAccount) *ContactAccountDetailDTO {
@@ -156,6 +162,8 @@ func NewContactAccountDetailDTO(account *account.ContactAccount) *ContactAccount
 		TransferMethod:        account.Type,
 		BankName:              account.InstitutionName,
 		AccountNoOrIBAN:       account.BranchNumber,
+		CreateAt:              account.CreatedAt.UnixMicro(),
+		LatestActiveAt:        account.LatestActivityAt.UnixMicro(),
 	}
 }
 
