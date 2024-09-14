@@ -1,20 +1,21 @@
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
 import { router, useFocusEffect } from 'expo-router'
 import React, { useEffect, useState, useCallback } from 'react'
+import { SafeAreaView } from 'react-native'
 
-import { SafeAreaView } from 'react-native-safe-area-context'
 import SearchInput from '../../components/SearchInput'
 import { accountService } from '../../service'
 
 const ContactTab = () => {
-
   const [searchText, setSearchText] = useState("")
+  const [contacts, setContacts] = useState([])
+
   useFocusEffect(useCallback(() => {
     const controller = new AbortController()
     const getAllContacts = async() => {
       try {
         const resp = await accountService.getAllContactAccounts()
-        console.log(resp.data)
+        setContacts(resp.data.data)
       } catch (e) {
         console.error(e)
       }
@@ -27,8 +28,8 @@ const ContactTab = () => {
 
   return (
     <SafeAreaView className="border-2 border-red-600">
-      <View className="px-4 pt-4">
-        <View className="pb-4 border-b-[1px] border-slate-300">
+      <View className="flex h-full px-4 pt-4">
+        <View className="pb-4 mb-4 border-b-[1px] border-slate-300">
           <View className="flex flex-row items-center">
             <Text className="flex-1 font-pbold text-2xl">Contacts</Text>
             <TouchableOpacity
@@ -50,6 +51,13 @@ const ContactTab = () => {
             />
           </View>
         </View>
+        <ScrollView className="flex-1 border-2 border-black">
+          {
+            contacts.map(contact => {
+              return <ContactListItem key={contact.id} contact={contact}/>
+            })
+          }
+        </ScrollView>
       </View>
     </SafeAreaView>
   )
@@ -60,6 +68,11 @@ const ContactListItem = ({
 }) => {
   if ( ! contact ) return <></>
 
+  return (
+    <View>
+      <Text>{contact.firstName}</Text>
+    </View>
+  )
 }
 
 export default ContactTab
