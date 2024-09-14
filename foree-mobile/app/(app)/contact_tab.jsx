@@ -32,7 +32,7 @@ const ContactTab = () => {
           <View className="flex flex-row items-center">
             <Text className="flex-1 font-pbold text-2xl">Contacts</Text>
             <TouchableOpacity
-              onPress={()=> {router.push("/contact/contact_create")}}
+              onPress={()=> {router.push("/contact/create")}}
               activeOpacity={0.7}
               className="bg-[#1A6B54] py-2 px-4 rounded-full"
               disabled={false}
@@ -53,6 +53,13 @@ const ContactTab = () => {
       </View>
     </SafeAreaView>
   )
+}
+
+const ContactListItem = ({
+  contact
+}) => {
+  if ( ! contact ) return <></>
+
 }
 
 export default ContactTab

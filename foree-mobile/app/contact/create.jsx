@@ -73,7 +73,7 @@ const ReviewItem = ({
   />
 )
 
-const CreateContact = () => {
+const ContactCreate = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState({})
   const [form, setForm] = useState({
@@ -460,4 +460,4 @@ const CreateContact = () => {
   )
 }
 
-export default CreateContact
+export default ContactCreate

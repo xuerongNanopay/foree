@@ -15,7 +15,7 @@ const ContactLayout = () => {
         }}
       >
       <Stack.Screen
-        name="contact_create"
+        name="create"
         options={{
           headerShown: true,
           title:"Create Contact",
