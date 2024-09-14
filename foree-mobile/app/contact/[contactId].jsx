@@ -4,7 +4,8 @@ import { useLocalSearchParams } from 'expo-router'
 import React from 'react'
 
 const ContactDetail = () => {
-  const {contact_id} = useLocalSearchParams()
+  const {contactId} = useLocalSearchParams()
+  console.log(contactId)
   return (
     <View>
       <Text>ContactDetail</Text>

@@ -58,7 +58,15 @@ const ContactTab = () => {
         >
           {
             contacts.map(contact => {
-              return <ContactListItem key={contact.id} contact={contact}/>
+              return (
+                <TouchableOpacity 
+                  key={contact.id}
+                  onPress={() => router.push(`/contact/${contact.id}`)}
+                  activeOpacity={0.7}
+                >
+                  <ContactListItem contact={contact}/>
+                </TouchableOpacity>
+              )
             })
           }
         </ScrollView>
