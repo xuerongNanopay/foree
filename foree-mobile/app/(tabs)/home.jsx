@@ -18,10 +18,10 @@ const Home = () => {
   })
   
   useFocusEffect(useCallback(() => {
-    controller = new AbortController()
+    const controller = new AbortController()
     const getRate = async() => {
       try {
-        resp = await transactionService.getCADToPRKRate({signal: controller.signal})
+        const resp = await transactionService.getCADToPRKRate({signal: controller.signal})
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("get rate", resp.status, resp.data)
         } else {

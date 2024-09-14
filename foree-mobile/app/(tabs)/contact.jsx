@@ -4,19 +4,26 @@ import React, { useEffect, useState, useCallback } from 'react'
 
 import { SafeAreaView } from 'react-native-safe-area-context'
 import SearchInput from '../../components/SearchInput'
+import { accountService } from '../../service'
 
 const Contact = () => {
 
   const [searchText, setSearchText] = useState("")
-  useFocusEffect(
-    useCallback(() => {
-      setSearchText("")
-
-      return () => {
-        console.log('This route is now unfocused.');
+  useFocusEffect(useCallback(() => {
+    const controller = new AbortController()
+    const getAllContacts = async() => {
+      try {
+        const resp = await accountService.getAllContactAccounts()
+        console.log(resp.data)
+      } catch (e) {
+        console.error(e)
       }
-    }, [])
-  )
+    }
+    getAllContacts()
+    return () => {
+      controller.abort()
+    }
+  }, []))
 
   return (
     <SafeAreaView className="border-2 border-red-600">
