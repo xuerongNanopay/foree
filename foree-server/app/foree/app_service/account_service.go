@@ -3,7 +3,6 @@ package foree_service
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"xue.io/go-pay/app/foree/account"
 	foree_logger "xue.io/go-pay/app/foree/logger"
@@ -85,7 +84,6 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 		return nil, sErr
 	}
 
-	now := time.Now()
 	newAcc := account.ContactAccount{
 		Status:                account.AccountStatusActive,
 		Type:                  account.ContactAccountType(req.TransferMethod),
@@ -103,7 +101,6 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 		AccountNumber:         req.AccountNoOrIBAN,
 		RelationshipToContact: req.RelationshipToContact,
 		OwnerId:               session.User.ID,
-		LatestActivityAt:      &now,
 	}
 
 	newAcc.HashMyself()

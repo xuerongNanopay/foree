@@ -109,7 +109,7 @@ type ContactAccountSummaryDTO struct {
 }
 
 func NewContactAccountSummaryDTO(account *account.ContactAccount) *ContactAccountSummaryDTO {
-	return &ContactAccountSummaryDTO{
+	ret := &ContactAccountSummaryDTO{
 		ID:              account.ID,
 		Status:          account.Status,
 		FirstName:       account.FirstName,
@@ -118,9 +118,14 @@ func NewContactAccountSummaryDTO(account *account.ContactAccount) *ContactAccoun
 		TransferMethod:  account.Type,
 		BankName:        account.InstitutionName,
 		AccountNoOrIBAN: account.AccountNumber,
-		CreateAt:        account.CreatedAt.UnixMilli(),
-		LatestActiveAt:  account.LatestActivityAt.UnixMilli(),
 	}
+	if account.CreatedAt != nil {
+		ret.CreateAt = account.CreatedAt.UnixMilli()
+	}
+	if account.LatestActivityAt != nil {
+		ret.LatestActiveAt = account.LatestActivityAt.UnixMilli()
+	}
+	return ret
 }
 
 type ContactAccountDetailDTO struct {
@@ -145,7 +150,7 @@ type ContactAccountDetailDTO struct {
 }
 
 func NewContactAccountDetailDTO(account *account.ContactAccount) *ContactAccountDetailDTO {
-	return &ContactAccountDetailDTO{
+	ret := &ContactAccountDetailDTO{
 		ID:                    account.ID,
 		Status:                account.Status,
 		FirstName:             account.FirstName,
@@ -162,9 +167,14 @@ func NewContactAccountDetailDTO(account *account.ContactAccount) *ContactAccount
 		TransferMethod:        account.Type,
 		BankName:              account.InstitutionName,
 		AccountNoOrIBAN:       account.BranchNumber,
-		CreateAt:              account.CreatedAt.UnixMilli(),
-		LatestActiveAt:        account.LatestActivityAt.UnixMilli(),
 	}
+	if account.CreatedAt != nil {
+		ret.CreateAt = account.CreatedAt.UnixMilli()
+	}
+	if account.LatestActivityAt != nil {
+		ret.LatestActiveAt = account.LatestActivityAt.UnixMilli()
+	}
+	return ret
 }
 
 type InteracAccountSummaryDTO struct {
