@@ -48,6 +48,7 @@ const ContactDetail = () => {
         </View>
         {/* Contact Detail */}
         <ScrollView className="flex-1 mt-4 mb-2">
+          {/* Contact Information Details */}
           <View className="bg-slate-200 border-[1px] border-slate-500 rounded-lg py-6 px-2">
             {/* Name */}
             <View className="border-b-[1px] border-slate-400 pb-2">
@@ -117,6 +118,17 @@ const ContactDetail = () => {
                 </> : null
               }
             </View>
+          </View>
+          {/* Delete button */}
+          <View className="mt-4 flex flex-row">
+            <TouchableOpacity
+              activeOpacity={0.7}
+              className="py-2 px-4 rounded-xl border-[1px] border-red-600 bg-red-100"
+              disabled={false}
+              onPress={() => {console.log("TODO: delete contact")}}
+            >
+              <Text className="font-psemibold text-red-600 text-lg">Delete</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </View>
