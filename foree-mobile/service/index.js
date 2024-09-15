@@ -62,7 +62,7 @@ httpClient.interceptors.response.use(
       router.replace("/login")
       return Promise.reject(error)
     } else if ( resp.status = 428 && resp?.data?.require === "TO_MAIN" ) {
-      router.replace("/home")
+      router.replace("/home_tab")
     } else if ( resp.status = 428 && resp?.data?.require === "LOGIN" ) {
       router.replace("/login")
       return Promise.reject(error)
@@ -139,7 +139,7 @@ httpFormClient.interceptors.response.use(
       router.replace("/login")
       return Promise.resolve(resp)
     } else if ( resp.status = 428 && resp?.data?.require === "TO_MAIN" ) {
-      router.replace("/home")
+      router.replace("/home_tab")
     } else if ( resp.status = 428 && resp?.data?.require === "LOGIN" ) {
       router.replace("/login")
       return Promise.resolve(resp)

@@ -130,7 +130,7 @@ const Onboarding = () => {
       }
       se = resp.data.data
       setUser(se)
-      router.replace("/home")
+      router.replace("/home_tab")
     } catch (err) {
       console.error("onboarding", err)
     } finally {

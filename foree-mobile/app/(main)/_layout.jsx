@@ -36,7 +36,7 @@ const TabsLayout = () => {
         }}
       >
         <Tabs.Screen 
-          name="home"
+          name="home_tab"
           options={{
             title: 'Home',
             headerShown: false,
@@ -66,22 +66,22 @@ const TabsLayout = () => {
           }}
         />
         <Tabs.Screen 
-          name="create"
+          name="transaction_tab"
           options={{
-            title: 'Create',
+            title: 'Transaction',
             headerShown: false,
             tabBarIcon:({ color, forced}) => (
               <TabIcon 
                 icon={icons.plus}
                 color={color}
-                name="Create"
+                name="Transaction"
                 forced={forced}
               />
             )
           }}
         />
         <Tabs.Screen 
-          name="profile"
+          name="profile_tab"
           options={{
             title: 'Profile',
             headerShown: false,

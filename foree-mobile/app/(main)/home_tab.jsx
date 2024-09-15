@@ -7,7 +7,7 @@ import { useGlobalContext } from '../../context/GlobalProvider'
 import { transactionService } from '../../service'
 import Currency from '../../constants/currency'
 
-const Home = () => {
+const HomeTab = () => {
   const { user } = useGlobalContext()
   // const navigation = useNavigation()
   const [ cpRate , setCPRate ] = useState({
@@ -123,4 +123,4 @@ const Home = () => {
   )
 }
 
-export default Home
+export default HomeTab
