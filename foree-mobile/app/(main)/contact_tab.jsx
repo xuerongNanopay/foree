@@ -14,16 +14,25 @@ const ContactTab = () => {
   const [showContacts, setShowContacts] = useState([])
 
   useFocusEffect(useCallback(() => {
-    const controller = new AbortController()
-    const getAllContacts = async() => {
+    const  controller = new AbortController()
+    const getAllContacts = async (signal) => {
       try {
-        const resp = await accountService.getAllContactAccounts()
-        setContacts(resp.data.data)
+        const resp = await accountService.getAllContactAccounts({signal})
+
+        if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
+          console.error("get all active contacts", resp.status, resp.data)
+        } else {
+          //How do this: because there is cache in getAllContactAccounts
+          //TODO: redesign the cache?
+          setContacts([...resp.data.data])
+          setSearchText("")
+        }
       } catch (e) {
         console.error(e)
       }
+      return controller
     }
-    getAllContacts()
+    getAllContacts(controller.signal)
     return () => {
       controller.abort()
     }
@@ -34,7 +43,7 @@ const ContactTab = () => {
     else {
       setShowContacts(contacts.filter(c => string_util.containSubsequence(`${c.firstName}${c.middleName ?? ""}${c.lastName}`, searchText, {caseInsensitive:true})))
     }
-  }, [searchText])
+  }, [searchText, contacts])
 
   return (
     <SafeAreaView className="">

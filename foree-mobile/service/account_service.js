@@ -26,7 +26,7 @@ class AccountService {
     }
 
     try {
-      resp = await this.#httpFormClient.get("/contact_accounts", {signal})
+      resp = await this.#httpClient.get("/contact_accounts", {signal})
       if ( resp.status / 100 == 2 && !!resp?.data?.data ) {
         this.#allContactCache = {
           contacts: resp,
@@ -35,12 +35,13 @@ class AccountService {
       }
       return resp
     } catch (e) {
+      this.#allContactCache = null
       throw e
     }
   }
 
   async getContactAccount(contactId, {signal}={signal}) {
-    return await this.#httpFormClient.post(`/contact_accounts/${contactId}`, req, {signal})
+    return await this.#httpClient.get(`/contact_accounts/${contactId}`, {signal})
   }
 }
 
