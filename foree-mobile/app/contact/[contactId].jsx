@@ -6,7 +6,7 @@ import { accountService } from '../../service'
 import { formatContactName } from '../../util/contact_util'
 import Regions from '../../constants/region'
 import Countries from '../../constants/country'
-import { ContactTransferMethods } from '../../constants/contacts'
+import { ContactTransferBankAccount, ContactTransferCashPickup, ContactTransferMethods } from '../../constants/contacts'
 
 const ContactDetail = () => {
   const {contactId} = useLocalSearchParams()
@@ -102,9 +102,20 @@ const ContactDetail = () => {
               <Text className="font-semibold mb-2">
                 Contact Relationship: <Text className="text-slate-600">{contact?.relationshipToContact}</Text>
               </Text>
-              <Text className="font-semibold mb-2">
+              <Text className="font-semibold">
                 Transfer Method: <Text className="text-slate-600">{!!contact?.transferMethod ? (ContactTransferMethods.find(x => x.value === contact.transferMethod)?.name || contact.transferMethod): ""}</Text>
               </Text>
+              {
+                !!contact?.transferMethod && contact.transferMethod !== ContactTransferCashPickup ?
+                <>
+                  <Text className="font-semibold mt-2">
+                    Bank Name: <Text className="text-slate-600">{contact?.bankName}</Text>
+                  </Text>
+                  <Text className="font-semibold mt-2">
+                    Account NO: <Text className="text-slate-600">{contact?.accountNoOrIBAN}</Text>
+                  </Text>
+                </> : null
+              }
             </View>
           </View>
         </ScrollView>
