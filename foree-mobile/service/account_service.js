@@ -20,6 +20,11 @@ class AccountService {
     return await this.#httpFormClient.post("/create_contact_account", req, {signal})
   }
 
+  async deleteContact(contactId, {signal}={signal}) {
+    this.#allContactCache = null
+    return await this.#httpFormClient.post("/delete_contact_account", {contactId}, {signal})
+  }
+
   async getAllContactAccounts({signal}={signal}) {
     if ( this.#allContactCache != null &&  this.#allContactCache.expiryAt.getTime() > new Date().getTime() )  {
       return this.#allContactCache.contacts
