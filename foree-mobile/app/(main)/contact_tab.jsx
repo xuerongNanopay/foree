@@ -7,6 +7,7 @@ import SearchInput from '../../components/SearchInput'
 import { accountService } from '../../service'
 import { ContactTransferCashPickup } from '../../constants/contacts'
 import string_util from '../../util/string_util'
+import { formatContactName } from '../../util/contact_util'
 
 const ContactTab = () => {
   const [searchText, setSearchText] = useState("")
@@ -107,19 +108,6 @@ const ContactListItem = ({
   )
 }
 
-const formatContactName = ({firstName, middleName, lastName}, max=30) => {
-  let fullName = !!middleName ? `${firstName} ${middleName} ${lastName}` : `${firstName} ${lastName}`
-  if ( fullName.length < max ) return fullName
-  fullName = `${firstName} ${lastName}`
-  if ( fullName.length < max ) return fullName
-  fullName = `${firstName}`
-  if ( fullName.length < max ) return fullName
-  fullName = `${lastName}`
-  if ( fullName.length < max ) return fullName
-  fullName = `${firstName}`
-  fullName = fullName.slice(0, max-3) + "..."
-  return fullName
-}
 
 const FormatContactTransferInfo = ({transferMethod, bankName, accountNoOrIBAN}) => {
   if ( transferMethod === ContactTransferCashPickup ) 

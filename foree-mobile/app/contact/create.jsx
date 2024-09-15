@@ -449,7 +449,7 @@ const ContactCreate = () => {
   ]
 
   return (
-    <SafeAreaView className="bg-slate-100">
+    <SafeAreaView>
       <MultiStepForm
         steps={() => CreateContactFlow}
         onSumbit={submit}

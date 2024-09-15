@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native'
+import { View, Text, SafeAreaView } from 'react-native'
 import { useLocalSearchParams } from 'expo-router'
 import React, { useEffect } from 'react'
 import { accountService } from '../../service'
@@ -29,9 +29,9 @@ const ContactDetail = () => {
     }
   }, [])
   return (
-    <View>
+    <SafeAreaView>
       <Text>ContactDetail</Text>
-    </View>
+    </SafeAreaView>
   )
 }
 
