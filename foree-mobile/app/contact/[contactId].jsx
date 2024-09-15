@@ -37,7 +37,19 @@ const ContactDetail = () => {
 
   onDelete = () => {
     Alert.alert("Delete", "Are you sure?",[
-      {text: 'Continue', onPress: () => {console.log("TODO: Cancel contact")}},
+      {text: 'Continue', onPress: async () => {
+        try {
+          const resp = await accountService.deleteContact(contact.id)
+          if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
+            console.error("delete contact", resp.status, resp.data)
+            router.replace('/contact')
+          } else {
+            router.replace('/contact')
+          }
+        } catch (e) {
+          console.error(e)
+        }
+      }},
       {text: 'Cancel', onPress: () => {}}
     ])
   }
