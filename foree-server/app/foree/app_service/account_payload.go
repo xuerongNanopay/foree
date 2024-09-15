@@ -166,7 +166,7 @@ func NewContactAccountDetailDTO(account *account.ContactAccount) *ContactAccount
 		RelationshipToContact: account.RelationshipToContact,
 		TransferMethod:        account.Type,
 		BankName:              account.InstitutionName,
-		AccountNoOrIBAN:       account.BranchNumber,
+		AccountNoOrIBAN:       account.AccountNumber,
 	}
 	if account.CreatedAt != nil {
 		ret.CreateAt = account.CreatedAt.UnixMilli()
