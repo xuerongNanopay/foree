@@ -25,7 +25,7 @@ const (
 	sQLContactAccountUpdateActiveByIdAndOwner = `
 		UPDATE contact_accounts SET 
 			status = ?, latest_activity_at = ?
-		WHERE id = ? AND a.owner_id = ? AND a.status = 'ACTIVE'
+		WHERE id = ? AND owner_id = ? AND status = 'ACTIVE'
 	`
 	sQLContactAccountGetUniqueById = `
 		SELECT 
@@ -205,16 +205,16 @@ func (repo *ContactAccountRepo) UpdateActiveContactAccountByIdAndOwner(ctx conte
 			sQLContactAccountUpdateActiveByIdAndOwner,
 			acc.Status,
 			acc.LatestActivityAt,
-			acc.OwnerId,
 			acc.ID,
+			acc.OwnerId,
 		)
 	} else {
 		_, err = repo.db.Exec(
 			sQLContactAccountUpdateActiveByIdAndOwner,
 			acc.Status,
 			acc.LatestActivityAt,
-			acc.OwnerId,
 			acc.ID,
+			acc.OwnerId,
 		)
 	}
 
