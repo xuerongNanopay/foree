@@ -1,5 +1,5 @@
-import { View, Text, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native'
-import { useLocalSearchParams } from 'expo-router'
+import { View, Text, SafeAreaView, TouchableOpacity, ScrollView, Alert } from 'react-native'
+import { router, useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 
 import { accountService } from '../../service'
@@ -9,6 +9,7 @@ import Countries from '../../constants/country'
 import { ContactTransferBankAccount, ContactTransferCashPickup, ContactTransferMethods } from '../../constants/contacts'
 
 const ContactDetail = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const {contactId} = useLocalSearchParams()
   const [contact, setContact] = useState(null)
 
@@ -18,13 +19,14 @@ const ContactDetail = () => {
       try {
         const resp = await accountService.getContactAccount(contactId, {signal: controller.signal})
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
-          console.error("get all active contacts", resp.status, resp.data)
+          console.error("get contact detail", resp.status, resp.data)
+          router.replace('/contact')
         } else {
           setContact(resp.data.data)
         }
       } catch (e) {
         console.error(e)
-        //TODO: route back
+        router.replace('/contact')
       }
     }
     getContactDetail()
@@ -32,6 +34,14 @@ const ContactDetail = () => {
       controller.abort()
     }
   }, [])
+
+  onDelete = () => {
+    Alert.alert("Delete", "Are you sure?",[
+      {text: 'Continue', onPress: () => {console.log("TODO: Cancel contact")}},
+      {text: 'Cancel', onPress: () => {}}
+    ])
+  }
+
   return (
     <SafeAreaView>
       <View className="flex h-full px-2 py-4">
@@ -125,7 +135,7 @@ const ContactDetail = () => {
               activeOpacity={0.7}
               className="py-2 px-4 rounded-xl border-[1px] border-red-600 bg-red-100"
               disabled={false}
-              onPress={() => {console.log("TODO: delete contact")}}
+              onPress={onDelete}
             >
               <Text className="font-psemibold text-red-600 text-lg">Delete</Text>
             </TouchableOpacity>
