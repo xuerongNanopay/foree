@@ -425,7 +425,7 @@ const Onboarding = () => {
   ]
 
   return (
-    <SafeAreaView>
+    <SafeAreaView className="bg-slate-100">
       <MultiStepForm
         steps={() => OnboardingFlow}
         onSumbit={submit}
