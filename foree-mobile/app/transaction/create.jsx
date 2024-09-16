@@ -110,8 +110,12 @@ const TransactionCreate = () => {
           if ( !form.coutAccId ) return ""
           const contact = contacts.find(c => c.id === form.coutAccId)
           if ( !contact ) return ""
-          return formatContactName(contact, 14) + " - " + formatContactMethod(contact)
+          return formatContactName(contact) + "\n" + formatContactMethod(contact)
         }}
+        inputContainerStyles="h-16"
+        multiline={true}
+        numberOfLines={2}
+        valueView
         searchKey={({firstName, middelName, lastName}) => {
           return `${firstName ?? ""}${middelName ?? ""}${lastName ?? ""}`
         }}

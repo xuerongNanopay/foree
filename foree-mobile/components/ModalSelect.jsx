@@ -20,6 +20,9 @@ const ModalSelect = ({
   title,
   modalTitle,
   value,
+  valueView,
+  multiline=false,
+  numberOfLines=1,
   containerStyles,
   inputStyles,
   allowSearch=true,
@@ -56,9 +59,8 @@ const ModalSelect = ({
         { !!title ? (<Text className="test-base test-gray-100 font-pmedium">{title}</Text>) : null }
         <View
           className={`
-            w-full h-12 bg-slate-100 ${variants[variant] ?? variants.bordered}
-            border-slate-400 focus:border-secondary-200
-            items-center flex-row ${inputContainerStyles}
+            h-12 ${variants[variant] ?? variants.bordered}
+            border-slate-400 ${inputContainerStyles}
           `}
         >
           <TextInput
@@ -66,6 +68,9 @@ const ModalSelect = ({
               if (isEditable) setVisible(true)
               else {}
             }}
+            inlineImageLeft='search_icon'
+            multiline={!!(typeof value === "function" ? value() : cache.get(value)?.[showExtractor]) ? multiline : false}
+            numberOfLines={numberOfLines}
             className={`h-full w-full px-4 flex-1 font-psemibold text-base ${inputStyles}`}
             value={typeof value === "function" ? value() : cache.get(value)?.[showExtractor]}
             placeholder={placeholder}
@@ -145,7 +150,6 @@ const ModalSelect = ({
                   }}
                 />
                   
-                {/* <Text>Search</Text> */}
               </View> : null
             }
             <View className="flex-1">
