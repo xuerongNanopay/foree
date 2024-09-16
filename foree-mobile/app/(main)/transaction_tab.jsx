@@ -4,31 +4,58 @@ import { router } from 'expo-router'
 
 const transactionStatuses = [
   {
-    id:"All"
+    id:"All",
+    borderColor: "border-green-800",
+    textColor: "border-green-800",
+    selectBgColor: "bg-green-200",
   },
   { 
-    id:"Initial"
+    id:"Initial",
+    borderColor: "border-green-800",
+    textColor: "border-green-800",
+    selectBgColor: "bg-green-200",
   },
   { 
-    id:"Await Payment"
+    id:"Await Payment",
+    borderColor: "border-green-800",
+    textColor: "border-green-800",
+    selectBgColor: "bg-green-200",
   },
   { 
-    id:"In Progress"
+    id:"In Progress",
+    borderColor: "border-green-800",
+    textColor: "border-green-800",
+    selectBgColor: "bg-green-200",
   },
   { 
-    id:"Completed"
+    id:"Completed",
+    borderColor: "border-green-800",
+    textColor: "border-green-800",
+    selectBgColor: "bg-green-200",
   },
   { 
-    id:"Cancelled"
+    id:"Cancelled",
+    borderColor: "border-green-800",
+    textColor: "border-green-800",
+    selectBgColor: "bg-green-200",
   },
   { 
-    id:"Ready To Pickup"
+    id:"Ready To Pickup",
+    borderColor: "border-green-800",
+    textColor: "border-green-800",
+    selectBgColor: "bg-green-200",
   },
   { 
-    id:"Refunding"
+    id:"Refunding",
+    borderColor: "border-green-800",
+    textColor: "border-green-800",
+    selectBgColor: "bg-green-200",
   },
   { 
-    id:"Refunded"
+    id:"Refunded",
+    borderColor: "border-green-800",
+    textColor: "border-green-800",
+    selectBgColor: "bg-green-200",
   }
 ]
 
@@ -36,13 +63,13 @@ const TransactionTab = () => {
   const [selectedStatus, setSelectedStatus] = useState('All')
 
   const statusChipItem = ({item}) => {
-    const bgColor = selectedStatus === item.id ? "bg-green-200" : ""
+    const bgColor = selectedStatus === item.id ? `${item.selectBgColor}` : ""
     return (
       <TouchableOpacity 
         onPress={() => setSelectedStatus(item.id)}
-        className={`p-2 border-[1px] border-green-800 rounded-2xl mr-2 ${bgColor}`}
+        className={`p-2 border-[1px] ${item.borderColor} rounded-2xl mr-2 ${bgColor}`}
       >
-        <Text className="text-green-800">{item.id}</Text>
+        <Text className={`${item.textColor}`}>{item.id}</Text>
       </TouchableOpacity>
     )
   }
