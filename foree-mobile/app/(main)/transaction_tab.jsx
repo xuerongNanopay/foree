@@ -1,68 +1,19 @@
 import { View, Text, SafeAreaView, TouchableOpacity, FlatList } from 'react-native'
-import React, { useState } from 'react'
-import { router } from 'expo-router'
-
-const transactionStatuses = [
-  {
-    id:"All",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
-  },
-  { 
-    id:"Initial",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
-  },
-  { 
-    id:"Await Payment",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
-  },
-  { 
-    id:"In Progress",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
-  },
-  { 
-    id:"Completed",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
-  },
-  { 
-    id:"Cancelled",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
-  },
-  { 
-    id:"Ready To Pickup",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
-  },
-  { 
-    id:"Refunding",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
-  },
-  { 
-    id:"Refunded",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
-  }
-]
+import React, { useCallback, useState } from 'react'
+import { router, useFocusEffect } from 'expo-router'
 
 const TransactionTab = () => {
   const [selectedStatus, setSelectedStatus] = useState('All')
 
-  const statusChipItem = ({item}) => {
+  useFocusEffect(useCallback(() => {
+    setSelectedStatus('All')
+    const  controller = new AbortController()
+    return () => {
+      controller.abort()
+    }
+  }, []))
+
+  const statusChipItem = useCallback(({item}) => {
     const bgColor = selectedStatus === item.id ? `${item.selectBgColor}` : ""
     return (
       <TouchableOpacity 
@@ -72,7 +23,7 @@ const TransactionTab = () => {
         <Text className={`${item.textColor}`}>{item.id}</Text>
       </TouchableOpacity>
     )
-  }
+  },[selectedStatus])
 
   return (
     <SafeAreaView>
@@ -130,5 +81,62 @@ const TransactionTab = () => {
     </SafeAreaView>
   )
 }
+
+const transactionStatuses = [
+  {
+    id:"All",
+    borderColor: "border-green-800",
+    textColor: "text-green-800",
+    selectBgColor: "bg-[#9cd1b9]",
+  },
+  { 
+    id:"Initial",
+    borderColor: "border-green-800",
+    textColor: "text-green-800",
+    selectBgColor: "bg-[#9cd1b9]",
+  },
+  { 
+    id:"Await Payment",
+    borderColor: "border-green-800",
+    textColor: "text-green-800",
+    selectBgColor: "bg-[#9cd1b9]",
+  },
+  { 
+    id:"In Progress",
+    borderColor: "border-green-800",
+    textColor: "text-green-800",
+    selectBgColor: "bg-[#9cd1b9]",
+  },
+  { 
+    id:"Completed",
+    borderColor: "border-green-800",
+    textColor: "text-green-800",
+    selectBgColor: "bg-[#9cd1b9]",
+  },
+  { 
+    id:"Cancelled",
+    borderColor: "border-green-800",
+    textColor: "text-green-800",
+    selectBgColor: "bg-[#9cd1b9]",
+  },
+  { 
+    id:"Ready To Pickup",
+    borderColor: "border-green-800",
+    textColor: "text-green-800",
+    selectBgColor: "bg-[#9cd1b9]",
+  },
+  { 
+    id:"Refunding",
+    borderColor: "border-green-800",
+    textColor: "text-green-800",
+    selectBgColor: "bg-[#9cd1b9]",
+  },
+  { 
+    id:"Refunded",
+    borderColor: "border-green-800",
+    textColor: "text-green-800",
+    selectBgColor: "bg-[#9cd1b9]",
+  }
+]
 
 export default TransactionTab
