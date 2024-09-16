@@ -5,7 +5,7 @@ import { Redirect } from 'expo-router'
 const TransactionIdex = () => {
   return (
     <View>
-      <Redirect href="/transactino_tab"/>
+      <Redirect href="/transaction_tab"/>
     </View>
   )
 }

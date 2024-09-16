@@ -66,7 +66,7 @@ const HomeTab = () => {
             </View>
             <View>
               <View className="mt-4 p-2 rounded-xl bg-[#1A6B54]">
-                <Link href="/profile">
+                <Link href="/transaction/create">
                   <Text className="text-lg text-center font-semibold text-white">Send Money</Text>
                 </Link>
               </View>
@@ -112,7 +112,7 @@ const HomeTab = () => {
             <Text>1111</Text>
             <Text>1111</Text>
             <View className="px-4 border-t-[1px] border-[#b6d4c7]">
-              <Link href="/profile" className="pt-2">
+              <Link href="/transaction" className="pt-2">
                 <Text className="font-pregular text-center">See more...</Text>
               </Link>
             </View>
