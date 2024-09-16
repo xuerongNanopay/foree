@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, TextInput, Modal } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput, Modal, SafeAreaView } from 'react-native'
 import React, { useState } from 'react'
 import Currencies from '../constants/currency'
 
@@ -33,7 +33,9 @@ const CurrencyInputField = ({
           `}
         >
           <TouchableOpacity
-            onPress={()=>{console.log("press currency")}}
+            onPress={() => {
+              setVisible(true)
+            }}
             activeOpacity={0.7}
             className="bg-slate-200 h-full px-2 rounded-l-2xl flex justify-center"
           >
@@ -50,7 +52,27 @@ const CurrencyInputField = ({
         visible={visible}
         animationType='slide'
       >
-      
+        <SafeAreaView>
+          <View
+            className="flex flex-row items-center border-b-[1px] border-slate-400 pr-4"
+          >
+            <View className="flex-1 flex flex-row items-center">
+              <Text
+                onPress={() => {
+                  setVisible(false)
+                }}
+                className="py-2 px-4 text-2xl font-bold text-slate-600"
+              >
+                &#8592;
+              </Text>
+              <Text
+                className="font-psemibold text-xl text-slate-600"
+              >
+                Choose a currency
+              </Text>
+            </View>
+          </View>
+        </SafeAreaView>
       </Modal>
     </>
   )
