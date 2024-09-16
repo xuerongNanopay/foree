@@ -14,12 +14,18 @@ const CurrencyInputField = ({
   inputContainerStyles,
   supportCurrency=Object.values(Currencies),
   value,
+  isEditable,
   onCurrencyChange=()=>{}
 }) => {
   const [visible, setVisible] = useState(false)
   const [selectedCurrency, setSelectedCurrency] = useState(null)
-  const [amount, setAmount] = useState(0.0)
-  
+  const [amount, setAmount] = useState("")
+  const [amt, setAmt] = useState({amount: 0.0, currency: ''})
+  console.log(amt)
+
+  useState(() => {
+    onCurrencyChange(amt)
+  }, amt)
   return (
     <>
       <View className={`${containerStyles}`}>
@@ -41,7 +47,26 @@ const CurrencyInputField = ({
             <Text className="font-semibold">{!!selectedCurrency ? `${selectedCurrency.unicodeIcon} ${selectedCurrency.isoCode}` : " ------- "} 🔽</Text>
           </TouchableOpacity>
           <TextInput
+            value={amount}
             keyboardType='decimal-pad'
+            placeholder="0.00"
+            isEditable={isEditable}
+            onChangeText={(e) => {
+              if ( e.match(/(\.\d\d\d)|.*\..*\..*/) ) return
+              setAmount(e)
+              n = parseFloat(e)
+              if ( isNaN(n) ) {
+                setAmt({
+                  ...amt,
+                  amount: 0.0
+                })
+              } else {
+                setAmt({
+                  ...amt,
+                  amount: n
+                })
+              }
+            }}
             className="flex-1 h-full text-right px-2 font-semibold"
           />
         </View>
@@ -75,7 +100,13 @@ const CurrencyInputField = ({
               supportCurrency.map(v => (
                 <TouchableOpacity
                   onPress={() => {
+                    
                     setSelectedCurrency(v)
+                    setAmount("")
+                    setAmt({
+                      currency: v.isoCode,
+                      amount: 0.0
+                    })
                     setVisible(false)
                   }}
                   key={v.isoCode}
