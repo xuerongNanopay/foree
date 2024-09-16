@@ -35,7 +35,7 @@ func (a *AccountService) VerifyContact(ctx context.Context, req CreateContactReq
 			userId = session.UserId
 		}
 		// Normal error when the token expired
-		foree_logger.Logger.Info("VerifyContact", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		foree_logger.Logger.Info("VerifyContact_Fail", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
 		return nil, sErr
 	}
 
