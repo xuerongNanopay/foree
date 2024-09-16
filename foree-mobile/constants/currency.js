@@ -1,4 +1,4 @@
-const Currency = {
+const Currencies = {
   "CAD": {
     isoCode:  "CAD",
     isoNum:   "124",
@@ -19,4 +19,4 @@ const Currency = {
   }
 }
 
-export default Currency
+export default Currencies

@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, TextInput, Modal } from 'react-native'
 import React, { useState } from 'react'
+import Currencies from '../constants/currency'
 
 const variants = {
   bordered: "border-2 rounded-2xl",
@@ -11,14 +12,15 @@ const CurrencyInputField = ({
   containerStyles,
   variant='bordered',
   inputContainerStyles,
-  supportCurrency=[],
+  supportCurrency=Currencies,
   value,
   onCurrencyChange=()=>{}
 }) => {
   const [visible, setVisible] = useState(false)
+  const [selectedCurrency, setSelectedCurrency] = useState(null)
   const [currency, setCurrency] = useState("")
   const [amount, setAmount] = useState(0.0)
-
+  
   return (
     <>
       <View className={`${containerStyles}`}>
@@ -35,7 +37,7 @@ const CurrencyInputField = ({
             activeOpacity={0.7}
             className="bg-slate-200 h-full px-2 rounded-l-2xl flex justify-center"
           >
-            <Text className="font-semibold">🇨🇦 CAD 🔽</Text>
+            <Text className="font-semibold">{!!selectedCurrency ? `${selectedCurrency.unicodeIcon} ${selectedCurrency.isoCode}` : " ---- "} 🔽</Text>
           </TouchableOpacity>
           <TextInput
             keyboardType='decimal-pad'
