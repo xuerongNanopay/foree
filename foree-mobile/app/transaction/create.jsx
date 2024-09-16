@@ -84,6 +84,21 @@ const TransactionCreate = () => {
   
   }
 
+  const InteracListItem = useCallback((interac) =>{
+    if ( !interac ) return <></>
+    return (
+      <View className={`mt-4 p-2 py-4 rounded-lg bg-[#ccded6] ${interac.id == form.cinAccId ? "bg-[#9cd1b9]" : ""}`}>
+        <Text className="font-bold">{formatName(interac)}</Text>
+        <Text className="font-semibold text-slate-700">
+          {"Interac"}
+          <Text className="italic">
+            ({interac.email})
+          </Text>
+        </Text>
+      </View>
+    )
+  }, [form.cinAccId])
+
   const ContactListItem = useCallback((
     contact
   ) => {
@@ -97,15 +112,6 @@ const TransactionCreate = () => {
       </View>
     )
   },[form.coutAccId])
-
-  const InteracListItem = useCallback((interac) =>{
-    if ( !interac ) return <></>
-    return (
-      <View className="m">
-        <Text>1111</Text>
-      </View>
-    )
-  }, [form.cinAccId])
 
   const TransactionCreateTitle = () => (
     <View>
@@ -124,10 +130,10 @@ const TransactionCreate = () => {
         errorMessage={errors['coutAccId']}
         containerStyles="mt-2"
         value={() => {
-          if ( !form.coutAccId ) return ""
-          const sourcAcc = sourceAccounts.find(c => c.id === form.coutAccId)
+          if ( !form.cinAccId ) return ""
+          const sourcAcc = sourceAccounts.find(c => c.id === form.cinAccId)
           if ( !sourcAcc ) return ""
-          return "TODO"
+          return formatName(sourcAcc) + "\nInterac(" + sourcAcc.email + ")"
         }}
         inputContainerStyles="h-16"
         multiline={true}
@@ -142,7 +148,7 @@ const TransactionCreate = () => {
           console.log(o)
           setForm({
             ...form,
-            coutAccId: o
+            cinAccId: o
           })
         }}
         placeholder="Select Source"
