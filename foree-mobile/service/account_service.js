@@ -25,6 +25,10 @@ class AccountService {
     return await this.#httpFormClient.post("/delete_contact_account", {contactId}, {signal})
   }
 
+  async getInteracAccounts({signal}={signal}) {
+    return await this.#httpClient.get("/interac_accounts", {signal})
+  }
+
   async getAllContactAccounts({signal}={signal}) {
     if ( this.#allContactCache != null &&  this.#allContactCache.expiryAt.getTime() > new Date().getTime() )  {
       return this.#allContactCache.contacts
