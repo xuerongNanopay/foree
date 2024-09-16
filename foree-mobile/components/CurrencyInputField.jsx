@@ -18,7 +18,6 @@ const CurrencyInputField = ({
 }) => {
   const [visible, setVisible] = useState(false)
   const [selectedCurrency, setSelectedCurrency] = useState(null)
-  const [currency, setCurrency] = useState("")
   const [amount, setAmount] = useState(0.0)
   
   return (
@@ -39,7 +38,7 @@ const CurrencyInputField = ({
             activeOpacity={0.7}
             className="bg-slate-200 h-full px-2 rounded-l-2xl flex justify-center"
           >
-            <Text className="font-semibold">{!!selectedCurrency ? `${selectedCurrency.unicodeIcon} ${selectedCurrency.isoCode}` : " ---- "} 🔽</Text>
+            <Text className="font-semibold">{!!selectedCurrency ? `${selectedCurrency.unicodeIcon} ${selectedCurrency.isoCode}` : " ------- "} 🔽</Text>
           </TouchableOpacity>
           <TextInput
             keyboardType='decimal-pad'
@@ -74,7 +73,11 @@ const CurrencyInputField = ({
           >
             {
               supportCurrency.map(v => (
-                <TouchableOpacity 
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedCurrency(v)
+                    setVisible(false)
+                  }}
                   key={v.isoCode}
                   className="mx-2 py-2 border-b-[1px] border-slate-400"
                 >
