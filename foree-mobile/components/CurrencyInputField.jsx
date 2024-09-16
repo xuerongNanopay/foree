@@ -29,7 +29,7 @@ const CurrencyInputField = ({
           activeOpacity={0.7}
           className="bg-slate-200 h-full px-2 rounded-l-2xl flex justify-center"
         >
-          <Text className="font-semibold">🇨🇦 CAD</Text>
+          <Text className="font-semibold">🇨🇦 CAD 🔽</Text>
         </TouchableOpacity>
         <TextInput
           keyboardType='decimal-pad'
