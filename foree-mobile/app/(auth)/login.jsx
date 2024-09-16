@@ -75,7 +75,7 @@ const Login = () => {
       } else if ( se.userStatus == UserStatusInitial ) {
         router.replace('/onboarding')
       } else if ( se.loginStatus == EPStatusActive && se.userStatus == UserStatusActive ) {
-        router.replace('/home')
+        router.replace('/home_tab')
       } else {
         console.error("login unknow status", se)
       }
