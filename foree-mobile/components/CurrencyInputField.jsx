@@ -18,9 +18,9 @@ const CurrencyInputField = ({
   onCurrencyChange=()=>{}
 }) => {
   const [visible, setVisible] = useState(false)
-  const [selectedCurrency, setSelectedCurrency] = useState(null)
+  const [selectedCurrency, setSelectedCurrency] = useState(supportCurrencies.length === 1 ? supportCurrencies[0] : null)
   const [amount, setAmount] = useState("")
-  const [amt, setAmt] = useState({amount: 0.0, currency: ''})
+  const [amt, setAmt] = useState(supportCurrencies.length === 1 ? {amount: 0.0, currency: supportCurrencies[0].isoCode} : {amount: 0.0, currency: ''})
   console.log(amt)
 
   useState(() => {
@@ -44,7 +44,9 @@ const CurrencyInputField = ({
             activeOpacity={0.7}
             className="bg-slate-200 h-full px-2 rounded-l-2xl flex justify-center"
           >
-            <Text className="font-semibold">{!!selectedCurrency ? `${selectedCurrency.unicodeIcon} ${selectedCurrency.isoCode}` : " ------- "} 🔽</Text>
+            <Text className="font-semibold">
+              {!!selectedCurrency ? `${selectedCurrency.unicodeIcon} ${selectedCurrency.isoCode}` : " ------- "} {supportCurrencies.length === 1 ? "" : "🔽"}
+            </Text>
           </TouchableOpacity>
           <TextInput
             value={amount}
@@ -72,53 +74,56 @@ const CurrencyInputField = ({
         </View>
       </View>
       {/* Currency picker */}
-      <Modal
-        visible={visible}
-        animationType='slide'
-      >
-        <SafeAreaView className="h-full flex flex-col">
-          <View className="flex flex-row items-center border-b-[1px] border-slate-400">
-            <Text
-              onPress={() => {
-                setVisible(false)
-              }}
-              className="py-2 px-4 text-2xl font-bold text-slate-600"
+      {
+        supportCurrencies.length === 1 ? <></> :
+        <Modal
+          visible={visible}
+          animationType='slide'
+        >
+          <SafeAreaView className="h-full flex flex-col">
+            <View className="flex flex-row items-center border-b-[1px] border-slate-400">
+              <Text
+                onPress={() => {
+                  setVisible(false)
+                }}
+                className="py-2 px-4 text-2xl font-bold text-slate-600"
+              >
+                &#8592;
+              </Text>
+              <Text
+                className="font-psemibold text-xl text-slate-600"
+              >
+                Choose a currency
+              </Text>
+            </View>
+            <ScrollView
+              className="flex-1"
+              showsVerticalScrollIndicator={false}
             >
-              &#8592;
-            </Text>
-            <Text
-              className="font-psemibold text-xl text-slate-600"
-            >
-              Choose a currency
-            </Text>
-          </View>
-          <ScrollView
-            className="flex-1"
-            showsVerticalScrollIndicator={false}
-          >
-            {
-              supportCurrency.map(v => (
-                <TouchableOpacity
-                  onPress={() => {
-                    
-                    setSelectedCurrency(v)
-                    setAmount("")
-                    setAmt({
-                      currency: v.isoCode,
-                      amount: 0.0
-                    })
-                    setVisible(false)
-                  }}
-                  key={v.isoCode}
-                  className="mx-2 py-2 border-b-[1px] border-slate-400"
-                >
-                  <Text className="font-semibold text-2xl">{v.unicodeIcon} {v.isoCode}</Text>
-                </TouchableOpacity>
-              ))
-            }
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
+              {
+                supportCurrencies.map(v => (
+                  <TouchableOpacity
+                    onPress={() => {
+                      
+                      setSelectedCurrency(v)
+                      setAmount("")
+                      setAmt({
+                        currency: v.isoCode,
+                        amount: 0.0
+                      })
+                      setVisible(false)
+                    }}
+                    key={v.isoCode}
+                    className="mx-2 py-2 border-b-[1px] border-slate-400"
+                  >
+                    <Text className="font-semibold text-2xl">{v.unicodeIcon} {v.isoCode}</Text>
+                  </TouchableOpacity>
+                ))
+              }
+            </ScrollView>
+          </SafeAreaView>
+        </Modal>
+      }
     </>
   )
 }
