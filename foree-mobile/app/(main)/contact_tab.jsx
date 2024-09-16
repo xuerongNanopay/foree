@@ -7,7 +7,7 @@ import SearchInput from '../../components/SearchInput'
 import { accountService } from '../../service'
 import { ContactTransferCashPickup } from '../../constants/contacts'
 import string_util from '../../util/string_util'
-import { formatContactName } from '../../util/contact_util'
+import { formatName } from '../../util/foree_util'
 
 const ContactTab = () => {
   const [searchText, setSearchText] = useState("")
@@ -101,7 +101,7 @@ const ContactListItem = ({
 
   return (
     <View className="mb-2 p-2 rounded-lg bg-[#ccded6]">
-      <Text className="font-bold">{formatContactName(contact)}</Text>
+      <Text className="font-bold">{formatName(contact)}</Text>
       <FormatContactTransferInfo {...contact}/>
       <FormatContactTransferRecentActivity {...contact}/>
     </View>

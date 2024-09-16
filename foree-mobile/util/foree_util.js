@@ -1,6 +1,6 @@
 import { ContactTransferCashPickup } from "../constants/contacts"
 
-export const formatContactName = ({firstName, middleName, lastName}, max=30) => {
+export const formatName = ({firstName, middleName, lastName}, max=30) => {
   let fullName = !!middleName ? `${firstName} ${middleName} ${lastName}` : `${firstName} ${lastName}`
   if ( fullName.length < max ) return fullName
   fullName = `${firstName} ${lastName}`

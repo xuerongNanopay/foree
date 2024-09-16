@@ -3,7 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 
 import { accountService } from '../../service'
-import { formatContactName } from '../../util/contact_util'
+import { formatName } from '../../util/foree_util'
 import Regions from '../../constants/region'
 import Countries from '../../constants/country'
 import { ContactTransferBankAccount, ContactTransferCashPickup, ContactTransferMethods } from '../../constants/contacts'
@@ -58,7 +58,7 @@ const ContactDetail = () => {
     <SafeAreaView>
       <View className="flex h-full px-2 py-4">
         <View className="flex flex-row items-center pb-4 border-b-[1px] border-slate-300">
-          <Text className="flex-1 font-pbold text-lg">{!!contact ? formatContactName(contact, 20) : ""}</Text>
+          <Text className="flex-1 font-pbold text-lg">{!!contact ? formatName(contact, 20) : ""}</Text>
           <TouchableOpacity
             activeOpacity={0.7}
             className="bg-[#1A6B54] py-2 px-4 rounded-full"

@@ -6,7 +6,7 @@ import MultiStepForm from '../../components/MultiStepForm'
 import { router, useFocusEffect } from 'expo-router'
 import ModalSelect from '../../components/ModalSelect'
 import { ContactTransferCashPickup } from '../../constants/contacts'
-import { formatContactMethod, formatContactName } from '../../util/contact_util'
+import { formatContactMethod, formatName } from '../../util/foree_util'
 
 const TransactionCreate = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -91,12 +91,21 @@ const TransactionCreate = () => {
   
     return (
       <View className={`mb-2 p-2 rounded-lg bg-[#ccded6] ${contact.id == form.coutAccId ? "bg-[#9cd1b9]" : ""}`}>
-        <Text className="font-bold">{formatContactName(contact)}</Text>
+        <Text className="font-bold">{formatName(contact)}</Text>
         <FormatContactTransferInfo {...contact}/>
         <FormatContactTransferRecentActivity {...contact}/>
       </View>
     )
   },[form.coutAccId])
+
+  const InteracListItem = useCallback((interac) =>{
+    if ( !interac ) return <></>
+    return (
+      <View className="m">
+        <Text>1111</Text>
+      </View>
+    )
+  }, [form.cinAccId])
 
   const TransactionCreateTitle = () => (
     <View>
@@ -153,7 +162,7 @@ const TransactionCreate = () => {
           if ( !form.coutAccId ) return ""
           const contact = contacts.find(c => c.id === form.coutAccId)
           if ( !contact ) return ""
-          return formatContactName(contact) + "\n" + formatContactMethod(contact)
+          return formatName(contact) + "\n" + formatContactMethod(contact)
         }}
         inputContainerStyles="h-16"
         multiline={true}
@@ -201,11 +210,6 @@ const TransactionCreate = () => {
   )
 }
 
-const InteracListItem = ({}) => (
-  <View className="mt-4">
-    <Text>1111</Text>
-  </View>
-)
 const FormatContactTransferInfo = ({transferMethod, bankName, accountNoOrIBAN}) => {
   if ( transferMethod === ContactTransferCashPickup ) 
     return <Text className="font-semibold text-slate-700">Cash Pickup</Text>
