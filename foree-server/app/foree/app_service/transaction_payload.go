@@ -35,7 +35,7 @@ type QuoteTransactionReq struct {
 	CoutAccId          int64   `json:"coutAccId" validate:"gt=0"`
 	SrcAmount          float64 `json:"srcAmount" validate:"gt=10,lt=1000"`
 	SrcCurrency        string  `json:"srcCurrency" validate:"eq=CAD"`
-	DestCurrency       string  `json:"DestCurrency" validate:"eq=PKR"`
+	DestCurrency       string  `json:"destCurrency" validate:"eq=PKR"`
 	RewardIds          []int64 `json:"rewardIds" validate:"max=1"`
 	PromoCode          string  `json:"promoCode"`
 	TransactionPurpose string  `json:"transactionPurpose" validate:"required"`
