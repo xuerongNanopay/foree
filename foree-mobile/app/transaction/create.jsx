@@ -1,11 +1,23 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import { View, Text, SafeAreaView } from 'react-native'
+import React, { useState } from 'react'
 
 const TransactionCreate = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errors, setErrors] = useState({})
+  const [form, setForm] = useState({
+    cinAccId: 0,
+    coutAccId: 0,
+    srcAmount: 0,
+    srcCurrency: 'CAD',
+    destCurrency: 'PKR',
+    rewardIds: [],
+    transactionPurpose: ''
+  })
+
   return (
-    <View>
-      <Text>TransactionCreate</Text>
-    </View>
+    <SafeAreaView>
+    <Text>TransactionCreate</Text>
+    </SafeAreaView>
   )
 }
 
