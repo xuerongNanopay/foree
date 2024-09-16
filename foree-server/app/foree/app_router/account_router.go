@@ -7,15 +7,12 @@ import (
 
 // Do I need additional struct this it?
 type AccountRouter struct {
-	// SessionRouter
 	accountService *foree_service.AccountService
+	authService    *foree_service.AuthService
 }
 
 func NewAccountRouter(authService *foree_service.AuthService, accountService *foree_service.AccountService) *AccountRouter {
 	return &AccountRouter{
-		// SessionRouter: SessionRouter{
-		// 	authService: authService,
-		// },
 		accountService: accountService,
 	}
 }
@@ -25,7 +22,34 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 	router.HandleFunc("/verify_contact_account", simplePostWrapper(c.accountService.VerifyContact)).Methods("POST")
 	router.HandleFunc("/create_contact_account", simplePostWrapper(c.accountService.CreateContact)).Methods("POST")
 	router.HandleFunc("/delete_contact_account", simplePostWrapper(c.accountService.DeleteContact)).Methods("POST")
-	router.HandleFunc("/contact_accounts/{ContactId}", simpleGetWrapper(c.accountService.GetActiveContact)).Methods("GET")
-	router.HandleFunc("/contact_accounts", simpleGetWrapper(c.accountService.GetAllActiveContacts)).Methods("GET")
-	router.HandleFunc("/interac_accounts", simpleGetWrapper(c.accountService.GetAllActiveInteracs)).Methods("GET")
+	// router.HandleFunc("/contact_accounts/{ContactId}", simpleGetWrapper(c.accountService.GetActiveContact)).Methods("GET")
+	router.HandleFunc(
+		"/contact_accounts/{ContactId}",
+		sessionGetWrapper(
+			"GetActiveContact",
+			foree_service.PermissionContactRead,
+			c.authService,
+			c.accountService.GetActiveContact,
+		),
+	).Methods("GET")
+	// router.HandleFunc("/contact_accounts", simpleGetWrapper(c.accountService.GetAllActiveContacts)).Methods("GET")
+	router.HandleFunc(
+		"/contact_accounts",
+		sessionGetWrapper(
+			"GetAllActiveContacts",
+			foree_service.PermissionContactRead,
+			c.authService,
+			c.accountService.GetAllActiveContacts,
+		),
+	).Methods("GET")
+	// router.HandleFunc("/interac_accounts", simpleGetWrapper(c.accountService.GetAllActiveInteracs)).Methods("GET")
+	router.HandleFunc(
+		"/interac_accounts",
+		sessionGetWrapper(
+			"GetAllActiveInteracs",
+			foree_service.PermissionContactRead,
+			c.authService,
+			c.accountService.GetAllActiveInteracs,
+		),
+	).Methods("GET")
 }

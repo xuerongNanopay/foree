@@ -79,6 +79,9 @@ func (q GetContactReq) Validate() *transport.BadRequestError {
 	}
 	return nil
 }
+func (q GetContactReq) GetSessionId() string {
+	return q.SessionId
+}
 
 type QueryContactReq struct {
 	transport.SessionReq
