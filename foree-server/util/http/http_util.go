@@ -1,8 +1,11 @@
 package http_util
 
 import (
+	"context"
 	"net/http"
 	"strings"
+
+	"xue.io/go-pay/constant"
 )
 
 func LoadRealIp(r *http.Request) string {
@@ -19,4 +22,12 @@ func LoadRealIp(r *http.Request) string {
 	} else {
 		return ip
 	}
+}
+
+func LoadRealIpFromContext(ctx context.Context) string {
+	req, ok := ctx.Value(constant.CKHttpRequest).(*http.Request)
+	if !ok {
+		return ""
+	}
+	return LoadRealIp(req)
 }

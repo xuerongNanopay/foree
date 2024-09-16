@@ -5,12 +5,17 @@ import (
 	foree_service "xue.io/go-pay/app/foree/app_service"
 )
 
+// Do I need additional struct this it?
 type AccountRouter struct {
+	// SessionRouter
 	accountService *foree_service.AccountService
 }
 
-func NewAccountRouter(accountService *foree_service.AccountService) *AccountRouter {
+func NewAccountRouter(authService *foree_service.AuthService, accountService *foree_service.AccountService) *AccountRouter {
 	return &AccountRouter{
+		// SessionRouter: SessionRouter{
+		// 	authService: authService,
+		// },
 		accountService: accountService,
 	}
 }
