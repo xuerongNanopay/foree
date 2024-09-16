@@ -38,7 +38,7 @@ func sessionGetWrapper[P transport.ForeeSessionRequest, Q any](
 				userId = session.UserId
 			}
 			// Normal error when the token expired
-			foree_logger.Logger.Info(fmt.Sprintf("%v_Fail", serviceName), "ip", http_util.LoadRealIpFromContext(ctx), "userId", userId, "sessionId", req.GetSessionId(), "cause", sErr.Error())
+			foree_logger.Logger.Info(fmt.Sprintf("%v_Permission_Error", serviceName), "ip", http_util.LoadRealIpFromContext(ctx), "userId", userId, "sessionId", req.GetSessionId(), "cause", sErr.Error())
 			return nil, sErr
 		}
 		return ctx, nil
@@ -78,7 +78,7 @@ func sessionPostWrapper[P transport.ForeeSessionRequest, Q any](
 				userId = session.UserId
 			}
 			// Normal error when the token expired
-			foree_logger.Logger.Info(fmt.Sprintf("%v_Fail", serviceName), "ip", http_util.LoadRealIpFromContext(ctx), "userId", userId, "sessionId", req.GetSessionId(), "cause", sErr.Error())
+			foree_logger.Logger.Info(fmt.Sprintf("%v_Permission_Error", serviceName), "ip", http_util.LoadRealIpFromContext(ctx), "userId", userId, "sessionId", req.GetSessionId(), "cause", sErr.Error())
 			return nil, sErr
 		}
 		return ctx, nil
