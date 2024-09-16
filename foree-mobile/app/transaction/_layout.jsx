@@ -14,7 +14,7 @@ const TransactionLayout = () => {
           },
         }}
       >
-      {/* <Stack.Screen
+      <Stack.Screen
         name="create"
         options={{
           headerShown: true,
@@ -28,7 +28,7 @@ const TransactionLayout = () => {
             }
           }} title="Back" color="#004d40"/>
         }}
-      /> */}
+      />
       {/* <Stack.Screen
         name="[transactionId]"
         options={{

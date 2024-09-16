@@ -1,5 +1,6 @@
 import { View, Text, SafeAreaView, TouchableOpacity, FlatList } from 'react-native'
 import React, { useState } from 'react'
+import { router } from 'expo-router'
 
 const transactionStatuses = [
   {
@@ -54,7 +55,7 @@ const TransactionTab = () => {
           <View className="flex flex-row items-center pb-2 mb-2 border-b-[1px] border-slate-300">
             <Text className="flex-1 font-pbold text-2xl">Transactions</Text>
             <TouchableOpacity
-              onPress={()=> {router.push("/contact/create")}}
+              onPress={()=> {router.push("/transaction/create")}}
               activeOpacity={0.7}
               className="bg-[#1A6B54] py-2 px-4 rounded-full"
               disabled={false}
