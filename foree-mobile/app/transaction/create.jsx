@@ -8,6 +8,7 @@ import ModalSelect from '../../components/ModalSelect'
 import { ContactTransferCashPickup } from '../../constants/contacts'
 import { formatContactMethod, formatName } from '../../util/foree_util'
 import CurrencyInputField from '../../components/CurrencyInputField'
+import Currencies from '../../constants/currency'
 
 const TransactionCreate = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -195,10 +196,12 @@ const TransactionCreate = () => {
       <CurrencyInputField
         title="You Send"
         containerStyles="mt-2"
+        supportCurrencies={[Currencies["CAD"]]}
       />
       <CurrencyInputField
         title="Recipient Receives"
         containerStyles="mt-2"
+        supportCurrencies={[Currencies["PKR"]]}
       />
     </View>
   )

@@ -12,16 +12,16 @@ const CurrencyInputField = ({
   containerStyles,
   variant='bordered',
   inputContainerStyles,
-  supportCurrency=Object.values(Currencies),
+  supportCurrencies=Object.values(Currencies),
   value,
   isEditable,
   onCurrencyChange=()=>{}
 }) => {
+  console.log("avvvv", supportCurrencies)
   const [visible, setVisible] = useState(false)
   const [selectedCurrency, setSelectedCurrency] = useState(supportCurrencies.length === 1 ? supportCurrencies[0] : null)
   const [amount, setAmount] = useState("")
   const [amt, setAmt] = useState(supportCurrencies.length === 1 ? {amount: 0.0, currency: supportCurrencies[0].isoCode} : {amount: 0.0, currency: ''})
-  console.log(amt)
 
   useState(() => {
     onCurrencyChange(amt)
