@@ -26,6 +26,10 @@ type CreateContactReq struct {
 	AccountNoOrIBAN       string `json:"accountNoOrIBAN"`
 }
 
+func (q CreateContactReq) GetSessionId() string {
+	return q.SessionId
+}
+
 func (q CreateContactReq) Validate() *transport.BadRequestError {
 	ret := validateStruct(q, "Invalid create contact request")
 
@@ -59,6 +63,10 @@ func (q CreateContactReq) Validate() *transport.BadRequestError {
 type DeleteContactReq struct {
 	transport.SessionReq
 	ContactId int64 `json:"contactId" validate:"required,gte=0"`
+}
+
+func (q DeleteContactReq) GetSessionId() string {
+	return q.SessionId
 }
 
 func (q DeleteContactReq) Validate() *transport.BadRequestError {
