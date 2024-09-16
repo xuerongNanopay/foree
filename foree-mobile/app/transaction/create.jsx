@@ -11,6 +11,7 @@ import CurrencyInputField from '../../components/CurrencyInputField'
 import Currencies from '../../constants/currency'
 
 const TransactionCreate = () => {
+  const [rate, setRate] = useState(0.0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isEditable, setIsEditable]  = useState(false)
   const [contacts, setContacts] = useState([])
@@ -203,6 +204,9 @@ const TransactionCreate = () => {
         containerStyles="mt-2"
         supportCurrencies={[Currencies["PKR"]]}
       />
+      <View className="mt-2">
+        <Text className="font-semibold text-green-800">Current Rate: <Text className="text-green-600">$1.00 CAD = $210.00 PRK</Text></Text>
+      </View>
     </View>
   )
 
