@@ -211,7 +211,6 @@ const Onboarding = () => {
         modalTitle="select a province"
         errorMessage={errors['province']}
         containerStyles="mt-2"
-        allowAdd={false}
         value={form.province}
         variant='flat'
         searchKey="name"
@@ -278,7 +277,6 @@ const Onboarding = () => {
         modalTitle="select a country"
         errorMessage={errors['pob']}
         containerStyles="mt-2"
-        allowAdd={false}
         value={() => {
           return Countries[form.pob] ? `${Countries[form.pob]?.unicodeIcon} ${Countries[form.pob]?.name}` : ""
         }}
@@ -301,7 +299,6 @@ const Onboarding = () => {
         modalTitle="select a country"
         containerStyles="mt-2"
         errorMessage={errors['nationality']}
-        allowAdd={false}
         value={() => {
           return Countries[form.nationality] ? `${Countries[form.nationality]?.unicodeIcon} ${Countries[form.nationality]?.name}` : ""
         }}
@@ -324,8 +321,6 @@ const Onboarding = () => {
         errorMessage={errors['identificationType']}
         modalTitle="select identification type"
         containerStyles="mt-2"
-        allowAdd={false}
-        allowSearch={false}
         value={form.identificationType}
         variant='flat'
         searchKey="id"

@@ -232,8 +232,6 @@ const ContactCreate = () => {
         modalTitle="select a province"
         errorMessage={errors['province']}
         containerStyles="mt-2"
-        allowSearch={false}
-        allowAdd={false}
         value={form.province}
         variant='flat'
         searchKey="name"
@@ -293,8 +291,6 @@ const ContactCreate = () => {
         errorMessage={errors['relationshipToContact']}
         modalTitle="select relationship"
         containerStyles="mt-2"
-        allowAdd={false}
-        allowSearch={false}
         value={form.relationshipToContact}
         variant='flat'
         searchKey="name"
@@ -316,8 +312,6 @@ const ContactCreate = () => {
         errorMessage={errors['transferMethod']}
         modalTitle="select transfer method"
         containerStyles="mt-2"
-        allowAdd={false}
-        allowSearch={false}
         value={form.transferMethod}
         variant='flat'
         keyExtractor="name"
@@ -344,7 +338,6 @@ const ContactCreate = () => {
             errorMessage={errors['bankName']}
             modalTitle="select bank"
             containerStyles="mt-2"
-            allowAdd={false}
             allowSearch={true}
             value={form.bankName}
             variant='flat'

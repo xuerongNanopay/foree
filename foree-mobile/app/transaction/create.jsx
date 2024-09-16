@@ -110,6 +110,35 @@ const TransactionCreate = () => {
         Enter the details for your transactions.
       </Text>
       <ModalSelect
+        title="From"
+        modalTitle="Select Source"
+        errorMessage={errors['coutAccId']}
+        containerStyles="mt-2"
+        value={() => {
+          if ( !form.coutAccId ) return ""
+          const sourcAcc = sourceAccounts.find(c => c.id === form.coutAccId)
+          if ( !sourcAcc ) return ""
+          return "TODO"
+        }}
+        inputContainerStyles="h-16"
+        multiline={true}
+        numberOfLines={2}
+        keyExtractor="id"
+        valueExtractor="id"
+        list={sourceAccounts}
+        listView={InteracListItem}
+        uselistSeperator={false}
+        isEditable={isEditable}
+        onPress={(o) => {
+          console.log(o)
+          setForm({
+            ...form,
+            coutAccId: o
+          })
+        }}
+        placeholder="Select Source"
+      />
+      <ModalSelect
         title="Send to"
         modalTitle="Select Contact"
         errorMessage={errors['coutAccId']}
@@ -129,12 +158,10 @@ const TransactionCreate = () => {
         inputContainerStyles="h-16"
         multiline={true}
         numberOfLines={2}
-        valueView
         searchKey={({firstName, middelName, lastName}) => {
           return `${firstName ?? ""}${middelName ?? ""}${lastName ?? ""}`
         }}
         keyExtractor="id"
-        showExtractor="firstName"
         valueExtractor="id"
         list={contacts}
         listView={ContactListItem}
@@ -174,6 +201,11 @@ const TransactionCreate = () => {
   )
 }
 
+const InteracListItem = ({}) => (
+  <View className="mt-4">
+    <Text>1111</Text>
+  </View>
+)
 const FormatContactTransferInfo = ({transferMethod, bankName, accountNoOrIBAN}) => {
   if ( transferMethod === ContactTransferCashPickup ) 
     return <Text className="font-semibold text-slate-700">Cash Pickup</Text>
