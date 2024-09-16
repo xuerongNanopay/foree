@@ -24,6 +24,7 @@ const ModalSelect = ({
   inputStyles,
   allowSearch=true,
   searchKey,
+  searchTitle="searching...",
   keyExtractor,
   showExtractor,
   valueExtractor,
@@ -132,7 +133,7 @@ const ModalSelect = ({
                 <TextInput
                   className={`flex-1 h-full font-pregular text-base`}
                   // value={"aaa"}
-                  placeholder="searching..."
+                  placeholder={searchTitle}
                   editable={true}
                   keyboardType="default"
                   placeholderTextColor="#BDBDBD"

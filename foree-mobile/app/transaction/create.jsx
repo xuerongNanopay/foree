@@ -6,7 +6,7 @@ import MultiStepForm from '../../components/MultiStepForm'
 import { router, useFocusEffect } from 'expo-router'
 import ModalSelect from '../../components/ModalSelect'
 import { ContactTransferCashPickup } from '../../constants/contacts'
-import { formatContactName } from '../../util/contact_util'
+import { formatContactMethod, formatContactName } from '../../util/contact_util'
 
 const TransactionCreate = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -101,12 +101,17 @@ const TransactionCreate = () => {
         errorMessage={errors['coutAccId']}
         containerStyles="mt-2"
         allowSearch={true}
+        searchTitle="search name..."
         allowAdd={true}
         addHandler={() => {
           router.push('/contact/create')
         }}
-        value={form.coutAccId}
-        variant='flat'
+        value={() => {
+          if ( !form.coutAccId ) return ""
+          const contact = contacts.find(c => c.id === form.coutAccId)
+          if ( !contact ) return ""
+          return formatContactName(contact, 14) + " - " + formatContactMethod(contact)
+        }}
         searchKey={({firstName, middelName, lastName}) => {
           return `${firstName ?? ""}${middelName ?? ""}${lastName ?? ""}`
         }}
