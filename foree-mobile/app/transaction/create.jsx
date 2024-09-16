@@ -84,6 +84,20 @@ const TransactionCreate = () => {
   
   }
 
+  const ContactListItem = useCallback((
+    contact
+  ) => {
+    if ( ! contact ) return <></>
+  
+    return (
+      <View className={`mb-2 p-2 rounded-lg bg-[#ccded6] ${contact.id == form.coutAccId ? "bg-[#9cd1b9]" : ""}`}>
+        <Text className="font-bold">{formatContactName(contact)}</Text>
+        <FormatContactTransferInfo {...contact}/>
+        <FormatContactTransferRecentActivity {...contact}/>
+      </View>
+    )
+  },[form.coutAccId])
+
   const TransactionCreateTitle = () => (
     <View>
       <Text className="text-lg font-pbold text-center">Transaction Details</Text>
@@ -159,22 +173,6 @@ const TransactionCreate = () => {
     </SafeAreaView>
   )
 }
-
-//TODO: refactor -- Duplicate code from contact_tab 
-const ContactListItem = (
-  contact
-) => {
-  if ( ! contact ) return <></>
-
-  return (
-    <View className="mb-2 p-2 rounded-lg bg-[#ccded6]">
-      <Text className="font-bold">{formatContactName(contact)}</Text>
-      <FormatContactTransferInfo {...contact}/>
-      <FormatContactTransferRecentActivity {...contact}/>
-    </View>
-  )
-}
-
 
 const FormatContactTransferInfo = ({transferMethod, bankName, accountNoOrIBAN}) => {
   if ( transferMethod === ContactTransferCashPickup ) 
