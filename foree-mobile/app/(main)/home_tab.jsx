@@ -58,7 +58,7 @@ const HomeTab = () => {
         <ScrollView 
           showsVerticalScrollIndicator={false}
         >
-          <View className="bg-[#d0f2e4] rounded-2xl p-4 my-4">
+          <View className="bg-[#ccded6] rounded-2xl p-4 my-4">
             <View className="flex-1">
               <Text className="font-pbold text-lg">Current Rate</Text>
               {/* <Text className="font-psemibold text-lg">🇨🇦 $1.00 CAD = 🇵🇰 $208.00 PKR</Text> */}
@@ -72,7 +72,7 @@ const HomeTab = () => {
               </View>
             </View>
           </View>
-          <View className="bg-[#d0f2e4] rounded-2xl p-4 my-4">
+          <View className="bg-[#ccded6] rounded-2xl p-4 my-4">
             <Text className="font-pbold mb-2">Welcome to Foree Remittance, stress free money transfers to ....... in exclusive partnership with ...</Text>
             <Text className="font-psemibold mb-2">Foree brings more value & exciting rewards for new & existing users</Text>
             <View className="pl-2 flex flex-row font-pregular">
@@ -85,7 +85,7 @@ const HomeTab = () => {
             </View>
             <Text className="font-psemibold mt-2">Refer today & start earning the rewards</Text>
           </View>
-          <View className="bg-[#d0f2e4] rounded-2xl py-4 my-4">
+          <View className="bg-[#ccded6] rounded-2xl py-4 my-4">
             <View className="px-4 pb-2 border-b-[1px] border-[#b6d4c7]">
               <Text className="font-pbold text-lg">Recent Activities</Text>
             </View>
