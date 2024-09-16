@@ -1,5 +1,5 @@
 import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView, SafeAreaView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import string_util from '../util/string_util'
 
 const variants = {
@@ -29,18 +29,24 @@ const ModalSelect = ({
   valueExtractor,
   list=[],
   listView,
+  uselistSeperator=true,
   allowAdd=true,
-  addTitle,
   addHandler,
   inputContainerStyles,
   onPress=()=>{},
   variant='bordered',
   placeholder,
-  errorMessage
+  errorMessage,
+  isEditable=true
 }) => {
   const [showList, setShowList] = useState(list)
   const [visible, setVisible] = useState(false)
   const [cache, setCache] = useState(new Map(list.map((obj) => [obj[valueExtractor], obj])))
+
+  useEffect(() => {
+    setCache(new Map(list.map((obj) => [obj[valueExtractor], obj])))
+    setShowList(list)
+  }, [list])
 
   return (
     <View>
@@ -55,9 +61,12 @@ const ModalSelect = ({
           `}
         >
           <TextInput
-            onPress={() => setVisible(true)}
+            onPress={() => {
+              if (isEditable) setVisible(true)
+              else {}
+            }}
             className={`h-full w-full px-4 flex-1 font-psemibold text-base ${inputStyles}`}
-            value={typeof value === "string" ? cache.get(value)?.[showExtractor] : value()}
+            value={typeof value === "function" ? value() : cache.get(value)?.[showExtractor]}
             placeholder={placeholder}
             placeholderTextColor="#BDBDBD"
             // onChangeText={handleChangeText}
@@ -77,27 +86,47 @@ const ModalSelect = ({
       >
         <SafeAreaView className="h-full flex flex-col">
           <View
-            className="flex flex-row items-center border-b-[1px] border-slate-400"
+            className="flex flex-row items-center border-b-[1px] border-slate-400 pr-4"
           >
-            <Text
-              onPress={() => {
-                setVisible(false)
-                setShowList(list)
-              }}
-              className="py-2 pl-4 pr-8 text-2xl font-bold text-slate-600"
-            >
-              &#8592;
-            </Text>
-            <Text
-              className="font-psemibold text-xl text-slate-600"
-            >{modalTitle}</Text>
+            <View className="flex-1 flex flex-row items-center">
+              <Text
+                onPress={() => {
+                  setVisible(false)
+                  setShowList(list)
+                }}
+                className="py-2 px-4 text-2xl font-bold text-slate-600"
+              >
+                &#8592;
+              </Text>
+              <Text
+                className="font-psemibold text-xl text-slate-600"
+              >{modalTitle}</Text>
+            </View>
+            <View>
+              {
+                allowAdd ?
+                  <TouchableOpacity
+                    onPress={()=> {
+                      addHandler()
+                      setVisible(false)
+                    }}
+                    activeOpacity={0.7}
+                    className="bg-[#1A6B54] py-2 px-4 rounded-full"
+                    disabled={false}
+                  >
+                    <Text className="font-pextrabold text-white">New</Text>
+                  </TouchableOpacity>
+                : null
+              }
+              
+            </View>
           </View>
           <View 
             className="px-2 flex-1"
           >
             {
               allowSearch ? <View
-                className="w-full h-14 my-2 border-2 border-secondary rounded-full flex-row items-center"
+                className="w-full h-14 my-2 border-2 border-secondary rounded-2xl flex-row items-center"
               >
                 <Text className="px-2">&#128270;</Text>
                 <TextInput
@@ -110,7 +139,7 @@ const ModalSelect = ({
                   onChangeText={(t)=>{
                     if ( !t ) setShowList(list)
                     else {
-                      setShowList(list.filter(v => string_util.containSubsequence(v[searchKey], t, {caseInsensitive:true})))
+                      setShowList(list.filter(v => string_util.containSubsequence(typeof searchKey === "function" ? searchKey(v) : v[searchKey], t, {caseInsensitive:true})))
                     }
                   }}
                 />
@@ -118,27 +147,13 @@ const ModalSelect = ({
                 {/* <Text>Search</Text> */}
               </View> : null
             }
-            <View>
-              {
-                allowAdd ? <View
-                  className="w-full h-14 my-2 border-2 border-secondary rounded-full flex-row items-center"
-                >
-                  <TouchableOpacity
-                    className="w-full"
-                  >
-                    <Text className="text-center font-semibold text-secondary text-xl"><Text className="text-2xl">+</Text> {addTitle}</Text>
-                  </TouchableOpacity>
-                </View> : null
-              }
-              
-            </View>
             <View className="flex-1">
               <ScrollView 
                 className=""
                 showsVerticalScrollIndicator={false}
               >
                 { !showList || showList.length === 0 ? 
-                  <View className="w-full border-b-[1px] border-slate-300">
+                  <View className="w-full">
                     <Text 
                       className="font-psemibold text-center py-4 text-xl"
                     >🚫 Empty</Text> 
@@ -152,7 +167,7 @@ const ModalSelect = ({
                         setVisible(false)
                         setShowList(list)
                       }}
-                      className="w-full border-b-[1px] border-slate-300"
+                      className={`w-full ${uselistSeperator ? "border-b-[1px] border-slate-300" : ""}`}
                       key={v[keyExtractor]}
                     >
                       {listView(v)}

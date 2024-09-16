@@ -120,7 +120,11 @@ const ContactCreate = () => {
     } catch (err) {
       console.error("create contact", err, err.response.data)
     } finally {
-      router.replace('/contact_tab')
+      if ( router.canGoBack() ) {
+        router.back()
+      } else {
+        router.replace('/contact_tab')
+      }
       setIsSubmitting(false)
     }
   }
