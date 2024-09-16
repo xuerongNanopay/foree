@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, TextInput, Modal, SafeAreaView } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput, Modal, SafeAreaView, ScrollView } from 'react-native'
 import React, { useState } from 'react'
 import Currencies from '../constants/currency'
 
@@ -12,7 +12,7 @@ const CurrencyInputField = ({
   containerStyles,
   variant='bordered',
   inputContainerStyles,
-  supportCurrency=Currencies,
+  supportCurrency=Object.values(Currencies),
   value,
   onCurrencyChange=()=>{}
 }) => {
@@ -52,26 +52,37 @@ const CurrencyInputField = ({
         visible={visible}
         animationType='slide'
       >
-        <SafeAreaView>
-          <View
-            className="flex flex-row items-center border-b-[1px] border-slate-400 pr-4"
-          >
-            <View className="flex-1 flex flex-row items-center">
-              <Text
-                onPress={() => {
-                  setVisible(false)
-                }}
-                className="py-2 px-4 text-2xl font-bold text-slate-600"
-              >
-                &#8592;
-              </Text>
-              <Text
-                className="font-psemibold text-xl text-slate-600"
-              >
-                Choose a currency
-              </Text>
-            </View>
+        <SafeAreaView className="h-full flex flex-col">
+          <View className="flex flex-row items-center border-b-[1px] border-slate-400">
+            <Text
+              onPress={() => {
+                setVisible(false)
+              }}
+              className="py-2 px-4 text-2xl font-bold text-slate-600"
+            >
+              &#8592;
+            </Text>
+            <Text
+              className="font-psemibold text-xl text-slate-600"
+            >
+              Choose a currency
+            </Text>
           </View>
+          <ScrollView
+            className="flex-1"
+            showsVerticalScrollIndicator={false}
+          >
+            {
+              supportCurrency.map(v => (
+                <TouchableOpacity 
+                  key={v.isoCode}
+                  className="mx-2 py-2 border-b-[1px] border-slate-400"
+                >
+                  <Text className="font-semibold text-2xl">{v.unicodeIcon} {v.isoCode}</Text>
+                </TouchableOpacity>
+              ))
+            }
+          </ScrollView>
         </SafeAreaView>
       </Modal>
     </>
