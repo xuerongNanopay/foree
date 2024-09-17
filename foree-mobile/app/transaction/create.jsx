@@ -9,6 +9,7 @@ import { ContactTransferCashPickup } from '../../constants/contacts'
 import { formatContactMethod, formatName } from '../../util/foree_util'
 import CurrencyInputField from '../../components/CurrencyInputField'
 import Currencies from '../../constants/currency'
+import { TransactionPurposes } from '../../constants/transactions'
 
 const TransactionCreate = () => {
   const {contactId} = useLocalSearchParams()
@@ -152,12 +153,13 @@ const TransactionCreate = () => {
     )
   },[form.coutAccId])
 
-  const TransactionCreateTitle = () => (
+  const TransactionCreateTitle = useCallback(() => (
     <View>
       <Text className="text-lg font-pbold text-center">Transaction Details</Text>
     </View>
-  )
+  ))
 
+  //TODO: apply use callback
   const TransactionCreate = () => (
     <View>
       <Text className="font-pregular text-center mb-4">
@@ -255,10 +257,54 @@ const TransactionCreate = () => {
     </View>
   )
 
+  const TransactionPurposeTitle = useCallback(() => (
+    <View>
+      <Text className="text-lg font-pbold text-center">Transaction Purpose</Text>
+    </View>
+  ))
+
+  const TransactionPurpose = useCallback(() => (
+    <View>
+      <Text className="font-pregular text-center mb-4">
+        Enter the details for your transactions.
+      </Text>
+      <ModalSelect
+        title="Transaction Purpose"
+        modalTitle="select a purpose"
+        errorMessage={errors['transactionPurpose']}
+        containerStyles="mt-2"
+        value={form.transactionPurpose}
+        keyExtractor="name"
+        showExtractor="name"
+        valueExtractor="name"
+        listView={(purpose) => (
+          <Text className="font-pregular py-3 text-xl">
+            {purpose["name"]}
+          </Text>
+        )}
+        list={Object.values(TransactionPurposes)}
+        onPress={(o) => {
+          setForm((form) =>({
+            ...form,
+            transactionPurpose: o
+          }))
+        }}
+        placeholder="Choose a transaction purpose"
+      />
+    </View>
+  ), [errors['transactionPurpose'], form.transactionPurpose])
+
   const CreateTransactionFlow = [
     {
       titleView: TransactionCreateTitle,
       formView: TransactionCreate,
+      canGoNext: () => {
+        return true
+      }
+    },
+    {
+      titleView: TransactionPurposeTitle,
+      formView: TransactionPurpose,
       canGoNext: () => {
         return true
       }
