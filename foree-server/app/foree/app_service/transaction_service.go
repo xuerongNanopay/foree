@@ -20,8 +20,7 @@ import (
 )
 
 const (
-	rateCacheTimeout      time.Duration = 30 * time.Minute
-	quoteRateCacheTimeout time.Duration = 15 * time.Minute
+	quoteRateCacheTimeout time.Duration = 5 * time.Minute
 	feeCacheTimeout       time.Duration = time.Hour
 )
 
@@ -32,13 +31,13 @@ func NewTransactionService(
 	foreeTxRepo *transaction.ForeeTxRepo,
 	txSummaryRepo *transaction.TxSummaryRepo,
 	txQuoteRepo *transaction.TxQuoteRepo,
-	rateRepo *transaction.RateRepo,
 	rewardRepo *transaction.RewardRepo,
 	dailyTxLimiteRepo *transaction.DailyTxLimitRepo,
-	feeRepo *transaction.FeeRepo,
 	contactAccountRepo *account.ContactAccountRepo,
 	interacAccountRepo *account.InteracAccountRepo,
 	feeJointRepo *transaction.FeeJointRepo,
+	rateService *RateService,
+	feeService *FeeService,
 	txProcessor *TxProcessor,
 	scotiaClient scotia.ScotiaClient,
 	nbpClient nbp.NBPClient,
@@ -50,18 +49,16 @@ func NewTransactionService(
 		foreeTxRepo:        foreeTxRepo,
 		txSummaryRepo:      txSummaryRepo,
 		txQuoteRepo:        txQuoteRepo,
-		rateRepo:           rateRepo,
 		rewardRepo:         rewardRepo,
 		dailyTxLimiteRepo:  dailyTxLimiteRepo,
-		feeRepo:            feeRepo,
 		contactAccountRepo: contactAccountRepo,
 		interacAccountRepo: interacAccountRepo,
 		feeJointRepo:       feeJointRepo,
+		rateService:        rateService,
+		feeService:         feeService,
 		txProcessor:        txProcessor,
 		scotiaClient:       scotiaClient,
 		nbpClient:          nbpClient,
-		rateCache:          make(map[string]CacheItem[transaction.Rate], 8),
-		feeCache:           make(map[string]CacheItem[transaction.Fee], 8),
 	}
 }
 
@@ -72,25 +69,20 @@ type TransactionService struct {
 	foreeTxRepo        *transaction.ForeeTxRepo
 	txSummaryRepo      *transaction.TxSummaryRepo
 	txQuoteRepo        *transaction.TxQuoteRepo
-	rateRepo           *transaction.RateRepo
 	rewardRepo         *transaction.RewardRepo
 	dailyTxLimiteRepo  *transaction.DailyTxLimitRepo
-	feeRepo            *transaction.FeeRepo
 	contactAccountRepo *account.ContactAccountRepo
 	interacAccountRepo *account.InteracAccountRepo
 	feeJointRepo       *transaction.FeeJointRepo
+	rateService        *RateService
+	feeService         *FeeService
 	txProcessor        *TxProcessor
 	scotiaClient       scotia.ScotiaClient
 	nbpClient          nbp.NBPClient
-	rateCache          map[string]CacheItem[transaction.Rate]
-	rateCacheRWLock    sync.RWMutex
-	feeCache           map[string]CacheItem[transaction.Fee]
-	feeCacheRWLock     sync.RWMutex
 }
 
-// Can be cache for 5 minutes.
 func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*RateDTO, transport.HError) {
-	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, rateCacheTimeout)
+	rate, err := t.rateService.GetRate(req.SrcCurrency, req.DestCurrency)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -107,42 +99,8 @@ func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*Rate
 	return NewRateDTO(rate), nil
 }
 
-func (t *TransactionService) getRate(ctx context.Context, src, dest string, validIn time.Duration) (*transaction.Rate, error) {
-	rateId := transaction.GenerateRateId(src, dest)
-
-	t.rateCacheRWLock.RLock()
-	rateCache, ok := t.rateCache[rateId]
-	t.rateCacheRWLock.RUnlock()
-
-	if ok && rateCache.createdAt.Add(validIn).After(time.Now()) {
-		return &rateCache.item, nil
-	}
-
-	rate, err := t.rateRepo.GetUniqueRateById(ctx, rateId)
-	if err != nil {
-		return nil, err
-	}
-
-	if rate == nil {
-		return nil, nil
-	}
-
-	//There is a change that write lock never work.
-	//But if this case happen, we already a big company.
-	if !t.rateCacheRWLock.TryLock() {
-		return rate, nil
-	}
-	defer t.rateCacheRWLock.Unlock()
-
-	t.rateCache[rateId] = CacheItem[transaction.Rate]{
-		item:      *rate,
-		createdAt: time.Now(),
-	}
-	return rate, nil
-}
-
 func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*QuoteTransactionDTO, transport.HError) {
-	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, rateCacheTimeout)
+	rate, err := t.rateService.GetRate(req.SrcCurrency, req.DestCurrency)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -158,15 +116,7 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 	}
 
 	//fee
-	fee, err := t.getFee(ctx, foree_constant.DefaultFeeGroup, feeCacheTimeout)
-	if err != nil {
-		return nil, transport.WrapInteralServerError(err)
-	}
-	if fee == nil {
-		return nil, transport.NewInteralServerError("fee `%v` not found", foree_constant.DefaultFeeGroup)
-	}
-
-	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
+	feeJoints, err := t.feeService.applyFee(foree_constant.DefaultFeeGroup, types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -177,8 +127,11 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 		Currency: req.SrcCurrency,
 	}
 
-	if joint != nil {
+	totalFee := types.AmountData{}
+	for _, joint := range feeJoints {
 		totalAmt.Amount += joint.Amt.Amount
+		totalFee.Amount += joint.Amt.Amount
+		totalFee.Currency = joint.Amt.Currency
 	}
 
 	//TODO: calculate fee.
@@ -188,42 +141,14 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 		SrcCurrency:   req.SrcCurrency,
 		DestAmount:    types.Amount(rate.CalculateForwardAmount(req.SrcAmount)),
 		DestCurrency:  req.DestCurrency,
-		FeeAmount:     joint.Amt.Amount,
-		FeeCurrency:   joint.Amt.Currency,
+		FeeAmount:     totalFee.Amount,
+		FeeCurrency:   totalFee.Currency,
 		TotalAmount:   totalAmt.Amount,
 		TotalCurrency: totalAmt.Currency,
 	}
 	return &QuoteTransactionDTO{
 		TxSum: txSum,
 	}, nil
-}
-
-func (t *TransactionService) getFee(ctx context.Context, feeGroup string, validIn time.Duration) (*transaction.Fee, error) {
-	t.feeCacheRWLock.RLock()
-	feeCache, ok := t.feeCache[feeGroup]
-	t.feeCacheRWLock.RUnlock()
-
-	if ok && feeCache.createdAt.Add(validIn).After(time.Now()) {
-		return &feeCache.item, nil
-	}
-
-	fee, err := t.feeRepo.GetUniqueFeeByName(ctx, feeGroup)
-	if err != nil {
-		return nil, err
-	}
-
-	//There is a change that write lock never work.
-	//But if this case happen, we already a big company.
-	if !t.feeCacheRWLock.TryLock() {
-		return fee, nil
-	}
-	defer t.feeCacheRWLock.Unlock()
-
-	t.feeCache[feeGroup] = CacheItem[transaction.Fee]{
-		item:      *fee,
-		createdAt: time.Now(),
-	}
-	return fee, nil
 }
 
 func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionReq) (*QuoteTransactionDTO, transport.HError) {
@@ -233,7 +158,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	user := *session.User
-	rate, err := t.getRate(ctx, req.SrcCurrency, req.DestCurrency, quoteRateCacheTimeout)
+	rate, err := t.rateService.GetRate(req.SrcCurrency, req.DestCurrency)
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -282,61 +207,14 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		reward = r
 	}
 
-	//TODO: PromoCode
-	//Don't return err. Just ignore the promocode reward.
-	// 	if req.PromoCode != "" {
-	// 		promoCode, err := t.promoCodeRepo.GetUniquePromoCodeByCode(ctx, req.PromoCode)
-	// 		if err != nil {
-	// 			//TODO: log
-	// 			goto existpromo
-	// 		}
-	// 		if promoCode == nil {
-	// 			//TODO: log
-	// 			goto existpromo
-	// 		}
-	// 		if !promoCode.IsValid() {
-	// 			//TODO: log
-	// 			goto existpromo
-	// 		}
-	// 		if req.SrcCurrency != promoCode.MinAmt.Currency {
-	// 			//TODO: log
-	// 			goto existpromo
-	// 		}
-	// 		if req.SrcAmount < float64(promoCode.MinAmt.Amount) {
-	// 			//TODO: log
-	// 			goto existpromo
-	// 		}
-	// 		//TODO: check account limit.
-	// 	}
-	// existpromo:
-
-	//Fee
-	fee, err := t.getFee(ctx, session.UserGroup.FeeGroup, time.Hour)
+	feeJoints, err := t.feeService.applyFee(session.UserGroup.FeeGroup, types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
 	if err != nil {
 		return nil, transport.WrapInteralServerError(err)
 	}
-	//TODO: need?
-	if fee == nil {
-		return nil, transport.NewInteralServerError("fee `%v` not found", session.UserGroup.FeeGroup)
-	}
 
-	joint, err := fee.MaybeApplyFee(types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
-	if err != nil {
-		return nil, transport.WrapInteralServerError(err)
-	}
-	if joint != nil {
-		joint.Description = fee.Description
-		joint.OwnerId = user.ID
-	}
-
-	userGroup, er := t.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
-	if er != nil {
-		return nil, transport.WrapInteralServerError(er)
-	}
-
-	txLimit, ok := foree_constant.TxLimits[foree_constant.TransactionLimitGroup(userGroup.TransactionLimitGroup)]
+	txLimit, ok := foree_constant.TxLimits[foree_constant.TransactionLimitGroup(session.UserGroup.TransactionLimitGroup)]
 	if !ok {
-		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", userGroup.TransactionLimitGroup)
+		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", session.UserGroup.TransactionLimitGroup)
 	}
 
 	dailyLimit, err := t.getDailyTxLimit(ctx, *session)
@@ -362,8 +240,13 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		return nil, transport.NewFormError("Invalid req transaction request", "srcAmount", fmt.Sprintf("amount should at lease %v %s without rewards", txLimit.MinAmt.Amount, txLimit.MinAmt.Currency))
 	}
 
-	if joint != nil {
-		totalAmt.Amount += joint.Amt.Amount
+	totalFee := types.AmountData{}
+	if len(feeJoints) > 0 {
+		for _, joint := range feeJoints {
+			totalAmt.Amount += joint.Amt.Amount
+			totalFee.Amount += joint.Amt.Amount
+			totalFee.Currency = joint.Amt.Currency
+		}
 	}
 
 	foreeTx := &transaction.ForeeTx{
@@ -378,6 +261,8 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 			Amount:   types.Amount(rate.CalculateForwardAmount(req.SrcAmount)),
 			Currency: req.DestCurrency,
 		},
+		FeeJoints:          feeJoints,
+		TotalFeeAmt:        totalFee,
 		TransactionPurpose: req.TransactionPurpose,
 		CinAccId:           req.CinAccId,
 		CoutAccId:          req.CoutAccId,
@@ -385,11 +270,6 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		ContactAcc:         coutAcc,
 		OwnerId:            user.ID,
 		Owner:              &user,
-	}
-
-	if joint != nil {
-		foreeTx.Fees = []*transaction.FeeJoint{joint}
-		foreeTx.TotalFeeAmt = joint.Amt
 	}
 
 	if reward != nil {
@@ -422,7 +302,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		OwnerId:        user.ID,
 	}
 
-	if joint != nil {
+	if len(feeJoints) > 0 {
 		txSummary.FeeAmount = foreeTx.TotalFeeAmt.Amount
 		txSummary.FeeCurrency = foreeTx.TotalFeeAmt.Currency
 	}
@@ -587,7 +467,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	var feeJointError transport.HError
 	createFeeJoint := func() {
 		defer wg.Done()
-		for _, feeJoin := range foreeTx.Fees {
+		for _, feeJoin := range foreeTx.FeeJoints {
 			feeJoin.ParentTxId = foreeTxID
 			_, err := t.feeJointRepo.InsertFeeJoint(ctx, *feeJoin)
 			if err != nil {

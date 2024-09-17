@@ -56,6 +56,8 @@ type ForeeApp struct {
 	promotionRepo          *promotion.PromotionRepo
 	authService            *foree_service.AuthService
 	accountService         *foree_service.AccountService
+	feeService             *foree_service.FeeService
+	rateService            *foree_service.RateService
 	transactionService     *foree_service.TransactionService
 	scotiaClient           scotia.ScotiaClient
 	idmClient              idm.IDMClient
@@ -205,6 +207,9 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.interacAccountRepo,
 	)
 
+	app.rateService = foree_service.NewRateService(app.rateRepo)
+	app.feeService = foree_service.NewFeeService(app.feeRepo)
+
 	app.transactionService = foree_service.NewTransactionService(
 		db,
 		app.authService,
@@ -212,13 +217,13 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.foreeTxRepo,
 		app.txSummaryRepo,
 		app.txQuoteRepo,
-		app.rateRepo,
 		app.rewardRepo,
 		app.dailyTxLimitRepo,
-		app.feeRepo,
 		app.contactAccountRepo,
 		app.interacAccountRepo,
 		app.feeJointRepo,
+		app.rateService,
+		app.feeService,
 		app.txProcessor,
 		app.scotiaClient,
 		app.nbpClient,

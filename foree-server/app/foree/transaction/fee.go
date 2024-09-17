@@ -20,14 +20,14 @@ const (
 			f.is_enable, f.created_at, f.updated_at
 		FROM fees as f
 	`
-	sQLFeeGetUniqueByFeeGroup = `
+	sQLFeeGetAllEnableByGroupName = `
 		SELECT
 			f.name, f.description, f.fee_group, f.type, f.condition,
 			f.condition_amount, f.condition_currency,
 			f.ratio, f.is_apply_in_condition_amount_only
 			f.is_enable, f.created_at, f.updated_at
 		FROM fees as f
-		Where f.name = ?
+		Where f.fee_group = ? AND f.is_enable = TRUE
 	`
 	sQLFeeJointInsert = `
 		INSERT INTO fees
@@ -92,6 +92,9 @@ func (f *Fee) MaybeApplyFee(amt types.AmountData) (*FeeJoint, error) {
 
 	switch f.Type {
 	case FeeTypeFixCost:
+		if f.IsApplyInConditionAmtOnly {
+			return nil, fmt.Errorf("Fee.IsApplyInConditionAmtOnly expect type in `%v`, but got `%v`", FeeTypeVariableCost, f.Type)
+		}
 		return &FeeJoint{
 			FeeName: f.Name,
 			Amt: types.AmountData{
@@ -100,10 +103,17 @@ func (f *Fee) MaybeApplyFee(amt types.AmountData) (*FeeJoint, error) {
 			},
 		}, nil
 	case FeeTypeVariableCost:
+		if f.IsApplyInConditionAmtOnly && f.Condition != FeeOperatorGT {
+			return nil, fmt.Errorf("Fee.IsApplyInConditionAmtOnly expect operator in `%v`, but got `%v`", FeeOperatorGT, f.Condition)
+		}
+		amount := amt.Amount
+		if f.IsApplyInConditionAmtOnly {
+			amount -= f.ConditionAmt.Amount
+		}
 		return &FeeJoint{
 			FeeName: f.Name,
 			Amt: types.AmountData{
-				Amount:   types.Amount(math.Round(float64(f.Ratio*amt.Amount)*100.0) / 100.0),
+				Amount:   types.Amount(math.Round(float64(f.Ratio*amount)*100.0) / 100.0),
 				Currency: f.ConditionAmt.Currency,
 			},
 		}, nil
@@ -162,28 +172,28 @@ type FeeJointRepo struct {
 	db *sql.DB
 }
 
-func (repo *FeeRepo) GetUniqueFeeByName(ctx context.Context, name string) (*Fee, error) {
-	rows, err := repo.db.Query(sQLFeeGetUniqueByFeeGroup, name)
+func (repo *FeeRepo) GetAllEnableFeeByGroupName(ctx context.Context, feeGroup string) ([]*Fee, error) {
+	rows, err := repo.db.Query(sQLFeeGetAllEnableByGroupName, feeGroup)
 
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var f *Fee
-
+	fees := make([]*Fee, 0)
 	for rows.Next() {
-		f, err = scanRowIntoFee(rows)
+		p, err := scanRowIntoFee(rows)
 		if err != nil {
 			return nil, err
 		}
+		fees = append(fees, p)
 	}
 
-	if f == nil || f.Name == "" {
-		return nil, nil
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
-	return f, nil
+	return fees, nil
 }
 
 func (repo *FeeRepo) GetAllFee() ([]*Fee, error) {

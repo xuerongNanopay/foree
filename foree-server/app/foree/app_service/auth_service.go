@@ -874,38 +874,39 @@ func (a *AuthService) rewardOnboard(registerUser auth.User) {
 
 // TODO: using atomic interger to limit peak volumn
 func (a *AuthService) getPromotion(code string, validIn time.Duration) (*promotion.Promotion, error) {
-	a.promotionCacheRWLock.RLock()
-	promotionCache, ok := a.promotionCache[code]
-	a.promotionCacheRWLock.RUnlock()
+	// a.promotionCacheRWLock.RLock()
+	// promotionCache, ok := a.promotionCache[code]
+	// a.promotionCacheRWLock.RUnlock()
 
-	if ok && promotionCache.createdAt.Add(validIn).After(time.Now()) {
-		return &promotionCache.item, nil
-	}
+	// if ok && promotionCache.createdAt.Add(validIn).After(time.Now()) {
+	// 	return &promotionCache.item, nil
+	// }
 
-	promo, err := a.promotionRepo.GetUniquePromotionByCode(context.TODO(), code)
-	if err != nil {
-		foree_logger.Logger.Error("Promotion_Fail", "code", code, "cause", err.Error())
-		return nil, err
-	}
+	// promo, err := a.promotionRepo.GetUniquePromotionByCode(context.TODO(), code)
+	// if err != nil {
+	// 	foree_logger.Logger.Error("Promotion_Fail", "code", code, "cause", err.Error())
+	// 	return nil, err
+	// }
 
-	if promo == nil {
-		foree_logger.Logger.Warn("Promotion_Fail", "code", code, "cause", "promotion no found")
-		return nil, fmt.Errorf("promotion no found with code `%v`", code)
-	}
+	// if promo == nil {
+	// 	foree_logger.Logger.Warn("Promotion_Fail", "code", code, "cause", "promotion no found")
+	// 	return nil, fmt.Errorf("promotion no found with code `%v`", code)
+	// }
 
-	// Make sure at least one thread can update the cache.
-	func() {
-		a.promotionCacheUpdateLock.TryLock()
-		defer a.promotionCacheUpdateLock.Unlock()
-		a.promotionCacheRWLock.Lock()
-		defer a.promotionCacheRWLock.Unlock()
-		a.promotionCache[code] = CacheItem[promotion.Promotion]{
-			item:      *promo,
-			createdAt: time.Now(),
-		}
-	}()
+	// // Make sure at least one thread can update the cache.
+	// func() {
+	// 	a.promotionCacheUpdateLock.TryLock()
+	// 	defer a.promotionCacheUpdateLock.Unlock()
+	// 	a.promotionCacheRWLock.Lock()
+	// 	defer a.promotionCacheRWLock.Unlock()
+	// 	a.promotionCache[code] = CacheItem[promotion.Promotion]{
+	// 		item:      *promo,
+	// 		createdAt: time.Now(),
+	// 	}
+	// }()
 
-	return promo, nil
+	// return promo, nil
+	return nil, nil
 }
 
 func verifySession(session *auth.Session) transport.HError {

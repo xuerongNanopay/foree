@@ -114,7 +114,7 @@ type ForeeTx struct {
 	InteracAcc      *account.InteracAccount `json:"interacAcc,omitempty"`
 	ContactAcc      *account.ContactAccount `json:"contactAcc,omitempty"`
 	FeeJointIds     []int64                 `json:"feeJointIds,omitempty"`
-	Fees            []*FeeJoint             `json:"fees,omitempty"`
+	FeeJoints       []*FeeJoint             `json:"feesJoints,omitempty"`
 	RewardIds       []int64                 `json:"rewardIds,omitempty"`
 	Rewards         []*Reward               `json:"rewards,omitempty"`
 	CI              *InteracCITx            `json:"ci,omitempty"`
