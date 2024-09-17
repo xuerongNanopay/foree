@@ -12,9 +12,9 @@ import (
 const rateCacheExpiry time.Duration = 5 * time.Minute
 const rateCacheRefreshInterval time.Duration = 3 * time.Minute
 
-func NewRateService() *RateService {
+func NewRateService(rateRepo *transaction.RateRepo) *RateService {
 	rateService := &RateService{
-		rateCache:              make(map[string]CacheItem[transaction.Rate], 8),
+		rateRepo:               rateRepo,
 		rateCacheInsertChan:    make(chan transaction.Rate, 1),
 		rateCacheUpdateChan:    make(chan string, 1),
 		rateCacheRefreshTicker: time.NewTicker(rateCacheRefreshInterval),
@@ -26,7 +26,6 @@ func NewRateService() *RateService {
 type RateService struct {
 	rateRepo               *transaction.RateRepo
 	cache                  sync.Map
-	rateCache              map[string]CacheItem[transaction.Rate]
 	rateCacheInsertChan    chan transaction.Rate
 	rateCacheUpdateChan    chan string
 	rateCacheRefreshTicker *time.Ticker
@@ -43,7 +42,7 @@ func (r *RateService) start() {
 		case rateId := <-r.rateCacheUpdateChan:
 			rate, err := r.rateRepo.GetUniqueRateById(context.TODO(), rateId)
 			if err != nil {
-				foree_logger.Logger.Error("Rate_Cache_Update_Fail", "userId", "rateId", rate, "cause", err.Error())
+				foree_logger.Logger.Error("Rate_Cache_Update_Fail", "rateId", rateId, "cause", err.Error())
 			} else {
 				r.cache.Swap(rate.GetId(), CacheItem[transaction.Rate]{
 					item:      *rate,
@@ -54,10 +53,11 @@ func (r *RateService) start() {
 		case _ = <-r.rateCacheRefreshTicker.C:
 			length := 0
 			r.cache.Range(func(k, _ interface{}) bool {
+				length += 1
 				rateId, _ := k.(string)
 				rate, err := r.rateRepo.GetUniqueRateById(context.TODO(), rateId)
 				if err != nil {
-					foree_logger.Logger.Error("Rate_Cache_Refresh_Fail", "userId", "rateId", rate, "cause", err.Error())
+					foree_logger.Logger.Error("Rate_Cache_Refresh_Fail", "rateId", rateId, "cause", err.Error())
 				} else {
 					r.cache.Swap(rate.GetId(), CacheItem[transaction.Rate]{
 						item:      *rate,
@@ -73,7 +73,7 @@ func (r *RateService) start() {
 	}
 }
 
-func (r *RateService) GetRate(src, dest string, validIn time.Duration) (*transaction.Rate, error) {
+func (r *RateService) GetRate(src, dest string) (*transaction.Rate, error) {
 	rateId := transaction.GenerateRateId(src, dest)
 
 	value, ok := r.cache.Load(rateId)
@@ -87,13 +87,18 @@ func (r *RateService) GetRate(src, dest string, validIn time.Duration) (*transac
 		case r.rateCacheInsertChan <- *rate:
 		default:
 		}
+		return rate, nil
 	}
 
 	cacheItem, _ := value.(CacheItem[transaction.Rate])
 
 	if cacheItem.expiredAt.Before(time.Now()) {
-		r.rateCacheUpdateChan <- rateId
+		select {
+		case r.rateCacheUpdateChan <- rateId:
+		default:
+		}
 	}
+	//Return old data.
 	rate := cacheItem.item
 	return &rate, nil
 }
