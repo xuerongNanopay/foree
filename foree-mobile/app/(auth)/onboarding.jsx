@@ -1,6 +1,6 @@
 import { View, Text, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { router } from 'expo-router'
 
 import MultiStepForm from '../../components/MultiStepForm'
@@ -139,12 +139,13 @@ const Onboarding = () => {
   }
 
 
-  const NameFieldTitle = () => (
+  const NameFieldTitle = useCallback(() => (
     <View>
       <Text className="text-lg font-pbold text-center">Let's Get to Know You!</Text>
     </View>
-  )
-  const NameField = () => (
+  ), [])
+
+  const NameField = useCallback(() => (
     <View>
       <Text className="font-pregular text-center mb-4">
         Please enter your full legal name so we can begin setting up your account
@@ -152,34 +153,39 @@ const Onboarding = () => {
 
       <FieldItem title="First Name" value={form.firstName}
         errorMessage={errors['firstName']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           firstName:e
-        })}
+        }))}
       />
       <FieldItem title="Middle Name" value={form.middleName}
         errorMessage={errors['middleName']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           middleName:e
-        })}
+        }))}
       />
       <FieldItem title="Last Name" value={form.lastName}
         errorMessage={errors['lastName']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           lastName:e
-        })}
+        }))}
       />
     </View>
-  )
+  ), [
+    form.firstName, errors['firstName'],
+    form.middleName, errors['middleName'],
+    form.lastName, errors['lastName']
+  ])
 
-  const AddressFieldTitle = () => (
+  const AddressFieldTitle = useCallback(() => (
     <View>
       <Text className="text-lg font-pbold text-center">Your Residential Address and Phone Number</Text>
     </View>
-  )
-  const AddressField = () => (
+  ), [])
+
+  const AddressField = useCallback(() => (
     <View>
       <Text className="font-pregular text-center mb-4">
         We require this information to continue setting up your Foree Remittance account
@@ -187,24 +193,24 @@ const Onboarding = () => {
 
       <FieldItem title="Address Line 1" value={form.address1}
         errorMessage={errors['address1']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           address1:e
-        })}
+        }))}
       />
       <FieldItem title="Address Line 2" value={form.address2}
         errorMessage={errors['address2']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           address2:e
-        })}
+        }))}
       />
       <FieldItem title="City" value={form.city}
         errorMessage={errors['city']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           city:e
-        })}
+        }))}
       />
       <ModalSelect
         title="Province"
@@ -220,56 +226,64 @@ const Onboarding = () => {
         listView={SelectProvinceItem}
         list={Object.values(Regions[form.country])}
         onPress={(o) => {
-          setForm({
+          setForm((form) => ({
             ...form,
             province: o
-          })
+          }))
         }}
         placeholder="select a province"
       />
       <FieldItem title="Country" value={`${Countries[form.country]?.unicodeIcon} ${Countries[form.country]?.name}`}
         errorMessage={errors['country']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           country:e
-        })}
+        }))}
         editable={false}
       />
       <FieldItem title="Postal Code" value={form.postalCode}
         errorMessage={errors['postalCode']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           postalCode:e
-        })}
+        }))}
       />
       <FieldItem title="Phone Number" value={form.phoneNumber}
         errorMessage={errors['phoneNumber']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           phoneNumber:e
-        })}
+        }))}
         keyboardType="phone-pad"
       />
     </View>
-  )
+  ), [
+    form.address1, errors['address1'],
+    form.address2, errors['address2'],
+    form.city, errors['city'],
+    form.province, errors['province'],
+    form.country, errors['country'],
+    form.postalCode, errors['postalCode'],
+    form.phoneNumber, errors['phoneNumber'],
+  ])
 
-  const PersonalDetailFieldTitle = () => (
+  const PersonalDetailFieldTitle = useCallback(() => (
     <View>
       <Text className="text-lg font-pbold text-center">Personal Details</Text>
     </View>
-  )
+  ),[])
 
-  const PersonalDetailField = () => (
+  const PersonalDetailField = useCallback(() => (
     <View>
       <Text className="font-pregular text-center mb-4">
         Almost done! Infomation below is requested by xxxxx xxxxx of xxxxxxx, our Foree Remittance payout parter, inorder to process your transfers under ...... regulatory guidelines
       </Text>
       <FieldItem title="Date of Birth(YYYY-MM-DD)" value={form.dob}
         errorMessage={errors['dob']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           dob:e
-        })}
+        }))}
         keyboardType="numbers-and-punctuation"
       />
       <ModalSelect
@@ -287,10 +301,10 @@ const Onboarding = () => {
         listView={SelectCountryItem}
         list={Object.values(Countries)}
         onPress={(o) => {
-          setForm({
+          setForm((form) => ({
             ...form,
             pob: o
-          })
+          }))
         }}
         placeholder="select a country"
       />
@@ -309,10 +323,10 @@ const Onboarding = () => {
         listView={SelectCountryItem}
         list={Object.values(Countries)}
         onPress={(o) => {
-          setForm({
+          setForm((form) => ({
             ...form,
             nationality: o
-          })
+          }))
         }}
         placeholder="select a country"
       />
@@ -330,28 +344,34 @@ const Onboarding = () => {
         listView={SelectIDTypesItem}
         list={Object.values(IDTypes)}
         onPress={(o) => {
-          setForm({
+          setForm((form) => ({
             ...form,
             identificationType: o
-          })
+          }))
         }}
         placeholder="select ID type"
       />
       <FieldItem title="Identification Number" value={form.identificationValue}
         errorMessage={errors['identificationValue']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           identificationValue:e
-        })}
+        }))}
       />
     </View>
-  )
+  ), [
+    form.dob, errors['dob'],
+    form.pob, errors['pob'],
+    form.nationality, errors['nationality'],
+    form.identificationType, errors['identificationType'],
+    form.identificationValue, errors['identificationValue'],
+  ])
 
-  const ReviewTitle = () => (
+  const ReviewTitle = useCallback(() => (
     <View>
       <Text className="text-lg font-pbold text-center">Review</Text>
     </View>
-  )
+  ), [])
 
   const Review = () => (
     <View>
