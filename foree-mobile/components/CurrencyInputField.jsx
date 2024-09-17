@@ -19,7 +19,8 @@ const CurrencyInputField = ({
   supportCurrencies=Object.values(Currencies),
   value=0.0,
   editable=true,
-  onCurrencyChange=(e)=>{}
+  onCurrencyChange=(e)=>{},
+  errorMessage
 }) => {
   const [visible, setVisible] = useState(false)
   const [selectedCurrency, setSelectedCurrency] = useState(supportCurrencies.length === 1 ? supportCurrencies[0] : null)
@@ -87,6 +88,12 @@ const CurrencyInputField = ({
             }}
           />
         </View>
+        {
+          !!errorMessage ?
+          <View>
+            <Text className="mt-2 text-red-600">{errorMessage}</Text>
+          </View> : null
+        }
       </View>
       {/* Currency picker */}
       {

@@ -1,7 +1,7 @@
 import { View, Text, SafeAreaView } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { accountService, transactionService } from '../../service'
+import { accountService, transactionpayload, transactionService } from '../../service'
 import MultiStepForm from '../../components/MultiStepForm'
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import ModalSelect from '../../components/ModalSelect'
@@ -29,6 +29,23 @@ const TransactionCreate = () => {
     rewardIds: [],
     transactionPurpose: ''
   })
+
+  useEffect(() => {
+    async function validate() {
+      try {
+        await transactionpayload.QuoteTransactoinScheme.validate(form, {abortEarly: false})
+        setErrors({})
+      } catch (err) {
+        let e = {}
+        for ( let i of err.inner ) {
+          e[i.path] =  e[i.path] ?? i.errors[0]
+        }
+        setErrors(e)
+        console.log(e)
+      }
+    }
+    validate()
+  }, [form])
 
   useEffect(() => {
     if ( !!contacts && contacts.length > 0 && !!sourceAccounts && sourceAccounts.length >0 ) {
@@ -160,7 +177,7 @@ const TransactionCreate = () => {
   ))
 
   //TODO: apply use callback
-  const TransactionCreate = () => (
+  const TransactionCreate = useCallback(() => (
     <View>
       <Text className="font-pregular text-center mb-4">
         Enter the details for your transactions.
@@ -168,7 +185,7 @@ const TransactionCreate = () => {
       <ModalSelect
         title="From"
         modalTitle="Select Source"
-        errorMessage={errors['coutAccId']}
+        errorMessage={errors['cinAccId']}
         containerStyles="mt-2"
         value={() => {
           if ( !form.cinAccId ) return ""
@@ -234,6 +251,7 @@ const TransactionCreate = () => {
       <CurrencyInputField
         title="You Send"
         containerStyles="mt-2"
+        errorMessage={errors['srcAmount']}
         placeholder="type amount..."
         onCurrencyChange={((e) => {
           setForm({
@@ -255,7 +273,17 @@ const TransactionCreate = () => {
         <Text className="font-semibold text-green-800">Current Rate: <Text className="text-green-600">{rate?.description}</Text></Text>
       </View>
     </View>
-  )
+  ), [
+    rate, 
+    contacts, 
+    sourceAccounts, 
+    form.destAmount, 
+    form.cinAccId, 
+    form.coutAccId, 
+    errors['srcAmount'],
+    errors['cinAccId'],
+    errors['coutAccId']
+  ])
 
   const TransactionPurposeTitle = useCallback(() => (
     <View>
