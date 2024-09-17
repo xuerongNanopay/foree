@@ -74,10 +74,10 @@ const TransactionCreate = () => {
               coutAccId: parseInt(contactId)
             }))
           } else if ( contacts.length === 1 ) {
-            setForm({
+            setForm((form) => ({
               ...form,
               coutAccId: contacts[0]
-            })
+            }))
           }
         }
       } catch (e) {
@@ -205,10 +205,10 @@ const TransactionCreate = () => {
         uselistSeperator={false}
         isEditable={isEditable}
         onPress={(o) => {
-          setForm({
+          setForm((form) => ({
             ...form,
             cinAccId: o
-          })
+          }))
         }}
         placeholder="Select Source"
       />
@@ -242,10 +242,10 @@ const TransactionCreate = () => {
         uselistSeperator={false}
         isEditable={isEditable}
         onPress={(o) => {
-          setForm({
+          setForm((form) => ({
             ...form,
             coutAccId: o
-          })
+          }))
         }}
         placeholder="Select Contact"
       />
@@ -256,11 +256,11 @@ const TransactionCreate = () => {
         errorMessage={errors['srcAmount']}
         placeholder="type amount..."
         onCurrencyChange={((e) => {
-          setForm({
+          setForm((form) => ({
             ...form,
             srcAmount: e.amount,
             destAmount: Math.floor(e.amount*rate.destAmount*100) / 100
-          })
+          }))
         })}
         supportCurrencies={[Currencies["CAD"]]}
       />
