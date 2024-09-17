@@ -12,67 +12,6 @@ import { ContactTransferBank, ContactTransferMethods, PersonalRelationships } fr
 import string_util from '../../util/string_util'
 import { router } from 'expo-router'
 
-const FieldItem = ({
-  title,
-  value,
-  handleChangeText,
-  editable=true,
-  keyboardType='ascii-capable',
-  errorMessage,
-}) => (
-  <FormField
-    title={title}
-    value={value}
-    handleChangeText={handleChangeText}
-    keyboardType={keyboardType}
-    containerStyles="mt-2"
-    variant='flat'
-    editable={editable}
-    errorMessage={errorMessage}
-  />
-)
-
-const SelectProvinceItem = (province) => (
-  <Text className="font-pregular py-3 text-xl">
-    {province["name"]}
-  </Text>
-)
-
-const SelectPersonalRelationshipItem = (relationship) => (
-  <Text className="font-pregular py-3 text-xl">
-    {relationship["name"]}
-  </Text>
-)
-
-const SelectTransferMethodItem = (transferMethod) => (
-  <Text className="font-pregular py-3 text-xl">
-    {transferMethod["name"]}
-  </Text>
-)
-
-const SelectBankItem = (bank) => (
-  <Text className="font-pregular py-3 text-xl">
-    {bank["bankName"]}
-  </Text>
-)
-
-const ReviewItem = ({
-  title,
-  value,
-}) => (
-  <FormField
-    title={title}
-    value={value}
-    handleChangeText={() => {}}
-    keyboardType="ascii-capable"
-    containerStyles="mt-2"
-    variant="flat"
-    inputStyles="text-slate-500"
-    inputContainerStyles="border-slate-700 h-7"
-    editable={false}
-  />
-)
-
 const ContactCreate = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState({})
@@ -172,24 +111,24 @@ const ContactCreate = () => {
   
       <FieldItem title="First Name" value={form.firstName}
         errorMessage={errors['firstName']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           firstName:e
-        })}
+        }))}
       />
       <FieldItem title="Middle Name" value={form.middleName}
         errorMessage={errors['middleName']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           middleName:e
-        })}
+        }))}
       />
       <FieldItem title="Last Name" value={form.lastName}
         errorMessage={errors['lastName']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           lastName:e
-        })}
+        }))}
       />
     </View>
   ), [
@@ -212,24 +151,24 @@ const ContactCreate = () => {
 
       <FieldItem title="Address Line 1" value={form.address1}
         errorMessage={errors['address1']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           address1:e
-        })}
+        }))}
       />
       <FieldItem title="Address Line 2" value={form.address2}
         errorMessage={errors['address2']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           address2:e
-        })}
+        }))}
       />
       <FieldItem title="City" value={form.city}
         errorMessage={errors['city']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           city:e
-        })}
+        }))}
       />
       <ModalSelect
         title="Province"
@@ -254,25 +193,25 @@ const ContactCreate = () => {
       />
       <FieldItem title="Country" value={`${Countries[form.country]?.unicodeIcon} ${Countries[form.country]?.name}`}
         errorMessage={errors['country']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           country:e
-        })}
+        }))}
         editable={false}
       />
       <FieldItem title="Postal Code" value={form.postalCode}
         errorMessage={errors['postalCode']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           postalCode:e
-        })}
+        }))}
       />
       <FieldItem title="Phone Number" value={form.phoneNumber}
         errorMessage={errors['phoneNumber']}
-        handleChangeText={(e) => setForm({
+        handleChangeText={(e) => setForm((form) => ({
           ...form,
           phoneNumber:e
-        })}
+        }))}
         keyboardType="name-phone-pad"
       />
     </View>
@@ -292,7 +231,7 @@ const ContactCreate = () => {
     </View>
   ), [])
 
-  const ContactBankInfo = useCallBack(() => (
+  const ContactBankInfo = useCallback(() => (
     <View>
       <Text className="font-pregular text-center mb-4">
         Please provide contact banking information.
@@ -312,10 +251,10 @@ const ContactCreate = () => {
         listView={SelectPersonalRelationshipItem}
         list={PersonalRelationships}
         onPress={(o) => {
-          setForm({
+          setForm((form) => ({
             ...form,
             relationshipToContact: o
-          })
+          }))
         }}
         placeholder="choose relationship..."
       />
@@ -332,12 +271,12 @@ const ContactCreate = () => {
         listView={SelectTransferMethodItem}
         list={ContactTransferMethods}
         onPress={(o) => {
-          setForm({
+          setForm((form) => ({
             ...form,
             transferMethod: o,
             bankName: "",
             accountNoOrIBAN: ""
-          })
+          }))
         }}
         placeholder="choose transfer method"
       />
@@ -370,10 +309,10 @@ const ContactCreate = () => {
           />
           <FieldItem title="Account No or IBAN" value={form.accountNoOrIBAN}
             errorMessage={errors['accountNoOrIBAN']}
-            handleChangeText={(e) => setForm({
+            handleChangeText={(e) => setForm((form) => ({
               ...form,
               accountNoOrIBAN:e
-            })}
+            }))}
           />
         </> : null
       }
@@ -473,5 +412,66 @@ const ContactCreate = () => {
     </SafeAreaView>
   )
 }
+
+const FieldItem = ({
+  title,
+  value,
+  handleChangeText,
+  editable=true,
+  keyboardType='ascii-capable',
+  errorMessage,
+}) => (
+  <FormField
+    title={title}
+    value={value}
+    handleChangeText={handleChangeText}
+    keyboardType={keyboardType}
+    containerStyles="mt-2"
+    variant='flat'
+    editable={editable}
+    errorMessage={errorMessage}
+  />
+)
+
+const SelectProvinceItem = (province) => (
+  <Text className="font-pregular py-3 text-xl">
+    {province["name"]}
+  </Text>
+)
+
+const SelectPersonalRelationshipItem = (relationship) => (
+  <Text className="font-pregular py-3 text-xl">
+    {relationship["name"]}
+  </Text>
+)
+
+const SelectTransferMethodItem = (transferMethod) => (
+  <Text className="font-pregular py-3 text-xl">
+    {transferMethod["name"]}
+  </Text>
+)
+
+const SelectBankItem = (bank) => (
+  <Text className="font-pregular py-3 text-xl">
+    {bank["bankName"]}
+  </Text>
+)
+
+const ReviewItem = ({
+  title,
+  value,
+}) => (
+  <FormField
+    title={title}
+    value={value}
+    handleChangeText={() => {}}
+    keyboardType="ascii-capable"
+    containerStyles="mt-2"
+    variant="flat"
+    inputStyles="text-slate-500"
+    inputContainerStyles="border-slate-700 h-7"
+    editable={false}
+  />
+)
 
 export default ContactCreate
