@@ -1,6 +1,8 @@
-import { View, Text, SafeAreaView, TouchableOpacity, FlatList } from 'react-native'
+import { View, Text, SafeAreaView, TouchableOpacity, FlatList, Image } from 'react-native'
 import React, { useCallback, useState } from 'react'
 import { router, useFocusEffect } from 'expo-router'
+
+import { icons } from '../../constants'
 
 const TransactionTab = () => {
   const [selectedStatus, setSelectedStatus] = useState('All')
@@ -42,14 +44,26 @@ const TransactionTab = () => {
             </TouchableOpacity>
           </View>
           {/* Status */}
-          <FlatList
-            data={transactionStatuses}
-            renderItem={statusChipItem}
-            keyExtractor={item => item.id}
-            showsHorizontalScrollIndicator={false}
-            horizontal={true}
-            className="mb-1"
-          />
+          <View className="flex flex-row items-center">
+            <TouchableOpacity
+              onPress={() => {console.log("TODO: transaction refresh")}}
+              className="border-[2px] border-slate-400 rounded-lg p-1"
+            >
+              <Image
+                source={icons.renewable}
+                className="w-[27px] h-[27px]"
+                resizeMode='contain'
+              />
+            </TouchableOpacity>
+            <FlatList
+              className="flex-1 mx-2"
+              data={transactionStatuses}
+              renderItem={statusChipItem}
+              keyExtractor={item => item.id}
+              showsHorizontalScrollIndicator={false}
+              horizontal={true}
+            />
+          </View>
           {/* Status Pagenation */}
           <View className="flex flex-row items-center">
             <View className="flex-1">
