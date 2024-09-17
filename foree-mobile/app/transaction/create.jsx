@@ -36,7 +36,6 @@ const TransactionCreate = () => {
     }
   }, [contacts, sourceAccounts])
 
-  console.log('vvvv', form)
   useFocusEffect(useCallback(() => {
     const  controller = new AbortController()
     const getAllContacts = async (signal) => {
@@ -76,7 +75,6 @@ const TransactionCreate = () => {
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("transaction_create--getRate", resp.status, resp.data)
         } else {
-          console.log(resp.data.data)
           setRate(resp.data.data)
         }
       } catch (e) {
@@ -215,8 +213,8 @@ const TransactionCreate = () => {
       <CurrencyInputField
         title="You Send"
         containerStyles="mt-2"
+        placeholder="type amount..."
         onCurrencyChange={((e) => {
-          console.log(e)
           setForm({
             ...form,
             srcAmount: e.amount,

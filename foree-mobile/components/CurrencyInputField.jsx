@@ -8,11 +8,14 @@ const variants = {
 }
 
 // Will introduce cycle, if mix source and dest.
+// if use string as amount, the problem can solove
 const CurrencyInputField = ({
   title,
   containerStyles,
   variant='bordered',
   inputContainerStyles,
+  placeholder="0.00",
+  inputStyles,
   supportCurrencies=Object.values(Currencies),
   value=0.0,
   editable=true,
@@ -58,13 +61,13 @@ const CurrencyInputField = ({
             </Text>
           </TouchableOpacity>
           <TextInput
+            className={`flex-1 h-full text-right px-2 font-semibold ${inputStyles}`}
             value={amtString}
             keyboardType='decimal-pad'
-            placeholder="0.00"
+            placeholder={placeholder}
             editable={editable}
             onChangeText={(e) => {
               if ( !!e.match(/(\.\d\d\d)|.*\..*\..*/) ) {
-                console.log('aaa')
                 setAmt({...amt})
                 return
               }
@@ -82,7 +85,6 @@ const CurrencyInputField = ({
                 })
               }
             }}
-            className="flex-1 h-full text-right px-2 font-semibold"
           />
         </View>
       </View>
