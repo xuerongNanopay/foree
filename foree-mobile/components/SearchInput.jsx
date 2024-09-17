@@ -45,15 +45,21 @@ const SearchInput = ({
           editable={editable}
         />
 
-        {/* <TouchableOpacity
-        onPress={()=> setShowPassword(!showPassword)}
-        >
-        <Image 
-            source={icons.search}
-            className="w-7 h-7"
-            resizeMode='contain'
-        />
-        </TouchableOpacity> */}
+        {
+          !!value ?         
+          <TouchableOpacity
+            onPress={()=> {handleChangeText("")}}
+            className="pr-4 pl-2 h-full flex flex-row items-center"
+            disabled={false}
+          >
+          <Image 
+              source={icons.x}
+              className="w-3 h-3"
+              resizeMode='contain'
+          />
+          </TouchableOpacity> :
+          <></>
+        }
       </View>
   )
 }
