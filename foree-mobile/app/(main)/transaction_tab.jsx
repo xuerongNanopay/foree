@@ -63,12 +63,29 @@ const TransactionTab = () => {
               showsHorizontalScrollIndicator={false}
               horizontal={true}
             />
+            {
+              selectedStatus !== "All" ? 
+              <TouchableOpacity
+                onPress={()=> {setSelectedStatus("All")}}
+                className="p-2 h-full flex flex-row items-center"
+                disabled={false}
+              >
+              <Image 
+                  source={icons.x}
+                  className="w-3 h-3"
+                  resizeMode='contain'
+              />
+              </TouchableOpacity> :
+              <></>
+            }
           </View>
           {/* Status Pagenation */}
           <View className="mt-2 flex flex-row items-center">
             <View className="flex-1">
-              <View className>
-                <Text className="text-green-800 font-psemibold">{selectedStatus}</Text>
+              <View className="flex flex-row">
+                <View className="border-[1px] border-green-800 rounded-2xl p-2 bg-[#9cd1b9]">
+                  <Text className="text-green-800 font-psemibold">{selectedStatus}</Text>
+                </View>
               </View>
             </View>
             <View className="flex flex-row items-center">
