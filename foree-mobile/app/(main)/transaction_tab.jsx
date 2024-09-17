@@ -47,7 +47,7 @@ const TransactionTab = () => {
           <View className="flex flex-row items-center">
             <TouchableOpacity
               onPress={() => {console.log("TODO: transaction refresh")}}
-              className="border-[2px] border-slate-400 rounded-lg p-1"
+              className="border-[1px] border-slate-400 rounded-lg p-1"
             >
               <Image
                 source={icons.renewable}
