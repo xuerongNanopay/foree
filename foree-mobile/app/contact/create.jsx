@@ -277,13 +277,13 @@ const ContactCreate = () => {
       />
     </View>
   ), [
-    foam.address1, errors['address1'],
-    foam.address2, errors['address2'],
-    foam.city, errors['city'],
-    foam.province, errors['province'],
-    foam.country, errors['country'],
-    foam.postalCode, errors['postalCode'],
-    foam.phoneNumber, errors['phoneNumber'],
+    form.address1, errors['address1'],
+    form.address2, errors['address2'],
+    form.city, errors['city'],
+    form.province, errors['province'],
+    form.country, errors['country'],
+    form.postalCode, errors['postalCode'],
+    form.phoneNumber, errors['phoneNumber'],
   ])
 
   const ContactBankInfoTitle = useCallback(() => (
