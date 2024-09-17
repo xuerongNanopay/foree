@@ -1,6 +1,6 @@
 import { View, Text, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import MultiStepForm from '../../components/MultiStepForm'
 import FormField from '../../components/FormField'
@@ -158,11 +158,11 @@ const ContactCreate = () => {
     }
   }
 
-  const ContactNameTitle = () => (
+  const ContactNameTitle = useCallback(() => (
     <View>
       <Text className="text-lg font-pbold text-center">Contact Name</Text>
     </View>
-  )
+  ), [])
 
   const ContactName = () => (
     <View>

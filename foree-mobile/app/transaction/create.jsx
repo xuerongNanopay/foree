@@ -141,7 +141,7 @@ const TransactionCreate = () => {
   
   }
 
-  const InteracListItem = useCallback((interac) =>{
+  const InteracListItem = useCallback((interac) => {
     if ( !interac ) return <></>
     return (
       <View className={`mt-4 p-2 py-4 rounded-lg bg-[#ccded6] ${interac.id == form.cinAccId ? "bg-[#9cd1b9]" : ""}`}>
@@ -170,11 +170,13 @@ const TransactionCreate = () => {
     )
   },[form.coutAccId])
 
-  const TransactionCreateTitle = useCallback(() => (
-    <View>
-      <Text className="text-lg font-pbold text-center">Transaction Details</Text>
-    </View>
-  ))
+  const TransactionCreateTitle = useCallback(() => {
+    return (
+      <View>
+        <Text className="text-lg font-pbold text-center">Transaction Details</Text>
+      </View>
+    )
+  }, [])
 
   //TODO: apply use callback
   const TransactionCreate = useCallback(() => (
@@ -274,7 +276,8 @@ const TransactionCreate = () => {
       </View>
     </View>
   ), [
-    rate, 
+    rate,
+    isEditable,
     contacts, 
     sourceAccounts, 
     form.destAmount, 
@@ -289,7 +292,7 @@ const TransactionCreate = () => {
     <View>
       <Text className="text-lg font-pbold text-center">Transaction Purpose</Text>
     </View>
-  ))
+  ), [])
 
   const TransactionPurpose = useCallback(() => (
     <View>
