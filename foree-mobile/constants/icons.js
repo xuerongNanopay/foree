@@ -35,5 +35,7 @@ export default {
   renewable,
   x,
   leftArrowDark,
-  rightArrowDark
+  rightArrowDark,
+  bell,
+  notificationBell
 }

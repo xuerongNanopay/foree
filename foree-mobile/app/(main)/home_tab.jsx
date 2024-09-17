@@ -1,8 +1,8 @@
-import { View, Text, SafeAreaView, FlatList, ScrollView, Image } from 'react-native'
+import { View, Text, SafeAreaView, FlatList, ScrollView, Image, Touchable, TouchableOpacity } from 'react-native'
 import { Link, useFocusEffect } from 'expo-router'
 import React, { useEffect, useState, useCallback } from 'react'
 
-import { images } from '../../constants'
+import { icons, images } from '../../constants'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { transactionService } from '../../service'
 import Currency from '../../constants/currency'
@@ -49,11 +49,15 @@ const HomeTab = () => {
             <Text className="font-pregular text-xl">Welcome Back</Text>
             <Text className="font-pbold text-2xl text-slate-700">{user?.firstName} {user?.lastName}</Text>
           </View>
-          <Image
-            source={images.logoSmall}
-            resizeMode='contain'
-            className="w-[36px] h-[36px]"
-          />
+          <TouchableOpacity
+            onPress={() => {console.log("TODO: notifications")}}
+          >
+            <Image
+              source={icons.bell}
+              resizeMode='contain'
+              className="w-[30px] h-[30px] mr-2"
+            />
+          </TouchableOpacity>
         </View>
         <ScrollView 
           showsVerticalScrollIndicator={false}
