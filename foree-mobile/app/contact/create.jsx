@@ -164,7 +164,7 @@ const ContactCreate = () => {
     </View>
   ), [])
 
-  const ContactName = () => (
+  const ContactName = useCallback(() => (
     <View>
       <Text className="font-pregular text-center mb-4">
         Please provide contact name.
@@ -192,15 +192,19 @@ const ContactCreate = () => {
         })}
       />
     </View>
-  )
+  ), [
+    form.firstName, errors['firstName'],
+    form.middleName, errors['middleName'],
+    form.lastName, errors['lastName']
+  ])
 
-  const ContactAddressTitle = () => (
+  const ContactAddressTitle = useCallback(() => (
     <View>
       <Text className="text-lg font-pbold text-center">Contact Address</Text>
     </View>
-  )
+  ), [])
 
-  const ContactAddress = () => (
+  const ContactAddress = useCallback(() => (
     <View>
       <Text className="font-pregular text-center mb-4">
         Please provide contact address details.
@@ -272,15 +276,23 @@ const ContactCreate = () => {
         keyboardType="name-phone-pad"
       />
     </View>
-  )
+  ), [
+    foam.address1, errors['address1'],
+    foam.address2, errors['address2'],
+    foam.city, errors['city'],
+    foam.province, errors['province'],
+    foam.country, errors['country'],
+    foam.postalCode, errors['postalCode'],
+    foam.phoneNumber, errors['phoneNumber'],
+  ])
 
-  const ContactBankInfoTitle = () => (
+  const ContactBankInfoTitle = useCallback(() => (
     <View>
       <Text className="text-lg font-pbold text-center">Contact Bank Info</Text>
     </View>
-  )
+  ), [])
 
-  const ContactBankInfo = () => (
+  const ContactBankInfo = useCallBack(() => (
     <View>
       <Text className="font-pregular text-center mb-4">
         Please provide contact banking information.
@@ -366,13 +378,18 @@ const ContactCreate = () => {
         </> : null
       }
     </View>
-  )
+  ), [
+    form.relationshipToContact, errors['relationshipToContact'],
+    form.transferMethod, errors['transferMethod'],
+    form.bankName, errors['bankName'],
+    form.accountNoOrIBAN, errors['accountNoOrIBAN']
+  ])
 
-  const ReviewTitle = () => (
+  const ReviewTitle = useCallback(() => (
     <View>
       <Text className="text-lg font-pbold text-center">Review</Text>
     </View>
-  )
+  ), [])
 
   const Review = () => (
     <View>
