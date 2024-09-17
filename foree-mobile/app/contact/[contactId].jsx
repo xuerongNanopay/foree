@@ -63,7 +63,9 @@ const ContactDetail = () => {
             activeOpacity={0.7}
             className="bg-[#1A6B54] py-2 px-4 rounded-full"
             disabled={false}
-            onPress={() => {console.log("TODO: route to send")}}
+            onPress={() => {
+              router.push({ pathname: "/transaction/create", params: { contactId } })
+            }}
           >
             <Text className="font-pextrabold text-white">Send</Text>
           </TouchableOpacity>

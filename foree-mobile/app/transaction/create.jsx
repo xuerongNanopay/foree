@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { accountService, transactionService } from '../../service'
 import MultiStepForm from '../../components/MultiStepForm'
-import { router, useFocusEffect } from 'expo-router'
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import ModalSelect from '../../components/ModalSelect'
 import { ContactTransferCashPickup } from '../../constants/contacts'
 import { formatContactMethod, formatName } from '../../util/foree_util'
@@ -11,6 +11,7 @@ import CurrencyInputField from '../../components/CurrencyInputField'
 import Currencies from '../../constants/currency'
 
 const TransactionCreate = () => {
+  const {contactId} = useLocalSearchParams()
   const [rate, setRate] = useState(0.0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isEditable, setIsEditable]  = useState(false)
@@ -41,13 +42,25 @@ const TransactionCreate = () => {
     const getAllContacts = async (signal) => {
       try {
         const resp = await accountService.getAllContactAccounts({signal})
-
+        console.log("xxxx")
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("transaction_create--getAllContacts", resp.status, resp.data)
         } else {
           //How do this: because there is cache in getAllContactAccounts
           //TODO: redesign the cache?
-          setContacts([...resp.data.data])
+          const destAccs = resp.data.data
+          setContacts([...destAccs])
+          if ( !!(destAccs.find(x => x.id == parseInt(contactId))) ) {
+            setForm((form) => ({
+              ...form,
+              coutAccId: parseInt(contactId)
+            }))
+          } else if ( contacts.length === 1 ) {
+            setForm({
+              ...form,
+              coutAccId: contacts[0]
+            })
+          }
         }
       } catch (e) {
         console.error("transaction_create--getAllContacts", e)
@@ -61,7 +74,14 @@ const TransactionCreate = () => {
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("transaction_create--getAllInteracs", resp.status, resp.data)
         } else {
-          setSourceAccounts(resp.data.data)
+          const interacs = resp.data.data
+          setSourceAccounts(interacs)
+          if ( interacs.length === 1 ) {
+            setForm((form) =>({
+              ...form,
+              cinAccId: interacs[0].id
+            }))
+          }
         }
       } catch (e) {
         console.error("transaction_create--getAllInteracs", e)
@@ -75,7 +95,8 @@ const TransactionCreate = () => {
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("transaction_create--getRate", resp.status, resp.data)
         } else {
-          setRate(resp.data.data)
+          const rate = resp.data.data
+          setRate(rate)
         }
       } catch (e) {
         console.error("transaction_create--getRate", e)
@@ -163,7 +184,6 @@ const TransactionCreate = () => {
         uselistSeperator={false}
         isEditable={isEditable}
         onPress={(o) => {
-          console.log(o)
           setForm({
             ...form,
             cinAccId: o
@@ -201,7 +221,6 @@ const TransactionCreate = () => {
         uselistSeperator={false}
         isEditable={isEditable}
         onPress={(o) => {
-          console.log(o)
           setForm({
             ...form,
             coutAccId: o
