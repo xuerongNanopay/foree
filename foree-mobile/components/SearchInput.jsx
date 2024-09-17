@@ -22,8 +22,7 @@ const SearchInput = ({
   allowClear=true,
   ...props
 }) => {
-  const [showPassword, setShowPassword] = useState(false)
-
+  const [v, setV] = useState(value)
 
   return (
       <View 
@@ -37,18 +36,24 @@ const SearchInput = ({
           className={`flex-1 h-full font-psemibold text-base ${inputStyles}`}
           autoCorrect={false}
           spellCheck={false}
-          value={value}
+          value={v}
           placeholder={placeholder}
           placeholderTextColor="#BDBDBD"
-          onChangeText={handleChangeText}
+          onChangeText={(t) => {
+            setV(t)
+            handleChangeText(t)
+          }}
           keyboardType={keyboardType} 
           editable={editable}
         />
 
         {
-          !!value ?         
+          !!v ?         
           <TouchableOpacity
-            onPress={()=> {handleChangeText("")}}
+            onPress={()=> {
+              setV("")
+              handleChangeText("")
+            }}
             className="pr-4 pl-2 h-full flex flex-row items-center"
             disabled={false}
           >

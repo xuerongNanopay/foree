@@ -1,6 +1,7 @@
 import { View, Text, TextInput, TouchableOpacity, Modal, ScrollView, SafeAreaView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import string_util from '../util/string_util'
+import SearchInput from './SearchInput'
 
 const variants = {
   bordered: "border-2 rounded-2xl",
@@ -130,26 +131,17 @@ const ModalSelect = ({
             className="px-2 flex-1"
           >
             {
-              allowSearch ? <View
-                className="w-full h-14 my-2 border-2 border-secondary rounded-2xl flex-row items-center"
-              >
-                <Text className="px-2">&#128270;</Text>
-                <TextInput
-                  className={`flex-1 h-full font-pregular text-base`}
-                  // value={"aaa"}
+              allowSearch ?
+                <SearchInput
+                  containerStyles="my-2 border-2 border-secondary rounded-xl"
                   placeholder={searchTitle}
-                  editable={true}
-                  keyboardType="default"
-                  placeholderTextColor="#BDBDBD"
-                  onChangeText={(t)=>{
+                  handleChangeText={(t)=>{
                     if ( !t ) setShowList(list)
                     else {
                       setShowList(list.filter(v => string_util.containSubsequence(typeof searchKey === "function" ? searchKey(v) : v[searchKey], t, {caseInsensitive:true})))
                     }
                   }}
-                />
-                  
-              </View> : null
+                /> : null
             }
             <View className="flex-1">
               <ScrollView 
