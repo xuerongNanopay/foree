@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, TextInput, Modal, SafeAreaView, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Currencies from '../constants/currency'
 
 const variants = {
@@ -7,25 +7,34 @@ const variants = {
   flat: "border-b-2"
 }
 
+// Will introduce cycle, if mix source and dest.
 const CurrencyInputField = ({
   title,
   containerStyles,
   variant='bordered',
   inputContainerStyles,
   supportCurrencies=Object.values(Currencies),
-  value,
-  isEditable,
-  onCurrencyChange=()=>{}
+  value=0.0,
+  editable=true,
+  onCurrencyChange=(e)=>{}
 }) => {
-  console.log("avvvv", supportCurrencies)
   const [visible, setVisible] = useState(false)
   const [selectedCurrency, setSelectedCurrency] = useState(supportCurrencies.length === 1 ? supportCurrencies[0] : null)
-  const [amount, setAmount] = useState("")
+  const [amtString, setAmtString] = useState(!value ? "" : value.toFixed(2))
   const [amt, setAmt] = useState(supportCurrencies.length === 1 ? {amount: 0.0, currency: supportCurrencies[0].isoCode} : {amount: 0.0, currency: ''})
 
-  useState(() => {
+  useEffect(() => {
     onCurrencyChange(amt)
-  }, amt)
+  }, [amt])
+
+  useEffect(() => {
+    setAmt({
+      ...amt,
+      amount: value
+    })
+    setAmtString(!value ? "" : value.toFixed(2))
+  }, [value])
+
   return (
     <>
       <View className={`${containerStyles}`}>
@@ -49,13 +58,17 @@ const CurrencyInputField = ({
             </Text>
           </TouchableOpacity>
           <TextInput
-            value={amount}
+            value={amtString}
             keyboardType='decimal-pad'
             placeholder="0.00"
-            isEditable={isEditable}
+            editable={editable}
             onChangeText={(e) => {
-              if ( e.match(/(\.\d\d\d)|.*\..*\..*/) ) return
-              setAmount(e)
+              if ( !!e.match(/(\.\d\d\d)|.*\..*\..*/) ) {
+                console.log('aaa')
+                setAmt({...amt})
+                return
+              }
+              setAmtString(e)
               n = parseFloat(e)
               if ( isNaN(n) ) {
                 setAmt({

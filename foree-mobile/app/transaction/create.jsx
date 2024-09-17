@@ -1,7 +1,7 @@
 import { View, Text, SafeAreaView } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { accountService } from '../../service'
+import { accountService, transactionService } from '../../service'
 import MultiStepForm from '../../components/MultiStepForm'
 import { router, useFocusEffect } from 'expo-router'
 import ModalSelect from '../../components/ModalSelect'
@@ -20,7 +20,8 @@ const TransactionCreate = () => {
   const [form, setForm] = useState({
     cinAccId: 0,
     coutAccId: 0,
-    srcAmount: 0,
+    srcAmount: 0.0,
+    destAmount: 0.0,
     srcCurrency: 'CAD',
     destCurrency: 'PKR',
     rewardIds: [],
@@ -35,8 +36,8 @@ const TransactionCreate = () => {
     }
   }, [contacts, sourceAccounts])
 
+  console.log('vvvv', form)
   useFocusEffect(useCallback(() => {
-    console.log("vvvvvvv")
     const  controller = new AbortController()
     const getAllContacts = async (signal) => {
       try {
@@ -61,15 +62,31 @@ const TransactionCreate = () => {
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("transaction_create--getAllInteracs", resp.status, resp.data)
         } else {
-          console.log(resp.data.data)
           setSourceAccounts(resp.data.data)
         }
       } catch (e) {
         console.error("transaction_create--getAllInteracs", e)
       }
     }
+
+    const getRate = async(signal) => {
+      try {
+        const resp = await transactionService.getCADToPRKRate({signal})
+
+        if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
+          console.error("transaction_create--getRate", resp.status, resp.data)
+        } else {
+          console.log(resp.data.data)
+          setRate(resp.data.data)
+        }
+      } catch (e) {
+        console.error("transaction_create--getRate", e)
+      }
+    }
+
     getAllContacts(controller.signal)
     getSourceAccounts(controller.signal)
+    getRate(controller.signal)
     return () => {
       controller.abort()
     }
@@ -194,18 +211,29 @@ const TransactionCreate = () => {
         }}
         placeholder="Select Contact"
       />
+      {/*  */}
       <CurrencyInputField
         title="You Send"
         containerStyles="mt-2"
+        onCurrencyChange={((e) => {
+          console.log(e)
+          setForm({
+            ...form,
+            srcAmount: e.amount,
+            destAmount: Math.floor(e.amount*rate.destAmount*100) / 100
+          })
+        })}
         supportCurrencies={[Currencies["CAD"]]}
       />
       <CurrencyInputField
         title="Recipient Receives"
         containerStyles="mt-2"
+        value={form.destAmount}
+        editable={false}
         supportCurrencies={[Currencies["PKR"]]}
       />
       <View className="mt-2">
-        <Text className="font-semibold text-green-800">Current Rate: <Text className="text-green-600">$1.00 CAD = $210.00 PRK</Text></Text>
+        <Text className="font-semibold text-green-800">Current Rate: <Text className="text-green-600">{rate?.description}</Text></Text>
       </View>
     </View>
   )
