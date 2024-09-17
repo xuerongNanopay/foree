@@ -56,7 +56,7 @@ func (r *FeeService) start() {
 				})
 			}
 
-		case _ = <-r.feeCacheRefreshTicker.C:
+		case <-r.feeCacheRefreshTicker.C:
 			length := 0
 			r.cache.Range(func(k, _ interface{}) bool {
 				length += 1
@@ -67,7 +67,7 @@ func (r *FeeService) start() {
 				} else {
 					r.cache.Swap(feeGroup, CacheItem[[]*transaction.Fee]{
 						item:      fees,
-						expiredAt: time.Now().Add(rateCacheExpiry),
+						expiredAt: time.Now().Add(feeCacheExpiry),
 					})
 				}
 				return true

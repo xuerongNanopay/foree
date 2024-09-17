@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"sync"
-	"time"
 
 	"xue.io/go-pay/app/foree/account"
 	foree_constant "xue.io/go-pay/app/foree/constant"
@@ -17,11 +16,6 @@ import (
 	"xue.io/go-pay/partner/nbp"
 	"xue.io/go-pay/partner/scotia"
 	"xue.io/go-pay/server/transport"
-)
-
-const (
-	quoteRateCacheTimeout time.Duration = 5 * time.Minute
-	feeCacheTimeout       time.Duration = time.Hour
 )
 
 func NewTransactionService(
