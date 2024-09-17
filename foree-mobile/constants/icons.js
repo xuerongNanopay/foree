@@ -15,6 +15,8 @@ import renewable from "../assets/icons/renewable.png"
 import x from "../assets/icons/x.png"
 import leftArrowDark from "../assets/icons/left-arrow-dark.png"
 import rightArrowDark from "../assets/icons/right-arrow-dark.png"
+import bell from "../assets/icons/bell.png"
+import notificationBell from "../assets/icons/notification-bell.png"
 
 export default {
   play,
