@@ -19,6 +19,7 @@ const SearchInput = ({
   keyboardType='default', 
   editable=true,
   errorMessage,
+  allowClear=true,
   ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false)

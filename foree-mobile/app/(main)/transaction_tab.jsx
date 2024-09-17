@@ -65,7 +65,7 @@ const TransactionTab = () => {
             />
           </View>
           {/* Status Pagenation */}
-          <View className="flex flex-row items-center">
+          <View className="mt-2 flex flex-row items-center">
             <View className="flex-1">
               <View className>
                 <Text className="text-green-800 font-psemibold">{selectedStatus}</Text>
@@ -77,16 +77,25 @@ const TransactionTab = () => {
                 onPress={()=> {console.log("TODO: transaction left")}}
                 activeOpacity={0.7}
                 disabled={false}
-                className="mr-2"
+                className="mr-2 p-2"
               >
-                <Text className="text-2xl">◀️</Text>
+                <Image
+                  source={icons.leftArrowDark}
+                  className="w-[15px] h-[15px]"
+                  resizeMode='contain'
+                />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={()=> {console.log("TODO: transaction right")}}
                 activeOpacity={0.7}
                 disabled={false}
+                className="mr-2 p-2"
               >
-                <Text className="text-2xl">▶️</Text>
+                <Image
+                  source={icons.rightArrowDark}
+                  className="w-[15px] h-[15px]"
+                  resizeMode='contain'
+                />
               </TouchableOpacity>
             </View>
           </View>
