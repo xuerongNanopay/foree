@@ -78,6 +78,11 @@ type TransactionService struct {
 func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*RateDTO, transport.HError) {
 	rate, err := t.rateService.GetRate(req.SrcCurrency, req.DestCurrency)
 	if err != nil {
+		foree_logger.Logger.Error("GetRate_Fail",
+			"ip", loadRealIp(ctx),
+			"rateId", transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency),
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if rate == nil {
@@ -96,6 +101,11 @@ func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*Rate
 func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*QuoteTransactionDTO, transport.HError) {
 	rate, err := t.rateService.GetRate(req.SrcCurrency, req.DestCurrency)
 	if err != nil {
+		foree_logger.Logger.Error("FreeQuote_Fail",
+			"ip", loadRealIp(ctx),
+			"rateId", transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency),
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -112,6 +122,11 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 	//fee
 	feeJoints, err := t.feeService.applyFee(foree_constant.DefaultFeeGroup, types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
 	if err != nil {
+		foree_logger.Logger.Error("FreeQuote_Fail",
+			"defaultFeeGroup", foree_constant.DefaultFeeGroup,
+			"ip", loadRealIp(ctx),
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -146,35 +161,80 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 }
 
 func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionReq) (*QuoteTransactionDTO, transport.HError) {
-	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionForeeTxWrite)
-	if sErr != nil {
+	session, sErr := t.authService.GetSession(ctx, req.SessionId)
+	if session == nil {
+		foree_logger.Logger.Info("QuoteTx_Fail",
+			"sessionId", req.SessionId,
+			"ip", loadRealIp(ctx),
+			"cause", "session no found",
+		)
 		return nil, sErr
 	}
 
 	user := *session.User
 	rate, err := t.rateService.GetRate(req.SrcCurrency, req.DestCurrency)
 	if err != nil {
+		foree_logger.Logger.Error("QuoteTx_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"rateId", transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency),
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if rate == nil {
+		foree_logger.Logger.Error("QuoteTx_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"rateId", transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency),
+			"cause", "missing rate",
+		)
 		return nil, transport.NewInteralServerError("user `%v` try to quote transaction with unkown rate `%s`", user.ID, transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency))
 	}
 
 	// Get CI account.
 	ciAcc, err := t.interacAccountRepo.GetUniqueActiveInteracAccountByOwnerAndId(ctx, user.ID, req.CinAccId)
 	if err != nil {
+		foree_logger.Logger.Error("QuoteTx_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if ciAcc == nil {
+		foree_logger.Logger.Warn("QuoteTx_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"ciAccId", req.CinAccId,
+			"cause", "Cash in account no found",
+		)
 		return nil, transport.NewInteralServerError("user `%v` try to use unkown ci account `%v`", user.ID, req.CinAccId)
 	}
 
 	// Get Cout account.
 	coutAcc, err := t.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, user.ID, req.CoutAccId)
 	if err != nil {
+		foree_logger.Logger.Error("QuoteTx_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if coutAcc == nil {
+		foree_logger.Logger.Warn("QuoteTx_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"coutAccId", req.CoutAccId,
+			"cause", "Cash out account no found",
+		)
 		return nil, transport.NewInteralServerError("user `%v` try to use unkown cout account `%v`", user.ID, req.CoutAccId)
 	}
 
@@ -184,18 +244,54 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		rewardId := req.RewardIds[1]
 		r, err := t.rewardRepo.GetUniqueRewardById(ctx, rewardId)
 		if err != nil {
+			foree_logger.Logger.Error("QuoteTx_Fail",
+				"ip", loadRealIp(ctx),
+				"userId", session.UserId,
+				"sessionId", req.SessionId,
+				"cause", err.Error(),
+			)
 			return nil, transport.WrapInteralServerError(err)
 		}
 		if r == nil {
+			foree_logger.Logger.Warn("QuoteTx_Fail",
+				"ip", loadRealIp(ctx),
+				"userId", session.UserId,
+				"sessionId", req.SessionId,
+				"rewardId", rewardId,
+				"cause", "reward no found",
+			)
 			return nil, transport.NewInteralServerError("user `%v` try to redeem unknown reward `%v`", user.ID, rewardId)
 		}
 		if r.OwnerId != user.ID {
+			foree_logger.Logger.Warn("QuoteTx_Fail",
+				"ip", loadRealIp(ctx),
+				"userId", session.UserId,
+				"sessionId", req.SessionId,
+				"rewardId", rewardId,
+				"cause", "user try to use other account's reward",
+			)
 			return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` that is belong to `%v`", user.ID, rewardId, r.OwnerId)
 		}
 		if r.Status != transaction.RewardStatusActive {
+			foree_logger.Logger.Warn("QuoteTx_Fail",
+				"ip", loadRealIp(ctx),
+				"userId", session.UserId,
+				"sessionId", req.SessionId,
+				"rewardId", rewardId,
+				"rewardStatus", r.Status,
+				"cause", "user try to use non-active reward",
+			)
 			return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` that is currently in status `%v`", user.ID, rewardId, r.Status)
 		}
 		if r.Amt.Currency != req.SrcCurrency {
+			foree_logger.Logger.Warn("QuoteTx_Fail",
+				"ip", loadRealIp(ctx),
+				"userId", session.UserId,
+				"sessionId", req.SessionId,
+				"rewardId", rewardId,
+				"requestCurrency", req.SrcCurrency,
+				"cause", "user try to use reward that has different currency",
+			)
 			return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` that apply currency `%v` to currency `%v`", user.ID, rewardId, r.Amt.Currency, req.SrcCurrency)
 		}
 		reward = r
@@ -203,16 +299,35 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 
 	feeJoints, err := t.feeService.applyFee(session.UserGroup.FeeGroup, types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
 	if err != nil {
+		foree_logger.Logger.Error("QuoteTx_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	txLimit, ok := foree_constant.TxLimits[foree_constant.TransactionLimitGroup(session.UserGroup.TransactionLimitGroup)]
 	if !ok {
+		foree_logger.Logger.Error("QuoteTx_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"transactionLimitGroup", session.UserGroup.TransactionLimitGroup,
+			"cause", "unknown transaction group",
+		)
 		return nil, transport.NewInteralServerError("transaction limit no found for group `%v`", session.UserGroup.TransactionLimitGroup)
 	}
 
 	dailyLimit, err := t.getDailyTxLimit(ctx, *session)
 	if err != nil {
+		foree_logger.Logger.Error("QuoteTx_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -223,6 +338,16 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	if totalAmt.Amount+dailyLimit.UsedAmt.Amount > txLimit.MaxAmt.Amount {
+		foree_logger.Logger.Warn("QuoteTx_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"requstAmount", totalAmt.Amount,
+			"requstCurrency", totalAmt.Currency,
+			"remainingAmount", txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount,
+			"maxAmount", txLimit.MaxAmt.Amount,
+			"cause", "overlimit",
+		)
 		return nil, transport.NewFormError("Invalid req transaction request", "srcAmount", fmt.Sprintf("available amount is %v", txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount))
 	}
 
@@ -231,6 +356,15 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	if totalAmt.Amount < txLimit.MinAmt.Amount {
+		foree_logger.Logger.Warn("QuoteTx_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"amoutnAfterReward", totalAmt.Amount,
+			"requstCurrency", totalAmt.Currency,
+			"minAmount", txLimit.MinAmt.Amount,
+			"cause", "underlimit",
+		)
 		return nil, transport.NewFormError("Invalid req transaction request", "srcAmount", fmt.Sprintf("amount should at lease %v %s without rewards", txLimit.MinAmt.Amount, txLimit.MinAmt.Currency))
 	}
 
@@ -314,8 +448,16 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	})
 
 	if err != nil {
+		foree_logger.Logger.Error("QuoteTx_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
+
+	foree_logger.Logger.Info("QuoteTx_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
 
 	return &QuoteTransactionDTO{
 		QuoteId: quoteId,
