@@ -40,6 +40,7 @@ type ForeeApp struct {
 	userIdnetificationRepo *foree_auth.UserIdentificationRepo
 	referralRepo           *referral.ReferralRepo
 	dailyTxLimitRepo       *transaction.DailyTxLimitRepo
+	txLimitRepo            *transaction.TxLimitRepo
 	feeRepo                *transaction.FeeRepo
 	feeJointRepo           *transaction.FeeJointRepo
 	rewardRepo             *transaction.RewardRepo
@@ -58,6 +59,7 @@ type ForeeApp struct {
 	accountService         *foree_service.AccountService
 	feeService             *foree_service.FeeService
 	rateService            *foree_service.RateService
+	txLimitService         *foree_service.TxLimitService
 	transactionService     *foree_service.TransactionService
 	scotiaClient           scotia.ScotiaClient
 	idmClient              idm.IDMClient
@@ -127,6 +129,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.txQuoteRepo = transaction.NewTxQuoteRepo(5, 2048)
 	app.txSummaryRepo = transaction.NewTxSummaryRepo(db)
 	app.promotionRepo = promotion.NewPromotionRepo(db)
+	app.txLimitRepo = transaction.NewTxLimitRepo(db)
 
 	//Initial vendors
 	app.scotiaClient = scotia.NewMockScotiaClient()
@@ -209,6 +212,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 
 	app.rateService = foree_service.NewRateService(app.rateRepo)
 	app.feeService = foree_service.NewFeeService(app.feeRepo)
+	app.txLimitService = foree_service.NewTxLimitService(app.txLimitRepo, app.dailyTxLimitRepo)
 
 	app.transactionService = foree_service.NewTransactionService(
 		db,
@@ -218,12 +222,12 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.txSummaryRepo,
 		app.txQuoteRepo,
 		app.rewardRepo,
-		app.dailyTxLimitRepo,
 		app.contactAccountRepo,
 		app.interacAccountRepo,
 		app.feeJointRepo,
 		app.rateService,
 		app.feeService,
+		app.txLimitService,
 		app.txProcessor,
 		app.scotiaClient,
 		app.nbpClient,

@@ -26,12 +26,12 @@ func NewTransactionService(
 	txSummaryRepo *transaction.TxSummaryRepo,
 	txQuoteRepo *transaction.TxQuoteRepo,
 	rewardRepo *transaction.RewardRepo,
-	dailyTxLimiteRepo *transaction.DailyTxLimitRepo,
 	contactAccountRepo *account.ContactAccountRepo,
 	interacAccountRepo *account.InteracAccountRepo,
 	feeJointRepo *transaction.FeeJointRepo,
 	rateService *RateService,
 	feeService *FeeService,
+	txLimitService *TxLimitService,
 	txProcessor *TxProcessor,
 	scotiaClient scotia.ScotiaClient,
 	nbpClient nbp.NBPClient,
@@ -44,12 +44,12 @@ func NewTransactionService(
 		txSummaryRepo:      txSummaryRepo,
 		txQuoteRepo:        txQuoteRepo,
 		rewardRepo:         rewardRepo,
-		dailyTxLimiteRepo:  dailyTxLimiteRepo,
 		contactAccountRepo: contactAccountRepo,
 		interacAccountRepo: interacAccountRepo,
 		feeJointRepo:       feeJointRepo,
 		rateService:        rateService,
 		feeService:         feeService,
+		txLimitService:     txLimitService,
 		txProcessor:        txProcessor,
 		scotiaClient:       scotiaClient,
 		nbpClient:          nbpClient,
@@ -70,6 +70,7 @@ type TransactionService struct {
 	feeJointRepo       *transaction.FeeJointRepo
 	rateService        *RateService
 	feeService         *FeeService
+	txLimitService     *TxLimitService
 	txProcessor        *TxProcessor
 	scotiaClient       scotia.ScotiaClient
 	nbpClient          nbp.NBPClient
