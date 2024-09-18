@@ -153,6 +153,17 @@ CREATE TABLE IF NOT EXISTS interac_accounts(
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
 
+CREATE TABLE IF NOT EXISTS tx_limit(
+    `name` VARCHAR(128) NOT NULL UNIQUE,
+    `limit_group` VARCHAR(64) NOT NULL UNIQUE,
+    `min_amount` DECIMAL(10, 2) NOT NULL,
+    `min_currency` CHAR(3) NOT NULL,
+    `max_amount` DECIMAL(10, 2) NOT NULL,
+    `max_currency` CHAR(3) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS daily_tx_limit(
     `id` SERIAL PRIMARY KEY,
     `reference` VARCHAR(64) NOT NULL,

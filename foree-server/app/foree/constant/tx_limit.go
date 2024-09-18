@@ -27,7 +27,6 @@ var TxLimits = map[TransactionLimitGroup]transaction.TxLimit{
 			Amount:   types.Amount(1000.0),
 			Currency: "CAD",
 		},
-		IsEnable: true,
 	},
 	TLPersonal2k: {
 		Name: string(TLPersonal2k),
@@ -39,7 +38,6 @@ var TxLimits = map[TransactionLimitGroup]transaction.TxLimit{
 			Amount:   types.Amount(2000.0),
 			Currency: "CAD",
 		},
-		IsEnable: true,
 	},
 	TLPersonal3k: {
 		Name: string(TLPersonal2k),
@@ -51,7 +49,6 @@ var TxLimits = map[TransactionLimitGroup]transaction.TxLimit{
 			Amount:   types.Amount(3000.0),
 			Currency: "CAD",
 		},
-		IsEnable: true,
 	},
 	TLBO: {
 		Name: string(TLBO),
@@ -63,6 +60,5 @@ var TxLimits = map[TransactionLimitGroup]transaction.TxLimit{
 			Amount:   types.Amount(3000.0),
 			Currency: "CAD",
 		},
-		IsEnable: true,
 	},
 }
