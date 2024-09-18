@@ -20,9 +20,9 @@ func NewPromotionService(promotionRepo *promotion.PromotionRepo) *PromotionServi
 		promotionRepo:               promotionRepo,
 		promotionCacheInsertChan:    make(chan string, 1),
 		promotionCacheUpdateChan:    make(chan string, 1),
-		promotionCacheRefreshTicker: time.NewTicker(txLimitCacheRefreshInterval),
+		promotionCacheRefreshTicker: time.NewTicker(promotionCacheRefreshInterval),
 	}
-
+	promotionService.start()
 	return promotionService
 }
 
@@ -32,7 +32,6 @@ type PromotionService struct {
 	promotionCacheInsertChan    chan string
 	promotionCacheUpdateChan    chan string
 	promotionCacheRefreshTicker *time.Ticker
-	pp                          promotion.Promotion
 }
 
 func (p *PromotionService) start() {
@@ -80,4 +79,33 @@ func (p *PromotionService) start() {
 			}
 		}
 	}
+}
+
+func (p *PromotionService) getPromotion(promotionName string) (*promotion.Promotion, error) {
+
+	value, ok := p.cache.Load(promotionName)
+
+	if !ok {
+		promo, err := p.promotionRepo.GetUniquePromotionByName(context.TODO(), promotionName)
+		if err != nil {
+			return nil, err
+		}
+		select {
+		case p.promotionCacheInsertChan <- promotionName:
+		default:
+		}
+		return promo, nil
+	}
+
+	cacheItem, _ := value.(CacheItem[promotion.Promotion])
+
+	if cacheItem.expiredAt.Before(time.Now()) {
+		select {
+		case p.promotionCacheUpdateChan <- promotionName:
+		default:
+		}
+	}
+	//Return old data.
+	promo := cacheItem.item
+	return &promo, nil
 }
