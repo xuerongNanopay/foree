@@ -30,7 +30,7 @@ type AccountService struct {
 func (a *AccountService) VerifyContact(ctx context.Context, req CreateContactReq) (*VerifyContactDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("VerifyContact_Fail", "sessionId", req.SessionId, "cause", fmt.Sprintf("session no found"))
+		foree_logger.Logger.Info("VerifyContact_Fail", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
@@ -70,7 +70,7 @@ func (a *AccountService) VerifyContact(ctx context.Context, req CreateContactReq
 func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq) (*ContactAccountDetailDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("CreateContact_Fail", "sessionId", req.SessionId, "cause", fmt.Sprintf("session no found"))
+		foree_logger.Logger.Info("CreateContact_Fail", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
@@ -119,7 +119,7 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq) (*ContactAccountDetailDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("DeleteContact_Fail", "sessionId", req.SessionId, "cause", fmt.Sprintf("session no found"))
+		foree_logger.Logger.Info("DeleteContact_Fail", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
@@ -149,7 +149,7 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 func (a *AccountService) GetActiveContact(ctx context.Context, req GetContactReq) (*ContactAccountDetailDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("GetActiveContact_Fail", "sessionId", req.SessionId, "cause", fmt.Sprintf("session no found"))
+		foree_logger.Logger.Info("GetActiveContact_Fail", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
@@ -171,7 +171,7 @@ func (a *AccountService) GetActiveContact(ctx context.Context, req GetContactReq
 func (a *AccountService) GetAllActiveContacts(ctx context.Context, req transport.SessionReq) ([]*ContactAccountSummaryDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("GetAllActiveContacts_Fail", "sessionId", req.SessionId, "cause", fmt.Sprintf("session no found"))
+		foree_logger.Logger.Info("GetAllActiveContacts_Fail", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
@@ -192,7 +192,7 @@ func (a *AccountService) GetAllActiveContacts(ctx context.Context, req transport
 func (a *AccountService) QueryActiveContacts(ctx context.Context, req QueryContactReq) ([]*ContactAccountSummaryDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("QueryActiveContacts_Fail", "sessionId", req.SessionId, "cause", fmt.Sprintf("session no found"))
+		foree_logger.Logger.Info("QueryActiveContacts_Fail", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
@@ -214,7 +214,7 @@ func (a *AccountService) QueryActiveContacts(ctx context.Context, req QueryConta
 func (a *AccountService) GetAllActiveInteracs(ctx context.Context, req transport.SessionReq) ([]*InteracAccountSummaryDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("GetAllActiveInteracs_Fail", "sessionId", req.SessionId, "cause", fmt.Sprintf("session no found"))
+		foree_logger.Logger.Info("GetAllActiveInteracs_Fail", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
