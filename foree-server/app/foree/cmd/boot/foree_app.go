@@ -237,7 +237,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	//Initial router
 	app.accountRouter = foree_router.NewAccountRouter(app.authService, app.accountService)
 	app.authRouter = foree_router.NewAuthRouter(app.authService)
-	app.transactionRouter = foree_router.NewTransactionRouter(app.transactionService)
+	app.transactionRouter = foree_router.NewTransactionRouter(app.authService, app.transactionService)
 
 	router := mux.NewRouter()
 	subrouter := router.PathPrefix("/app/v1").Subrouter()

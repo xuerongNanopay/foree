@@ -7,10 +7,12 @@ import (
 
 type TransactionRouter struct {
 	transactionService *foree_service.TransactionService
+	authService        *foree_service.AuthService
 }
 
-func NewTransactionRouter(transactionService *foree_service.TransactionService) *TransactionRouter {
+func NewTransactionRouter(authService *foree_service.AuthService, transactionService *foree_service.TransactionService) *TransactionRouter {
 	return &TransactionRouter{
+		authService:        authService,
 		transactionService: transactionService,
 	}
 }
@@ -24,11 +26,36 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 
 	// === Private
 	// Transaction quote
-	router.HandleFunc("/quote", simplePostWrapper(c.transactionService.QuoteTx)).Methods("POST")
+
+	router.HandleFunc(
+		"/quote",
+		sessionGetWrapper(
+			"QuoteTx",
+			foree_service.PermissionForeeTxWrite,
+			c.authService,
+			c.transactionService.QuoteTx,
+		),
+	).Methods("POST")
 	// Transaction creation
-	router.HandleFunc("/create_transaction", simplePostWrapper(c.transactionService.CreateTx)).Methods("POST")
+	router.HandleFunc(
+		"/create_transaction",
+		sessionGetWrapper(
+			"QuoteTx",
+			foree_service.PermissionForeeTxWrite,
+			c.authService,
+			c.transactionService.CreateTx,
+		),
+	).Methods("POST")
 	// Transaction limit
-	router.HandleFunc("/transaction_limit", simpleGetWrapper(c.transactionService.GetDailyTxLimit)).Methods("GET")
+	router.HandleFunc(
+		"/transaction_limit",
+		sessionGetWrapper(
+			"QuoteTx",
+			foree_service.PermissionForeeTxWrite,
+			c.authService,
+			c.transactionService.GetDailyTxLimit,
+		),
+	).Methods("GET")
 	// Summary Transaction detail
 	router.HandleFunc("/transactions/{TransactionId}", simpleGetWrapper(c.transactionService.GetTxSummary)).Methods("GET")
 	// Summary Transaction query
