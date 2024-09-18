@@ -896,13 +896,24 @@ func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTrans
 
 // Check transaction status, see if is able to cancel.
 func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTransactionReq) (*TxCancelDTO, transport.HError) {
-	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionForeeTxWrite)
-	if sErr != nil {
+	session, sErr := t.authService.GetSession(ctx, req.SessionId)
+	if session == nil {
+		foree_logger.Logger.Info("CancelTransaction_Fail",
+			"sessionId", req.SessionId,
+			"ip", loadRealIp(ctx),
+			"cause", "session no found",
+		)
 		return nil, sErr
 	}
 
 	summaryTx, err := t.txSummaryRepo.GetUniqueTxSummaryByOwnerAndId(ctx, session.UserId, req.TransactionId)
 	if err != nil {
+		foree_logger.Logger.Error("CancelTransaction_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -912,6 +923,12 @@ func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTr
 
 	fTx, err := t.txProcessor.LoadTx(summaryTx.ParentTxId)
 	if err != nil {
+		foree_logger.Logger.Error("CancelTransaction_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -922,6 +939,12 @@ func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTr
 		})
 		//TODO: log
 		if err != nil {
+			foree_logger.Logger.Error("CancelTransaction_Fail",
+				"ip", loadRealIp(ctx),
+				"userId", session.UserId,
+				"sessionId", req.SessionId,
+				"cause", err.Error(),
+			)
 			return nil, transport.WrapInteralServerError(err)
 		} else if resp.StatusCode/100 != 2 {
 			return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
@@ -933,14 +956,34 @@ func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTr
 		})
 		//TODO: log
 		if err != nil {
+			foree_logger.Logger.Error("CancelTransaction_Fail",
+				"ip", loadRealIp(ctx),
+				"userId", session.UserId,
+				"sessionId", req.SessionId,
+				"cause", err.Error(),
+			)
 			return nil, transport.WrapInteralServerError(err)
 		} else if resp.StatusCode/100 != 2 {
 			return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
 		}
 	} else {
+		foree_logger.Logger.Warn("CancelTransaction_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"foreeTxId", fTx.ID,
+			"CurStage", fTx.CurStage,
+			"CurStageStatus", fTx.CurStageStatus,
+		)
 		return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
 	}
 
+	foree_logger.Logger.Info("CancelTransaction_Success",
+		"ip", loadRealIp(ctx),
+		"userId", session.UserId,
+		"sessionId", req.SessionId,
+		"foreeTxId", fTx.ID,
+	)
 	return &TxCancelDTO{
 		TransactionId: req.TransactionId,
 		Message:       "cancel successfully",
