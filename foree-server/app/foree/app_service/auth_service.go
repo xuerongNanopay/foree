@@ -760,6 +760,14 @@ func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) tra
 	return nil
 }
 
+func (a *AuthService) GetSession(ctx context.Context, sessionId string) (*auth.Session, transport.HError) {
+	session := a.sessionRepo.GetSessionUniqueById(sessionId)
+	if session == nil {
+		return nil, transport.NewUnauthorizedRequestError()
+	}
+	return session, nil
+}
+
 func (a *AuthService) Authorize(ctx context.Context, sessionId string, permission string) (*auth.Session, transport.HError) {
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	err := verifySession(session)
