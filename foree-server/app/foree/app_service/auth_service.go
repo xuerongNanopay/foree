@@ -468,7 +468,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		}
 	}()
 
-	// go a.rewardOnboard(newUser)
+	go a.promotionService.rewardOnboard(newUser)
 
 	return NewUserDTO(updateSession), nil
 }
@@ -727,25 +727,33 @@ func (a *AuthService) GetUser(ctx context.Context, req transport.SessionReq) (*U
 	return NewUserDTO(session), nil
 }
 
-func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) transport.HError {
-	session, err := a.VerifySession(ctx, req.SessionId)
-	if err != nil {
-		return err
+func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) (*auth.Session, transport.HError) {
+	session, sErr := a.VerifySession(ctx, req.SessionId)
+	if sErr != nil {
+		var userId int64
+		if session != nil {
+			userId = session.UserId
+		}
+		// Normal error when the token expired
+		foree_logger.Logger.Info("ChangePasswd_Fail", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		return nil, sErr
 	}
 
-	hashed, hErr := auth.HashPassword(req.Password)
-	if hErr != nil {
-		return transport.WrapInteralServerError(hErr)
+	hashed, err := auth.HashPassword(req.Password)
+	if err != nil {
+		foree_logger.Logger.Error("ChangePasswd_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
 	}
 	ep := *session.EmailPasswd
 	ep.Passwd = hashed
-	//TODO: log
 
-	updateErr := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, ep)
-	if updateErr != nil {
-		return transport.WrapInteralServerError(updateErr)
+	err = a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, ep)
+	if err != nil {
+		foree_logger.Logger.Error("ChangePasswd_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
 	}
-	return nil
+	foree_logger.Logger.Info("ChangePasswd_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId")
+	return nil, nil
 }
 
 func (a *AuthService) GetSession(ctx context.Context, sessionId string) (*auth.Session, transport.HError) {
@@ -818,55 +826,6 @@ func (a *AuthService) linkReferer(registerUser auth.User, req SignUpReq) {
 	}
 	foree_logger.Logger.Info("Link_Referer_success", "userId", registerUser.ID, "ReferrerId", referral.ReferrerId)
 }
-
-// TODO: configure to turn targo.
-// func (a *AuthService) rewardReferer(registerUser auth.User) {
-// 	referral, _ := a.referralRepo.GetUniqueReferralByRefereeId(registerUser.ID)
-// 	if referral == nil {
-// 		return
-// 	}
-
-// 	promotion, _ := a.getPromotion(PromotionReferral, promotionCacheTimeout)
-
-// 	if promotion == nil || !promotion.IsValid() {
-// 		return
-// 	}
-
-// 	reward := transaction.Reward{
-// 		Type:        transaction.RewardTypeReferal,
-// 		Description: fmt.Sprintf("Referral reward by %v %v", registerUser.FirstName, registerUser.LastName),
-// 		Amt:         promotion.Amt,
-// 		OwnerId:     referral.ReferrerId,
-// 		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
-// 	}
-
-// 	_, err := a.rewardRepo.InsertReward(context.TODO(), reward)
-// 	if err != nil {
-// 		foree_logger.Logger.Error("Referral_Reward_Fail", "refereeId", registerUser.ID, "referrerId", referral.ReferrerId, "cause", err.Error())
-// 	}
-// }
-
-// func (a *AuthService) rewardOnboard(registerUser auth.User) {
-
-// 	promotion, _ := a.getPromotion(PromotionOnboard, promotionCacheTimeout)
-
-// 	if promotion == nil || !promotion.IsValid() {
-// 		return
-// 	}
-
-// 	reward := transaction.Reward{
-// 		Type:        transaction.RewardTypeReferal,
-// 		Description: "Onboard Reward",
-// 		Amt:         promotion.Amt,
-// 		OwnerId:     registerUser.ID,
-// 		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
-// 	}
-
-// 	_, err := a.rewardRepo.InsertReward(context.TODO(), reward)
-// 	if err != nil {
-// 		foree_logger.Logger.Error("Onboard_Reward_Fail", "userId", registerUser.ID, "cause", err.Error())
-// 	}
-// }
 
 func verifySession(session *auth.Session) transport.HError {
 	if session == nil {
