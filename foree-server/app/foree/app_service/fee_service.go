@@ -10,8 +10,8 @@ import (
 	"xue.io/go-pay/app/foree/types"
 )
 
-const feeCacheExpiry time.Duration = 5 * time.Minute
-const feeCacheRefreshInterval time.Duration = 3 * time.Minute
+const feeCacheExpiry time.Duration = 4 * time.Minute
+const feeCacheRefreshInterval time.Duration = 2 * time.Minute
 
 func NewFeeService(feeRepo *transaction.FeeRepo) *FeeService {
 	feeService := &FeeService{
@@ -40,7 +40,7 @@ func (r *FeeService) start() {
 			if err != nil {
 				foree_logger.Logger.Error("Fee_Cache_Insert_Fail", "feeGroup", feeGroup, "cause", err.Error())
 			} else {
-				r.cache.Swap(feeGroup, CacheItem[[]*transaction.Fee]{
+				r.cache.Store(feeGroup, CacheItem[[]*transaction.Fee]{
 					item:      fees,
 					expiredAt: time.Now().Add(rateCacheExpiry),
 				})

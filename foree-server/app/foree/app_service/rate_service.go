@@ -9,8 +9,8 @@ import (
 	"xue.io/go-pay/app/foree/transaction"
 )
 
-const rateCacheExpiry time.Duration = 5 * time.Minute
-const rateCacheRefreshInterval time.Duration = 3 * time.Minute
+const rateCacheExpiry time.Duration = 4 * time.Minute
+const rateCacheRefreshInterval time.Duration = 2 * time.Minute
 
 func NewRateService(rateRepo *transaction.RateRepo) *RateService {
 	rateService := &RateService{
