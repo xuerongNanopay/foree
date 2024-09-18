@@ -7,6 +7,9 @@ import (
 
 	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/promotion"
+	"xue.io/go-pay/app/foree/referral"
+	"xue.io/go-pay/app/foree/transaction"
+	"xue.io/go-pay/auth"
 )
 
 const PromotionOnboard = "ONBOARD_PROMOTION"
@@ -15,8 +18,12 @@ const PromotionReferral = "REFERRAL_PROMOTION"
 const promotionCacheExpiry time.Duration = 4 * time.Minute
 const promotionCacheRefreshInterval time.Duration = 2 * time.Minute
 
-func NewPromotionService(promotionRepo *promotion.PromotionRepo) *PromotionService {
+func NewPromotionService(
+	promotionRepo *promotion.PromotionRepo,
+	rewardRepo *transaction.RewardRepo,
+) *PromotionService {
 	promotionService := &PromotionService{
+		rewardRepo:                  rewardRepo,
 		promotionRepo:               promotionRepo,
 		promotionCacheInsertChan:    make(chan string, 1),
 		promotionCacheUpdateChan:    make(chan string, 1),
@@ -27,7 +34,9 @@ func NewPromotionService(promotionRepo *promotion.PromotionRepo) *PromotionServi
 }
 
 type PromotionService struct {
+	*referral.ReferralRepo
 	promotionRepo               *promotion.PromotionRepo
+	rewardRepo                  *transaction.RewardRepo
 	cache                       sync.Map
 	promotionCacheInsertChan    chan string
 	promotionCacheUpdateChan    chan string
@@ -108,4 +117,40 @@ func (p *PromotionService) getPromotion(promotionName string) (*promotion.Promot
 	//Return old data.
 	promo := cacheItem.item
 	return &promo, nil
+}
+
+func (p *PromotionService) rewardOnboard(registerUser auth.User) {
+
+	promotion, err := p.getPromotion(PromotionOnboard)
+
+	if err != nil {
+		foree_logger.Logger.Error("Reward_Onboard_Fail", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
+
+	if promotion == nil {
+		foree_logger.Logger.Debug("Reward_Onboard_Fail", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "promotion no found")
+		return
+	}
+
+	if !promotion.IsValid() {
+		foree_logger.Logger.Debug("Reward_Onboard_Fail", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "promotion is invalid")
+		return
+	}
+
+	reward := transaction.Reward{
+		Type:        transaction.RewardTypeReferal,
+		Status:      transaction.RewardStatusActive,
+		Description: "Onboard Reward",
+		Amt:         promotion.Amt,
+		OwnerId:     registerUser.ID,
+		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
+	}
+
+	rewardId, err := p.rewardRepo.InsertReward(context.TODO(), reward)
+	if err != nil {
+		foree_logger.Logger.Error("Reward_Onboard_Fail", "userId", registerUser.ID, "cause", err.Error())
+	}
+	foree_logger.Logger.Info("Reward_Onboard_Success", "userId", registerUser.ID, "rewardId", rewardId)
+
 }

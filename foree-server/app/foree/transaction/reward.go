@@ -60,6 +60,7 @@ const (
 type RewardStatus string
 
 const (
+	RewardStatusInitial  = "INITIAL"
 	RewardStatusActive   = "ACTIVE"
 	RewardStatusPending  = "PENDING"
 	RewardStatusRedeemed = "REDEEMED"

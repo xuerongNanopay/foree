@@ -61,6 +61,7 @@ type ForeeApp struct {
 	rateService            *foree_service.RateService
 	txLimitService         *foree_service.TxLimitService
 	transactionService     *foree_service.TransactionService
+	promotionService       *foree_service.PromotionService
 	scotiaClient           scotia.ScotiaClient
 	idmClient              idm.IDMClient
 	nbpClient              nbp.NBPClient
@@ -188,6 +189,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	if err := app.nbpTxProcessor.Start(); err != nil {
 		return err
 	}
+	app.promotionService = foree_service.NewPromotionService(app.promotionRepo, app.rewardRepo)
 
 	//Initial service
 	app.authService = foree_service.NewAuthService(
@@ -200,6 +202,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.userGroupRepo,
 		app.userExtraRepo,
 		app.referralRepo,
+		app.promotionService,
 	)
 
 	app.accountService = foree_service.NewAccountService(

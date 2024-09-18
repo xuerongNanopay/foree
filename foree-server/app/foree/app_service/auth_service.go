@@ -11,7 +11,6 @@ import (
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_constant "xue.io/go-pay/app/foree/constant"
 	foree_logger "xue.io/go-pay/app/foree/logger"
-	"xue.io/go-pay/app/foree/promotion"
 	"xue.io/go-pay/app/foree/referral"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
@@ -35,6 +34,7 @@ func NewAuthService(
 	userGroupRepo *auth.UserGroupRepo,
 	userExtraRepo *foree_auth.UserExtraRepo,
 	referralRepo *referral.ReferralRepo,
+	promotionService *PromotionService,
 ) *AuthService {
 	return &AuthService{
 		db:                     db,
@@ -47,6 +47,7 @@ func NewAuthService(
 		userGroupRepo:          userGroupRepo,
 		userExtraRepo:          userExtraRepo,
 		referralRepo:           referralRepo,
+		promotionService:       promotionService,
 	}
 }
 
@@ -61,6 +62,7 @@ type AuthService struct {
 	userGroupRepo          *auth.UserGroupRepo
 	userExtraRepo          *foree_auth.UserExtraRepo
 	referralRepo           *referral.ReferralRepo
+	promotionService       *PromotionService
 }
 
 func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, transport.HError) {
@@ -126,6 +128,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 	_, err = a.userGroupRepo.InsertUserGroup(ctx, auth.UserGroup{
 		RoleGroup:             foree_constant.DefaultRoleGroup,
 		TransactionLimitGroup: foree_constant.DefaultTransactionLimitGroup,
+		FeeGroup:              foree_constant.DefaultFeeGroup,
 		OwnerId:               userId,
 	})
 	if err != nil {
@@ -864,43 +867,6 @@ func (a *AuthService) linkReferer(registerUser auth.User, req SignUpReq) {
 // 		foree_logger.Logger.Error("Onboard_Reward_Fail", "userId", registerUser.ID, "cause", err.Error())
 // 	}
 // }
-
-// TODO: using atomic interger to limit peak volumn
-func (a *AuthService) getPromotion(code string, validIn time.Duration) (*promotion.Promotion, error) {
-	// a.promotionCacheRWLock.RLock()
-	// promotionCache, ok := a.promotionCache[code]
-	// a.promotionCacheRWLock.RUnlock()
-
-	// if ok && promotionCache.createdAt.Add(validIn).After(time.Now()) {
-	// 	return &promotionCache.item, nil
-	// }
-
-	// promo, err := a.promotionRepo.GetUniquePromotionByCode(context.TODO(), code)
-	// if err != nil {
-	// 	foree_logger.Logger.Error("Promotion_Fail", "code", code, "cause", err.Error())
-	// 	return nil, err
-	// }
-
-	// if promo == nil {
-	// 	foree_logger.Logger.Warn("Promotion_Fail", "code", code, "cause", "promotion no found")
-	// 	return nil, fmt.Errorf("promotion no found with code `%v`", code)
-	// }
-
-	// // Make sure at least one thread can update the cache.
-	// func() {
-	// 	a.promotionCacheUpdateLock.TryLock()
-	// 	defer a.promotionCacheUpdateLock.Unlock()
-	// 	a.promotionCacheRWLock.Lock()
-	// 	defer a.promotionCacheRWLock.Unlock()
-	// 	a.promotionCache[code] = CacheItem[promotion.Promotion]{
-	// 		item:      *promo,
-	// 		createdAt: time.Now(),
-	// 	}
-	// }()
-
-	// return promo, nil
-	return nil, nil
-}
 
 func verifySession(session *auth.Session) transport.HError {
 	if session == nil {
