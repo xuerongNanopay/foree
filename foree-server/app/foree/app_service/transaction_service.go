@@ -466,26 +466,31 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 }
 
 func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
-	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionForeeTxWrite)
-	if sErr != nil {
+	session, sErr := t.authService.GetSession(ctx, req.SessionId)
+	if session == nil {
+		foree_logger.Logger.Info("CreateTx_Fail",
+			"sessionId", req.SessionId,
+			"ip", loadRealIp(ctx),
+			"cause", "session no found",
+		)
 		return nil, sErr
 	}
 
-	quote := t.txQuoteRepo.GetUniqueById(ctx, req.QuoteId)
 	user := session.User
-	if quote.OwerId != session.User.ID {
-		return nil, transport.NewInteralServerError("user `%v` try to create a transaction with quote belong to `%v`", user.ID, quote.OwerId)
+	quote := t.txQuoteRepo.GetUniqueById(ctx, req.QuoteId)
+
+	if quote == nil {
+		foree_logger.Logger.Warn("CreateTx_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"quoteId", req.QuoteId,
+			"cause", "quote not found",
+		)
+		return nil, transport.NewInteralServerError("user `%v` try to get null quote", user.ID)
 	}
 
 	foreeTx := quote.Tx
-	if foreeTx == nil {
-		return nil, transport.NewInteralServerError("user `%v` do not find foreeTx in quote `%v`", user.ID, req.QuoteId)
-	}
-
-	userGroup, er := t.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
-	if er != nil {
-		return nil, transport.WrapInteralServerError(er)
-	}
 
 	// Start database transaction.
 	dTx, err := t.db.Begin()
@@ -511,9 +516,24 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 			reward := foreeTx.Rewards[1]
 			reward, err := t.rewardRepo.GetUniqueRewardById(ctx, reward.ID)
 			if err != nil {
+				foree_logger.Logger.Error("CreateTx_Fail",
+					"ip", loadRealIp(ctx),
+					"userId", session.UserId,
+					"sessionId", req.SessionId,
+					"quoteId", req.QuoteId,
+					"cause", err.Error(),
+				)
 				rewardErr = transport.WrapInteralServerError(err)
 			}
 			if reward.Status != transaction.RewardStatusActive {
+				foree_logger.Logger.Warn("CreateTx_Fail",
+					"ip", loadRealIp(ctx),
+					"userId", session.UserId,
+					"sessionId", req.SessionId,
+					"quoteId", req.QuoteId,
+					"rewardStatus", reward.Status,
+					"cause", "reward is not in active",
+				)
 				rewardErr = transport.NewInteralServerError("user `%v` try to create a transaction with reward `%v` in status `%s`", user.ID, reward.ID, reward.Status)
 			}
 			//TODO: update reward
@@ -526,17 +546,31 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	var limitErr transport.HError
 	limitChecker := func() {
 		defer wg.Done()
-		txLimit, ok := foree_constant.TxLimits[foree_constant.TransactionLimitGroup(userGroup.TransactionLimitGroup)]
-		if !ok {
-			limitErr = transport.NewInteralServerError("transaction limit no found for group `%v`", userGroup.TransactionLimitGroup)
-		}
+		txLimit := foree_constant.TxLimits[foree_constant.TransactionLimitGroup(session.UserGroup.TransactionLimitGroup)]
 
 		dailyLimit, err := t.getDailyTxLimit(ctx, *session)
 		if err != nil {
+			foree_logger.Logger.Error("CreateTx_Fail",
+				"ip", loadRealIp(ctx),
+				"userId", session.UserId,
+				"sessionId", req.SessionId,
+				"quoteId", req.QuoteId,
+				"cause", err.Error(),
+			)
 			limitErr = transport.WrapInteralServerError(err)
 		}
 
 		if foreeTx.SrcAmt.Amount+dailyLimit.UsedAmt.Amount > txLimit.MaxAmt.Amount {
+			foree_logger.Logger.Warn("QuoteTx_Fail",
+				"ip", loadRealIp(ctx),
+				"userId", session.UserId,
+				"sessionId", req.SessionId,
+				"requstAmount", foreeTx.SrcAmt.Amount,
+				"requstCurrency", foreeTx.SrcAmt.Currency,
+				"remainingAmount", txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount,
+				"maxAmount", txLimit.MaxAmt.Amount,
+				"cause", "overlimit",
+			)
 			limitErr = transport.NewInteralServerError("user `%v` try to create a transaction with `%v` but the remaining limit is `%v`", user.ID, foreeTx.SrcAmt.Amount, txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount)
 		}
 	}
@@ -552,11 +586,25 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		id, err := t.foreeTxRepo.InsertForeeTx(ctx, *foreeTx)
 		if err != nil {
 			dTx.Rollback()
+			foree_logger.Logger.Error("CreateTx_Fail",
+				"ip", loadRealIp(ctx),
+				"userId", session.UserId,
+				"sessionId", req.SessionId,
+				"quoteId", req.QuoteId,
+				"cause", err.Error(),
+			)
 			foreeTxErr = transport.WrapInteralServerError(err)
 		}
 
 		if _, err := t.addDailyTxLimit(ctx, *session, foreeTx.SrcAmt); err != nil {
 			dTx.Rollback()
+			foree_logger.Logger.Error("CreateTx_Fail",
+				"ip", loadRealIp(ctx),
+				"userId", session.UserId,
+				"sessionId", req.SessionId,
+				"quoteId", req.QuoteId,
+				"cause", err.Error(),
+			)
 			foreeTxErr = transport.WrapInteralServerError(err)
 		}
 		foreeTxID = id
@@ -579,8 +627,8 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		return nil, foreeTxErr
 	}
 
+	// Below code can do in other coroutine.
 	foreeTx.ID = foreeTxID
-
 	// Create TxSummary, feeJoin, update reward, update limit.
 	wg = sync.WaitGroup{}
 
@@ -592,6 +640,13 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		foreeTx.Summary.NBPReference = transaction.GenerateNbpId(foree_constant.DefaultNBPIdPrefix, foreeTxID)
 		id, err := t.txSummaryRepo.InsertTxSummary(ctx, *foreeTx.Summary)
 		if err != nil {
+			foree_logger.Logger.Error("CreateTx_Fail",
+				"ip", loadRealIp(ctx),
+				"userId", session.UserId,
+				"sessionId", req.SessionId,
+				"quoteId", req.QuoteId,
+				"cause", err.Error(),
+			)
 			txSummaryErr = transport.WrapInteralServerError(err)
 		}
 		foreeTx.Summary.ID = id
@@ -607,6 +662,13 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 			feeJoin.ParentTxId = foreeTxID
 			_, err := t.feeJointRepo.InsertFeeJoint(ctx, *feeJoin)
 			if err != nil {
+				foree_logger.Logger.Error("CreateTx_Fail",
+					"ip", loadRealIp(ctx),
+					"userId", session.UserId,
+					"sessionId", req.SessionId,
+					"quoteId", req.QuoteId,
+					"cause", err.Error(),
+				)
 				feeJointError = transport.WrapInteralServerError(err)
 				return
 			}
@@ -625,6 +687,13 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 			r.Status = transaction.RewardStatusPending
 			err := t.rewardRepo.UpdateRewardTxById(ctx, *r)
 			if err != nil {
+				foree_logger.Logger.Error("CreateTx_Fail",
+					"ip", loadRealIp(ctx),
+					"userId", session.UserId,
+					"sessionId", req.SessionId,
+					"quoteId", req.QuoteId,
+					"cause", err.Error(),
+				)
 				rewardError = transport.WrapInteralServerError(err)
 			}
 		}
@@ -652,6 +721,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 
 	go t.txProcessor.createAndProcessTx(*foreeTx)
 
+	foree_logger.Logger.Info("CreateTx_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "foreeTxId", foreeTxID)
 	return NewTxSummaryDetailDTO(foreeTx.Summary), nil
 }
 
@@ -664,15 +734,31 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 // }
 
 func (t *TransactionService) GetDailyTxLimit(ctx context.Context, req transport.SessionReq) (*DailyTxLimitDTO, transport.HError) {
-	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionForeeTxWrite)
-	if sErr != nil {
+	session, sErr := t.authService.GetSession(ctx, req.SessionId)
+	if session == nil {
+		foree_logger.Logger.Info("CreateTx_Fail",
+			"sessionId", req.SessionId,
+			"ip", loadRealIp(ctx),
+			"cause", "session no found",
+		)
 		return nil, sErr
 	}
 
 	limit, err := t.getDailyTxLimit(ctx, *session)
 	if err != nil {
+		foree_logger.Logger.Error("GetDailyTxLimit_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
+	foree_logger.Logger.Debug("GetDailyTxLimit_Success",
+		"ip", loadRealIp(ctx),
+		"userId", session.UserId,
+		"sessionId", req.SessionId,
+	)
 	return NewDailyTxLimitDTO(limit), nil
 }
 
@@ -690,21 +776,6 @@ func (t *TransactionService) addDailyTxLimit(ctx context.Context, session auth.S
 
 	return dailyLimit, nil
 }
-
-// func (t *TransactionService) minusDailyTxLimit(ctx context.Context, session auth.Session, amt types.AmountData) (*transaction.DailyTxLimit, error) {
-// 	dailyLimit, err := t.getDailyTxLimit(ctx, session)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	dailyLimit.UsedAmt.Amount -= amt.Amount
-
-// 	if err := t.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
-// 		return nil, err
-// 	}
-
-// 	return dailyLimit, nil
-// }
 
 // I don't case race condition here, cause create transaction will rescure it.
 func (t *TransactionService) getDailyTxLimit(ctx context.Context, session auth.Session) (*transaction.DailyTxLimit, error) {
@@ -746,13 +817,24 @@ func (t *TransactionService) getDailyTxLimit(ctx context.Context, session auth.S
 }
 
 func (t *TransactionService) GetTxSummary(ctx context.Context, req GetTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
-	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionForeeTxSummaryRead)
-	if sErr != nil {
+	session, sErr := t.authService.GetSession(ctx, req.SessionId)
+	if session == nil {
+		foree_logger.Logger.Info("GetTxSummary_Fail",
+			"sessionId", req.SessionId,
+			"ip", loadRealIp(ctx),
+			"cause", "session no found",
+		)
 		return nil, sErr
 	}
 
 	summaryTx, err := t.txSummaryRepo.GetUniqueTxSummaryByOwnerAndId(ctx, session.UserId, req.TransactionId)
 	if err != nil {
+		foree_logger.Logger.Error("GetTxSummary_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -760,15 +842,24 @@ func (t *TransactionService) GetTxSummary(ctx context.Context, req GetTransactio
 		return nil, nil
 	}
 
+	foree_logger.Logger.Debug("GetTxSummary_Success",
+		"ip", loadRealIp(ctx),
+		"userId", session.UserId,
+		"sessionId", req.SessionId,
+	)
 	return NewTxSummaryDetailDTO(summaryTx), nil
 }
 
 func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTransactionReq) ([]*TxSummaryDTO, transport.HError) {
-	session, sErr := t.authService.Authorize(ctx, req.SessionId, PermissionForeeTxSummaryRead)
-	if sErr != nil {
+	session, sErr := t.authService.GetSession(ctx, req.SessionId)
+	if session == nil {
+		foree_logger.Logger.Info("QuerySummaryTxs_Fail",
+			"sessionId", req.SessionId,
+			"ip", loadRealIp(ctx),
+			"cause", "session no found",
+		)
 		return nil, sErr
 	}
-
 	//TODO: limit, offset pruning
 	var summaryTxs []*transaction.TxSummary
 	var err error
@@ -780,15 +871,26 @@ func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTrans
 	}
 
 	if err != nil {
+		foree_logger.Logger.Error("QuerySummaryTxs_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"cause", err.Error(),
+		)
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	rets := make([]*TxSummaryDTO, len(summaryTxs))
 
-	for _, v := range summaryTxs {
-		rets = append(rets, NewTxSummaryDTO(v))
+	for i, v := range summaryTxs {
+		rets[i] = NewTxSummaryDTO(v)
 	}
 
+	foree_logger.Logger.Debug("QuerySummaryTxs_Success",
+		"ip", loadRealIp(ctx),
+		"userId", session.UserId,
+		"sessionId", req.SessionId,
+	)
 	return rets, nil
 }
 
