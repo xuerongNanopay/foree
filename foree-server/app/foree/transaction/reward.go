@@ -51,7 +51,7 @@ const (
 type RewardType string
 
 const (
-	RewardTypeSignUp    string = "SIGN_UP_REWARD"
+	RewardTypeOnboard   string = "ONBOARD_REWARD"
 	RewardTypeReferal   string = "REFERAL_REWARD"
 	RewardTypeTx        string = "TX_REWARD"
 	RewardTypePromoCode string = "PROMO_CODE_REWARD"

@@ -469,6 +469,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	}()
 
 	go a.promotionService.rewardOnboard(newUser)
+	go a.promotionService.initialReferralReward(newUser)
 
 	return NewUserDTO(updateSession), nil
 }

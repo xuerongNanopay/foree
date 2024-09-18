@@ -2,6 +2,7 @@ package foree_service
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -37,6 +38,7 @@ type PromotionService struct {
 	*referral.ReferralRepo
 	promotionRepo               *promotion.PromotionRepo
 	rewardRepo                  *transaction.RewardRepo
+	referralRepo                *referral.ReferralRepo
 	cache                       sync.Map
 	promotionCacheInsertChan    chan string
 	promotionCacheUpdateChan    chan string
@@ -139,7 +141,7 @@ func (p *PromotionService) rewardOnboard(registerUser auth.User) {
 	}
 
 	reward := transaction.Reward{
-		Type:        transaction.RewardTypeReferal,
+		Type:        transaction.RewardTypeOnboard,
 		Status:      transaction.RewardStatusActive,
 		Description: "Onboard Reward",
 		Amt:         promotion.Amt,
@@ -153,4 +155,48 @@ func (p *PromotionService) rewardOnboard(registerUser auth.User) {
 	}
 	foree_logger.Logger.Info("Reward_Onboard_Success", "userId", registerUser.ID, "rewardId", rewardId)
 
+}
+
+func (p *PromotionService) initialReferralReward(registerUser auth.User) {
+	promotion, err := p.getPromotion(PromotionReferral)
+
+	if err != nil {
+		foree_logger.Logger.Error("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
+
+	if promotion == nil {
+		foree_logger.Logger.Debug("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "promotion no found")
+		return
+	}
+
+	if !promotion.IsValid() {
+		foree_logger.Logger.Debug("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "promotion is invalid")
+		return
+	}
+
+	referral, err := p.referralRepo.GetUniqueReferralByRefereeId(registerUser.ID)
+	if err != nil {
+		foree_logger.Logger.Error("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
+
+	generateReferralRewardDescription := func(refereeId int64) string {
+		return fmt.Sprintf("Referral accepted by %v", refereeId)
+	}
+
+	reward := transaction.Reward{
+		Type:        transaction.RewardTypeReferal,
+		Status:      transaction.RewardStatusInitial,
+		Description: generateReferralRewardDescription(registerUser.ID),
+		Amt:         promotion.Amt,
+		OwnerId:     referral.ReferrerId,
+		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
+	}
+
+	rewardId, err := p.rewardRepo.InsertReward(context.TODO(), reward)
+	if err != nil {
+		foree_logger.Logger.Error("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "cause", "referrerId", referral.ID, err.Error())
+	}
+	foree_logger.Logger.Info("Initial_Referral_Reward_Success", "userId", registerUser.ID, "referrerId", referral.ID, "rewardId", rewardId)
 }
