@@ -508,7 +508,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 
 	var wg sync.WaitGroup
 
-	// Recheck rewards
+	// Recheck and update rewards
 	var rewardErr transport.HError
 	rewardChecker := func() {
 		defer wg.Done()
@@ -536,13 +536,12 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 				)
 				rewardErr = transport.NewInteralServerError("user `%v` try to create a transaction with reward `%v` in status `%s`", user.ID, reward.ID, reward.Status)
 			}
-			//TODO: update reward
 		}
 	}
 	wg.Add(1)
 	go rewardChecker()
 
-	// Recheck limit
+	// Recheck and update limit
 	var limitErr transport.HError
 	limitChecker := func() {
 		defer wg.Done()
@@ -573,6 +572,18 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 			)
 			limitErr = transport.NewInteralServerError("user `%v` try to create a transaction with `%v` but the remaining limit is `%v`", user.ID, foreeTx.SrcAmt.Amount, txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount)
 		}
+
+		if _, err := t.addDailyTxLimit(ctx, *session, foreeTx.SrcAmt); err != nil {
+			dTx.Rollback()
+			foree_logger.Logger.Error("CreateTx_Fail",
+				"ip", loadRealIp(ctx),
+				"userId", session.UserId,
+				"sessionId", req.SessionId,
+				"quoteId", req.QuoteId,
+				"cause", err.Error(),
+			)
+			limitErr = transport.WrapInteralServerError(err)
+		}
 	}
 
 	wg.Add(1)
@@ -585,18 +596,6 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		defer wg.Done()
 		id, err := t.foreeTxRepo.InsertForeeTx(ctx, *foreeTx)
 		if err != nil {
-			dTx.Rollback()
-			foree_logger.Logger.Error("CreateTx_Fail",
-				"ip", loadRealIp(ctx),
-				"userId", session.UserId,
-				"sessionId", req.SessionId,
-				"quoteId", req.QuoteId,
-				"cause", err.Error(),
-			)
-			foreeTxErr = transport.WrapInteralServerError(err)
-		}
-
-		if _, err := t.addDailyTxLimit(ctx, *session, foreeTx.SrcAmt); err != nil {
 			dTx.Rollback()
 			foree_logger.Logger.Error("CreateTx_Fail",
 				"ip", loadRealIp(ctx),
@@ -654,6 +653,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	wg.Add(1)
 	go createSummaryTx()
 
+	//TODO: update to patch insert.
 	// Create feeJoint
 	var feeJointError transport.HError
 	createFeeJoint := func() {
@@ -677,7 +677,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	wg.Add(1)
 	go createFeeJoint()
 
-	// reward
+	// Update reward
 	var rewardError transport.HError
 	updateReward := func() {
 		defer wg.Done()
@@ -698,6 +698,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 			}
 		}
 	}
+
 	wg.Add(1)
 	go updateReward()
 

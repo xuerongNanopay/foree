@@ -50,7 +50,7 @@ func (r *RateService) start() {
 				})
 			}
 
-		case _ = <-r.rateCacheRefreshTicker.C:
+		case <-r.rateCacheRefreshTicker.C:
 			length := 0
 			r.cache.Range(func(k, _ interface{}) bool {
 				length += 1
