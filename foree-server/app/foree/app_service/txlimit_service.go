@@ -162,6 +162,9 @@ func (t *TxLimitService) getDailyTxLimit(ctx context.Context, session auth.Sessi
 		if err != nil {
 			return nil, err
 		}
+		if dl == nil {
+			return nil, fmt.Errorf("transaction limit no found for group `%v`", session.UserGroup.TransactionLimitGroup)
+		}
 		dailyLimit = dl
 	}
 	return dailyLimit, nil
