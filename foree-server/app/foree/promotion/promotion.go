@@ -9,18 +9,18 @@ import (
 )
 
 const (
-	sQLPromotionGetUniqueByCode = `
+	sQLPromotionGetUniqueByName = `
 		SELECT
-			g.code, g.description, g.amount, g.currency,
+			g.name, g.description, g.amount, g.currency,
 			g.is_enable, g.start_time, g.end_time, g.created_at, g.updated_at
 		FROM promotion as g
-		Where g.code = ?
+		Where g.name = ?
 	`
 )
 
 // Control the life cycle of promotion.
 type Promotion struct {
-	Code        string           `json:"code"`
+	Name        string           `json:"name"`
 	Description string           `json:"description"`
 	Amt         types.AmountData `json:"Amt"`
 	IsEnable    bool             `json:"isEnable"`
@@ -64,8 +64,8 @@ type PromotionRepo struct {
 	db *sql.DB
 }
 
-func (repo *PromotionRepo) GetUniquePromotionByCode(ctx context.Context, code string) (*Promotion, error) {
-	rows, err := repo.db.Query(sQLPromotionGetUniqueByCode, code)
+func (repo *PromotionRepo) GetUniquePromotionByName(ctx context.Context, name string) (*Promotion, error) {
+	rows, err := repo.db.Query(sQLPromotionGetUniqueByName, name)
 
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func (repo *PromotionRepo) GetUniquePromotionByCode(ctx context.Context, code st
 		}
 	}
 
-	if f == nil || f.Code == "" {
+	if f == nil || f.Name == "" {
 		return nil, nil
 	}
 
@@ -91,7 +91,7 @@ func (repo *PromotionRepo) GetUniquePromotionByCode(ctx context.Context, code st
 func scanRowIntoPromotion(rows *sql.Rows) (*Promotion, error) {
 	p := new(Promotion)
 	err := rows.Scan(
-		&p.Code,
+		&p.Name,
 		&p.Description,
 		&p.Amt.Amount,
 		&p.Amt.Currency,

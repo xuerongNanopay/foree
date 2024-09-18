@@ -67,7 +67,7 @@ func (r *RateService) start() {
 				return true
 			})
 			if length > 64 {
-				foree_logger.Logger.Error("Rate_Cache_Refresh", "message", "Size of rate cache is greater than 64, please check if rateCacheExpiry and rateCacheRefreshInterval are still suitable with this cache size.")
+				foree_logger.Logger.Warn("Rate_Cache_Refresh", "message", "Size of rate cache is greater than 64, please check if rateCacheExpiry and rateCacheRefreshInterval are still suitable with this cache size.")
 			}
 		}
 	}

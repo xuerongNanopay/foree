@@ -29,6 +29,7 @@ const TransactionCreate = () => {
     rewardIds: [],
     transactionPurpose: ''
   })
+  const [quote, setQuote] = useState(null)
 
   useEffect(() => {
     async function validate() {
@@ -325,20 +326,45 @@ const TransactionCreate = () => {
     </View>
   ), [errors['transactionPurpose'], form.transactionPurpose])
 
+  const ReviewTitle = useCallback(() => (
+    <View>
+      <Text className="text-lg font-pbold text-center">Review</Text>
+    </View>
+  ), [])
+
+  const Review = () => (
+    <View>
+
+    </View>
+  )
+
   const CreateTransactionFlow = [
     {
       titleView: TransactionCreateTitle,
       formView: TransactionCreate,
       canGoNext: () => {
-        return true
+        return !errors.cinAccId &&
+                !errors.coutAccId &&
+                !errors.srcAmount
       }
     },
     {
       titleView: TransactionPurposeTitle,
       formView: TransactionPurpose,
       canGoNext: () => {
-        return true
+        return !errors.transactionPurpose
+      },
+      goNext: async () => {
+        const resp = await transactionService.getCADToPRKRate()
+        console.log(resp.data)
       }
+    },
+    {
+      titleView: ReviewTitle,
+      formView: Review,
+      canGoNext: () => {
+        return !errors.transactionPurpose
+      },
     },
   ]
 
@@ -349,6 +375,7 @@ const TransactionCreate = () => {
         onSumbit={submit}
         containerStyle=""
         submitDisabled={isSubmitting}
+        submitTintTitle="Send"
       />
     </SafeAreaView>
   )

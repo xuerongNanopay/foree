@@ -422,7 +422,7 @@ CREATE TABLE IF NOT EXISTS tx_summary(
 );
 
 CREATE TABLE IF NOT EXISTS promotion(
-    `code` VARCHAR(128) NOT NULL PRIMARY KEY,
+    `name` VARCHAR(128) NOT NULL PRIMARY KEY,
     `description` VARCHAR(256) DEFAULT '',
     `amount` DECIMAL(11, 2) NOT NULL,
     `currency` CHAR(3) NOT NULL,

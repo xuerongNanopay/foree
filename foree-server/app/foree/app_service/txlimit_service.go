@@ -32,8 +32,8 @@ func NewTxLimitService(
 
 type TxLimitService struct {
 	txLimitRepo               *transaction.TxLimitRepo
-	cache                     sync.Map
 	dailyTxLimiteRepo         *transaction.DailyTxLimitRepo
+	cache                     sync.Map
 	txlimitCacheInsertChan    chan string
 	txlimitCacheUpdateChan    chan string
 	txlimitCacheRefreshTicker *time.Ticker
@@ -80,7 +80,7 @@ func (t *TxLimitService) start() {
 				return true
 			})
 			if length > 32 {
-				foree_logger.Logger.Error("TxLimit_Cache_Refresh", "message", "Size of rate cache is greater than 32, please check if txLimitCacheExpiry and txLimitCacheRefreshInterval are still suitable with this cache size.")
+				foree_logger.Logger.Warn("TxLimit_Cache_Refresh", "message", "Size of rate cache is greater than 32, please check if txLimitCacheExpiry and txLimitCacheRefreshInterval are still suitable with this cache size.")
 			}
 		}
 	}

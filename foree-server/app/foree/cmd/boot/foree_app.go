@@ -200,8 +200,6 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.userGroupRepo,
 		app.userExtraRepo,
 		app.referralRepo,
-		app.rewardRepo,
-		app.promotionRepo,
 	)
 
 	app.accountService = foree_service.NewAccountService(

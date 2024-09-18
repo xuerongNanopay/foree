@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
@@ -14,7 +13,6 @@ import (
 	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/promotion"
 	"xue.io/go-pay/app/foree/referral"
-	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
 	"xue.io/go-pay/server/transport"
@@ -22,9 +20,6 @@ import (
 )
 
 const maxLoginAttempts = 4
-const PromotionOnboard = "ONBOARD_PROMOTION"
-const PromotionReferral = "REFERRAL_PROMOTION"
-const promotionCacheTimeout = 15 * time.Minute
 const verifyCodeExpiry = 4 * time.Minute
 const retrieveTokenExpiry = 5 * time.Minute
 const forgetPasswordUpdateInterval = 1 * time.Hour
@@ -40,8 +35,6 @@ func NewAuthService(
 	userGroupRepo *auth.UserGroupRepo,
 	userExtraRepo *foree_auth.UserExtraRepo,
 	referralRepo *referral.ReferralRepo,
-	rewardRepo *transaction.RewardRepo,
-	promotionRepo *promotion.PromotionRepo,
 ) *AuthService {
 	return &AuthService{
 		db:                     db,
@@ -54,28 +47,20 @@ func NewAuthService(
 		userGroupRepo:          userGroupRepo,
 		userExtraRepo:          userExtraRepo,
 		referralRepo:           referralRepo,
-		rewardRepo:             rewardRepo,
-		promotionRepo:          promotionRepo,
-		promotionCache:         make(map[string]CacheItem[promotion.Promotion], 8),
 	}
 }
 
 type AuthService struct {
-	db                       *sql.DB
-	sessionRepo              *auth.SessionRepo
-	userRepo                 *auth.UserRepo
-	emailPasswordRepo        *auth.EmailPasswdRepo
-	rolePermissionRepo       *auth.RolePermissionRepo
-	userIdentificationRepo   *foree_auth.UserIdentificationRepo
-	interacAccountRepo       *account.InteracAccountRepo
-	userGroupRepo            *auth.UserGroupRepo
-	userExtraRepo            *foree_auth.UserExtraRepo
-	referralRepo             *referral.ReferralRepo
-	rewardRepo               *transaction.RewardRepo
-	promotionRepo            *promotion.PromotionRepo
-	promotionCache           map[string]CacheItem[promotion.Promotion]
-	promotionCacheRWLock     sync.RWMutex
-	promotionCacheUpdateLock sync.RWMutex
+	db                     *sql.DB
+	sessionRepo            *auth.SessionRepo
+	userRepo               *auth.UserRepo
+	emailPasswordRepo      *auth.EmailPasswdRepo
+	rolePermissionRepo     *auth.RolePermissionRepo
+	userIdentificationRepo *foree_auth.UserIdentificationRepo
+	interacAccountRepo     *account.InteracAccountRepo
+	userGroupRepo          *auth.UserGroupRepo
+	userExtraRepo          *foree_auth.UserExtraRepo
+	referralRepo           *referral.ReferralRepo
 }
 
 func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, transport.HError) {
@@ -480,7 +465,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		}
 	}()
 
-	go a.rewardOnboard(newUser)
+	// go a.rewardOnboard(newUser)
 
 	return NewUserDTO(updateSession), nil
 }
@@ -832,53 +817,53 @@ func (a *AuthService) linkReferer(registerUser auth.User, req SignUpReq) {
 }
 
 // TODO: configure to turn targo.
-func (a *AuthService) rewardReferer(registerUser auth.User) {
-	referral, _ := a.referralRepo.GetUniqueReferralByRefereeId(registerUser.ID)
-	if referral == nil {
-		return
-	}
+// func (a *AuthService) rewardReferer(registerUser auth.User) {
+// 	referral, _ := a.referralRepo.GetUniqueReferralByRefereeId(registerUser.ID)
+// 	if referral == nil {
+// 		return
+// 	}
 
-	promotion, _ := a.getPromotion(PromotionReferral, promotionCacheTimeout)
+// 	promotion, _ := a.getPromotion(PromotionReferral, promotionCacheTimeout)
 
-	if promotion == nil || !promotion.IsValid() {
-		return
-	}
+// 	if promotion == nil || !promotion.IsValid() {
+// 		return
+// 	}
 
-	reward := transaction.Reward{
-		Type:        transaction.RewardTypeReferal,
-		Description: fmt.Sprintf("Referral reward by %v %v", registerUser.FirstName, registerUser.LastName),
-		Amt:         promotion.Amt,
-		OwnerId:     referral.ReferrerId,
-		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
-	}
+// 	reward := transaction.Reward{
+// 		Type:        transaction.RewardTypeReferal,
+// 		Description: fmt.Sprintf("Referral reward by %v %v", registerUser.FirstName, registerUser.LastName),
+// 		Amt:         promotion.Amt,
+// 		OwnerId:     referral.ReferrerId,
+// 		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
+// 	}
 
-	_, err := a.rewardRepo.InsertReward(context.TODO(), reward)
-	if err != nil {
-		foree_logger.Logger.Error("Referral_Reward_Fail", "refereeId", registerUser.ID, "referrerId", referral.ReferrerId, "cause", err.Error())
-	}
-}
+// 	_, err := a.rewardRepo.InsertReward(context.TODO(), reward)
+// 	if err != nil {
+// 		foree_logger.Logger.Error("Referral_Reward_Fail", "refereeId", registerUser.ID, "referrerId", referral.ReferrerId, "cause", err.Error())
+// 	}
+// }
 
-func (a *AuthService) rewardOnboard(registerUser auth.User) {
+// func (a *AuthService) rewardOnboard(registerUser auth.User) {
 
-	promotion, _ := a.getPromotion(PromotionOnboard, promotionCacheTimeout)
+// 	promotion, _ := a.getPromotion(PromotionOnboard, promotionCacheTimeout)
 
-	if promotion == nil || !promotion.IsValid() {
-		return
-	}
+// 	if promotion == nil || !promotion.IsValid() {
+// 		return
+// 	}
 
-	reward := transaction.Reward{
-		Type:        transaction.RewardTypeReferal,
-		Description: "Onboard Reward",
-		Amt:         promotion.Amt,
-		OwnerId:     registerUser.ID,
-		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
-	}
+// 	reward := transaction.Reward{
+// 		Type:        transaction.RewardTypeReferal,
+// 		Description: "Onboard Reward",
+// 		Amt:         promotion.Amt,
+// 		OwnerId:     registerUser.ID,
+// 		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
+// 	}
 
-	_, err := a.rewardRepo.InsertReward(context.TODO(), reward)
-	if err != nil {
-		foree_logger.Logger.Error("Onboard_Reward_Fail", "userId", registerUser.ID, "cause", err.Error())
-	}
-}
+// 	_, err := a.rewardRepo.InsertReward(context.TODO(), reward)
+// 	if err != nil {
+// 		foree_logger.Logger.Error("Onboard_Reward_Fail", "userId", registerUser.ID, "cause", err.Error())
+// 	}
+// }
 
 // TODO: using atomic interger to limit peak volumn
 func (a *AuthService) getPromotion(code string, validIn time.Duration) (*promotion.Promotion, error) {
