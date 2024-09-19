@@ -251,6 +251,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.sysRouter.RegisterRouter(sysSubrouter)
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%v", cfg.HttpServerPort), router); err != nil {
+		foree_logger.Logger.Error("Service initial error", "cause", err.Error())
 		return err
 	}
 

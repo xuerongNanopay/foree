@@ -30,7 +30,7 @@ func NewPromotionService(
 		promotionCacheUpdateChan:    make(chan string, 1),
 		promotionCacheRefreshTicker: time.NewTicker(promotionCacheRefreshInterval),
 	}
-	promotionService.start()
+	go promotionService.start()
 	return promotionService
 }
 

@@ -20,7 +20,7 @@ func NewFeeService(feeRepo *transaction.FeeRepo) *FeeService {
 		feeCacheUpdateChan:    make(chan string, 1),
 		feeCacheRefreshTicker: time.NewTicker(feeCacheRefreshInterval),
 	}
-	feeService.start()
+	go feeService.start()
 	return feeService
 }
 

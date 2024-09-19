@@ -26,7 +26,7 @@ func NewTxLimitService(
 		txlimitCacheUpdateChan:    make(chan string, 1),
 		txlimitCacheRefreshTicker: time.NewTicker(txLimitCacheRefreshInterval),
 	}
-	txLimitService.start()
+	go txLimitService.start()
 	return txLimitService
 }
 

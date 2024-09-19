@@ -19,7 +19,7 @@ func NewRateService(rateRepo *transaction.RateRepo) *RateService {
 		rateCacheUpdateChan:    make(chan string, 1),
 		rateCacheRefreshTicker: time.NewTicker(rateCacheRefreshInterval),
 	}
-	rateService.start()
+	go rateService.start()
 	return rateService
 }
 
