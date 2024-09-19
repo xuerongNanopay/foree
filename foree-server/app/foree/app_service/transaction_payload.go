@@ -335,7 +335,7 @@ func NewTxSummaryDetailDTO(tx *transaction.TxSummary) *TxSummaryDetailDTO {
 		IsCancelAllowed: tx.IsCancelAllowed,
 	}
 
-	if tx.CreatedAt == nil {
+	if tx.CreatedAt != nil {
 		ret.CreateAt = tx.CreatedAt.UnixMilli()
 	}
 
