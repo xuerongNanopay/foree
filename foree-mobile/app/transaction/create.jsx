@@ -170,6 +170,10 @@ const TransactionCreate = () => {
   
   }
 
+  const quoteTransaction = async () => {
+
+  }
+
   const InteracListItem = useCallback((interac) => {
     if ( !interac ) return <></>
     return (
@@ -281,6 +285,7 @@ const TransactionCreate = () => {
       {/*  */}
       <CurrencyInputField
         title="You Send"
+        defaultValue={form.srcAmount}
         containerStyles="mt-2"
         errorMessage={errors['srcAmount']}
         placeholder={!dailyLimit ? "type amount..." : `available: ${(dailyLimit.maxAmount-dailyLimit.usedAmount).toFixed(2)}`}
@@ -296,6 +301,7 @@ const TransactionCreate = () => {
       <CurrencyInputField
         title="Recipient Receives"
         containerStyles="mt-2"
+        producer={false}
         value={form.destAmount}
         editable={false}
         supportCurrencies={[Currencies["PKR"]]}
@@ -317,7 +323,7 @@ const TransactionCreate = () => {
     errors['cinAccId'],
     errors['coutAccId']
   ])
-
+  
   const TransactionPurposeTitle = useCallback(() => (
     <View>
       <Text className="text-lg font-pbold text-center">Transaction Purpose</Text>

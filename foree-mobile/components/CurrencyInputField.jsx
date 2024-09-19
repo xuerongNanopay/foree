@@ -17,14 +17,16 @@ const CurrencyInputField = ({
   placeholder="0.00",
   inputStyles,
   supportCurrencies=Object.values(Currencies),
+  defaultValue=0.0,
   value=0.0,
+  producer=true,
   editable=true,
   onCurrencyChange=(e)=>{},
   errorMessage
 }) => {
   const [visible, setVisible] = useState(false)
   const [selectedCurrency, setSelectedCurrency] = useState(supportCurrencies.length === 1 ? supportCurrencies[0] : null)
-  const [amtString, setAmtString] = useState(!value ? "" : value.toFixed(2))
+  const [amtString, setAmtString] = useState(!defaultValue ? "" : defaultValue.toFixed(2))
   const [amt, setAmt] = useState(supportCurrencies.length === 1 ? {amount: 0.0, currency: supportCurrencies[0].isoCode} : {amount: 0.0, currency: ''})
 
   useEffect(() => {
@@ -32,12 +34,23 @@ const CurrencyInputField = ({
   }, [amt])
 
   useEffect(() => {
-    setAmt({
+    setAmt((amt) => ({
       ...amt,
-      amount: value
-    })
-    setAmtString(!value ? "" : value.toFixed(2))
-  }, [value])
+      amount: defaultValue
+    }))
+    setAmtString(!defaultValue ? "" : defaultValue.toFixed(2))
+  }, [])
+
+  //Receiver.
+  if ( !producer ) {
+    useEffect(() => {
+      setAmt((amt) => ({
+        ...amt,
+        amount: value
+      }))
+      setAmtString(!value ? "" : value.toFixed(2))
+    }, [value])
+  }
 
   return (
     <>
