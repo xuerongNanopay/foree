@@ -1,7 +1,8 @@
+import { number, object, string } from "yup"
 import { View, Text, SafeAreaView } from 'react-native'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { accountService, transactionpayload, transactionService } from '../../service'
+import { accountService, transactionService } from '../../service'
 import MultiStepForm from '../../components/MultiStepForm'
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import ModalSelect from '../../components/ModalSelect'
@@ -19,6 +20,7 @@ const TransactionCreate = () => {
   const [contacts, setContacts] = useState([])
   const [sourceAccounts , setSourceAccounts] = useState([])
   const [errors, setErrors] = useState({})
+  const [dailyLimit, setDailyLimit] = useState(null)
   const [form, setForm] = useState({
     cinAccId: 0,
     coutAccId: 0,
@@ -31,10 +33,22 @@ const TransactionCreate = () => {
   })
   const [quote, setQuote] = useState(null)
 
+  const quoteTransactionScheme = useMemo(() => {
+    const sourceAmoutScheme = !!dailyLimit ? 
+      number().required("required").min(20, "Minimum $20.00 CAD").max(dailyLimit.maxAmount-dailyLimit.usedAmount, `Maximum $${(dailyLimit.maxAmount-dailyLimit.usedAmount).toFixed(2)} CAD`) :
+      number().required("required").min(20, "Minimum $20.00 CAD").max(1000, "Maximum $1000.00 CAD")
+    return object({
+      cinAccId: number().required("required"),
+      coutAccId: number().integer().required("required").min(1, "required"),
+      srcAmount: sourceAmoutScheme,
+      transactionPurpose: string().required("required")
+    })
+  }, [dailyLimit])
+
   useEffect(() => {
     async function validate() {
       try {
-        await transactionpayload.QuoteTransactoinScheme.validate(form, {abortEarly: false})
+        await quoteTransactionScheme.validate(form, {abortEarly: false})
         setErrors({})
       } catch (err) {
         let e = {}
@@ -128,7 +142,7 @@ const TransactionCreate = () => {
           console.error("transaction_create--getDailyLimit", resp.status, resp.data)
         } else {
           const dailyLimit = resp.data.data
-          console.log("aaa", dailyLimit)
+          setDailyLimit(dailyLimit)
         }
       } catch (e) {
         console.error("transaction_create--getDailyLimit", e)
@@ -269,7 +283,7 @@ const TransactionCreate = () => {
         title="You Send"
         containerStyles="mt-2"
         errorMessage={errors['srcAmount']}
-        placeholder="type amount..."
+        placeholder={!dailyLimit ? "type amount..." : `available: ${(dailyLimit.maxAmount-dailyLimit.usedAmount).toFixed(2)}`}
         onCurrencyChange={((e) => {
           setForm((form) => ({
             ...form,
@@ -292,6 +306,7 @@ const TransactionCreate = () => {
     </View>
   ), [
     rate,
+    dailyLimit,
     isEditable,
     contacts, 
     sourceAccounts, 
