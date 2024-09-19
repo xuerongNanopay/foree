@@ -2,8 +2,8 @@ package foree_service
 
 import (
 	"fmt"
-	"time"
 
+	"xue.io/go-pay/app/foree/account"
 	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/types"
@@ -194,11 +194,11 @@ type TxSummaryDTO struct {
 	TotalAmount     string                      `json:"totalAmount,omitempty"`
 	TotalCurrency   string                      `json:"totalCurrency,omitempty"`
 	IsCancelAllowed bool                        `json:"isCancelAllowed,omitempty"`
-	CreatedAt       time.Time                   `json:"createdAt,omitempty"`
+	CreateAt        int64                       `json:"createAt,omitempty"`
 }
 
 func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
-	return &TxSummaryDTO{
+	ret := &TxSummaryDTO{
 		ID:              tx.ID,
 		Summary:         tx.Summary,
 		Type:            tx.Type,
@@ -207,8 +207,13 @@ func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
 		TotalAmount:     tx.Rate,
 		TotalCurrency:   tx.TotalCurrency,
 		IsCancelAllowed: tx.IsCancelAllowed,
-		CreatedAt:       tx.CreatedAt,
 	}
+
+	if tx.CreatedAt == nil {
+		ret.CreateAt = tx.CreatedAt.UnixMilli()
+	}
+
+	return ret
 }
 
 type TxSummaryDetailDTO struct {
@@ -218,24 +223,97 @@ type TxSummaryDetailDTO struct {
 	Status          transaction.TxSummaryStatus `json:"status,omitempty"`
 	Rate            string                      `json:"rate,omitempty"`
 	PaymentUrl      string                      `json:"paymentUrl,omitempty"`
-	SrcAccSummary   string                      `json:"srcAccSummary,omitempty"`
-	SrcAmount       types.Amount                `json:"srcAmount,omitempty"`
-	SrcCurrency     string                      `json:"srcCurrency,omitempty"`
-	DestAccSummary  string                      `json:"destAccSummary,omitempty"`
-	DestAmount      types.Amount                `json:"destAmount,omitempty"`
-	DestCurrency    string                      `json:"destCurrency,omitempty"`
-	TotalAmount     types.Amount                `json:"totalAmount,omitempty"`
-	TotalCurrency   string                      `json:"totalCurrency,omitempty"`
-	FeeAmount       types.Amount                `json:"feeAmount,omitempty"`
-	FeeCurrency     string                      `json:"feeCurrency,omitempty"`
-	RewardAmount    types.Amount                `json:"rewardAmount,omitempty"`
-	RewardCurrency  string                      `json:"rewardCurrency,omitempty"`
-	IsCancelAllowed bool                        `json:"isCancelAllowed,omitempty"`
-	CreatedAt       time.Time                   `json:"createdAt,omitempty"`
+	SrcAccSummary   string                      `json:"srcAccSummary"`
+	SrcAmount       types.Amount                `json:"srcAmount"`
+	SrcCurrency     string                      `json:"srcCurrency"`
+	DestAccSummary  string                      `json:"destAccSummary"`
+	DestAmount      types.Amount                `json:"destAmount"`
+	DestCurrency    string                      `json:"destCurrency"`
+	TotalAmount     types.Amount                `json:"totalAmount"`
+	TotalCurrency   string                      `json:"totalCurrency"`
+	FeeAmount       types.Amount                `json:"feeAmount"`
+	FeeCurrency     string                      `json:"feeCurrency"`
+	RewardAmount    types.Amount                `json:"rewardAmount"`
+	RewardCurrency  string                      `json:"rewardCurrency"`
+	IsCancelAllowed bool                        `json:"isCancelAllowed"`
+	CreateAt        int64                       `json:"createAt,omitempty"`
+	SrcAccount      *SumInteracAccountDTO       `json:"srcAccount,omitempty"`
+	DestAccount     *SumContactAccountDTO       `json:"destAccount,omitempty"`
+}
+
+func NewSumInteracAccountDTO(acc *account.InteracAccount) *SumInteracAccountDTO {
+	return &SumInteracAccountDTO{
+		ID:          acc.ID,
+		FirstName:   acc.FirstName,
+		MiddleName:  acc.MiddleName,
+		LastName:    acc.LastName,
+		Address1:    acc.Address1,
+		Address2:    acc.Address2,
+		City:        acc.City,
+		Province:    acc.Province,
+		Country:     acc.Country,
+		PostalCode:  acc.PostalCode,
+		PhoneNumber: acc.PhoneNumber,
+		Email:       acc.Email,
+	}
+}
+
+type SumInteracAccountDTO struct {
+	ID          int64  `json:"id,omitempty"`
+	FirstName   string `json:"firstName,omitempty"`
+	MiddleName  string `json:"middleName,omitempty"`
+	LastName    string `json:"lastName,omitempty"`
+	Address1    string `json:"address1,omitempty"`
+	Address2    string `json:"address2,omitempty"`
+	City        string `json:"city,omitempty"`
+	Province    string `json:"province,omitempty"`
+	Country     string `json:"country,omitempty"`
+	PostalCode  string `json:"postalCode,omitempty"`
+	PhoneNumber string `json:"phoneNumber,omitempty"`
+	Email       string `json:"email,omitempty"`
+}
+
+func NewSumContactAccountDTO(acc *account.ContactAccount) *SumContactAccountDTO {
+	return &SumContactAccountDTO{
+		ID:              acc.ID,
+		FirstName:       acc.FirstName,
+		MiddleName:      acc.MiddleName,
+		LastName:        acc.LastName,
+		Address1:        acc.Address1,
+		Address2:        acc.Address2,
+		City:            acc.City,
+		Province:        acc.Province,
+		Country:         acc.Country,
+		PostalCode:      acc.PostalCode,
+		PhoneNumber:     acc.PhoneNumber,
+		InstitutionName: acc.InstitutionName,
+		BranchNumber:    acc.BranchNumber,
+		AccountNumber:   acc.AccountNumber,
+	}
+}
+
+type SumContactAccountDTO struct {
+	ID              int64                      `json:"id"`
+	Status          account.AccountStatus      `json:"status"`
+	Type            account.ContactAccountType `json:"type"`
+	FirstName       string                     `json:"firstName"`
+	MiddleName      string                     `json:"middleName"`
+	LastName        string                     `json:"lastName"`
+	Address1        string                     `json:"address1"`
+	Address2        string                     `json:"address2"`
+	City            string                     `json:"city"`
+	Province        string                     `json:"province"`
+	Country         string                     `json:"country"`
+	PostalCode      string                     `json:"postalCode"`
+	PhoneNumber     string                     `json:"phoneNumber"`
+	InstitutionName string                     `json:"institutionName"`
+	BranchNumber    string                     `json:"branchNumber"`
+	AccountNumber   string                     `json:"accountNumber"`
+	AccountHash     string                     `json:"accountHash"`
 }
 
 func NewTxSummaryDetailDTO(tx *transaction.TxSummary) *TxSummaryDetailDTO {
-	return &TxSummaryDetailDTO{
+	ret := &TxSummaryDetailDTO{
 		ID:              tx.ID,
 		Summary:         tx.Summary,
 		Type:            tx.Type,
@@ -255,8 +333,21 @@ func NewTxSummaryDetailDTO(tx *transaction.TxSummary) *TxSummaryDetailDTO {
 		RewardAmount:    tx.RewardAmount,
 		RewardCurrency:  tx.RewardCurrency,
 		IsCancelAllowed: tx.IsCancelAllowed,
-		CreatedAt:       tx.CreatedAt,
 	}
+
+	if tx.CreatedAt == nil {
+		ret.CreateAt = tx.CreatedAt.UnixMilli()
+	}
+
+	if tx.SrcAccount != nil {
+		ret.SrcAccount = NewSumInteracAccountDTO(tx.SrcAccount)
+	}
+
+	if tx.DestAccount != nil {
+		ret.DestAccount = NewSumContactAccountDTO(tx.DestAccount)
+	}
+
+	return ret
 }
 
 type QuoteTransactionDTO struct {

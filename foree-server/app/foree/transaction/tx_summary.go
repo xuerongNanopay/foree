@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/constant"
 )
@@ -128,8 +129,11 @@ type TxSummary struct {
 	IsCancelAllowed bool            `json:"isCancelAllowed"`
 	ParentTxId      int64           `json:"parentTxd"`
 	OwnerId         int64           `json:"owerId"`
-	CreatedAt       time.Time       `json:"createdAt"`
-	UpdatedAt       time.Time       `json:"updatedAt"`
+	CreatedAt       *time.Time      `json:"createdAt"`
+	UpdatedAt       *time.Time      `json:"updatedAt"`
+
+	SrcAccount  *account.InteracAccount
+	DestAccount *account.ContactAccount
 }
 
 func NewTxSummaryRepo(db *sql.DB) *TxSummaryRepo {

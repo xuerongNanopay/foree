@@ -437,6 +437,8 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		TotalAmount:    foreeTx.TotalAmt.Amount,
 		TotalCurrency:  foreeTx.TotalAmt.Currency,
 		OwnerId:        user.ID,
+		SrcAccount:     ciAcc,
+		DestAccount:    coutAcc,
 	}
 
 	if len(feeJoints) > 0 {
