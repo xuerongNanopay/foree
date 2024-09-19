@@ -16,7 +16,7 @@ const (
 		SELECT
 			f.name, f.description, f.fee_group, f.type, f.condition,
 			f.condition_amount, f.condition_currency,
-			f.ratio, f.is_apply_in_condition_amount_only
+			f.ratio, f.is_apply_in_condition_amount_only,
 			f.is_enable, f.created_at, f.updated_at
 		FROM fees as f
 	`
@@ -24,7 +24,7 @@ const (
 		SELECT
 			f.name, f.description, f.fee_group, f.type, f.condition,
 			f.condition_amount, f.condition_currency,
-			f.ratio, f.is_apply_in_condition_amount_only
+			f.ratio, f.is_apply_in_condition_amount_only,
 			f.is_enable, f.created_at, f.updated_at
 		FROM fees as f
 		Where f.fee_group = ? AND f.is_enable = TRUE
