@@ -171,7 +171,14 @@ const TransactionCreate = () => {
   }
 
   const quoteTransaction = async () => {
-
+    try {
+      console.log(form)
+      const resp = await transactionService.quote(form)
+      console.log(resp.data)
+    } catch (e) {
+      console.log(e)
+    }
+    return false
   }
 
   const InteracListItem = useCallback((interac) => {
@@ -390,8 +397,7 @@ const TransactionCreate = () => {
         return !errors.transactionPurpose
       },
       goNext: async () => {
-        const resp = await transactionService.getCADToPRKRate()
-        console.log(resp.data)
+        return await quoteTransaction()
       }
     },
     {

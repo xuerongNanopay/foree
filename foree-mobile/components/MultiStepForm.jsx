@@ -84,8 +84,14 @@ const MultiStepForm = ({
               title={"Next >"}
               disabled={!formStep[curIdx].canGoNext()}
               handlePress={async ()=>{
-                if ( !!formStep[curIdx].goNext ) await formStep[curIdx].goNext()
-                setCurIdx(curIdx+1)
+                if ( !!formStep[curIdx].goNext ) {
+                  const can = await formStep[curIdx].goNext()
+                  if (can) {
+                    setCurIdx(curIdx+1)
+                  }
+                } else {
+                  setCurIdx(curIdx+1)
+                }
               }}
               containerStyles={isFirst ? "w-[100%]" : "w-[49%]"}
             /> : null
