@@ -759,7 +759,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 func (t *TransactionService) GetDailyTxLimit(ctx context.Context, req transport.SessionReq) (*DailyTxLimitDTO, transport.HError) {
 	session, sErr := t.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("CreateTx_Fail",
+		foree_logger.Logger.Info("GetDailyTxLimit_Fail",
 			"sessionId", req.SessionId,
 			"ip", loadRealIp(ctx),
 			"cause", "session no found",

@@ -164,9 +164,9 @@ func NewRateDTO(r *transaction.Rate) *RateDTO {
 }
 
 type DailyTxLimitDTO struct {
-	UsedAmount   types.Amount `json:"usedAmount,omitempty"`
+	UsedAmount   types.Amount `json:"usedAmount"`
 	UsedCurrency string       `json:"usedCurrency,omitempty"`
-	MaxAmount    types.Amount `json:"maxAmount,omitempty"`
+	MaxAmount    types.Amount `json:"maxAmount"`
 	MaxCurrency  string       `json:"maxCurrency,omitempty"`
 }
 
@@ -174,8 +174,8 @@ func NewDailyTxLimitDTO(r *transaction.DailyTxLimit) *DailyTxLimitDTO {
 	return &DailyTxLimitDTO{
 		UsedAmount:   r.UsedAmt.Amount,
 		UsedCurrency: r.UsedAmt.Currency,
-		MaxAmount:    r.UsedAmt.Amount,
-		MaxCurrency:  r.UsedAmt.Currency,
+		MaxAmount:    r.MaxAmt.Amount,
+		MaxCurrency:  r.MaxAmt.Currency,
 	}
 }
 
