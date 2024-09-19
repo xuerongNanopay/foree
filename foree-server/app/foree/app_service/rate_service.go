@@ -15,7 +15,7 @@ const rateCacheRefreshInterval time.Duration = 2 * time.Minute
 func NewRateService(rateRepo *transaction.RateRepo) *RateService {
 	rateService := &RateService{
 		rateRepo:               rateRepo,
-		rateCacheInsertChan:    make(chan transaction.Rate, 1),
+		rateCacheInsertChan:    make(chan string, 1),
 		rateCacheUpdateChan:    make(chan string, 1),
 		rateCacheRefreshTicker: time.NewTicker(rateCacheRefreshInterval),
 	}
@@ -26,7 +26,7 @@ func NewRateService(rateRepo *transaction.RateRepo) *RateService {
 type RateService struct {
 	rateRepo               *transaction.RateRepo
 	cache                  sync.Map
-	rateCacheInsertChan    chan transaction.Rate
+	rateCacheInsertChan    chan string
 	rateCacheUpdateChan    chan string
 	rateCacheRefreshTicker *time.Ticker
 }
@@ -34,15 +34,24 @@ type RateService struct {
 func (r *RateService) start() {
 	for {
 		select {
-		case rate := <-r.rateCacheInsertChan:
-			r.cache.Store(rate.GetId(), CacheItem[transaction.Rate]{
-				item:      rate,
-				expiredAt: time.Now().Add(rateCacheExpiry),
-			})
+		case rateId := <-r.rateCacheInsertChan:
+			rate, err := r.rateRepo.GetUniqueRateById(context.TODO(), rateId)
+			if err != nil {
+				foree_logger.Logger.Error("Rate_Cache_Insert_Fail", "rateId", rateId, "cause", err.Error())
+			} else if rate == nil {
+				foree_logger.Logger.Error("Rate_Cache_Insert_Fail", "rateId", rateId, "cause", "rate no found")
+			} else {
+				r.cache.Swap(rate.GetId(), CacheItem[transaction.Rate]{
+					item:      *rate,
+					expiredAt: time.Now().Add(rateCacheExpiry),
+				})
+			}
 		case rateId := <-r.rateCacheUpdateChan:
 			rate, err := r.rateRepo.GetUniqueRateById(context.TODO(), rateId)
 			if err != nil {
 				foree_logger.Logger.Error("Rate_Cache_Update_Fail", "rateId", rateId, "cause", err.Error())
+			} else if rate == nil {
+				foree_logger.Logger.Error("Rate_Cache_Update_Fail", "rateId", rateId, "cause", "rate no found")
 			} else {
 				r.cache.Swap(rate.GetId(), CacheItem[transaction.Rate]{
 					item:      *rate,
@@ -58,6 +67,8 @@ func (r *RateService) start() {
 				rate, err := r.rateRepo.GetUniqueRateById(context.TODO(), rateId)
 				if err != nil {
 					foree_logger.Logger.Error("Rate_Cache_Refresh_Fail", "rateId", rateId, "cause", err.Error())
+				} else if rate == nil {
+					foree_logger.Logger.Error("Rate_Cache_Refresh_Fail", "rateId", rateId, "cause", "rate no found")
 				} else {
 					r.cache.Swap(rate.GetId(), CacheItem[transaction.Rate]{
 						item:      *rate,
@@ -84,7 +95,7 @@ func (r *RateService) GetRate(src, dest string) (*transaction.Rate, error) {
 			return nil, err
 		}
 		select {
-		case r.rateCacheInsertChan <- *rate:
+		case r.rateCacheInsertChan <- rate.ID:
 		default:
 		}
 		return rate, nil

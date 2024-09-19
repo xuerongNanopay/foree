@@ -10,9 +10,8 @@ import (
 const (
 	sQLTxLimitGetUniqueByLimitGroup = `
 		SELECT
-			l.name, l.limit_group, l.min_amt_amount, l.min_amt_currency,
-			l.max_amt_amount, l.max_amt_currency, l.is_enable,
-			l.created_at, l.updated_at
+			l.name, l.limit_group, l.min_amount, l.min_currency,
+			l.max_amount, l.max_currency, l.created_at, l.updated_at
 		FROM tx_limit l
 		where l.limit_group = ?
 	`
@@ -52,7 +51,7 @@ func (repo *TxLimitRepo) GetUniqueTxLimitByLimitGroup(limitGroup string) (*TxLim
 		}
 	}
 
-	if f.Name == "" {
+	if f == nil || f.Name == "" {
 		return nil, nil
 	}
 

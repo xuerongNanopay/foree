@@ -52,6 +52,8 @@ func (p *PromotionService) start() {
 			promo, err := p.promotionRepo.GetUniquePromotionByName(context.TODO(), promotionName)
 			if err != nil {
 				foree_logger.Logger.Error("Promotion_Cache_Insert_Fail", "promotionName", promotionName, "cause", err.Error())
+			} else if promo == nil {
+				foree_logger.Logger.Error("Promotion_Cache_Insert_Fail", "promotionName", promotionName, "cause", "promotion no found")
 			} else {
 				p.cache.Store(promotionName, CacheItem[promotion.Promotion]{
 					item:      *promo,
@@ -62,6 +64,8 @@ func (p *PromotionService) start() {
 			promo, err := p.promotionRepo.GetUniquePromotionByName(context.TODO(), promotionName)
 			if err != nil {
 				foree_logger.Logger.Error("Promotion_Cache_Update_Fail", "promotionName", promotionName, "cause", err.Error())
+			} else if promo == nil {
+				foree_logger.Logger.Error("Promotion_Cache_Update_Fail", "promotionName", promotionName, "cause", "promotion no found")
 			} else {
 				p.cache.Swap(promotionName, CacheItem[promotion.Promotion]{
 					item:      *promo,
@@ -76,7 +80,9 @@ func (p *PromotionService) start() {
 				promotionName, _ := k.(string)
 				promo, err := p.promotionRepo.GetUniquePromotionByName(context.TODO(), promotionName)
 				if err != nil {
-					foree_logger.Logger.Error("Promotion_Cache_Refresh_Fail", "limitGroup", promotionName, "cause", err.Error())
+					foree_logger.Logger.Error("Promotion_Cache_Refresh_Fail", "promotionName", promotionName, "cause", err.Error())
+				} else if promo == nil {
+					foree_logger.Logger.Error("Promotion_Cache_Refresh_Fail", "promotionName", promotionName, "cause", "promotion no found")
 				} else {
 					p.cache.Swap(promotionName, CacheItem[promotion.Promotion]{
 						item:      *promo,

@@ -46,6 +46,8 @@ func (t *TxLimitService) start() {
 			txLimit, err := t.txLimitRepo.GetUniqueTxLimitByLimitGroup(limitGroup)
 			if err != nil {
 				foree_logger.Logger.Error("TxLimit_Cache_Insert_Fail", "limitGroup", limitGroup, "cause", err.Error())
+			} else if txLimit == nil {
+				foree_logger.Logger.Error("TxLimit_Cache_Insert_Fail", "limitGroup", limitGroup, "cause", "transaction limit no found")
 			} else {
 				t.cache.Store(limitGroup, CacheItem[transaction.TxLimit]{
 					item:      *txLimit,
@@ -56,6 +58,8 @@ func (t *TxLimitService) start() {
 			txLimit, err := t.txLimitRepo.GetUniqueTxLimitByLimitGroup(limitGroup)
 			if err != nil {
 				foree_logger.Logger.Error("TxLimit_Cache_Update_Fail", "limitGroup", limitGroup, "cause", err.Error())
+			} else if txLimit == nil {
+				foree_logger.Logger.Error("TxLimit_Cache_Update_Fail", "limitGroup", limitGroup, "cause", "transaction limit no found")
 			} else {
 				t.cache.Swap(limitGroup, CacheItem[transaction.TxLimit]{
 					item:      *txLimit,
@@ -71,6 +75,8 @@ func (t *TxLimitService) start() {
 				txLimit, err := t.txLimitRepo.GetUniqueTxLimitByLimitGroup(limitGroup)
 				if err != nil {
 					foree_logger.Logger.Error("TxLimit_Cache_Refresh_Fail", "limitGroup", limitGroup, "cause", err.Error())
+				} else if txLimit == nil {
+					foree_logger.Logger.Error("TxLimit_Cache_Refresh_Fail", "limitGroup", limitGroup, "cause", "transaction limit no found")
 				} else {
 					t.cache.Swap(limitGroup, CacheItem[transaction.TxLimit]{
 						item:      *txLimit,
