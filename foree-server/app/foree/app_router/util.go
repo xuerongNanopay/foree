@@ -20,6 +20,17 @@ func sessionGetWrapper[P transport.ForeeSessionRequest, Q any](
 	handler func(context.Context, P) (Q, transport.HError),
 ) func(http.ResponseWriter, *http.Request) {
 	validatePayloadAndPermissionBeforeProcess := func(ctx context.Context, r *http.Request, req P) (context.Context, transport.HError) {
+		session, sErr := authService.Authorize(ctx, req.GetSessionId(), permission)
+		if sErr != nil {
+			var userId int64
+			if session != nil {
+				userId = session.UserId
+			}
+			// Normal error when the token expired
+			foree_logger.Logger.Info(fmt.Sprintf("%v_Permission_Error", serviceName), "ip", http_util.LoadRealIpFromContext(ctx), "userId", userId, "sessionId", req.GetSessionId(), "cause", sErr.Error())
+			return nil, sErr
+		}
+
 		err := req.Validate()
 		if err != nil {
 			foree_logger.Logger.Warn(
@@ -30,16 +41,6 @@ func sessionGetWrapper[P transport.ForeeSessionRequest, Q any](
 				"cause", req.Validate().Error(),
 			)
 			return ctx, err
-		}
-		session, sErr := authService.Authorize(ctx, req.GetSessionId(), permission)
-		if sErr != nil {
-			var userId int64
-			if session != nil {
-				userId = session.UserId
-			}
-			// Normal error when the token expired
-			foree_logger.Logger.Info(fmt.Sprintf("%v_Permission_Error", serviceName), "ip", http_util.LoadRealIpFromContext(ctx), "userId", userId, "sessionId", req.GetSessionId(), "cause", sErr.Error())
-			return nil, sErr
 		}
 		return ctx, nil
 	}
@@ -60,6 +61,17 @@ func sessionPostWrapper[P transport.ForeeSessionRequest, Q any](
 	handler func(context.Context, P) (Q, transport.HError),
 ) func(http.ResponseWriter, *http.Request) {
 	validatePayloadAndPermissionBeforeProcess := func(ctx context.Context, r *http.Request, req P) (context.Context, transport.HError) {
+		session, sErr := authService.Authorize(ctx, req.GetSessionId(), permission)
+		if sErr != nil {
+			var userId int64
+			if session != nil {
+				userId = session.UserId
+			}
+			// Normal error when the token expired
+			foree_logger.Logger.Info(fmt.Sprintf("%v_Permission_Error", serviceName), "ip", http_util.LoadRealIpFromContext(ctx), "userId", userId, "sessionId", req.GetSessionId(), "cause", sErr.Error())
+			return nil, sErr
+		}
+
 		err := req.Validate()
 		if err != nil {
 			foree_logger.Logger.Warn(
@@ -71,16 +83,7 @@ func sessionPostWrapper[P transport.ForeeSessionRequest, Q any](
 			)
 			return ctx, err
 		}
-		session, sErr := authService.Authorize(ctx, req.GetSessionId(), permission)
-		if sErr != nil {
-			var userId int64
-			if session != nil {
-				userId = session.UserId
-			}
-			// Normal error when the token expired
-			foree_logger.Logger.Info(fmt.Sprintf("%v_Permission_Error", serviceName), "ip", http_util.LoadRealIpFromContext(ctx), "userId", userId, "sessionId", req.GetSessionId(), "cause", sErr.Error())
-			return nil, sErr
-		}
+
 		return ctx, nil
 	}
 

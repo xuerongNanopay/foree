@@ -33,7 +33,7 @@ type QuoteTransactionReq struct {
 	transport.SessionReq
 	CinAccId           int64   `json:"cinAccId" validate:"gt=0"`
 	CoutAccId          int64   `json:"coutAccId" validate:"gt=0"`
-	SrcAmount          float64 `json:"srcAmount" validate:"gt=10,lt=1000"`
+	SrcAmount          float64 `json:"srcAmount" validate:"gt=0"`
 	SrcCurrency        string  `json:"srcCurrency" validate:"eq=CAD"`
 	DestCurrency       string  `json:"destCurrency" validate:"eq=PKR"`
 	RewardIds          []int64 `json:"rewardIds" validate:"max=1"`
@@ -42,6 +42,7 @@ type QuoteTransactionReq struct {
 }
 
 func (q QuoteTransactionReq) Validate() *transport.BadRequestError {
+	fmt.Println(q)
 	ret := validateStruct(q, "Invalid quote transaction request")
 
 	//TODO: support promoCode

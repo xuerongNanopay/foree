@@ -29,7 +29,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 
 	router.HandleFunc(
 		"/quote",
-		sessionGetWrapper(
+		sessionPostWrapper(
 			"QuoteTx",
 			foree_service.PermissionForeeTxWrite,
 			c.authService,
@@ -39,8 +39,8 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 	// Transaction creation
 	router.HandleFunc(
 		"/create_transaction",
-		sessionGetWrapper(
-			"QuoteTx",
+		sessionPostWrapper(
+			"CreateTx",
 			foree_service.PermissionForeeTxWrite,
 			c.authService,
 			c.transactionService.CreateTx,
@@ -50,7 +50,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 	router.HandleFunc(
 		"/transaction_limit",
 		sessionGetWrapper(
-			"QuoteTx",
+			"GetDailyTxLimit",
 			foree_service.PermissionForeeTxWrite,
 			c.authService,
 			c.transactionService.GetDailyTxLimit,
