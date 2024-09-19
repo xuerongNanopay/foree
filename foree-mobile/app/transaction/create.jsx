@@ -174,9 +174,15 @@ const TransactionCreate = () => {
     try {
       console.log(form)
       const resp = await transactionService.quote(form)
-      console.log(resp.data)
+      if ( resp.status / 100 !== 2 ) {
+        console.warn("quote transaction", resp.status, resp.data)
+        return false
+      }
+      setQuote(resp.data.data)
+      return true
     } catch (e) {
       console.log(e)
+      return false
     }
     return false
   }

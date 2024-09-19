@@ -18,12 +18,11 @@ class TransactionService {
   }
 
   async quote(req, {signal}={signal}) {
-    console.log("aaavv", req)
     return await this.#httpFormClient.post("/quote", req, {signal})
   }
 
-  async confirmQuote(req, {signal}={signal}) {
-    return await this.#httpFormClient.post("/create_transaction", req, {signal})
+  async confirmQuote(quoteId, {signal}={signal}) {
+    return await this.#httpFormClient.post("/create_transaction", {quoteId}, {signal})
   }
 }
 
