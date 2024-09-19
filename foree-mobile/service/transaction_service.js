@@ -12,6 +12,18 @@ class TransactionService {
       destCurrency: "PKR"
     }, {signal})
   }
+
+  async getDailyLimit({signal}={signal}) {
+    return await this.#httpClient.get("/transaction_limit", {signal})
+  }
+
+  async quote(req, {signal}={signal}) {
+    return await this.#httpFormClient.post("/quote", req, {signal})
+  }
+
+  async confirmQuote(req, {signal}={signal}) {
+    return await this.#httpFormClient.post("/create_transaction", req, {signal})
+  }
 }
 
 export default TransactionService
