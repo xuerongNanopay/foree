@@ -61,7 +61,6 @@ const TransactionCreate = () => {
     const getAllContacts = async (signal) => {
       try {
         const resp = await accountService.getAllContactAccounts({signal})
-        console.log("xxxx")
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("transaction_create--getAllContacts", resp.status, resp.data)
         } else {
@@ -122,9 +121,24 @@ const TransactionCreate = () => {
       }
     }
 
+    const getDailyLimit = async(signal) => {
+      try {
+        const resp = await transactionService.getDailyLimit({signal})
+        if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
+          console.error("transaction_create--getDailyLimit", resp.status, resp.data)
+        } else {
+          const dailyLimit = resp.data.data
+          console.log("aaa", dailyLimit)
+        }
+      } catch (e) {
+        console.error("transaction_create--getDailyLimit", e)
+      }
+    }
+
     getAllContacts(controller.signal)
     getSourceAccounts(controller.signal)
     getRate(controller.signal)
+    getDailyLimit(controller.signal)
     return () => {
       controller.abort()
     }
