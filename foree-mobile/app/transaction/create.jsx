@@ -179,12 +179,12 @@ const TransactionCreate = () => {
         return false
       }
       setQuote(resp.data.data)
+      console.log(resp.data.data)
       return true
     } catch (e) {
       console.log(e)
       return false
     }
-    return false
   }
 
   const InteracListItem = useCallback((interac) => {
@@ -380,11 +380,42 @@ const TransactionCreate = () => {
     </View>
   ), [])
 
-  const Review = () => (
+  const Review = useCallback(() => (
     <View>
-
+      <Text className="font-pregular text-center mb-4">
+        Review your transactions.
+      </Text>
+      <View>
+        <View className="border-b-[1px] border-slate-400 pb-2">
+          <Text className="font-semibold text">You Send</Text>
+          <Text className="font-bold mb-1 text-lg">${quote.txSum.srcAmount.toFixed(2)} {quote.txSum.srcCurrency}</Text>
+          <Text className="font-semibold text-slate-500">From</Text>
+          <Text className="font-bold mb-1 text-lg">{formatName(quote.txSum.srcAccount)}</Text>
+          <Text className="font-semibold text-slate-500">Interac E-Transfer</Text>
+          <Text className="font-bold mb-1 text-lg">{quote.txSum.srcAccount.email}</Text>
+        </View>
+        <View className="mt-2 border-b-[1px] border-slate-400 pb-2">
+          <Text className="font-semibold text">Recipient Receives</Text>
+          <Text className="font-bold mb-1 text-lg">${quote.txSum.destAmount.toFixed(2)} {quote.txSum.destCurrency}</Text>
+          <Text className="font-semibold text-slate-500">To</Text>
+          <Text className="font-bold mb-1 text-lg">{formatName(quote.txSum.destAccount)}</Text>
+          <Text className="font-semibold text">Destination Account</Text>
+          <Text className="font-bold mb-1 text-lg">
+            {
+              quote.txSum.destAccount.type == ContactTransferCashPickup ?
+              <Text className="font-bold mb-1 text-lg">Cash Pickup</Text> : 
+              <Text className="font-bold mb-1 text-lg">
+                {!! quote.txSum.destAccount.institutionName ?  quote.txSum.destAccount.institutionName.slice(0, 16) + ( quote.txSum.destAccount.institutionName.length > 16 ? "..." : "") : ""}
+                <Text className="italic">
+                  ({!!quote.txSum.destAccount.accountNumber ? quote.txSum.destAccount.accountNumber.slice(0, 13) + (quote.txSum.destAccount.accountNumber.length > 13 ? "..." : "") : ""})
+                </Text>
+              </Text>
+            }
+          </Text>
+        </View>
+      </View>
     </View>
-  )
+  ), [quote])
 
   const CreateTransactionFlow = [
     {
@@ -410,7 +441,7 @@ const TransactionCreate = () => {
       titleView: ReviewTitle,
       formView: Review,
       canGoNext: () => {
-        return !errors.transactionPurpose
+        return true
       },
     },
   ]
