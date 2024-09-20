@@ -276,6 +276,7 @@ type SumInteracAccountDTO struct {
 func NewSumContactAccountDTO(acc *account.ContactAccount) *SumContactAccountDTO {
 	return &SumContactAccountDTO{
 		ID:              acc.ID,
+		Type:            acc.Type,
 		FirstName:       acc.FirstName,
 		MiddleName:      acc.MiddleName,
 		LastName:        acc.LastName,
