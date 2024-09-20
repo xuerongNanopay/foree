@@ -17,6 +17,10 @@ class TransactionService {
     return await this.#httpClient.get("/transaction_limit", {signal})
   }
 
+  async getRewards({signal}={signal}) {
+    return await this.#httpClient.get("/transaction_reward", {signal})
+  }
+
   async quote(req, {signal}={signal}) {
     return await this.#httpFormClient.post("/quote", req, {signal})
   }

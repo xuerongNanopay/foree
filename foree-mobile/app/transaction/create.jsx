@@ -151,10 +151,26 @@ const TransactionCreate = () => {
       }
     }
 
+    const getRewards = async(signal) => {
+      try {
+        const resp = await transactionService.getRewards({signal})
+        if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
+          console.error("transaction_create--getRewards", resp.status, resp.data)
+        } else {
+          const r = resp.data.data
+          console.log('eeeee', r)
+          setRewards(r)
+        }
+      } catch (e) {
+        console.error("transaction_create--getRewards", e)
+      }
+    }
+
     getAllContacts(controller.signal)
     getSourceAccounts(controller.signal)
     getRate(controller.signal)
     getDailyLimit(controller.signal)
+    getRewards(controller.signal)
     return () => {
       controller.abort()
     }
@@ -327,6 +343,7 @@ const TransactionCreate = () => {
     </View>
   ), [
     rate,
+    rewards,
     dailyLimit,
     isEditable,
     contacts, 
