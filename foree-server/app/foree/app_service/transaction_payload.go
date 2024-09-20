@@ -48,6 +48,16 @@ func (q QuoteTransactionReq) Validate() *transport.BadRequestError {
 	// if q.PromoCode != "" && len(q.RewardIds) > 0 {
 	// 	ret.AddDetails("promoCode", "cannot apply promocode and reward together")
 	// }
+	if len(q.RewardIds) > 4 {
+		ret.AddDetails("RewardIds", "maximum 4 promotions")
+	}
+
+	for _, v := range q.RewardIds {
+		if v <= 0 {
+			ret.AddDetails("RewardIds", "invalid rewards")
+			break
+		}
+	}
 
 	if len(ret.Details) > 0 {
 		return ret
