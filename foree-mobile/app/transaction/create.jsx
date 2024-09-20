@@ -387,7 +387,7 @@ const TransactionCreate = () => {
       </Text>
       <View>
         <View className="border-b-[1px] border-slate-400 pb-2">
-          <Text className="font-semibold text">You Send</Text>
+          <Text className="font-semibold">You Send</Text>
           <Text className="font-bold mb-1 text-lg">${quote.txSum.srcAmount.toFixed(2)} {quote.txSum.srcCurrency}</Text>
           <Text className="font-semibold text-slate-500">From</Text>
           <Text className="font-bold mb-1 text-lg">{formatName(quote.txSum.srcAccount)}</Text>
@@ -395,11 +395,11 @@ const TransactionCreate = () => {
           <Text className="font-bold mb-1 text-lg">{quote.txSum.srcAccount.email}</Text>
         </View>
         <View className="mt-2 border-b-[1px] border-slate-400 pb-2">
-          <Text className="font-semibold text">Recipient Receives</Text>
+          <Text className="font-semibold">Recipient Receives</Text>
           <Text className="font-bold mb-1 text-lg">${quote.txSum.destAmount.toFixed(2)} {quote.txSum.destCurrency}</Text>
           <Text className="font-semibold text-slate-500">To</Text>
           <Text className="font-bold mb-1 text-lg">{formatName(quote.txSum.destAccount)}</Text>
-          <Text className="font-semibold text">Destination Account</Text>
+          <Text className="font-semibold">Destination Account</Text>
           <Text className="font-bold mb-1 text-lg">
             {
               quote.txSum.destAccount.type == ContactTransferCashPickup ?
@@ -412,6 +412,25 @@ const TransactionCreate = () => {
               </Text>
             }
           </Text>
+        </View>
+        <View className="mt-2">
+            <Text className="font-semibold mb-2 text-lg">Details</Text>
+            <View className="flex flex-row justify-between items-center mb-1">
+              <Text className="font-semibold">Exchange Rate</Text>
+              <Text className="font-bold" >{quote.txSum.rate}</Text>
+            </View>
+            <View className="flex flex-row justify-between items-center mb-1">
+              <Text className="font-semibold">Fees</Text>
+              <Text className="font-bold" >${quote.txSum.feeAmount.toFixed(2)}{quote.txSum.feeCurrency}</Text>
+            </View>
+            <View className="flex flex-row justify-between items-center mb-1">
+              <Text className="font-semibold">Promotions</Text>
+              <Text className="font-bold" >${quote.txSum.rewardAmount.toFixed(2)}{quote.txSum.rewardCurrency}</Text>
+            </View>
+            <View className="flex flex-row justify-between items-center mb-1">
+              <Text className="font-semibold text-green-800">Amount Debited</Text>
+              <Text className="font-bold text-green-800" >${quote.txSum.totalAmount.toFixed(2)} {quote.txSum.totalCurrency}</Text>
+            </View>
         </View>
       </View>
     </View>
