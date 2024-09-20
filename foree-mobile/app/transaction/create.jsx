@@ -236,6 +236,15 @@ const TransactionCreate = () => {
     )
   },[form.coutAccId])
 
+  const RewardListItem = useCallback((reward) => {
+    if ( !reward ) return <></>
+    return (
+      <View>
+        <Text>{reward.description}</Text>
+      </View>
+    )
+  }, [form.rewardIds])
+
   const TransactionCreateTitle = useCallback(() => {
     return (
       <View>
@@ -364,7 +373,7 @@ const TransactionCreate = () => {
           keyExtractor="id"
           valueExtractor="id"
           list={rewards}
-          listView={() =><></>}
+          listView={RewardListItem}
           uselistSeperator={false}
           isEditable={isEditable}
           inputStyles="text-right"

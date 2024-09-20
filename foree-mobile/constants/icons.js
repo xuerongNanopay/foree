@@ -17,6 +17,8 @@ import leftArrowDark from "../assets/icons/left-arrow-dark.png"
 import rightArrowDark from "../assets/icons/right-arrow-dark.png"
 import bell from "../assets/icons/bell.png"
 import notificationBell from "../assets/icons/notification-bell.png"
+import checkboxUncheckDark from "../assets/icons/checkbox-uncheck-dark.png"
+import checkboxCheckDark from "../assets/icons/checkbox-check-dark.png"
 
 export default {
   play,
@@ -37,5 +39,7 @@ export default {
   leftArrowDark,
   rightArrowDark,
   bell,
-  notificationBell
+  notificationBell,
+  checkboxUncheckDark,
+  checkboxCheckDark
 }
