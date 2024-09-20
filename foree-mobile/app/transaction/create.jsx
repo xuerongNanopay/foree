@@ -423,15 +423,15 @@ const TransactionCreate = () => {
             </View>
             <View className="flex flex-row justify-between items-center mb-1">
               <Text className="font-semibold">Fees</Text>
-              <Text className="font-bold" >${quote.txSum.feeAmount.toFixed(2)}{quote.txSum.feeCurrency}</Text>
+              <Text className="font-bold" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(quote.txSum.feeAmount)}{!!quote.txSum.feeCurrency ? ` ${quote.txSum.feeCurrency}` : ''}</Text>
             </View>
             <View className="flex flex-row justify-between items-center mb-1">
               <Text className="font-semibold">Promotions</Text>
-              <Text className="font-bold" >${quote.txSum.rewardAmount.toFixed(2)}{quote.txSum.rewardCurrency}</Text>
+              <Text className="font-bold" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(quote.txSum.rewardAmount)}{!!quote.txSum.rewardCurrency ? ` ${quote.txSum.rewardCurrency}` : ''}</Text>
             </View>
             <View className="flex flex-row justify-between items-center mb-1">
               <Text className="font-semibold text-green-800">Amount Debited</Text>
-              <Text className="font-bold text-green-800" >${quote.txSum.totalAmount.toFixed(2)} {quote.txSum.totalCurrency}</Text>
+              <Text className="font-bold text-green-800" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(quote.txSum.totalAmount)} {quote.txSum.totalCurrency}</Text>
             </View>
         </View>
       </View>
