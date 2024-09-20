@@ -107,9 +107,11 @@ func (p *PromotionService) getPromotion(promotionName string) (*promotion.Promot
 		if err != nil {
 			return nil, err
 		}
-		select {
-		case p.promotionCacheInsertChan <- promotionName:
-		default:
+		if promo != nil {
+			select {
+			case p.promotionCacheInsertChan <- promotionName:
+			default:
+			}
 		}
 		return promo, nil
 	}
@@ -172,12 +174,12 @@ func (p *PromotionService) initialReferralReward(registerUser auth.User) {
 	}
 
 	if promotion == nil {
-		foree_logger.Logger.Debug("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "promotion no found")
+		foree_logger.Logger.Warn("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "promotionName", PromotionReferral, "cause", "promotion no found")
 		return
 	}
 
 	if !promotion.IsValid() {
-		foree_logger.Logger.Debug("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "promotion is invalid")
+		foree_logger.Logger.Debug("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "promotionName", PromotionReferral, "cause", "promotion is invalid")
 		return
 	}
 

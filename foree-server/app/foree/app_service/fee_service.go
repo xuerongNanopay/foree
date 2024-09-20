@@ -88,9 +88,11 @@ func (r *FeeService) getFee(feeGroup string) ([]*transaction.Fee, error) {
 		if err != nil {
 			return nil, err
 		}
-		select {
-		case r.feeCacheInsertChan <- feeGroup:
-		default:
+		if fees != nil && len(fees) > 0 {
+			select {
+			case r.feeCacheInsertChan <- feeGroup:
+			default:
+			}
 		}
 		return fees, nil
 	}

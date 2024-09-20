@@ -15,7 +15,7 @@ const (
 		(
 			type, description, amount, currency,
 			status, owner_id
-		) VALUES(?,?,?,?,?,?,?)
+		) VALUES(?,?,?,?,?,?)
 	`
 	sQLRewardUpdateById = `
 		UPDATE rewards SET

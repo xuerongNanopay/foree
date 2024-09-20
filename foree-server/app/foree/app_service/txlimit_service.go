@@ -99,9 +99,11 @@ func (t *TxLimitService) getTxLimit(ctx context.Context, limitGroup string) (*tr
 		if err != nil {
 			return nil, err
 		}
-		select {
-		case t.txlimitCacheInsertChan <- limitGroup:
-		default:
+		if txLimit != nil {
+			select {
+			case t.txlimitCacheInsertChan <- limitGroup:
+			default:
+			}
 		}
 		return txLimit, nil
 	}

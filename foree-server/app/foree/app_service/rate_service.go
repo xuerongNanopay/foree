@@ -94,9 +94,11 @@ func (r *RateService) GetRate(src, dest string) (*transaction.Rate, error) {
 		if err != nil {
 			return nil, err
 		}
-		select {
-		case r.rateCacheInsertChan <- rate.ID:
-		default:
+		if rate != nil {
+			select {
+			case r.rateCacheInsertChan <- rate.ID:
+			default:
+			}
 		}
 		return rate, nil
 	}
