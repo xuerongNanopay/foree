@@ -26,7 +26,6 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 
 	// === Private
 	// Transaction quote
-
 	router.HandleFunc(
 		"/quote",
 		sessionPostWrapper(
@@ -36,6 +35,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 			c.transactionService.QuoteTx,
 		),
 	).Methods("POST")
+
 	// Transaction creation
 	router.HandleFunc(
 		"/create_transaction",
@@ -46,6 +46,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 			c.transactionService.CreateTx,
 		),
 	).Methods("POST")
+
 	// Transaction limit
 	router.HandleFunc(
 		"/transaction_limit",
@@ -56,6 +57,18 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 			c.transactionService.GetDailyTxLimit,
 		),
 	).Methods("GET")
+
+	// reward
+	router.HandleFunc(
+		"/transaction_reward",
+		sessionGetWrapper(
+			"GetReward",
+			foree_service.PermissionForeeTxWrite,
+			c.authService,
+			c.transactionService.GetReward,
+		),
+	).Methods("GET")
+
 	// Summary Transaction detail
 	router.HandleFunc("/transactions/{TransactionId}", simpleGetWrapper(c.transactionService.GetTxSummary)).Methods("GET")
 	// Summary Transaction query
