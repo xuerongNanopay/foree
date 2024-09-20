@@ -22,10 +22,12 @@ const promotionCacheRefreshInterval time.Duration = 2 * time.Minute
 func NewPromotionService(
 	promotionRepo *promotion.PromotionRepo,
 	rewardRepo *transaction.RewardRepo,
+	referralRepo *referral.ReferralRepo,
 ) *PromotionService {
 	promotionService := &PromotionService{
 		rewardRepo:                  rewardRepo,
 		promotionRepo:               promotionRepo,
+		referralRepo:                referralRepo,
 		promotionCacheInsertChan:    make(chan string, 1),
 		promotionCacheUpdateChan:    make(chan string, 1),
 		promotionCacheRefreshTicker: time.NewTicker(promotionCacheRefreshInterval),
@@ -166,6 +168,16 @@ func (p *PromotionService) rewardOnboard(registerUser auth.User) {
 }
 
 func (p *PromotionService) initialReferralReward(registerUser auth.User) {
+	referral, err := p.referralRepo.GetUniqueReferralByRefereeId(registerUser.ID)
+	if err != nil {
+		foree_logger.Logger.Error("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
+	if referral == nil {
+		foree_logger.Logger.Debug("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "cause", "do not have referrer")
+		return
+	}
+
 	promotion, err := p.getPromotion(PromotionReferral)
 
 	if err != nil {
@@ -180,12 +192,6 @@ func (p *PromotionService) initialReferralReward(registerUser auth.User) {
 
 	if !promotion.IsValid() {
 		foree_logger.Logger.Debug("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "promotionName", PromotionReferral, "cause", "promotion is invalid")
-		return
-	}
-
-	referral, err := p.referralRepo.GetUniqueReferralByRefereeId(registerUser.ID)
-	if err != nil {
-		foree_logger.Logger.Error("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "cause", err.Error())
 		return
 	}
 

@@ -189,7 +189,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	if err := app.nbpTxProcessor.Start(); err != nil {
 		return err
 	}
-	app.promotionService = foree_service.NewPromotionService(app.promotionRepo, app.rewardRepo)
+	app.promotionService = foree_service.NewPromotionService(app.promotionRepo, app.rewardRepo, app.referralRepo)
 
 	//Initial service
 	app.authService = foree_service.NewAuthService(
