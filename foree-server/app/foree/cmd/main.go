@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -25,7 +24,6 @@ var certPath string
 var appCmd = &cobra.Command{
 	Use: "app",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(args)
 		envFile, _ := cmd.Flags().GetString("env-file")
 
 		if args[0] == "foree_app" {
