@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"xue.io/go-pay/logger"
 	reflect_util "xue.io/go-pay/util/reflect"
 )
 
@@ -51,9 +52,10 @@ func initRSA(config ScotiaConfig) (*rsa, error) {
 	return nil, nil
 }
 
-func NewScotiaClientImpl(config ScotiaConfig) ScotiaClient {
+func NewScotiaClientImpl(config ScotiaConfig, logger logger.Logger) ScotiaClient {
 	return &scotiaClientImpl{
 		config: config,
+		logger: logger,
 	}
 }
 
@@ -63,6 +65,7 @@ type scotiaClientImpl struct {
 	auth       *tokenData
 	mu         sync.Mutex
 	httpClient *http.Client
+	logger     logger.Logger
 }
 
 func (s *scotiaClientImpl) GetConfigs() ScotiaConfig {

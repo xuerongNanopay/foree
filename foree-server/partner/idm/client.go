@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 
+	"xue.io/go-pay/logger"
 	reflect_util "xue.io/go-pay/util/reflect"
 )
 
@@ -17,16 +18,18 @@ type IDMClient interface {
 	SetConfig(key string, value string) error
 }
 
-func NewIDMClient(config IDMConfig) IDMClient {
+func NewIDMClient(config IDMConfig, logger logger.Logger) IDMClient {
 	return &IDMClientImpl{
 		config:     config,
 		httpClient: &http.Client{},
+		logger:     logger,
 	}
 }
 
 type IDMClientImpl struct {
 	config     IDMConfig
 	httpClient *http.Client
+	logger     logger.Logger
 }
 
 func (s *IDMClientImpl) GetConfigs() IDMConfig {

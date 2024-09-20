@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"xue.io/go-pay/logger"
 	reflect_util "xue.io/go-pay/util/reflect"
 )
 
@@ -33,13 +34,14 @@ type NBPClient interface {
 	SetConfig(key string, value string) error
 }
 
-func NewNBPClient(config NBPConfig) NBPClient {
+func NewNBPClient(config NBPConfig, logger logger.Logger) NBPClient {
 
 	return &NBPClientImpl{
 		config: config,
 		httpClient: &http.Client{
 			Timeout: 4 * time.Minute, // At least 3 minutes
 		},
+		logger: logger,
 	}
 }
 
@@ -48,6 +50,7 @@ type NBPClientImpl struct {
 	httpClient *http.Client
 	auth       tokenData
 	mu         sync.Mutex
+	logger     logger.Logger
 }
 
 func (s *NBPClientImpl) GetConfigs() NBPConfig {
