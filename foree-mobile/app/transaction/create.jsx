@@ -94,10 +94,10 @@ const TransactionCreate = () => {
               ...form,
               coutAccId: parseInt(contactId)
             }))
-          } else if ( contacts.length === 1 ) {
+          } else if ( destAccs.length === 1 ) {
             setForm((form) => ({
               ...form,
-              coutAccId: contacts[0].id
+              coutAccId: destAccs[0].id
             }))
           }
           setIsEditable(true)
@@ -184,9 +184,10 @@ const TransactionCreate = () => {
   const submit = async () => {
     setIsSubmitting(true)
     try {
-      console.log(form)
+      const resp = transactionService.confirmQuote(quote.quoteId)
+      console.log(resp.data)
     } catch (e) {
-
+      console.log(e)
     } finally {
       setIsSubmitting(false)
     }
