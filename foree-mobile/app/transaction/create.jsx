@@ -60,7 +60,6 @@ const TransactionCreate = () => {
           e[i.path] =  e[i.path] ?? i.errors[0]
         }
         setErrors(e)
-        console.log(e)
       }
     }
     validate()
@@ -162,7 +161,6 @@ const TransactionCreate = () => {
           console.error("transaction_create--getRewards", resp.status, resp.data)
         } else {
           const r = resp.data.data
-          console.log('eeeee', r)
           setRewards(r)
         }
       } catch (e) {
@@ -183,7 +181,7 @@ const TransactionCreate = () => {
   const submit = async () => {
     setIsSubmitting(true)
     try {
-      console.log("TODO: query transaction")
+      console.log(form)
     } catch (e) {
 
     } finally {
@@ -193,19 +191,19 @@ const TransactionCreate = () => {
   }
 
   const quoteTransaction = async () => {
+    setIsSubmitting(true)
     try {
-      console.log(form)
       const resp = await transactionService.quote(form)
       if ( resp.status / 100 !== 2 ) {
         console.warn("quote transaction", resp.status, resp.data)
         return false
       }
       setQuote(resp.data.data)
-      console.log(resp.data.data)
       return true
     } catch (e) {
-      console.log(e)
       return false
+    }finally{
+      setIsSubmitting(false)
     }
   }
 
@@ -397,14 +395,12 @@ const TransactionCreate = () => {
                   rewardIds: [...form.rewardIds.filter(x => x !== w)]
                 }
               } else {
-                console.log("aaa", w)
                 return {
                   ...form,
                   rewardIds: [...form.rewardIds, w]
                 }
               }
             })
-            console.log(form)
           }}
           placeholder="...choose"
         />
@@ -544,7 +540,7 @@ const TransactionCreate = () => {
       titleView: TransactionPurposeTitle,
       formView: TransactionPurpose,
       canGoNext: () => {
-        return !errors.transactionPurpose
+        return !errors.transactionPurpose && !isSubmitting
       },
       goNext: async () => {
         return await quoteTransaction()
