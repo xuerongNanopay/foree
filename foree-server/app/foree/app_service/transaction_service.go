@@ -239,10 +239,10 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	// Get reward
-	var reward *transaction.Reward
-	if len(req.RewardIds) == 1 {
-		rewardId := req.RewardIds[1]
-		r, err := t.rewardRepo.GetUniqueRewardById(ctx, rewardId)
+	var rewards = make([]*transaction.Reward, len(req.RewardIds))
+
+	if len(req.RewardIds) > 0 {
+		rs, err := t.rewardRepo.GetAllRewardByOwnerIdAndIds(ctx, session.UserId, req.RewardIds)
 		if err != nil {
 			foree_logger.Logger.Error("QuoteTx_Fail",
 				"ip", loadRealIp(ctx),
@@ -252,49 +252,32 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 			)
 			return nil, transport.WrapInteralServerError(err)
 		}
-		if r == nil {
-			foree_logger.Logger.Warn("QuoteTx_Fail",
-				"ip", loadRealIp(ctx),
-				"userId", session.UserId,
-				"sessionId", req.SessionId,
-				"rewardId", rewardId,
-				"cause", "reward no found",
-			)
-			return nil, transport.NewInteralServerError("user `%v` try to redeem unknown reward `%v`", user.ID, rewardId)
+
+		for _, reward := range rs {
+			if reward.Status != transaction.RewardStatusActive {
+				foree_logger.Logger.Warn("QuoteTx_Fail",
+					"ip", loadRealIp(ctx),
+					"userId", session.UserId,
+					"sessionId", req.SessionId,
+					"rewardId", reward.ID,
+					"rewardStatus", reward.Status,
+					"cause", "invalid reward status",
+				)
+				continue
+			}
+			if reward.Amt.Currency != req.SrcCurrency {
+				foree_logger.Logger.Warn("QuoteTx_Fail",
+					"ip", loadRealIp(ctx),
+					"userId", session.UserId,
+					"sessionId", req.SessionId,
+					"rewardId", reward.ID,
+					"requestCurrency", req.SrcCurrency,
+					"cause", "user try to use reward that has different currency",
+				)
+				continue
+			}
+			rewards = append(rewards, reward)
 		}
-		if r.OwnerId != user.ID {
-			foree_logger.Logger.Warn("QuoteTx_Fail",
-				"ip", loadRealIp(ctx),
-				"userId", session.UserId,
-				"sessionId", req.SessionId,
-				"rewardId", rewardId,
-				"cause", "user try to use other account's reward",
-			)
-			return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` that is belong to `%v`", user.ID, rewardId, r.OwnerId)
-		}
-		if r.Status != transaction.RewardStatusActive {
-			foree_logger.Logger.Warn("QuoteTx_Fail",
-				"ip", loadRealIp(ctx),
-				"userId", session.UserId,
-				"sessionId", req.SessionId,
-				"rewardId", rewardId,
-				"rewardStatus", r.Status,
-				"cause", "user try to use non-active reward",
-			)
-			return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` that is currently in status `%v`", user.ID, rewardId, r.Status)
-		}
-		if r.Amt.Currency != req.SrcCurrency {
-			foree_logger.Logger.Warn("QuoteTx_Fail",
-				"ip", loadRealIp(ctx),
-				"userId", session.UserId,
-				"sessionId", req.SessionId,
-				"rewardId", rewardId,
-				"requestCurrency", req.SrcCurrency,
-				"cause", "user try to use reward that has different currency",
-			)
-			return nil, transport.NewInteralServerError("user `%v` try to redeem reward `%v` that apply currency `%v` to currency `%v`", user.ID, rewardId, r.Amt.Currency, req.SrcCurrency)
-		}
-		reward = r
 	}
 
 	feeJoints, err := t.feeService.applyFee(session.UserGroup.FeeGroup, types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
@@ -360,7 +343,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		return nil, transport.NewFormError("Invalid req transaction request", "srcAmount", fmt.Sprintf("available amount is %v", txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount))
 	}
 
-	if reward != nil {
+	for _, reward := range rewards {
 		totalAmt.Amount -= reward.Amt.Amount
 	}
 
@@ -409,10 +392,22 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		Owner:              &user,
 	}
 
-	if reward != nil {
+	if len(rewards) > 0 {
+		rIds := make([]int64, len(rewards))
+		rs := make([]*transaction.Reward, len(rewards))
+		tRewardAmt := types.AmountData{}
+
+		for i, reward := range rewards {
+			rIds[i] = reward.ID
+			rs[i] = reward
+			tRewardAmt = types.AmountData{
+				Amount:   tRewardAmt.Amount + reward.Amt.Amount,
+				Currency: reward.Amt.Currency,
+			}
+		}
 		foreeTx.RewardIds = req.RewardIds
-		foreeTx.Rewards = []*transaction.Reward{reward}
-		foreeTx.TotalRewardAmt = reward.Amt
+		foreeTx.Rewards = rs
+		foreeTx.TotalRewardAmt = tRewardAmt
 	}
 
 	foreeTx.TotalAmt = totalAmt
@@ -446,7 +441,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		txSummary.FeeCurrency = foreeTx.TotalFeeAmt.Currency
 	}
 
-	if reward != nil {
+	if len(rewards) > 0 {
 		txSummary.RewardAmount = foreeTx.TotalRewardAmt.Amount
 		txSummary.RewardCurrency = foreeTx.TotalRewardAmt.Currency
 	}
@@ -523,9 +518,8 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	var rewardErr transport.HError
 	rewardChecker := func() {
 		defer wg.Done()
-		if len(foreeTx.Rewards) == 1 {
-			reward := foreeTx.Rewards[1]
-			reward, err := t.rewardRepo.GetUniqueRewardById(ctx, reward.ID)
+		if len(foreeTx.Rewards) > 0 {
+			rewards, err := t.rewardRepo.GetAllRewardByOwnerIdAndIds(ctx, session.UserId, foreeTx.RewardIds)
 			if err != nil {
 				foree_logger.Logger.Error("CreateTx_Fail",
 					"ip", loadRealIp(ctx),
@@ -537,16 +531,18 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 				rewardErr = transport.WrapInteralServerError(err)
 				return
 			}
-			if reward.Status != transaction.RewardStatusActive {
-				foree_logger.Logger.Warn("CreateTx_Fail",
-					"ip", loadRealIp(ctx),
-					"userId", session.UserId,
-					"sessionId", req.SessionId,
-					"quoteId", req.QuoteId,
-					"rewardStatus", reward.Status,
-					"cause", "reward is not in active",
-				)
-				rewardErr = transport.NewInteralServerError("user `%v` try to create a transaction with reward `%v` in status `%s`", user.ID, reward.ID, reward.Status)
+			for _, reward := range rewards {
+				if reward.Status != transaction.RewardStatusActive {
+					foree_logger.Logger.Warn("CreateTx_Fail",
+						"ip", loadRealIp(ctx),
+						"userId", session.UserId,
+						"sessionId", req.SessionId,
+						"quoteId", req.QuoteId,
+						"rewardStatus", reward.Status,
+						"cause", "reward is not in active",
+					)
+					rewardErr = transport.NewInteralServerError("user `%v` try to create a transaction with reward `%v` in status `%s`", user.ID, reward.ID, reward.Status)
+				}
 			}
 		}
 	}
