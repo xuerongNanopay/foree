@@ -64,13 +64,14 @@ const TransactionCreate = () => {
     validate()
   }, [form])
 
-  useEffect(() => {
-    if ( !!contacts && contacts.length > 0 && !!sourceAccounts && sourceAccounts.length >0 ) {
-      setIsEditable(true)
-    } else {
-      setIsEditable(false)
-    }
-  }, [contacts, sourceAccounts])
+  // useEffect(() => {
+  //   console.log("aaa", contacts.length, sourceAccounts.length)
+  //   if ( !!contacts && contacts.length > 0 && !!sourceAccounts && sourceAccounts.length >0 ) {
+  //     setIsEditable(true)
+  //   } else {
+  //     setIsEditable(false)
+  //   }
+  // }, [contacts, sourceAccounts])
 
   useFocusEffect(useCallback(() => {
     const  controller = new AbortController()
@@ -95,6 +96,7 @@ const TransactionCreate = () => {
               coutAccId: contacts[0]
             }))
           }
+          setIsEditable(true)
         }
       } catch (e) {
         console.error("transaction_create--getAllContacts", e)
