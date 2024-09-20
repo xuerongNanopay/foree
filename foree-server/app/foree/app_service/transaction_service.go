@@ -542,6 +542,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 						"cause", "reward is not in active",
 					)
 					rewardErr = transport.NewInteralServerError("user `%v` try to create a transaction with reward `%v` in status `%s`", user.ID, reward.ID, reward.Status)
+					return
 				}
 			}
 		}
@@ -594,7 +595,6 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		}
 
 		if _, err := t.txLimitService.addDailyTxLimit(ctx, *session, foreeTx.SrcAmt); err != nil {
-			dTx.Rollback()
 			foree_logger.Logger.Error("CreateTx_Fail",
 				"ip", loadRealIp(ctx),
 				"userId", session.UserId,
@@ -616,7 +616,6 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		defer wg.Done()
 		id, err := t.foreeTxRepo.InsertForeeTx(ctx, *foreeTx)
 		if err != nil {
-			dTx.Rollback()
 			foree_logger.Logger.Error("CreateTx_Fail",
 				"ip", loadRealIp(ctx),
 				"userId", session.UserId,
