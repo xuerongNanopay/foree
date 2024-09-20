@@ -13,6 +13,8 @@ import Currencies from '../../constants/currency'
 import { TransactionPurposes } from '../../constants/transactions'
 import { icons } from "../../constants"
 
+const MaxPromotion = 4
+
 const TransactionCreate = () => {
   const {contactId} = useLocalSearchParams()
   const [rate, setRate] = useState(0.0)
@@ -45,7 +47,7 @@ const TransactionCreate = () => {
       coutAccId: number().integer().required("required").min(1, "required"),
       srcAmount: sourceAmoutScheme,
       transactionPurpose: string().required("required"),
-      rewardIds: array().of(number().integer().min(0)).max(4, "maxmium 4 promotions")
+      rewardIds: array().of(number().integer().min(0)).max(MaxPromotion, "maxmium 4 promotions")
     })
   }, [dailyLimit])
 
@@ -363,7 +365,7 @@ const TransactionCreate = () => {
         !!rewards && rewards.length > 0 ?
           <ModalSelect
           title="Apply Promotion"
-          modalTitle="apply promotions"
+          modalTitle={`apply promotions(${form.rewardIds.length}/${MaxPromotion})`}
           containerStyles="mt-2"
           errorMessage={errors['rewardIds']}
           multiChoice={true}
@@ -395,6 +397,7 @@ const TransactionCreate = () => {
                   rewardIds: [...form.rewardIds.filter(x => x !== w)]
                 }
               } else {
+                if ( form.rewardIds.length >= MaxPromotion ) return form
                 return {
                   ...form,
                   rewardIds: [...form.rewardIds, w]
