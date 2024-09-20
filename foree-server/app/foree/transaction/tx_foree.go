@@ -16,7 +16,7 @@ const (
 		INSERT INTO foree_tx
 		(
 			type, status, rate, cin_acc_id, cout_acc_id,
-			src_amount, src_currency, dest_amount, dest_currency
+			src_amount, src_currency, dest_amount, dest_currency,
 			total_fee_amount, total_fee_currency, total_reward_amount, total_reward_currency,
 			total_amount, total_currency, cur_stage, cur_stage_status,
 			transaction_purpose, conclusion, owner_id
