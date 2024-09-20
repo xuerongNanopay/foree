@@ -14,8 +14,8 @@ const (
 		INSERT INTO rewards
 		(
 			type, description, amount, currency,
-			status, owner_id
-		) VALUES(?,?,?,?,?,?)
+			status, owner_id, expire_at
+		) VALUES(?,?,?,?,?,?,?)
 	`
 	sQLRewardUpdateById = `
 		UPDATE rewards SET
@@ -103,6 +103,7 @@ func (repo *RewardRepo) InsertReward(ctx context.Context, reward Reward) (int64,
 			reward.Amt.Currency,
 			reward.Status,
 			reward.OwnerId,
+			reward.ExpireAt,
 		)
 	} else {
 		result, err = repo.db.Exec(
@@ -113,6 +114,7 @@ func (repo *RewardRepo) InsertReward(ctx context.Context, reward Reward) (int64,
 			reward.Amt.Currency,
 			reward.Status,
 			reward.OwnerId,
+			reward.ExpireAt,
 		)
 	}
 	if err != nil {
