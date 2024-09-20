@@ -345,7 +345,7 @@ const TransactionCreate = () => {
       {
         !!rewards && rewards.length > 0 ?
           <ModalSelect
-          title="Apply Ppromotion"
+          title="Apply Promotion"
           modalTitle="apply promotions"
           containerStyles="mt-2"
           value={() => {
