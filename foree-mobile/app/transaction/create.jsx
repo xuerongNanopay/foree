@@ -1,5 +1,5 @@
-import { number, object, string } from "yup"
-import { View, Text, SafeAreaView } from 'react-native'
+import { number, object, string, array } from "yup"
+import { View, Text, SafeAreaView, Image } from 'react-native'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { accountService, transactionService } from '../../service'
@@ -11,6 +11,7 @@ import { formatContactMethod, formatName } from '../../util/foree_util'
 import CurrencyInputField from '../../components/CurrencyInputField'
 import Currencies from '../../constants/currency'
 import { TransactionPurposes } from '../../constants/transactions'
+import { icons } from "../../constants"
 
 const TransactionCreate = () => {
   const {contactId} = useLocalSearchParams()
@@ -43,7 +44,8 @@ const TransactionCreate = () => {
       cinAccId: number().required("required"),
       coutAccId: number().integer().required("required").min(1, "required"),
       srcAmount: sourceAmoutScheme,
-      transactionPurpose: string().required("required")
+      transactionPurpose: string().required("required"),
+      rewardIds: array().of(number().integer().min(0)).max(4, "maxmium 4 promotions")
     })
   }, [dailyLimit])
 
@@ -239,8 +241,16 @@ const TransactionCreate = () => {
   const RewardListItem = useCallback((reward) => {
     if ( !reward ) return <></>
     return (
-      <View>
-        <Text>{reward.description}</Text>
+      <View className="border-2 border-slate-500 rounded-lg py-2 mt-2 flex flex-row items-center">
+        <Image 
+          source={!form.rewardIds.find(x => x === reward.id) ? icons.checkboxUncheckDark : icons.checkboxCheckDark}
+          resizeMode='contain'
+          className="w-[30px] h-[30px] mx-2"
+        />
+        <View>
+          <Text className="font-semibold text-slate-500">{reward.description}</Text>
+          <Text className="font-bold text-lg">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(reward.amount)}{!!reward.currency ? ` ${reward.currency}` : ''}</Text>
+        </View>
       </View>
     )
   }, [form.rewardIds])
@@ -357,6 +367,8 @@ const TransactionCreate = () => {
           title="Apply Promotion"
           modalTitle="apply promotions"
           containerStyles="mt-2"
+          errorMessage={errors['rewardIds']}
+          multiChoice={true}
           value={() => {
             let totalReward = 0
             let totalRewardCurrency = ''
@@ -379,15 +391,16 @@ const TransactionCreate = () => {
           inputStyles="text-right"
           onPress={(w) => {
             setForm((form) => {
-              if (!!form.rewardIds.find(x => x === w.id)) {
+              if (!!form.rewardIds.find(x => x === w)) {
                 return {
                   ...form,
-                  rewardIds: [...form.rewardIds.filter(x => x !== w.id)]
+                  rewardIds: [...form.rewardIds.filter(x => x !== w)]
                 }
               } else {
+                console.log("aaa", w)
                 return {
                   ...form,
-                  rewardIds: [...form.rewardIds, w.id]
+                  rewardIds: [...form.rewardIds, w]
                 }
               }
             })
@@ -407,7 +420,8 @@ const TransactionCreate = () => {
     sourceAccounts, 
     form.destAmount, 
     form.cinAccId, 
-    form.coutAccId, 
+    form.coutAccId,
+    form.rewardIds,
     errors['srcAmount'],
     errors['cinAccId'],
     errors['coutAccId']

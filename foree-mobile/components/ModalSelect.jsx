@@ -21,6 +21,7 @@ const ModalSelect = ({
   title,
   modalTitle,
   value,
+  multiChoice=false,
   multiline=false,
   numberOfLines=1,
   containerStyles,
@@ -160,7 +161,7 @@ const ModalSelect = ({
                     <TouchableOpacity
                       onPress={() => {
                         onPress(v[valueExtractor])
-                        setVisible(false)
+                        if ( !multiChoice ) setVisible(false)
                         setShowList(list)
                       }}
                       className={`w-full ${uselistSeperator ? "border-b-[1px] border-slate-300" : ""}`}
