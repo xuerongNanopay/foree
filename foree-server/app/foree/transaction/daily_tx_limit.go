@@ -99,9 +99,9 @@ func (repo *DailyTxLimitRepo) UpdateDailyTxLimitById(ctx context.Context, tx Dai
 	var err error
 
 	if ok {
-		_, err = dTx.Exec(sQLDailyTxLimitUpdateByReference, tx.UsedAmt.Amount, tx.ID)
+		_, err = dTx.Exec(sQLDailyTxLimitUpdateByReference, tx.UsedAmt.Amount, tx.Reference)
 	} else {
-		_, err = repo.db.Exec(sQLDailyTxLimitUpdateByReference, tx.UsedAmt.Amount, tx.ID)
+		_, err = repo.db.Exec(sQLDailyTxLimitUpdateByReference, tx.UsedAmt.Amount, tx.Reference)
 	}
 	if err != nil {
 		return err
