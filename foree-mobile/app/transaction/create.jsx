@@ -93,7 +93,7 @@ const TransactionCreate = () => {
           } else if ( contacts.length === 1 ) {
             setForm((form) => ({
               ...form,
-              coutAccId: contacts[0]
+              coutAccId: contacts[0].id
             }))
           }
           setIsEditable(true)
@@ -342,6 +342,52 @@ const TransactionCreate = () => {
       <View className="mt-2">
         <Text className="font-semibold text-green-800">Current Rate: <Text className="text-green-600">{rate?.description}</Text></Text>
       </View>
+      {
+        !!rewards && rewards.length > 0 ?
+          <ModalSelect
+          title="Apply Ppromotion"
+          modalTitle="apply promotions"
+          containerStyles="mt-2"
+          value={() => {
+            let totalReward = 0
+            let totalRewardCurrency = ''
+            form.rewardIds.forEach((id) => {
+              let reward = rewards.find(r => r.id === id)
+              if ( !!reward ) {
+                totalReward += reward.amount
+                totalRewardCurrency = reward.currency
+              }
+            })
+            if ( totalReward === 0 ) return ''
+            return new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(totalReward) + (!!totalRewardCurrency ? ` ${totalRewardCurrency}` : '')
+          }}
+          keyExtractor="id"
+          valueExtractor="id"
+          list={rewards}
+          listView={() =><></>}
+          uselistSeperator={false}
+          isEditable={isEditable}
+          inputStyles="text-right"
+          onPress={(w) => {
+            setForm((form) => {
+              if (!!form.rewardIds.find(x => x === w.id)) {
+                return {
+                  ...form,
+                  rewardIds: [...form.rewardIds.filter(x => x !== w.id)]
+                }
+              } else {
+                return {
+                  ...form,
+                  rewardIds: [...form.rewardIds, w.id]
+                }
+              }
+            })
+            console.log(form)
+          }}
+          placeholder="...choose"
+        />
+        :<></>
+      }
     </View>
   ), [
     rate,
