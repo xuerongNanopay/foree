@@ -86,7 +86,7 @@ func (f *Fee) MaybeApplyFee(amt types.AmountData) (*FeeJoint, error) {
 	if err != nil {
 		return nil, err
 	}
-	if !cond(f.ConditionAmt.Amount, amt.Amount) {
+	if !cond(amt.Amount, f.ConditionAmt.Amount) {
 		return nil, nil
 	}
 

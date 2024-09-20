@@ -42,7 +42,6 @@ type QuoteTransactionReq struct {
 }
 
 func (q QuoteTransactionReq) Validate() *transport.BadRequestError {
-	fmt.Println(q)
 	ret := validateStruct(q, "Invalid quote transaction request")
 
 	//TODO: support promoCode

@@ -2,6 +2,7 @@ package foree_service
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -108,13 +109,15 @@ func (r *FeeService) getFee(feeGroup string) ([]*transaction.Fee, error) {
 }
 
 func (t *FeeService) applyFee(feeGroup string, amt types.AmountData) ([]*transaction.FeeJoint, error) {
+	fmt.Println("ass1", feeGroup)
 	fees, err := t.getFee(feeGroup)
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println("ass", feeGroup, fees)
 	feeJoints := make([]*transaction.FeeJoint, 0)
 	for _, f := range fees {
+		fmt.Println("vvvvv", f.Name)
 		fj, err := f.MaybeApplyFee(amt)
 		if err != nil {
 			return nil, err
