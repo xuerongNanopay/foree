@@ -26,7 +26,7 @@ const (
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
-			r.expire_at, f.created_at, f.updated_at
+			r.expire_at, r.created_at, r.updated_at
 		FROM rewards as r
 		Where r.id = ?
 	`
@@ -34,7 +34,7 @@ const (
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
-			r.expire_at, f.created_at, f.updated_at
+			r.expire_at, r.created_at, r.updated_at
 		FROM rewards as r
 		Where r.applied_transaction_id = ?
 	`
@@ -42,7 +42,7 @@ const (
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
-			r.expire_at, f.created_at, f.updated_at
+			r.expire_at, r.created_at, r.updated_at
 		FROM rewards as r
 		Where r.owner_id = ? AND r.status = 'ACTIVE'
 	`
