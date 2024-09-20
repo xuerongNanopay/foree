@@ -239,7 +239,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	// Get reward
-	var rewards = make([]*transaction.Reward, len(req.RewardIds))
+	var rewards = make([]*transaction.Reward, 0)
 
 	if len(req.RewardIds) > 0 {
 		rs, err := t.rewardRepo.GetAllRewardByOwnerIdAndIds(ctx, session.UserId, req.RewardIds)
