@@ -36,7 +36,7 @@ type QuoteTransactionReq struct {
 	SrcAmount          float64 `json:"srcAmount" validate:"gt=0"`
 	SrcCurrency        string  `json:"srcCurrency" validate:"eq=CAD"`
 	DestCurrency       string  `json:"destCurrency" validate:"eq=PKR"`
-	RewardIds          []int64 `json:"rewardIds" validate:"max=1"`
+	RewardIds          []int64 `json:"rewardIds"`
 	PromoCode          string  `json:"promoCode"`
 	TransactionPurpose string  `json:"transactionPurpose" validate:"required"`
 }
@@ -156,10 +156,11 @@ type RewardDTO struct {
 
 func NewRewardDTO(r *transaction.Reward) *RewardDTO {
 	d := &RewardDTO{
-		ID:       r.ID,
-		Type:     r.Type,
-		Amount:   r.Amt.Amount,
-		Currency: r.Amt.Currency,
+		ID:          r.ID,
+		Type:        r.Type,
+		Description: r.Description,
+		Amount:      r.Amt.Amount,
+		Currency:    r.Amt.Currency,
 	}
 	if r.ExpireAt != nil {
 		d.ExpireAt = r.ExpireAt.UnixMilli()

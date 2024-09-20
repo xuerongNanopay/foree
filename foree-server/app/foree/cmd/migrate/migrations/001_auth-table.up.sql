@@ -225,7 +225,7 @@ CREATE TABLE IF NOT EXISTS rewards(
     `description` VARCHAR(256) DEFAULT '',
     `amount` DECIMAL(7, 2) NOT NULL,
     `currency` CHAR(3) NOT NULL,
-    `applied_transaction_id` BIGINT UNSIGNED,
+    `applied_transaction_id` BIGINT UNSIGNED DEFAULT 0,
     `owner_id` BIGINT UNSIGNED NOT NULL,
     `expire_at` DATETIME,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
