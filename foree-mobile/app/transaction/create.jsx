@@ -488,7 +488,7 @@ const TransactionCreate = () => {
             <Text className="font-bold mb-1 text-lg">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(txSum.destAmount)} {txSum.destCurrency}</Text>
             <Text className="font-semibold text-slate-500">To</Text>
             <Text className="font-bold mb-1 text-lg">{formatName(txSum.destAccount)}</Text>
-            <Text className="font-semibold">Destination Account</Text>
+            <Text className="font-semibold text-slate-500">Destination Account</Text>
             <Text className="font-bold mb-1 text-lg">
               {
                 txSum.destAccount.type == ContactTransferCashPickup ?
