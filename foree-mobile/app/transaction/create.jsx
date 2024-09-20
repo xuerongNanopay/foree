@@ -39,9 +39,10 @@ const TransactionCreate = () => {
   const [rewards, setRewards] = useState([])
 
   const quoteTransactionScheme = useMemo(() => {
+    min = rewards.filter(x => form.rewardIds.includes(x.id)).reduce((total, cur) => total+cur.amount, 20)
     const sourceAmoutScheme = !!dailyLimit ? 
-      number().required("required").min(20, "Minimum $20.00 CAD").max(dailyLimit.maxAmount-dailyLimit.usedAmount, `Maximum $${(dailyLimit.maxAmount-dailyLimit.usedAmount).toFixed(2)} CAD`) :
-      number().required("required").min(20, "Minimum $20.00 CAD").max(1000, "Maximum $1000.00 CAD")
+      number().required("required").min(min, `Minimum ${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(min)} CAD`).max(dailyLimit.maxAmount-dailyLimit.usedAmount, `Maximum $${(dailyLimit.maxAmount-dailyLimit.usedAmount).toFixed(2)} CAD`) :
+      number().required("required").min(min, `Minimum ${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(min)} CAD`).max(1000, "Maximum $1000.00 CAD")
     return object({
       cinAccId: number().required("required"),
       coutAccId: number().integer().required("required").min(1, "required"),
@@ -49,7 +50,7 @@ const TransactionCreate = () => {
       transactionPurpose: string().required("required"),
       rewardIds: array().of(number().integer().min(0)).max(MaxPromotion, "maxmium 4 promotions")
     })
-  }, [dailyLimit])
+  }, [dailyLimit, form.rewardIds])
 
   useEffect(() => {
     async function validate() {
