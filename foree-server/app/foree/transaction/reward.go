@@ -32,13 +32,13 @@ const (
 		FROM rewards as r
 		Where r.id = ?
 	`
-	sQLRewardAllByIds = `
+	sQLRewardAllByOwnerIdAndIds = `
 		SELECT
 			r.id, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
 			r.expire_at, r.created_at, r.updated_at
 		FROM rewards as r
-		Where r.id in (?%v)
+		Where r.owner_id = ? AND r.id in (?%v)
 	`
 	sQLRewardGetAllByAppliedTransactionId = `
 		SELECT
@@ -177,13 +177,14 @@ func (repo *RewardRepo) GetUniqueRewardById(ctx context.Context, id int64) (*Rew
 	return f, nil
 }
 
-func (repo *RewardRepo) GetAllRewardByIds(ctx context.Context, args []int64) ([]*Reward, error) {
-	ids := make([]interface{}, len(args))
+func (repo *RewardRepo) GetAllRewardByOwnerIdAndIds(ctx context.Context, ownerId int64, ids []int64) ([]*Reward, error) {
+	args := make([]interface{}, len(ids)+1)
+	args[0] = ownerId
 	for i, id := range args {
-		ids[i] = id
+		args[i+1] = id
 	}
 
-	rows, err := repo.db.Query(fmt.Sprintf(sQLRewardAllByIds, strings.Repeat(",?", len(ids)-1)), ids...)
+	rows, err := repo.db.Query(fmt.Sprintf(sQLRewardAllByOwnerIdAndIds, strings.Repeat(",?", len(ids)-1)), args...)
 
 	if err != nil {
 		return nil, err
