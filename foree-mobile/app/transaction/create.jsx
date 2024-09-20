@@ -382,61 +382,65 @@ const TransactionCreate = () => {
     </View>
   ), [])
 
-  const Review = useCallback(() => (
-    <View>
-      <Text className="font-pregular text-center mb-4">
-        Review your transactions.
-      </Text>
+  const Review = useCallback(() => {
+    const txSum = quote.txSum
+    if ( !txSum ) return <></>
+    return (
       <View>
-        <View className="border-b-[1px] border-slate-400 pb-2">
-          <Text className="font-semibold">You Send</Text>
-          <Text className="font-bold mb-1 text-lg">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(quote.txSum.srcAmount)} {quote.txSum.srcCurrency}</Text>
-          <Text className="font-semibold text-slate-500">From</Text>
-          <Text className="font-bold mb-1 text-lg">{formatName(quote.txSum.srcAccount)}</Text>
-          <Text className="font-semibold text-slate-500">Interac E-Transfer</Text>
-          <Text className="font-bold mb-1 text-lg">{quote.txSum.srcAccount.email}</Text>
-        </View>
-        <View className="mt-2 border-b-[1px] border-slate-400 pb-2">
-          <Text className="font-semibold">Recipient Receives</Text>
-          <Text className="font-bold mb-1 text-lg">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(quote.txSum.destAmount)} {quote.txSum.destCurrency}</Text>
-          <Text className="font-semibold text-slate-500">To</Text>
-          <Text className="font-bold mb-1 text-lg">{formatName(quote.txSum.destAccount)}</Text>
-          <Text className="font-semibold">Destination Account</Text>
-          <Text className="font-bold mb-1 text-lg">
-            {
-              quote.txSum.destAccount.type == ContactTransferCashPickup ?
-              <Text className="font-bold mb-1 text-lg">Cash Pickup</Text> : 
-              <Text className="font-bold mb-1 text-lg">
-                {!! quote.txSum.destAccount.institutionName ?  quote.txSum.destAccount.institutionName.slice(0, 16) + ( quote.txSum.destAccount.institutionName.length > 16 ? "..." : "") : ""}
-                <Text className="italic">
-                  ({!!quote.txSum.destAccount.accountNumber ? quote.txSum.destAccount.accountNumber.slice(0, 13) + (quote.txSum.destAccount.accountNumber.length > 13 ? "..." : "") : ""})
+        <Text className="font-pregular text-center mb-4">
+          Review your transactions.
+        </Text>
+        <View>
+          <View className="border-b-[1px] border-slate-400 pb-2">
+            <Text className="font-semibold">You Send</Text>
+            <Text className="font-bold mb-1 text-lg">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(txSum.srcAmount)} {txSum.srcCurrency}</Text>
+            <Text className="font-semibold text-slate-500">From</Text>
+            <Text className="font-bold mb-1 text-lg">{formatName(txSum.srcAccount)}</Text>
+            <Text className="font-semibold text-slate-500">Interac E-Transfer</Text>
+            <Text className="font-bold mb-1 text-lg">{txSum.srcAccount.email}</Text>
+          </View>
+          <View className="mt-2 border-b-[1px] border-slate-400 pb-2">
+            <Text className="font-semibold">Recipient Receives</Text>
+            <Text className="font-bold mb-1 text-lg">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(txSum.destAmount)} {txSum.destCurrency}</Text>
+            <Text className="font-semibold text-slate-500">To</Text>
+            <Text className="font-bold mb-1 text-lg">{formatName(txSum.destAccount)}</Text>
+            <Text className="font-semibold">Destination Account</Text>
+            <Text className="font-bold mb-1 text-lg">
+              {
+                txSum.destAccount.type == ContactTransferCashPickup ?
+                <Text className="font-bold mb-1 text-lg">Cash Pickup</Text> : 
+                <Text className="font-bold mb-1 text-lg">
+                  {!! txSum.destAccount.institutionName ?  txSum.destAccount.institutionName.slice(0, 16) + ( txSum.destAccount.institutionName.length > 16 ? "..." : "") : ""}
+                  <Text className="italic">
+                    ({!!txSum.destAccount.accountNumber ? txSum.destAccount.accountNumber.slice(0, 13) + (txSum.destAccount.accountNumber.length > 13 ? "..." : "") : ""})
+                  </Text>
                 </Text>
-              </Text>
-            }
-          </Text>
-        </View>
-        <View className="mt-2">
-            <Text className="font-semibold mb-2 text-lg">Details</Text>
-            <View className="flex flex-row justify-between items-center mb-1">
-              <Text className="font-semibold">Exchange Rate</Text>
-              <Text className="font-bold" >{quote.txSum.rate}</Text>
-            </View>
-            <View className="flex flex-row justify-between items-center mb-1">
-              <Text className="font-semibold">Fees</Text>
-              <Text className="font-bold" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(quote.txSum.feeAmount)}{!!quote.txSum.feeCurrency ? ` ${quote.txSum.feeCurrency}` : ''}</Text>
-            </View>
-            <View className="flex flex-row justify-between items-center mb-1">
-              <Text className="font-semibold">Promotions</Text>
-              <Text className="font-bold" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(quote.txSum.rewardAmount)}{!!quote.txSum.rewardCurrency ? ` ${quote.txSum.rewardCurrency}` : ''}</Text>
-            </View>
-            <View className="flex flex-row justify-between items-center mb-1">
-              <Text className="font-semibold text-green-800">Amount Debited</Text>
-              <Text className="font-bold text-green-800" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(quote.txSum.totalAmount)} {quote.txSum.totalCurrency}</Text>
-            </View>
+              }
+            </Text>
+          </View>
+          <View className="mt-2">
+              <Text className="font-semibold mb-2 text-lg">Details</Text>
+              <View className="flex flex-row justify-between items-center mb-1">
+                <Text className="font-semibold">Exchange Rate</Text>
+                <Text className="font-bold" >{txSum.rate}</Text>
+              </View>
+              <View className="flex flex-row justify-between items-center mb-1">
+                <Text className="font-semibold">Fees</Text>
+                <Text className="font-bold" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(txSum.feeAmount)}{!!txSum.feeCurrency ? ` ${txSum.feeCurrency}` : ''}</Text>
+              </View>
+              <View className="flex flex-row justify-between items-center mb-1">
+                <Text className="font-semibold">Promotions</Text>
+                <Text className="font-bold" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(txSum.rewardAmount)}{!!txSum.rewardCurrency ? ` ${txSum.rewardCurrency}` : ''}</Text>
+              </View>
+              <View className="flex flex-row justify-between items-center mb-1">
+                <Text className="font-semibold text-green-800">Amount Debited</Text>
+                <Text className="font-bold text-green-800" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(txSum.totalAmount)} {txSum.totalCurrency}</Text>
+              </View>
+          </View>
         </View>
       </View>
-    </View>
-  ), [quote])
+    )
+  }, [quote])
 
   const CreateTransactionFlow = [
     {
