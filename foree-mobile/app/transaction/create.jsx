@@ -32,6 +32,8 @@ const TransactionCreate = () => {
     transactionPurpose: ''
   })
   const [quote, setQuote] = useState(null)
+  const [txOutage, setTxOutage] = useState(null)
+  const [rewards, setRewards] = useState([])
 
   const quoteTransactionScheme = useMemo(() => {
     const sourceAmoutScheme = !!dailyLimit ? 
@@ -388,7 +390,7 @@ const TransactionCreate = () => {
       <View>
         <View className="border-b-[1px] border-slate-400 pb-2">
           <Text className="font-semibold">You Send</Text>
-          <Text className="font-bold mb-1 text-lg">${quote.txSum.srcAmount.toFixed(2)} {quote.txSum.srcCurrency}</Text>
+          <Text className="font-bold mb-1 text-lg">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(quote.txSum.srcAmount)} {quote.txSum.srcCurrency}</Text>
           <Text className="font-semibold text-slate-500">From</Text>
           <Text className="font-bold mb-1 text-lg">{formatName(quote.txSum.srcAccount)}</Text>
           <Text className="font-semibold text-slate-500">Interac E-Transfer</Text>
@@ -396,7 +398,7 @@ const TransactionCreate = () => {
         </View>
         <View className="mt-2 border-b-[1px] border-slate-400 pb-2">
           <Text className="font-semibold">Recipient Receives</Text>
-          <Text className="font-bold mb-1 text-lg">${quote.txSum.destAmount.toFixed(2)} {quote.txSum.destCurrency}</Text>
+          <Text className="font-bold mb-1 text-lg">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(quote.txSum.destAmount)} {quote.txSum.destCurrency}</Text>
           <Text className="font-semibold text-slate-500">To</Text>
           <Text className="font-bold mb-1 text-lg">{formatName(quote.txSum.destAccount)}</Text>
           <Text className="font-semibold">Destination Account</Text>
