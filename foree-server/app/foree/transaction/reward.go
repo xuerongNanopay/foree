@@ -180,7 +180,7 @@ func (repo *RewardRepo) GetUniqueRewardById(ctx context.Context, id int64) (*Rew
 func (repo *RewardRepo) GetAllRewardByOwnerIdAndIds(ctx context.Context, ownerId int64, ids []int64) ([]*Reward, error) {
 	args := make([]interface{}, len(ids)+1)
 	args[0] = ownerId
-	for i, id := range args {
+	for i, id := range ids {
 		args[i+1] = id
 	}
 
