@@ -145,6 +145,28 @@ func (q GetRateReq) Validate() *transport.BadRequestError {
 }
 
 // ----------   Response --------------
+type RewardDTO struct {
+	ID          int64        `json:"id"`
+	Type        string       `json:"type"`
+	Description string       `json:"description"`
+	Amount      types.Amount `json:"amount"`
+	Currency    string       `json:"currency"`
+	ExpireAt    int64        `json:"expireAt,omitempty"`
+}
+
+func NewRewardDTO(r *transaction.Reward) *RewardDTO {
+	d := &RewardDTO{
+		ID:       r.ID,
+		Type:     r.Type,
+		Amount:   r.Amt.Amount,
+		Currency: r.Amt.Currency,
+	}
+	if r.ExpireAt != nil {
+		d.ExpireAt = r.ExpireAt.UnixMilli()
+	}
+	return d
+}
+
 type RateDTO struct {
 	SrcAmount    types.Amount `json:"srcAmount,omitempty"`
 	SrcCurrency  string       `json:"srcCurrency,omitempty"`

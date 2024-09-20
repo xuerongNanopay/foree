@@ -787,6 +787,37 @@ func (t *TransactionService) GetDailyTxLimit(ctx context.Context, req transport.
 	return NewDailyTxLimitDTO(limit), nil
 }
 
+func (t *TransactionService) GetReward(ctx context.Context, req transport.SessionReq) ([]*RewardDTO, transport.HError) {
+	session, sErr := t.authService.GetSession(ctx, req.SessionId)
+	if session == nil {
+		foree_logger.Logger.Info("GetReward_Fail",
+			"sessionId", req.SessionId,
+			"ip", loadRealIp(ctx),
+			"cause", "session no found",
+		)
+		return nil, sErr
+	}
+
+	rewards, err := t.rewardRepo.GetAllActiveRewardByOwnerId(ctx, session.UserId)
+	if err != nil {
+		foree_logger.Logger.Error("GetReward_Fail",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"cause", err.Error(),
+		)
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	ret := make([]*RewardDTO, len(rewards))
+	for i, v := range rewards {
+		ret[i] = NewRewardDTO(v)
+	}
+
+	foree_logger.Logger.Debug("GetReward_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
+	return ret, nil
+}
+
 func (t *TransactionService) GetTxSummary(ctx context.Context, req GetTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
 	session, sErr := t.authService.GetSession(ctx, req.SessionId)
 	if session == nil {

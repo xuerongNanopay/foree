@@ -75,9 +75,9 @@ type Reward struct {
 	Status               RewardStatus     `json:"status"`
 	OwnerId              int64            `json:"ownerId"`
 	AppliedTransactionId int64            `json:"appliedTransactionId"`
-	ExpireAt             time.Time        `json:"expireAt"`
-	CreatedAt            time.Time        `json:"createdAt"`
-	UpdatedAt            time.Time        `json:"updatedAt"`
+	ExpireAt             *time.Time       `json:"expireAt"`
+	CreatedAt            *time.Time       `json:"createdAt"`
+	UpdatedAt            *time.Time       `json:"updatedAt"`
 }
 
 func NewRewardRepo(db *sql.DB) *RewardRepo {

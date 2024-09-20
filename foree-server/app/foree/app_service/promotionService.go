@@ -145,14 +145,14 @@ func (p *PromotionService) rewardOnboard(registerUser auth.User) {
 		foree_logger.Logger.Debug("Reward_Onboard_Fail", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "promotion is invalid")
 		return
 	}
-
+	expiry := time.Now().Add(time.Hour * 24 * 180)
 	reward := transaction.Reward{
 		Type:        transaction.RewardTypeOnboard,
 		Status:      transaction.RewardStatusActive,
 		Description: "Onboard Reward",
 		Amt:         promotion.Amt,
 		OwnerId:     registerUser.ID,
-		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
+		ExpireAt:    &expiry,
 	}
 
 	rewardId, err := p.rewardRepo.InsertReward(context.TODO(), reward)
@@ -191,13 +191,14 @@ func (p *PromotionService) initialReferralReward(registerUser auth.User) {
 		return fmt.Sprintf("Referral accepted by %v", refereeId)
 	}
 
+	expiry := time.Now().Add(time.Hour * 24 * 180)
 	reward := transaction.Reward{
 		Type:        transaction.RewardTypeReferal,
 		Status:      transaction.RewardStatusInitial,
 		Description: generateReferralRewardDescription(registerUser.ID),
 		Amt:         promotion.Amt,
 		OwnerId:     referral.ReferrerId,
-		ExpireAt:    time.Now().Add(time.Hour * 24 * 180),
+		ExpireAt:    &expiry,
 	}
 
 	rewardId, err := p.rewardRepo.InsertReward(context.TODO(), reward)
