@@ -30,7 +30,7 @@ const (
 		Where f.fee_group = ? AND f.is_enable = TRUE
 	`
 	sQLFeeJointInsert = `
-		INSERT INTO fees
+		INSERT INTO fee_joint
 		(
 			fee_name, description, amount, currency,
 			parent_tx_id, owner_id
