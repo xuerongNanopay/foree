@@ -35,7 +35,7 @@ const (
             fee_amount, fee_currency, 
             reward_amount, reward_currency, 
             nbp_reference, is_cancel_allowed, parent_tx_id, owner_id
-        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `
 	sQLTxSummaryUpdateById = `
         UPDATE tx_summary SET 
@@ -156,7 +156,6 @@ func (repo *TxSummaryRepo) InsertTxSummary(ctx context.Context, tx TxSummary) (i
 			tx.Type,
 			tx.Status,
 			tx.Rate,
-			tx.PaymentUrl,
 			tx.SrcAccId,
 			tx.DestAccId,
 			tx.SrcAccSummary,
@@ -183,7 +182,6 @@ func (repo *TxSummaryRepo) InsertTxSummary(ctx context.Context, tx TxSummary) (i
 			tx.Type,
 			tx.Status,
 			tx.Rate,
-			tx.PaymentUrl,
 			tx.SrcAccId,
 			tx.DestAccId,
 			tx.SrcAccSummary,
