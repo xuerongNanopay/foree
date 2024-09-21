@@ -14,8 +14,8 @@ const (
 	sQLNBPCOTxInsert = `
         INSERT INTO nbp_co_tx
         (
-            status, amount, currency, nbp_reference,  cash_out_acc_id
-            parent_tx_id, owner_id
+            status, amount, currency, nbp_reference,
+			cash_out_acc_id, parent_tx_id, owner_id
         ) VALUES(?,?,?,?,?,?,?)
     `
 	sQLNBPCOTxUpdateById = `

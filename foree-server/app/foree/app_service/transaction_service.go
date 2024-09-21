@@ -329,18 +329,18 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		Currency: req.SrcCurrency,
 	}
 
-	if totalAmt.Amount+dailyLimit.UsedAmt.Amount > txLimit.MaxAmt.Amount {
+	if totalAmt.Amount+dailyLimit.UsedAmt.Amount > dailyLimit.MaxAmt.Amount {
 		foree_logger.Logger.Warn("QuoteTx_Fail",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
 			"requstAmount", totalAmt.Amount,
 			"requstCurrency", totalAmt.Currency,
-			"remainingAmount", txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount,
-			"maxAmount", txLimit.MaxAmt.Amount,
+			"remainingAmount", dailyLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount,
+			"maxAmount", dailyLimit.MaxAmt.Amount,
 			"cause", "overlimit",
 		)
-		return nil, transport.NewFormError("Invalid req transaction request", "srcAmount", fmt.Sprintf("available amount is %v", txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount))
+		return nil, transport.NewFormError("Invalid req transaction request", "srcAmount", fmt.Sprintf("available amount is %v", dailyLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount))
 	}
 
 	for _, reward := range rewards {
@@ -554,17 +554,6 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	var limitErr transport.HError
 	limitChecker := func() {
 		defer wg.Done()
-		txLimit, err := t.txLimitService.getTxLimit(ctx, session.UserGroup.TransactionLimitGroup)
-		if err != nil {
-			foree_logger.Logger.Error("CreateTx_Fail",
-				"ip", loadRealIp(ctx),
-				"userId", session.UserId,
-				"sessionId", req.SessionId,
-				"cause", err.Error(),
-			)
-			limitErr = transport.WrapInteralServerError(err)
-			return
-		}
 
 		dailyLimit, err := t.txLimitService.getDailyTxLimit(ctx, *session)
 		if err != nil {
@@ -579,18 +568,18 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 			return
 		}
 
-		if foreeTx.SrcAmt.Amount+dailyLimit.UsedAmt.Amount > txLimit.MaxAmt.Amount {
+		if foreeTx.SrcAmt.Amount+dailyLimit.UsedAmt.Amount > dailyLimit.MaxAmt.Amount {
 			foree_logger.Logger.Warn("QuoteTx_Fail",
 				"ip", loadRealIp(ctx),
 				"userId", session.UserId,
 				"sessionId", req.SessionId,
 				"requstAmount", foreeTx.SrcAmt.Amount,
 				"requstCurrency", foreeTx.SrcAmt.Currency,
-				"remainingAmount", txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount,
-				"maxAmount", txLimit.MaxAmt.Amount,
+				"remainingAmount", dailyLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount,
+				"maxAmount", dailyLimit.MaxAmt.Amount,
 				"cause", "overlimit",
 			)
-			limitErr = transport.NewInteralServerError("user `%v` try to create a transaction with `%v` but the remaining limit is `%v`", user.ID, foreeTx.SrcAmt.Amount, txLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount)
+			limitErr = transport.NewInteralServerError("user `%v` try to create a transaction with `%v` but the remaining limit is `%v`", user.ID, foreeTx.SrcAmt.Amount, dailyLimit.MaxAmt.Amount-dailyLimit.UsedAmt.Amount)
 			return
 		}
 

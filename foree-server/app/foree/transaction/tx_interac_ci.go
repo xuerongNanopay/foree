@@ -14,9 +14,8 @@ const (
 	sQLInteracCITxInsert = `
         INSERT INTO interact_ci_tx
         (
-            status, cash_in_acc_id,
-            amount, currency, end_to_end_id, parent_tx_id, owner_id
-        ) VALUES(?,?,?,?,?,?,?,?)
+            status, cash_in_acc_id, amount, currency,
+			end_to_end_id, parent_tx_id, owner_id) VALUES(?,?,?,?,?,?,?)
     `
 	sQLInteracCITxUpdateById = `
 		UPDATE interact_ci_tx SET 
