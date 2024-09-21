@@ -105,8 +105,8 @@ type ForeeTx struct {
 	TransactionPurpose string           `json:"transactionPurpose,omitempty"`
 	Conclusion         string           `json:"conclusion,omitempty"`
 	OwnerId            int64            `json:"ownerId,omitempty"`
-	CreatedAt          time.Time        `json:"createdAt,omitempty"`
-	UpdatedAt          time.Time        `json:"updatedAt,omitempty"`
+	CreatedAt          *time.Time       `json:"createdAt,omitempty"`
+	UpdatedAt          *time.Time       `json:"updatedAt,omitempty"`
 
 	Ip              string                  `json:"ip,omitempty"`
 	UserAgent       string                  `json:"userAgent,omitempty"`

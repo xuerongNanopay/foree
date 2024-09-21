@@ -9,6 +9,7 @@ import (
 
 	"xue.io/go-pay/app/foree/account"
 	foree_constant "xue.io/go-pay/app/foree/constant"
+	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
@@ -81,15 +82,21 @@ type TxProcessor struct {
 }
 
 func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
-	foreeTx, err := p.createTx(tx)
+	foreeTx, err := p.createFullTx(tx)
 	if err != nil {
-		//todo log
+		foree_logger.Logger.Error("CreateAndProcessTx_Fail",
+			"foreeTxId", tx.ID,
+			"cause", err.Error(),
+		)
 		return
 	}
 
 	_, err = p.processTx(*foreeTx)
 	if err != nil {
-		//TODO log
+		foree_logger.Logger.Error("CreateAndProcessTx_Fail",
+			"foreeTxId", tx.ID,
+			"cause", err.Error(),
+		)
 	}
 }
 
@@ -110,7 +117,7 @@ func (p *TxProcessor) loadAndProcessTx(foreeId int64) (*transaction.ForeeTx, err
 }
 
 // Create CI, COUT, IDM for ForeeTx
-func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	wg := sync.WaitGroup{}
 	dTx, err := p.db.Begin()
 	if err != nil {
@@ -213,18 +220,30 @@ func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, er
 	wg.Wait()
 	if ciErr != nil {
 		dTx.Rollback()
-		//log error: ciErr
-		return nil, err
+		foree_logger.Logger.Error("CreateFullTx_Fail",
+			"ip", loadRealIp(ctx),
+			"foreeTxId", tx.ID,
+			"cause", ciErr.Error(),
+		)
+		return nil, ciErr
 	}
 	if idmErr != nil {
 		dTx.Rollback()
-		//log error: idmErr
-		return nil, err
+		foree_logger.Logger.Error("CreateFullTx_Fail",
+			"ip", loadRealIp(ctx),
+			"foreeTxId", tx.ID,
+			"cause", idmErr.Error(),
+		)
+		return nil, idmErr
 	}
 	if coutErr != nil {
 		dTx.Rollback()
-		//log error: coutErr
-		return nil, err
+		foree_logger.Logger.Error("CreateFullTx_Fail",
+			"ip", loadRealIp(ctx),
+			"foreeTxId", tx.ID,
+			"cause", coutErr.Error(),
+		)
+		return nil, coutErr
 	}
 
 	tx.CI = ciTx
@@ -232,7 +251,11 @@ func (p *TxProcessor) createTx(tx transaction.ForeeTx) (*transaction.ForeeTx, er
 	tx.COUT = coutTx
 
 	if err = dTx.Commit(); err != nil {
-		//TODO: log
+		foree_logger.Logger.Error("CreateFullTx_Fail",
+			"ip", loadRealIp(ctx),
+			"foreeTxId", tx.ID,
+			"cause", err.Error(),
+		)
 		return nil, err
 	}
 	return &tx, nil
@@ -623,7 +646,7 @@ func (p *TxProcessor) MaybeRefund(ctx context.Context, fTx transaction.ForeeTx) 
 	}
 
 	// Refund limit.
-	reference := transaction.GenerateDailyTxLimitReference(fTx.OwnerId)
+	reference := transaction.GetDailyTxLimitReference(&fTx)
 	dailyLimit, err := p.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, reference)
 	if err != nil {
 		dTx.Rollback()

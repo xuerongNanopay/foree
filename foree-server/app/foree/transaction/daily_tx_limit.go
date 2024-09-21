@@ -157,3 +157,8 @@ func GenerateDailyTxLimitReference(userId int64) string {
 	now := time_util.NowInToronto()
 	return fmt.Sprintf("%v_%s", userId, now.Format(time.DateOnly))
 }
+
+func GetDailyTxLimitReference(fTx *ForeeTx) string {
+	created := time_util.UTCInToronto(*fTx.CreatedAt)
+	return fmt.Sprintf("%v_%s", fTx.OwnerId, created.Format(time.DateOnly))
+}
