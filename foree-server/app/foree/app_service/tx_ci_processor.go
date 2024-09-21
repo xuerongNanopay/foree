@@ -169,7 +169,7 @@ func (p *CITxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx
 
 	if nForeeTx.CurStage != transaction.TxStageInteracCI && nForeeTx.CurStageStatus != transaction.TxStatusInitial {
 		dTx.Rollback()
-		return nil, fmt.Errorf("CITxProcessor -- transaction `%v` is in status `%s` at stage `%s`", nForeeTx.ID, nForeeTx.CurStageStatus, nForeeTx.Status)
+		return nil, fmt.Errorf("CITxProcessor -- transaction `%v` is in status `%s` at stage `%s`", nForeeTx.ID, nForeeTx.CurStageStatus, nForeeTx.CurStage)
 	}
 
 	resp, err := p.scotiaClient.RequestPayment(*p.createRequestPaymentReq(fTx))

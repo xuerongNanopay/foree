@@ -60,7 +60,7 @@ func (p *IDMTxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx
 
 	if nForeeTx.CurStage != transaction.TxStageIDM && nForeeTx.CurStageStatus != transaction.TxStatusInitial {
 		dTx.Rollback()
-		return nil, fmt.Errorf("IDM failed: transaction `%v` is in status `%s` at stage `%s`", nForeeTx.ID, nForeeTx.CurStageStatus, nForeeTx.Status)
+		return nil, fmt.Errorf("IDM failed: transaction `%v` is in status `%s` at stage `%s`", nForeeTx.ID, nForeeTx.CurStageStatus, nForeeTx.CurStage)
 	}
 
 	resp, err := p.idmClient.Transfer(*req)
