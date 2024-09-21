@@ -16,6 +16,10 @@ import (
 	time_util "xue.io/go-pay/util/time"
 )
 
+// Goal of Txprocessor:
+//	1. dispatch tx to sub tx processor.
+// 	2. handle terminal status of subprocessor.
+// 	3. it use curStage to navigate to different subprocessor.
 // It is the internal service for transaction process.
 
 func NewTxProcessor(
@@ -269,26 +273,43 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	ctx := context.Background()
 	foreeTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, id)
 	if err != nil {
+		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if foreeTx == nil {
+		foree_logger.Logger.Warn("loadTx_Fail",
+			"foreeTxId", id,
+			"cause", "foreeTx no found",
+		)
 		return nil, fmt.Errorf("ForeeTx no found with id `%v`", id)
 	}
 
 	// Load CI
 	ci, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, foreeTx.ID)
 	if err != nil {
+		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if isEmptyCheck && ci == nil {
+		foree_logger.Logger.Warn("loadTx_Fail",
+			"foreeTxId", id,
+			"cause", "InteracCITx no found",
+		)
 		return nil, fmt.Errorf("InteracCITx no found for ForeeTx `%v`", foreeTx.ID)
 	}
 
 	CashInAcc, err := p.interacAccountRepo.GetUniqueInteracAccountById(ctx, ci.CashInAccId)
 	if err != nil {
+		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if isEmptyCheck && CashInAcc == nil {
+		foree_logger.Logger.Warn("loadTx_Fail",
+			"foreeTxId", id,
+			"interactTxId", ci.ID,
+			"interacAccountId", ci.CashInAccId,
+			"cause", "interac account no found",
+		)
 		return nil, fmt.Errorf("CashInAcc no found for InteracCITx `%v`", ci.CashInAccId)
 	}
 	ci.CashInAcc = CashInAcc
@@ -298,9 +319,14 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	// Load IDM
 	idm, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, foreeTx.ID)
 	if err != nil {
+		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if isEmptyCheck && idm == nil {
+		foree_logger.Logger.Warn("loadTx_Fail",
+			"foreeTxId", id,
+			"cause", "idmTx no found",
+		)
 		return nil, fmt.Errorf("IDMTx no found for ForeeTx `%v`", foreeTx.ID)
 	}
 	foreeTx.IDM = idm
@@ -308,17 +334,29 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	// Load COUT
 	cout, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, foreeTx.ID)
 	if err != nil {
+		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if isEmptyCheck && cout == nil {
+		foree_logger.Logger.Warn("loadTx_Fail",
+			"foreeTxId", id,
+			"cause", "nbpCOTx no found",
+		)
 		return nil, fmt.Errorf("NBPCOTx no found for ForeeTx `%v`", foreeTx.ID)
 	}
 
 	CashOutAcc, err := p.contactAccountRepo.GetUniqueContactAccountById(ctx, cout.CashOutAccId)
 	if err != nil {
+		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if isEmptyCheck && CashOutAcc == nil {
+		foree_logger.Logger.Warn("loadTx_Fail",
+			"foreeTxId", id,
+			"nbpCoTxId", cout.ID,
+			"contactAccountId", cout.CashOutAccId,
+			"cause", "CashOutAcc no found",
+		)
 		return nil, fmt.Errorf("CashOutAcc no found for NBPCOTx `%v`", cout.CashOutAccId)
 	}
 	cout.CashOutAcc = CashOutAcc
@@ -327,10 +365,16 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	// Load User
 	user, err := p.userRepo.GetUniqueUserById(foreeTx.OwnerId)
 	if err != nil {
+		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if isEmptyCheck && user == nil {
-		return nil, fmt.Errorf("ForeeTx no found for user `%v`", foreeTx.OwnerId)
+		foree_logger.Logger.Warn("loadTx_Fail",
+			"foreeTxId", id,
+			"ownerId", foreeTx.OwnerId,
+			"cause", "owner no found",
+		)
+		return nil, fmt.Errorf("owner `%v` no found for ForeeTx `%v`", foreeTx.OwnerId, foreeTx.ID)
 	}
 	foreeTx.Owner = user
 
