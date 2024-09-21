@@ -200,7 +200,7 @@ func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx
 		defer wg.Done()
 		coutId, err := p.nbpTxRepo.InsertNBPCOTx(ctx, transaction.NBPCOTx{
 			Status:       transaction.TxStatusInitial,
-			Amt:          tx.SrcAmt,
+			Amt:          tx.DestAmt,
 			NBPReference: tx.Summary.NBPReference,
 			CashOutAccId: tx.CoutAccId,
 			ParentTxId:   tx.ID,
@@ -383,7 +383,61 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	return foreeTx, nil
 }
 
+func (p *TxProcessor) processRootTx(fTx transaction.ForeeTx) error {
+	dbTx, err := p.db.Begin()
+	if err != nil {
+		dbTx.Rollback()
+		foree_logger.Logger.Error("processRootTx", "foreeTxId", fTx.ID, "cause", err.Error())
+		return err
+	}
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dbTx)
+
+	curForeeTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.ID)
+	if err != nil {
+		dbTx.Rollback()
+		foree_logger.Logger.Error("processRootTx", "foreeTxId", fTx.ID, "cause", err.Error())
+		return err
+	}
+	if curForeeTx.CurStage != fTx.CurStage {
+		foree_logger.Logger.Warn("processRootTx",
+			"foreeTxId", fTx.ID,
+			"transactionStage", fTx.CurStage,
+			"transactionStageIndb", curForeeTx.CurStage,
+			"cause", "transaction stage mismatch",
+		)
+		return fmt.Errorf("ForeeTx stage mismatch expect `%v` but `%v`", fTx.CurStage, curForeeTx.CurStage)
+	}
+
+	switch fTx.CurStage {
+	case "":
+		fTx.CurStage = transaction.TxStageInteracCI
+		err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx)
+		if err != nil {
+			dbTx.Rollback()
+			foree_logger.Logger.Error("processRootTx", "foreeTxId", fTx.ID, "cause", err.Error())
+			return err
+		}
+		if err = dbTx.Commit(); err != nil {
+			foree_logger.Logger.Error("processRootTx", "foreeTxId", fTx.ID, "cause", err.Error())
+			return err
+		}
+		//TODO: go update summaryTx
+		fallthrough
+	case transaction.TxStageInteracCI:
+		return nil
+	default:
+		foree_logger.Logger.Error("processRootTx",
+			"foreeTxId", fTx.ID,
+			"transactionStage", fTx.CurStage,
+			"cause", "unkown foreeTx stage",
+		)
+		return fmt.Errorf("unknmow foreeTx stage `%v`", fTx.CurStage)
+	}
+}
+
 func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+
 	if tx.Type != transaction.TxTypeInteracToNBP {
 		return nil, fmt.Errorf("unknow ForeeTx type `%s` for transaction `%v`", tx.Type, tx.ID)
 	}
