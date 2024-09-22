@@ -338,7 +338,7 @@ CREATE TABLE IF NOT EXISTS idm_compliance(
     FOREIGN KEY (parent_tx_id) REFERENCES foree_tx(id)
 );
 
-CREATE TABLE IF NOT EXISTS interact_ci_tx(
+CREATE TABLE IF NOT EXISTS interac_ci_tx(
     `id` SERIAL PRIMARY KEY,
     `status` VARCHAR(64) NOT NULL,
     `cash_in_acc_id` BIGINT UNSIGNED NOT NULL,
