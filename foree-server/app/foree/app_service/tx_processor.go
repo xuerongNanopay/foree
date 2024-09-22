@@ -457,6 +457,10 @@ func (p *TxProcessor) rollback(fTxId int64) {
 	}
 }
 
+func (p *TxProcessor) onStatusUpdate(fTxId int64) {
+
+}
+
 func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 
 	if tx.Type != transaction.TxTypeInteracToNBP {

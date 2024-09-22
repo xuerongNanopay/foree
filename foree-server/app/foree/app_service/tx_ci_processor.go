@@ -186,10 +186,10 @@ func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
 	resp, err := p.scotiaClient.RequestPayment(*p.createRequestPaymentReq(&ciTx))
 
 	if err != nil {
-		foree_logger.Logger.Error("CI_Processor-requestPayment", "interacTxId", ciTx.ID, "cause", err.Error())
+		foree_logger.Logger.Error("CITxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
 	}
 	if resp.StatusCode/100 != 2 {
-		foree_logger.Logger.Warn("CI_Processor-requestPayment",
+		foree_logger.Logger.Warn("CITxProcessor-requestPayment_FAIL",
 			"interacTxId", ciTx.ID,
 			"httpResponseStatus", resp.StatusCode,
 			"httpRequest", resp.RawRequest,
@@ -202,9 +202,9 @@ func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
 		ciTx.Status = transaction.TxStatusRejected
 		err := p.interacTxRepo.UpdateInteracCITxById(context.TODO(), ciTx)
 		if err != nil {
-			foree_logger.Logger.Error("CI_Processor-requestPayment", "interacTxId", ciTx.ID, "cause", err.Error())
+			foree_logger.Logger.Error("CITxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
 		}
-		p.txProcessor.rollback(ciTx.ParentTxId)
+		go p.txProcessor.rollback(ciTx.ParentTxId)
 		return
 	}
 
@@ -215,10 +215,10 @@ func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
 	})
 
 	if err != nil {
-		foree_logger.Logger.Error("CI_Processor-requestPayment", "interacTxId", ciTx.ID, "cause", err.Error())
+		foree_logger.Logger.Error("CITxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
 	}
 	if statusResp.StatusCode/100 != 2 {
-		foree_logger.Logger.Warn("CI_Processor-requestPayment",
+		foree_logger.Logger.Warn("CITxProcessor-requestPayment_FAIL",
 			"interacTxId", ciTx.ID,
 			"httpResponseStatus", statusResp.StatusCode,
 			"httpRequest", statusResp.RawRequest,
@@ -231,13 +231,28 @@ func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
 		ciTx.Status = transaction.TxStatusRejected
 		err := p.interacTxRepo.UpdateInteracCITxById(context.TODO(), ciTx)
 		if err != nil {
-			foree_logger.Logger.Error("CI_Processor-requestPayment", "interacTxId", ciTx.ID, "cause", err.Error())
+			foree_logger.Logger.Error("CITxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
 		}
-		p.txProcessor.rollback(ciTx.ParentTxId)
+		go p.txProcessor.rollback(ciTx.ParentTxId)
 		return
 	}
 
 	//Success
+	ciTx.PaymentUrl = statusResp.PaymentStatuses[0].GatewayUrl
+	ciTx.ScotiaPaymentId = resp.Data.PaymentId
+	ciTx.Status = transaction.TxStatusSent
+	ciTx.ScotiaClearingReference = resp.Data.ClearingSystemReference
+
+	err = p.interacTxRepo.UpdateInteracCITxById(context.TODO(), ciTx)
+	if err != nil {
+		foree_logger.Logger.Error("CITxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
+	}
+	foree_logger.Logger.Info("CITxProcessor-requestPayment_SUCCESS",
+		"interacTxId", ciTx.ID,
+	)
+
+	go p.txProcessor.onStatusUpdate(ciTx.ParentTxId)
+	//TODO: send to wait pool
 }
 
 // Scotia APi Call
