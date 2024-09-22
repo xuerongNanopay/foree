@@ -85,8 +85,8 @@ type InteracCITx struct {
 	Amt                     types.AmountData        `json:"Amt"`
 	ParentTxId              int64                   `json:"parentTxId"`
 	OwnerId                 int64                   `json:"OwnerId"`
-	CreatedAt               time.Time               `json:"createdAt"`
-	UpdatedAt               time.Time               `json:"updatedAt"`
+	CreatedAt               *time.Time              `json:"createdAt"`
+	UpdatedAt               *time.Time              `json:"updatedAt"`
 }
 
 func NewInteracCITxRepo(db *sql.DB) *InteracCITxRepo {

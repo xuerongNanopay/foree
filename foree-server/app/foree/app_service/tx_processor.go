@@ -390,19 +390,19 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 // This is internal process.
 // Yes, in theory the race condition exists, but unlikely to happen.
 // To avoid race condition, the simple strategy is pull from DB when we need.
-func (p *TxProcessor) processRootTx(fTxId int64) error {
+func (p *TxProcessor) processRootTx(fTxId int64) {
 	ctx := context.TODO()
 	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
 	if err != nil {
 		foree_logger.Logger.Error("processRootTx", "foreeTxId", fTxId, "cause", err.Error())
-		return err
+		return
 	}
 	if fTx == nil {
 		foree_logger.Logger.Warn("processRootTx",
 			"foreeTxId", fTxId,
 			"cause", "unknown ForeeTx",
 		)
-		return fmt.Errorf("unknown ForeeTx with id `%v`", fTxId)
+		return
 	}
 
 	switch fTx.CurStage {
@@ -411,19 +411,49 @@ func (p *TxProcessor) processRootTx(fTxId int64) error {
 		err := p.foreeTxRepo.UpdateForeeTxById(ctx, *fTx)
 		if err != nil {
 			foree_logger.Logger.Error("processRootTx", "foreeTxId", fTx.ID, "cause", err.Error())
-			return err
 		}
 		//TODO: go update summaryTx
 		fallthrough
 	case transaction.TxStageInteracCI:
-		return p.ciTxProcessor.process(fTxId)
+		p.ciTxProcessor.process(fTxId)
 	default:
 		foree_logger.Logger.Error("processRootTx",
 			"foreeTxId", fTx.ID,
 			"transactionStage", fTx.CurStage,
 			"cause", "unkown foreeTx stage",
 		)
-		return fmt.Errorf("unknmow foreeTx stage `%v`", fTx.CurStage)
+	}
+}
+
+func (p *TxProcessor) next(fTxId int64) {
+	ctx := context.TODO()
+	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
+	if err != nil {
+		foree_logger.Logger.Error("tx_processor-next_Fail", "foreeTxId", fTxId, "cause", err.Error())
+		return
+	}
+	if fTx == nil {
+		foree_logger.Logger.Warn("tx_processor-next_Fail",
+			"foreeTxId", fTxId,
+			"cause", "unknown ForeeTx",
+		)
+		return
+	}
+}
+
+func (p *TxProcessor) rollback(fTxId int64) {
+	ctx := context.TODO()
+	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
+	if err != nil {
+		foree_logger.Logger.Error("tx_processor-rollback_Fail", "foreeTxId", fTxId, "cause", err.Error())
+		return
+	}
+	if fTx == nil {
+		foree_logger.Logger.Warn("tx_processor-rollback_Fail",
+			"foreeTxId", fTxId,
+			"cause", "unknown ForeeTx",
+		)
+		return
 	}
 }
 

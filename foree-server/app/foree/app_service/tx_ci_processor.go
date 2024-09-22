@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/constant"
 	"xue.io/go-pay/partner/scotia"
@@ -148,8 +149,95 @@ func (p *CITxProcessor) waitFTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, 
 	return &fTx, nil
 }
 
-func (p *CITxProcessor) process(fTxId int64) error {
-	return nil
+func (p *CITxProcessor) process(parentTxId int64) {
+	ctx := context.TODO()
+	ciTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, parentTxId)
+	if err != nil {
+		foree_logger.Logger.Error("CI_Processor-process", "parentTxId", parentTxId, "cause", err.Error())
+		return
+	}
+	if ciTx == nil {
+		foree_logger.Logger.Error("CI_Processor-process", "parentTxId", parentTxId, "cause", "interacTx no found")
+		return
+	}
+	switch ciTx.Status {
+	case transaction.TxStatusInitial:
+		//call scotia
+	case transaction.TxStatusSent:
+		//wait loop
+	case transaction.TxStatusCompleted:
+		p.txProcessor.next(ciTx.ParentTxId)
+	case transaction.TxStatusRejected:
+		p.txProcessor.rollback(ciTx.ParentTxId)
+	case transaction.TxStatusCancelled:
+		p.txProcessor.rollback(ciTx.ParentTxId)
+	default:
+		foree_logger.Logger.Error(
+			"CI_Processor-process",
+			"parentTxId", parentTxId,
+			"interacCITxId", ciTx.ID,
+			"interacCITxStatus", ciTx.Status,
+			"cause", "unsupport status",
+		)
+	}
+}
+
+func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
+	resp, err := p.scotiaClient.RequestPayment(*p.createRequestPaymentReq(&ciTx))
+
+	if err != nil {
+		foree_logger.Logger.Error("CI_Processor-requestPayment", "interacTxId", ciTx.ID, "cause", err.Error())
+	}
+	if resp.StatusCode/100 != 2 {
+		foree_logger.Logger.Warn("CI_Processor-requestPayment",
+			"interacTxId", ciTx.ID,
+			"httpResponseStatus", resp.StatusCode,
+			"httpRequest", resp.RawRequest,
+			"httpResponseBody", resp.RawResponse,
+			"cause", "scotia response error",
+		)
+	}
+
+	if err != nil && resp.StatusCode/100 != 2 {
+		ciTx.Status = transaction.TxStatusRejected
+		err := p.interacTxRepo.UpdateInteracCITxById(context.TODO(), ciTx)
+		if err != nil {
+			foree_logger.Logger.Error("CI_Processor-requestPayment", "interacTxId", ciTx.ID, "cause", err.Error())
+		}
+		p.txProcessor.rollback(ciTx.ParentTxId)
+		return
+	}
+
+	ciTx.ScotiaPaymentId = resp.Data.PaymentId
+	statusResp, err := p.scotiaClient.PaymentStatus(scotia.PaymentStatusRequest{
+		PaymentId:  ciTx.ScotiaPaymentId,
+		EndToEndId: ciTx.EndToEndId,
+	})
+
+	if err != nil {
+		foree_logger.Logger.Error("CI_Processor-requestPayment", "interacTxId", ciTx.ID, "cause", err.Error())
+	}
+	if statusResp.StatusCode/100 != 2 {
+		foree_logger.Logger.Warn("CI_Processor-requestPayment",
+			"interacTxId", ciTx.ID,
+			"httpResponseStatus", statusResp.StatusCode,
+			"httpRequest", statusResp.RawRequest,
+			"httpResponseBody", statusResp.RawResponse,
+			"cause", "scotia status response error",
+		)
+	}
+
+	if err != nil && statusResp.StatusCode/100 != 2 {
+		ciTx.Status = transaction.TxStatusRejected
+		err := p.interacTxRepo.UpdateInteracCITxById(context.TODO(), ciTx)
+		if err != nil {
+			foree_logger.Logger.Error("CI_Processor-requestPayment", "interacTxId", ciTx.ID, "cause", err.Error())
+		}
+		p.txProcessor.rollback(ciTx.ParentTxId)
+		return
+	}
+
+	//Success
 }
 
 // Scotia APi Call
@@ -176,7 +264,7 @@ func (p *CITxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx
 		return nil, fmt.Errorf("CITxProcessor -- transaction `%v` is in status `%s` at stage `%s`", nForeeTx.ID, nForeeTx.CurStageStatus, nForeeTx.CurStage)
 	}
 
-	resp, err := p.scotiaClient.RequestPayment(*p.createRequestPaymentReq(fTx))
+	resp, err := p.scotiaClient.RequestPayment(*p.createRequestPaymentReq(fTx.CI))
 	if err != nil {
 		return nil, err
 	}
@@ -381,23 +469,23 @@ func scotiaToInternalStatusMapper(scotiaStatus string) transaction.TxStatus {
 	}
 }
 
-func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.RequestPaymentRequest {
+func (p *CITxProcessor) createRequestPaymentReq(ciTx *transaction.InteracCITx) *scotia.RequestPaymentRequest {
 	expireDate := time.Now().Add(time.Hour * time.Duration(p.scotiaProfile.ExpireInHours))
 
 	req := &scotia.RequestPaymentRequest{
 		RequestData: &scotia.RequestPaymentRequestData{
 			ProductCode:                    "DOMESTIC",
-			MessageIdentification:          tx.Summary.NBPReference,
-			EndToEndIdentification:         tx.Summary.NBPReference,
+			MessageIdentification:          ciTx.EndToEndId,
+			EndToEndIdentification:         ciTx.EndToEndId,
 			CreditDebitIndicator:           "CRDT",
-			CreationDatetime:               (*scotia.ScotiaDatetime)(tx.CreatedAt),
+			CreationDatetime:               (*scotia.ScotiaDatetime)(ciTx.CreatedAt),
 			PaymentExpiryDate:              (*scotia.ScotiaDatetime)(&expireDate),
 			SuppressResponderNotifications: p.scotiaProfile.SupressResponderNotifications,
 			ReturnUrl:                      "string",
 			Language:                       "EN",
 			InstructedAmtData: &scotia.ScotiaAmtData{
-				Amount:   scotia.ScotiaAmount(tx.CI.Amt.Amount),
-				Currency: tx.CI.Amt.Currency,
+				Amount:   scotia.ScotiaAmount(ciTx.Amt.Amount),
+				Currency: ciTx.Amt.Currency,
 			},
 			InitiatingParty: &scotia.InitiatingPartyData{
 				Name: p.scotiaProfile.InitiatingPartyName,
@@ -415,10 +503,10 @@ func (p *CITxProcessor) createRequestPaymentReq(tx transaction.ForeeTx) *scotia.
 				},
 			},
 			Debtor: &scotia.DebtorData{
-				Name:               tx.CI.CashInAcc.GetLegalName(),
+				Name:               ciTx.CashInAcc.GetLegalName(),
 				CountryOfResidence: p.scotiaProfile.CountryOfResidence,
 				ContactDetails: &scotia.ContactDetailsData{
-					EmailAddress: tx.CI.CashInAcc.Email,
+					EmailAddress: ciTx.CashInAcc.Email,
 				},
 			},
 			Creditor: &scotia.CreditorData{
