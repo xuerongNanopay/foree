@@ -52,6 +52,7 @@ func NewCITxProcessor(
 		txProcessor:         txProcessor,
 		statusPullingChan:   make(chan transaction.InteracCITx, 64),
 		refreshStatusChan:   make(chan string, 64),
+		manualResolveChan:   make(chan string),
 		statusRecheckticker: time.NewTicker(5 * time.Minute),
 		statusRefreshticker: time.NewTicker(5 * time.Minute),
 	}
@@ -76,6 +77,7 @@ type CITxProcessor struct {
 	waits               sync.Map
 	statusPullingChan   chan transaction.InteracCITx
 	refreshStatusChan   chan string
+	manualResolveChan   chan string
 	statusRecheckticker *time.Ticker
 	statusRefreshticker *time.Ticker
 }
@@ -208,17 +210,31 @@ func (p *CITxProcessor) start() {
 					"newScotiaStatus", newScotiaStatus,
 				)
 			}
+		case paymentId := <-p.manualResolveChan:
+			_, ok := p.waits.Load(paymentId)
+			if !ok {
+				foree_logger.Logger.Warn("CITxprocessor-manualResolveChan_FAIL",
+					"socitaPaymentId", paymentId,
+					"cause", "unknown paymentId in the wait map",
+				)
+			} else {
+				p.waits.Delete(paymentId)
+				foree_logger.Logger.Info("CITxprocessor-manualResolveChan_SUCCESS",
+					"socitaPaymentId", paymentId,
+					"msg", "remove interacCiTx from map successfully",
+				)
+			}
 		case <-p.statusRefreshticker.C:
+			waitCIs := make([]string, 0)
+			p.waits.Range(func(k, _ interface{}) bool {
+				paymentId, _ := k.(string)
+				waitCIs = append(waitCIs, paymentId)
+				return true
+			})
 			func() {
-				p.waits.Range(func(k, _ interface{}) bool {
-					paymentId, _ := k.(string)
+				for _, paymentId := range waitCIs {
 					p.refreshStatusChan <- paymentId
-					return true
-				})
-			}()
-		case <-p.statusRecheckticker.C:
-			func() {
-
+				}
 			}()
 		}
 	}
@@ -241,7 +257,7 @@ func (p *CITxProcessor) process(parentTxId int64) {
 	case transaction.TxStatusSent:
 		p.statusPullingChan <- *ciTx
 	case transaction.TxStatusCompleted:
-		p.txProcessor.next(ciTx.ParentTxId)
+		p.txProcessor.processRootTx(ciTx.ParentTxId)
 	case transaction.TxStatusRejected:
 		p.txProcessor.rollback(ciTx.ParentTxId)
 	case transaction.TxStatusCancelled:
@@ -359,6 +375,61 @@ func (p *CITxProcessor) refreshScotiaStatus(ciTx transaction.InteracCITx) (trans
 
 func (p *CITxProcessor) Webhook(paymentId string) {
 	p.refreshStatusChan <- paymentId
+}
+
+func (p *CITxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.TxStatus) error {
+	if newTxStatus != transaction.TxStatusRejected && newTxStatus != transaction.TxStatusCompleted {
+		return fmt.Errorf("unsupport transaction status `%v`", newTxStatus)
+	}
+
+	ctx := context.TODO()
+	ciTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, parentTxId)
+	if err != nil {
+		return err
+	}
+	if ciTx == nil {
+		return fmt.Errorf("InteracCITx no found with parentTxId `%v`", parentTxId)
+	}
+	if ciTx.Status != transaction.TxStatusSent {
+		return fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSent, ciTx.Status)
+	}
+
+	ciTx.Status = transaction.TxStatusCompleted
+	err = p.interacTxRepo.UpdateInteracCITxById(context.TODO(), *ciTx)
+	if err != nil {
+		return err
+	}
+	p.manualResolveChan <- ciTx.ScotiaPaymentId
+	go p.txProcessor.processRootTx(ciTx.ParentTxId)
+	return nil
+}
+
+func (p *CITxProcessor) Cancel(parentTxId int64) error {
+	ctx := context.TODO()
+	ciTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, parentTxId)
+	if err != nil {
+		return err
+	}
+	if ciTx == nil {
+		return fmt.Errorf("InteracCITx no found with parentTxId `%v`", parentTxId)
+	}
+	if ciTx.Status != transaction.TxStatusSent {
+		return fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSent, ciTx.Status)
+	}
+
+	if ciTx.Status != transaction.TxStatusSent {
+		return fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSent, ciTx.Status)
+	}
+
+	//TODO: call scotial cancel api
+	ciTx.Status = transaction.TxStatusCompleted
+	err = p.interacTxRepo.UpdateInteracCITxById(context.TODO(), *ciTx)
+	if err != nil {
+		return err
+	}
+	p.manualResolveChan <- ciTx.ScotiaPaymentId
+	go p.txProcessor.processRootTx(ciTx.ParentTxId)
+	return nil
 }
 
 func scotiaToInternalStatusMapper(scotiaStatus string) transaction.TxStatus {

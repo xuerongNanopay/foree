@@ -425,22 +425,6 @@ func (p *TxProcessor) processRootTx(fTxId int64) {
 	}
 }
 
-func (p *TxProcessor) next(fTxId int64) {
-	ctx := context.TODO()
-	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
-	if err != nil {
-		foree_logger.Logger.Error("tx_processor-next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
-		return
-	}
-	if fTx == nil {
-		foree_logger.Logger.Warn("tx_processor-next_FAIL",
-			"foreeTxId", fTxId,
-			"cause", "unknown ForeeTx",
-		)
-		return
-	}
-}
-
 func (p *TxProcessor) rollback(fTxId int64) {
 	ctx := context.TODO()
 	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
