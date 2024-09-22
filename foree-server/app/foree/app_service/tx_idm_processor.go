@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	foree_constant "xue.io/go-pay/app/foree/constant"
+	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/transaction"
-	"xue.io/go-pay/constant"
 	"xue.io/go-pay/partner/idm"
 )
 
@@ -16,12 +16,14 @@ func NewIDMTxProcessor(
 	foreeTxRepo *transaction.ForeeTxRepo,
 	idmTxRepo *transaction.IdmTxRepo,
 	idmClient idm.IDMClient,
+	txProcessor *TxProcessor,
 ) *IDMTxProcessor {
 	return &IDMTxProcessor{
 		db:          db,
 		foreeTxRepo: foreeTxRepo,
 		idmTxRepo:   idmTxRepo,
 		idmClient:   idmClient,
+		txProcessor: txProcessor,
 	}
 }
 
@@ -30,84 +32,123 @@ type IDMTxProcessor struct {
 	foreeTxRepo *transaction.ForeeTxRepo
 	idmTxRepo   *transaction.IdmTxRepo
 	idmClient   idm.IDMClient
-	// txProcessor *TxProcessor
+	txProcessor *TxProcessor
+}
+
+func (p *IDMTxProcessor) process(parentTxId int64) {
+	ctx := context.TODO()
+	idmTx, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, parentTxId)
+	if err != nil {
+		foree_logger.Logger.Error("IDM_Processor-process_FAIL", "parentTxId", parentTxId, "cause", err.Error())
+		return
+	}
+	if idmTx == nil {
+		foree_logger.Logger.Error("IDM_Processor-process_FAIL", "parentTxId", parentTxId, "cause", "idmTx no found")
+		return
+	}
+	switch idmTx.Status {
+	case transaction.TxStatusInitial:
+		p.idmTransferVeirfy(parentTxId)
+	case transaction.TxStatusSuspend:
+		foree_logger.Logger.Debug("IDM_Processor-process", "parentTxId", parentTxId, "idmTxId", idmTx.ID, "idmTxStatus", idmTx.Status, "msg", "waiting for action")
+	case transaction.TxStatusCompleted:
+		p.txProcessor.processRootTx(idmTx.ParentTxId)
+	case transaction.TxStatusRejected:
+		p.txProcessor.rollback(idmTx.ParentTxId)
+	default:
+		foree_logger.Logger.Error(
+			"IDM_Processor-process_FAIL",
+			"parentTxId", parentTxId,
+			"interacCITxId", idmTx.ID,
+			"interacCITxStatus", idmTx.Status,
+			"cause", "unsupport status",
+		)
+	}
+}
+
+func (p *IDMTxProcessor) idmTransferVeirfy(parentTxId int64) {
+	fTx, err := p.txProcessor.loadTx(parentTxId, true)
+	if err != nil {
+		foree_logger.Logger.Error("IDM_Processor-idmTransferVeirfy_FAIL", "parentTxId", parentTxId, "cause", err.Error())
+	}
+	req := p.generateValidateTransferReq(fTx)
+	resp, err := p.idmClient.Transfer(*req)
+	// Treat err and err response as Suspend.
+	if err != nil {
+		foree_logger.Logger.Error("IDM_Processor-idmTransferVeirfy_FAIL",
+			"parentTxId", parentTxId,
+			"cause", err.Error(),
+		)
+	}
+	if resp.StatusCode/100 != 2 || resp.GetResultStatus() != "ACCEPT" {
+		foree_logger.Logger.Warn("CITxProcessor-idmTransferVeirfy_FAIL",
+			"idmTxId", fTx.IDM.ID,
+			"httpResponseStatus", resp.StatusCode,
+			"httpRequest", resp.RawRequest,
+			"httpResponseBody", resp.RawResponse,
+			"cause", "idm response error",
+		)
+	}
+	if err != nil || resp.StatusCode/100 != 2 || resp.GetResultStatus() != "ACCEPT" {
+		idm := *fTx.IDM
+		idm.Status = transaction.TxStatusSuspend
+		err = p.idmTxRepo.UpdateIDMTxById(context.TODO(), idm)
+		if err != nil {
+			foree_logger.Logger.Error("IDM_Processor-idmTransferVeirfy_FAIL",
+				"parentTxId", parentTxId,
+				"cause", err.Error(),
+			)
+			return
+		}
+		return
+	}
+
+	idm := *fTx.IDM
+	idm.Status = transaction.TxStatusCompleted
+	err = p.idmTxRepo.UpdateIDMTxById(context.TODO(), idm)
+	if err != nil {
+		foree_logger.Logger.Error("IDM_Processor-idmTransferVeirfy_FAIL",
+			"parentTxId", parentTxId,
+			"cause", err.Error(),
+		)
+		return
+	}
+
+	p.process(idm.ParentTxId)
+}
+
+func (p *IDMTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.TxStatus) error {
+	if newTxStatus != transaction.TxStatusRejected && newTxStatus != transaction.TxStatusCompleted {
+		return fmt.Errorf("unsupport transaction status `%v`", newTxStatus)
+	}
+
+	ctx := context.TODO()
+	idmTx, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, parentTxId)
+	if err != nil {
+		return err
+	}
+	if idmTx == nil {
+		return fmt.Errorf("idmTx no found with parentTxId `%v`", parentTxId)
+	}
+	if idmTx.Status != transaction.TxStatusSent {
+		return fmt.Errorf("expect idmTx in `%v`, but got `%v`", transaction.TxStatusSent, idmTx.Status)
+	}
+
+	idmTx.Status = transaction.TxStatusCompleted
+	err = p.idmTxRepo.UpdateIDMTxById(context.TODO(), *idmTx)
+	if err != nil {
+		return err
+	}
+	go p.txProcessor.processRootTx(idmTx.ParentTxId)
+	return nil
 }
 
 // IDM API called
 func (p *IDMTxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	req, err := p.generateValidateTransferReq(tx)
-	if err != nil {
-		return nil, err
-	}
-
-	// Safe check
-	dTx, err := p.db.Begin()
-	if err != nil {
-		dTx.Rollback()
-		//TODO: log err
-		return nil, err
-	}
-
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
-
-	nForeeTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, tx.ID)
-	if err != nil {
-		dTx.Rollback()
-		//TODO: log err
-		return nil, err
-	}
-
-	if nForeeTx.CurStage != transaction.TxStageIDM && nForeeTx.CurStageStatus != transaction.TxStatusInitial {
-		dTx.Rollback()
-		return nil, fmt.Errorf("IDM failed: transaction `%v` is in status `%s` at stage `%s`", nForeeTx.ID, nForeeTx.CurStageStatus, nForeeTx.CurStage)
-	}
-
-	resp, err := p.idmClient.Transfer(*req)
-	if err != nil {
-		dTx.Rollback()
-		return nil, err
-	}
-
-	if resp.StatusCode/100 == 2 && resp.GetResultStatus() == "ACCEPT" {
-		//TODO: log success
-		tx.CurStageStatus = transaction.TxStatusCompleted
-		tx.IDM.Status = transaction.TxStatusCompleted
-		err = p.idmTxRepo.UpdateIDMTxById(ctx, *tx.IDM)
-		if err != nil {
-			dTx.Rollback()
-			return nil, err
-		}
-		err = p.foreeTxRepo.UpdateForeeTxById(ctx, tx)
-		if err != nil {
-			dTx.Rollback()
-			return nil, err
-		}
-	} else {
-		//TODO: log fails
-		tx.CurStageStatus = transaction.TxStatusSuspend
-		tx.IDM.Status = transaction.TxStatusSuspend
-		err = p.idmTxRepo.UpdateIDMTxById(ctx, *tx.IDM)
-		if err != nil {
-			dTx.Rollback()
-			return nil, err
-		}
-		err = p.foreeTxRepo.UpdateForeeTxById(ctx, tx)
-		if err != nil {
-			dTx.Rollback()
-			return nil, err
-		}
-		//TODO: generate approval.
-	}
-
-	if err = dTx.Commit(); err != nil {
-		return nil, err
-	}
-
-	return &tx, nil
+	return nil, nil
 }
 
-func (p *IDMTxProcessor) generateValidateTransferReq(tx transaction.ForeeTx) (*idm.IDMRequest, error) {
+func (p *IDMTxProcessor) generateValidateTransferReq(tx *transaction.ForeeTx) *idm.IDMRequest {
 	IsCashPickup := false
 	if tx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
 		IsCashPickup = true
@@ -152,5 +193,5 @@ func (p *IDMTxProcessor) generateValidateTransferReq(tx transaction.ForeeTx) (*i
 		Ip:                      tx.Ip,
 		SrcAccountIdentifier:    fmt.Sprintf("%09d", tx.CI.CashInAccId),
 		DestAccountIdentifier:   fmt.Sprintf("%09d", tx.COUT.CashOutAccId),
-	}, nil
+	}
 }

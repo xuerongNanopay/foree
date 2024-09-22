@@ -167,6 +167,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.foreeTxRepo,
 		app.idmTxRepo,
 		app.idmClient,
+		app.txProcessor,
 	)
 	app.nbpTxProcessor = foree_service.NewNBPTxProcessor(
 		app.db,

@@ -416,6 +416,8 @@ func (p *TxProcessor) processRootTx(fTxId int64) {
 		fallthrough
 	case transaction.TxStageInteracCI:
 		p.ciTxProcessor.process(fTxId)
+	case transaction.TxStageIDM:
+		p.idmTxProcessor.process(fTxId)
 	default:
 		foree_logger.Logger.Error("processRootTx",
 			"foreeTxId", fTx.ID,
