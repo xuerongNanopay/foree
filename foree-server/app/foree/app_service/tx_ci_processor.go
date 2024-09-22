@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sync"
 	"time"
 
 	foree_logger "xue.io/go-pay/app/foree/logger"
@@ -42,16 +43,17 @@ func NewCITxProcessor(
 	txProcessor *TxProcessor,
 ) *CITxProcessor {
 	ret := &CITxProcessor{
-		db:                db,
-		scotiaProfile:     scotiaProfile,
-		scotiaClient:      scotiaClient,
-		interacTxRepo:     interacTxRepo,
-		foreeTxRepo:       foreeTxRepo,
-		txSummaryRepo:     txSummaryRepo,
-		txProcessor:       txProcessor,
-		statusPullingChan: make(chan transaction.InteracCITx, 64),
-		scotiaWebhoodChan: make(chan string, 64),
-		ticker:            time.NewTicker(5 * time.Minute),
+		db:                  db,
+		scotiaProfile:       scotiaProfile,
+		scotiaClient:        scotiaClient,
+		interacTxRepo:       interacTxRepo,
+		foreeTxRepo:         foreeTxRepo,
+		txSummaryRepo:       txSummaryRepo,
+		txProcessor:         txProcessor,
+		statusPullingChan:   make(chan transaction.InteracCITx, 64),
+		refreshStatusChan:   make(chan string, 64),
+		statusRecheckticker: time.NewTicker(5 * time.Minute),
+		statusRefreshticker: time.NewTicker(5 * time.Minute),
 	}
 	ret.start()
 	return ret
@@ -70,10 +72,10 @@ type CITxProcessor struct {
 	foreeTxRepo         *transaction.ForeeTxRepo
 	txSummaryRepo       *transaction.TxSummaryRepo
 	txProcessor         *TxProcessor
-	waits               map[string]waitWrapper
+	waits               sync.Map
 	statusPullingChan   chan transaction.InteracCITx
-	scotiaWebhoodChan   chan string
-	ticker              *time.Ticker
+	refreshStatusChan   chan string
+	statusRecheckticker *time.Ticker
 	statusRefreshticker *time.Ticker
 }
 
@@ -82,16 +84,17 @@ func (p *CITxProcessor) start() {
 		select {
 		// Push into map.
 		case ciTx := <-p.statusPullingChan:
-			_, ok := p.waits[ciTx.ScotiaPaymentId]
+			_, ok := p.waits.Load(ciTx.ScotiaPaymentId)
 			if ok {
 				continue
 			}
-			p.waits[ciTx.ScotiaPaymentId] = waitWrapper{
+			p.waits.Store(ciTx.ScotiaPaymentId, waitWrapper{
 				ciTx:      ciTx,
 				recheckAt: time.Now().Add(waitRecheckInterval),
-			}
-		case paymentId := <-p.scotiaWebhoodChan:
-			w, ok := p.waits[paymentId]
+			})
+		case paymentId := <-p.refreshStatusChan:
+			v, ok := p.waits.Load(paymentId)
+			w, _ := v.(waitWrapper)
 			if !ok {
 				ciTx, err := p.interacTxRepo.GetUniqueInteracCITxByScotiaPaymentId(context.TODO(), paymentId)
 				if err != nil {
@@ -117,11 +120,12 @@ func (p *CITxProcessor) start() {
 					)
 					continue
 				}
-				p.waits[paymentId] = waitWrapper{
+				p.waits.Store(paymentId, waitWrapper{
 					ciTx:      *ciTx,
 					recheckAt: time.Now().Add(waitRecheckInterval),
-				}
-				w = p.waits[paymentId]
+				})
+				v, _ := p.waits.Load(paymentId)
+				w, _ = v.(waitWrapper)
 				foree_logger.Logger.Info("CITxprocessor-scotiaWebhoodChan",
 					"socitaPaymentId", paymentId,
 					"interacCITxId", ciTx.ID,
@@ -130,16 +134,8 @@ func (p *CITxProcessor) start() {
 				)
 			}
 
-			newStatus, scotiaStatus, err := p.refreshScotiaStatus(w.ciTx)
+			newStatus, newScotiaStatus, err := p.refreshScotiaStatus(w.ciTx)
 			if err != nil {
-				foree_logger.Logger.Error("CITxprocessor-scotiaWebhoodChan_FAIL",
-					"socitaPaymentId", paymentId,
-					"interacCITxId", w.ciTx.ID,
-					"interacCITxStatus", w.ciTx.Status,
-					"cause", err.Error(),
-				)
-			}
-			if newStatus == transaction.TxStatusSent {
 				foree_logger.Logger.Error("CITxprocessor-scotiaWebhoodChan_FAIL",
 					"socitaPaymentId", paymentId,
 					"interacCITxId", w.ciTx.ID,
@@ -148,9 +144,82 @@ func (p *CITxProcessor) start() {
 				)
 				continue
 			}
-			ciTx, err := p.interacTxRepo.GetUniqueInteracCITxByScotiaPaymentId(context.TODO(), paymentId)
+			if newStatus == w.ciTx.Status && newScotiaStatus == w.ciTx.ScotiaStatus {
+				foree_logger.Logger.Debug("CITxprocessor-scotiaWebhoodChan_still_in_waiting",
+					"socitaPaymentId", paymentId,
+					"foreeTxId", w.ciTx.ParentTxId,
+					"interacCITxId", w.ciTx.ID,
+					"newInteracCITxStatus", newStatus,
+					"newScotiaStatus", newScotiaStatus,
+				)
+				continue
+			}
+			curCiTx, err := p.interacTxRepo.GetUniqueInteracCITxByScotiaPaymentId(context.TODO(), paymentId)
+			if err != nil {
+				foree_logger.Logger.Error("CITxprocessor-scotiaWebhoodChan_FAIL",
+					"socitaPaymentId", paymentId,
+					"interacCITxId", w.ciTx.ID,
+					"interacCITxStatus", w.ciTx.Status,
+					"cause", err.Error(),
+				)
+				continue
+			}
+			if curCiTx.Status != transaction.TxStatusSent {
+				foree_logger.Logger.Warn("CITxprocessor-scotiaWebhoodChan_FAIL",
+					"socitaPaymentId", paymentId,
+					"foreeTxId", curCiTx.ParentTxId,
+					"interacCITxId", curCiTx.ID,
+					"curInteracCITxStatus", curCiTx.Status,
+					"cause", "interacCITx is not in SENT status",
+				)
+				p.waits.Delete(paymentId)
+				continue
+			}
 
+			curCiTx.Status = newStatus
+			curCiTx.ScotiaStatus = newScotiaStatus
+
+			err = p.interacTxRepo.UpdateInteracCITxById(context.TODO(), *curCiTx)
+			if err != nil {
+				foree_logger.Logger.Error("CITxprocessor-scotiaWebhoodChan_FAIL",
+					"socitaPaymentId", paymentId,
+					"interacCITxId", w.ciTx.ID,
+					"newInteracCITxStatus", newStatus,
+					"newScotiaStatus", newScotiaStatus,
+					"cause", err.Error(),
+				)
+				continue
+			}
+			// Still in send
+			if curCiTx.Status == w.ciTx.Status {
+				//TODO: Update status
+				go p.txProcessor.onStatusUpdate(curCiTx.ParentTxId)
+				p.waits.Swap(paymentId, waitWrapper{
+					ciTx:      *curCiTx,
+					recheckAt: time.Now().Add(waitRecheckInterval),
+				})
+			} else {
+				p.waits.Delete(paymentId)
+				go p.process(curCiTx.ParentTxId)
+				foree_logger.Logger.Info("CITxprocessor-scotiaWebhoodChan_SUCCESS",
+					"socitaPaymentId", paymentId,
+					"interacCITxId", w.ciTx.ID,
+					"newInteracCITxStatus", newStatus,
+					"newScotiaStatus", newScotiaStatus,
+				)
+			}
 		case <-p.statusRefreshticker.C:
+			func() {
+				p.waits.Range(func(k, _ interface{}) bool {
+					paymentId, _ := k.(string)
+					p.refreshStatusChan <- paymentId
+					return true
+				})
+			}()
+		case <-p.statusRecheckticker.C:
+			func() {
+
+			}()
 		}
 	}
 }
@@ -168,9 +237,9 @@ func (p *CITxProcessor) process(parentTxId int64) {
 	}
 	switch ciTx.Status {
 	case transaction.TxStatusInitial:
-		//call scotia
+		p.requestPayment(*ciTx)
 	case transaction.TxStatusSent:
-		//wait loop
+		p.statusPullingChan <- *ciTx
 	case transaction.TxStatusCompleted:
 		p.txProcessor.next(ciTx.ParentTxId)
 	case transaction.TxStatusRejected:
@@ -210,7 +279,7 @@ func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
 		if err != nil {
 			foree_logger.Logger.Error("CITxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
 		}
-		go p.txProcessor.rollback(ciTx.ParentTxId)
+		p.process(ciTx.ParentTxId)
 		return
 	}
 
@@ -239,7 +308,7 @@ func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
 		if err != nil {
 			foree_logger.Logger.Error("CITxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
 		}
-		go p.txProcessor.rollback(ciTx.ParentTxId)
+		p.process(ciTx.ParentTxId)
 		return
 	}
 
@@ -257,8 +326,7 @@ func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
 		"interacTxId", ciTx.ID,
 	)
 
-	go p.txProcessor.onStatusUpdate(ciTx.ParentTxId)
-	//TODO: send to wait pool
+	p.process(ciTx.ID)
 }
 
 // Scotia APi Call
@@ -291,7 +359,7 @@ func (p *CITxProcessor) refreshScotiaStatus(ciTx transaction.InteracCITx) (trans
 }
 
 func (p *CITxProcessor) Webhook(paymentId string) {
-	p.scotiaWebhoodChan <- paymentId
+	p.refreshStatusChan <- paymentId
 }
 
 func scotiaToInternalStatusMapper(scotiaStatus string) transaction.TxStatus {
