@@ -192,7 +192,6 @@ func (p *CITxProcessor) start() {
 			}
 			// Still in send
 			if curCiTx.Status == w.ciTx.Status {
-				//TODO: Update status
 				go p.txProcessor.onStatusUpdate(curCiTx.ParentTxId)
 				p.waits.Swap(paymentId, waitWrapper{
 					ciTx:      *curCiTx,
@@ -334,7 +333,6 @@ func (p *CITxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx
 	return nil, nil
 }
 
-// The function normally in a goroutine
 func (p *CITxProcessor) refreshScotiaStatus(ciTx transaction.InteracCITx) (transaction.TxStatus, string, error) {
 
 	detailResp, err := p.scotiaClient.PaymentDetail(scotia.PaymentDetailRequest{
