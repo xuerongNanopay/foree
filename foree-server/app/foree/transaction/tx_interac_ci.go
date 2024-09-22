@@ -23,6 +23,16 @@ const (
 			scotia_clearing_reference = ?, payment_url = ?
 		WHERE id = ?
 	`
+	sQLInteracCITxGetForUpdateById = `
+		SELECT 
+			t.id, t.status, t.cash_in_acc_id,
+			t.amount, t.currency, t.scotia_payment_id, 
+			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
+			t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
+		FROM interact_ci_tx t
+		where t.id = ?
+		FOR UPDATE
+	`
 	sQLInteracCITxGetUniqueById = `
         SELECT 
             t.id, t.status, t.cash_in_acc_id,

@@ -148,6 +148,10 @@ func (p *CITxProcessor) waitFTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, 
 	return &fTx, nil
 }
 
+func (p *CITxProcessor) process(fTxId int64) error {
+	return nil
+}
+
 // Scotia APi Call
 func (p *CITxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	dTx, err := p.db.Begin()

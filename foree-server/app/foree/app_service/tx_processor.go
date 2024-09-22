@@ -383,49 +383,40 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	return foreeTx, nil
 }
 
-func (p *TxProcessor) processRootTx(fTx transaction.ForeeTx) error {
-	dbTx, err := p.db.Begin()
+// Stage: Begin/"" -> CI -> IDM -> COUT -> End
+//
+// Stage: Begin/"" -> CI -> IDM -> COUT -> Rollback -> End
+//
+// This is internal process.
+// Yes, in theory the race condition exists, but unlikely to happen.
+// To avoid race condition, the simple strategy is pull from DB when we need.
+func (p *TxProcessor) processRootTx(fTxId int64) error {
+	ctx := context.TODO()
+	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
 	if err != nil {
-		dbTx.Rollback()
-		foree_logger.Logger.Error("processRootTx", "foreeTxId", fTx.ID, "cause", err.Error())
+		foree_logger.Logger.Error("processRootTx", "foreeTxId", fTxId, "cause", err.Error())
 		return err
 	}
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dbTx)
-
-	curForeeTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.ID)
-	if err != nil {
-		dbTx.Rollback()
-		foree_logger.Logger.Error("processRootTx", "foreeTxId", fTx.ID, "cause", err.Error())
-		return err
-	}
-	if curForeeTx.CurStage != fTx.CurStage {
+	if fTx == nil {
 		foree_logger.Logger.Warn("processRootTx",
-			"foreeTxId", fTx.ID,
-			"transactionStage", fTx.CurStage,
-			"transactionStageIndb", curForeeTx.CurStage,
-			"cause", "transaction stage mismatch",
+			"foreeTxId", fTxId,
+			"cause", "unknown ForeeTx",
 		)
-		return fmt.Errorf("ForeeTx stage mismatch expect `%v` but `%v`", fTx.CurStage, curForeeTx.CurStage)
+		return fmt.Errorf("unknown ForeeTx with id `%v`", fTxId)
 	}
 
 	switch fTx.CurStage {
 	case "":
 		fTx.CurStage = transaction.TxStageInteracCI
-		err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx)
+		err := p.foreeTxRepo.UpdateForeeTxById(ctx, *fTx)
 		if err != nil {
-			dbTx.Rollback()
-			foree_logger.Logger.Error("processRootTx", "foreeTxId", fTx.ID, "cause", err.Error())
-			return err
-		}
-		if err = dbTx.Commit(); err != nil {
 			foree_logger.Logger.Error("processRootTx", "foreeTxId", fTx.ID, "cause", err.Error())
 			return err
 		}
 		//TODO: go update summaryTx
 		fallthrough
 	case transaction.TxStageInteracCI:
-		return nil
+		return p.ciTxProcessor.process(fTxId)
 	default:
 		foree_logger.Logger.Error("processRootTx",
 			"foreeTxId", fTx.ID,
