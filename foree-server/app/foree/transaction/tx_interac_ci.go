@@ -12,13 +12,13 @@ import (
 
 const (
 	sQLInteracCITxInsert = `
-        INSERT INTO interact_ci_tx
+        INSERT INTO interac_ci_tx
         (
             status, cash_in_acc_id, amount, currency,
 			end_to_end_id, parent_tx_id, owner_id) VALUES(?,?,?,?,?,?,?)
     `
 	sQLInteracCITxUpdateById = `
-		UPDATE interact_ci_tx SET 
+		UPDATE interac_ci_tx SET 
 			status = ?, scotia_payment_id = ?, scotia_status = ?,
 			scotia_clearing_reference = ?, payment_url = ?
 		WHERE id = ?
@@ -29,7 +29,7 @@ const (
 			t.amount, t.currency, t.scotia_payment_id, 
 			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
 			t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
-		FROM interact_ci_tx t
+		FROM interac_ci_tx t
 		where t.id = ?
 		FOR UPDATE
 	`
@@ -39,7 +39,7 @@ const (
             t.amount, t.currency, t.scotia_payment_id, 
 			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
             t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
-        FROM interact_ci_tx t
+        FROM interac_ci_tx t
         where t.id = ?
 
     `
@@ -49,7 +49,7 @@ const (
             t.amount, t.currency, t.scotia_payment_id, 
 			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
             t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
-        FROM interact_ci_tx t
+        FROM interac_ci_tx t
         where t.parent_tx_id = ?
     `
 	sQLInteracCITxGetUniqueByScotiaPaymentId = `
@@ -58,7 +58,7 @@ const (
 			t.amount, t.currency, t.scotia_payment_id, 
 			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
 			t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
-		FROM interact_ci_tx t
+		FROM interac_ci_tx t
 		where t.scotia_payment_id = ?
 	`
 	sQLInteracCITxGetAllByStatus = `
@@ -67,7 +67,7 @@ const (
 			t.amount, t.currency, t.scotia_payment_id, 
 			t.scotia_status, t.scotia_clearing_reference, t.payment_url, t.end_to_end_id,
 			t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
-		FROM interact_ci_tx t
+		FROM interac_ci_tx t
 		where t.status = ?
 	`
 )
