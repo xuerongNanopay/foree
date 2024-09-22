@@ -56,6 +56,7 @@ func NewCITxProcessor(
 		statusRefreshticker: time.NewTicker(5 * time.Minute),
 	}
 	ret.start()
+	//TODO: load all wait transaction from DB
 	return ret
 }
 
