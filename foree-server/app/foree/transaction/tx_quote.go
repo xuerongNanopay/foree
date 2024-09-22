@@ -90,6 +90,7 @@ func (repo *TxQuoteRepo) GetUniqueById(ctx context.Context, id string) *TxQuote 
 	if !ok {
 		return nil
 	}
+	delete(repo.mems[idx%2], id)
 	return &s
 }
 
