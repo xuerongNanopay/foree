@@ -53,9 +53,9 @@ func (p *PromotionService) start() {
 		case promotionName := <-p.promotionCacheInsertChan:
 			promo, err := p.promotionRepo.GetUniquePromotionByName(context.TODO(), promotionName)
 			if err != nil {
-				foree_logger.Logger.Error("Promotion_Cache_Insert_Fail", "promotionName", promotionName, "cause", err.Error())
+				foree_logger.Logger.Error("Promotion_Cache_Insert_FAIL", "promotionName", promotionName, "cause", err.Error())
 			} else if promo == nil {
-				foree_logger.Logger.Error("Promotion_Cache_Insert_Fail", "promotionName", promotionName, "cause", "promotion no found")
+				foree_logger.Logger.Error("Promotion_Cache_Insert_FAIL", "promotionName", promotionName, "cause", "promotion no found")
 			} else {
 				p.cache.Store(promotionName, CacheItem[promotion.Promotion]{
 					item:      *promo,
@@ -65,9 +65,9 @@ func (p *PromotionService) start() {
 		case promotionName := <-p.promotionCacheUpdateChan:
 			promo, err := p.promotionRepo.GetUniquePromotionByName(context.TODO(), promotionName)
 			if err != nil {
-				foree_logger.Logger.Error("Promotion_Cache_Update_Fail", "promotionName", promotionName, "cause", err.Error())
+				foree_logger.Logger.Error("Promotion_Cache_Update_FAIL", "promotionName", promotionName, "cause", err.Error())
 			} else if promo == nil {
-				foree_logger.Logger.Error("Promotion_Cache_Update_Fail", "promotionName", promotionName, "cause", "promotion no found")
+				foree_logger.Logger.Error("Promotion_Cache_Update_FAIL", "promotionName", promotionName, "cause", "promotion no found")
 			} else {
 				p.cache.Swap(promotionName, CacheItem[promotion.Promotion]{
 					item:      *promo,
@@ -82,9 +82,9 @@ func (p *PromotionService) start() {
 				promotionName, _ := k.(string)
 				promo, err := p.promotionRepo.GetUniquePromotionByName(context.TODO(), promotionName)
 				if err != nil {
-					foree_logger.Logger.Error("Promotion_Cache_Refresh_Fail", "promotionName", promotionName, "cause", err.Error())
+					foree_logger.Logger.Error("Promotion_Cache_Refresh_FAIL", "promotionName", promotionName, "cause", err.Error())
 				} else if promo == nil {
-					foree_logger.Logger.Error("Promotion_Cache_Refresh_Fail", "promotionName", promotionName, "cause", "promotion no found")
+					foree_logger.Logger.Error("Promotion_Cache_Refresh_FAIL", "promotionName", promotionName, "cause", "promotion no found")
 				} else {
 					p.cache.Swap(promotionName, CacheItem[promotion.Promotion]{
 						item:      *promo,
@@ -136,17 +136,17 @@ func (p *PromotionService) rewardOnboard(registerUser auth.User) {
 	promotion, err := p.getPromotion(PromotionOnboard)
 
 	if err != nil {
-		foree_logger.Logger.Error("Reward_Onboard_Fail", "userId", registerUser.ID, "cause", err.Error())
+		foree_logger.Logger.Error("Reward_Onboard_FAIL", "userId", registerUser.ID, "cause", err.Error())
 		return
 	}
 
 	if promotion == nil {
-		foree_logger.Logger.Debug("Reward_Onboard_Fail", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "promotion no found")
+		foree_logger.Logger.Debug("Reward_Onboard_FAIL", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "promotion no found")
 		return
 	}
 
 	if !promotion.IsValid() {
-		foree_logger.Logger.Debug("Reward_Onboard_Fail", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "promotion is invalid")
+		foree_logger.Logger.Debug("Reward_Onboard_FAIL", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "promotion is invalid")
 		return
 	}
 	expiry := time.Now().Add(time.Hour * 24 * 180)
@@ -161,37 +161,37 @@ func (p *PromotionService) rewardOnboard(registerUser auth.User) {
 
 	rewardId, err := p.rewardRepo.InsertReward(context.TODO(), reward)
 	if err != nil {
-		foree_logger.Logger.Error("Reward_Onboard_Fail", "userId", registerUser.ID, "cause", err.Error())
+		foree_logger.Logger.Error("Reward_Onboard_FAIL", "userId", registerUser.ID, "cause", err.Error())
 	}
-	foree_logger.Logger.Info("Reward_Onboard_Success", "userId", registerUser.ID, "rewardId", rewardId)
+	foree_logger.Logger.Info("Reward_Onboard_SUCCESS", "userId", registerUser.ID, "rewardId", rewardId)
 
 }
 
 func (p *PromotionService) initialReferralReward(registerUser auth.User) {
 	referral, err := p.referralRepo.GetUniqueReferralByRefereeId(registerUser.ID)
 	if err != nil {
-		foree_logger.Logger.Error("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "cause", err.Error())
+		foree_logger.Logger.Error("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
 		return
 	}
 	if referral == nil {
-		foree_logger.Logger.Debug("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "cause", "do not have referrer")
+		foree_logger.Logger.Debug("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", "do not have referrer")
 		return
 	}
 
 	promotion, err := p.getPromotion(PromotionReferral)
 
 	if err != nil {
-		foree_logger.Logger.Error("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "cause", err.Error())
+		foree_logger.Logger.Error("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
 		return
 	}
 
 	if promotion == nil {
-		foree_logger.Logger.Warn("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "promotionName", PromotionReferral, "cause", "promotion no found")
+		foree_logger.Logger.Warn("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferral, "cause", "promotion no found")
 		return
 	}
 
 	if !promotion.IsValid() {
-		foree_logger.Logger.Debug("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "promotionName", PromotionReferral, "cause", "promotion is invalid")
+		foree_logger.Logger.Debug("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferral, "cause", "promotion is invalid")
 		return
 	}
 
@@ -211,7 +211,7 @@ func (p *PromotionService) initialReferralReward(registerUser auth.User) {
 
 	rewardId, err := p.rewardRepo.InsertReward(context.TODO(), reward)
 	if err != nil {
-		foree_logger.Logger.Error("Initial_Referral_Reward_Fail", "userId", registerUser.ID, "cause", "referrerId", referral.ID, err.Error())
+		foree_logger.Logger.Error("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", "referrerId", referral.ID, err.Error())
 	}
-	foree_logger.Logger.Info("Initial_Referral_Reward_Success", "userId", registerUser.ID, "referrerId", referral.ID, "rewardId", rewardId)
+	foree_logger.Logger.Info("Initial_Referral_Reward_SUCCESS", "userId", registerUser.ID, "referrerId", referral.ID, "rewardId", rewardId)
 }

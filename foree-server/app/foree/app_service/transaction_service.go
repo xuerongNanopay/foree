@@ -78,7 +78,7 @@ type TransactionService struct {
 func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*RateDTO, transport.HError) {
 	rate, err := t.rateService.GetRate(req.SrcCurrency, req.DestCurrency)
 	if err != nil {
-		foree_logger.Logger.Error("GetRate_Fail",
+		foree_logger.Logger.Error("GetRate_FAIL",
 			"ip", loadRealIp(ctx),
 			"rateId", transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency),
 			"cause", err.Error(),
@@ -94,14 +94,14 @@ func (t *TransactionService) GetRate(ctx context.Context, req GetRateReq) (*Rate
 			fmt.Sprintf("unsupport destCurrency %s", req.DestCurrency),
 		)
 	}
-	foree_logger.Logger.Debug("GetRate_Success", "ip", loadRealIp(ctx), "rate", fmt.Sprintf("`%v`", rate))
+	foree_logger.Logger.Debug("GetRate_SUCCESS", "ip", loadRealIp(ctx), "rate", fmt.Sprintf("`%v`", rate))
 	return NewRateDTO(rate), nil
 }
 
 func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*QuoteTransactionDTO, transport.HError) {
 	rate, err := t.rateService.GetRate(req.SrcCurrency, req.DestCurrency)
 	if err != nil {
-		foree_logger.Logger.Error("FreeQuote_Fail",
+		foree_logger.Logger.Error("FreeQuote_FAIL",
 			"ip", loadRealIp(ctx),
 			"rateId", transaction.GenerateRateId(req.SrcCurrency, req.DestCurrency),
 			"cause", err.Error(),
@@ -122,7 +122,7 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 	//fee
 	feeJoints, err := t.feeService.applyFee(foree_constant.DefaultFeeGroup, types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
 	if err != nil {
-		foree_logger.Logger.Error("FreeQuote_Fail",
+		foree_logger.Logger.Error("FreeQuote_FAIL",
 			"defaultFeeGroup", foree_constant.DefaultFeeGroup,
 			"ip", loadRealIp(ctx),
 			"cause", err.Error(),
@@ -163,7 +163,7 @@ func (t *TransactionService) FreeQuote(ctx context.Context, req FreeQuoteReq) (*
 func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionReq) (*QuoteTransactionDTO, transport.HError) {
 	session, sErr := t.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("QuoteTx_Fail",
+		foree_logger.Logger.Info("QuoteTx_FAIL",
 			"sessionId", req.SessionId,
 			"ip", loadRealIp(ctx),
 			"cause", "session no found",
@@ -174,7 +174,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	user := *session.User
 	rate, err := t.rateService.GetRate(req.SrcCurrency, req.DestCurrency)
 	if err != nil {
-		foree_logger.Logger.Error("QuoteTx_Fail",
+		foree_logger.Logger.Error("QuoteTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -184,7 +184,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if rate == nil {
-		foree_logger.Logger.Error("QuoteTx_Fail",
+		foree_logger.Logger.Error("QuoteTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -197,7 +197,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	// Get CI account.
 	ciAcc, err := t.interacAccountRepo.GetUniqueActiveInteracAccountByOwnerAndId(ctx, user.ID, req.CinAccId)
 	if err != nil {
-		foree_logger.Logger.Error("QuoteTx_Fail",
+		foree_logger.Logger.Error("QuoteTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -206,7 +206,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if ciAcc == nil {
-		foree_logger.Logger.Warn("QuoteTx_Fail",
+		foree_logger.Logger.Warn("QuoteTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -219,7 +219,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	// Get Cout account.
 	coutAcc, err := t.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, user.ID, req.CoutAccId)
 	if err != nil {
-		foree_logger.Logger.Error("QuoteTx_Fail",
+		foree_logger.Logger.Error("QuoteTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -228,7 +228,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if coutAcc == nil {
-		foree_logger.Logger.Warn("QuoteTx_Fail",
+		foree_logger.Logger.Warn("QuoteTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -244,7 +244,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	if len(req.RewardIds) > 0 {
 		rs, err := t.rewardRepo.GetAllRewardByOwnerIdAndIds(ctx, session.UserId, req.RewardIds)
 		if err != nil {
-			foree_logger.Logger.Error("QuoteTx_Fail",
+			foree_logger.Logger.Error("QuoteTx_FAIL",
 				"ip", loadRealIp(ctx),
 				"userId", session.UserId,
 				"sessionId", req.SessionId,
@@ -255,7 +255,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 
 		for _, reward := range rs {
 			if reward.Status != transaction.RewardStatusActive {
-				foree_logger.Logger.Warn("QuoteTx_Fail",
+				foree_logger.Logger.Warn("QuoteTx_FAIL",
 					"ip", loadRealIp(ctx),
 					"userId", session.UserId,
 					"sessionId", req.SessionId,
@@ -266,7 +266,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 				continue
 			}
 			if reward.Amt.Currency != req.SrcCurrency {
-				foree_logger.Logger.Warn("QuoteTx_Fail",
+				foree_logger.Logger.Warn("QuoteTx_FAIL",
 					"ip", loadRealIp(ctx),
 					"userId", session.UserId,
 					"sessionId", req.SessionId,
@@ -282,7 +282,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 
 	feeJoints, err := t.feeService.applyFee(session.UserGroup.FeeGroup, types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
 	if err != nil {
-		foree_logger.Logger.Error("QuoteTx_Fail",
+		foree_logger.Logger.Error("QuoteTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -293,7 +293,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 
 	txLimit, err := t.txLimitService.getTxLimit(ctx, session.UserGroup.TransactionLimitGroup)
 	if err != nil {
-		foree_logger.Logger.Error("QuoteTx_Fail",
+		foree_logger.Logger.Error("QuoteTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -302,7 +302,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		return nil, transport.WrapInteralServerError(err)
 	}
 	if txLimit == nil {
-		foree_logger.Logger.Error("QuoteTx_Fail",
+		foree_logger.Logger.Error("QuoteTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -314,7 +314,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 
 	dailyLimit, err := t.txLimitService.getDailyTxLimit(ctx, *session)
 	if err != nil {
-		foree_logger.Logger.Error("QuoteTx_Fail",
+		foree_logger.Logger.Error("QuoteTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -330,7 +330,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	if totalAmt.Amount+dailyLimit.UsedAmt.Amount > dailyLimit.MaxAmt.Amount {
-		foree_logger.Logger.Warn("QuoteTx_Fail",
+		foree_logger.Logger.Warn("QuoteTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -348,7 +348,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	if totalAmt.Amount < txLimit.MinAmt.Amount {
-		foree_logger.Logger.Warn("QuoteTx_Fail",
+		foree_logger.Logger.Warn("QuoteTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -454,7 +454,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	})
 
 	if err != nil {
-		foree_logger.Logger.Error("QuoteTx_Fail",
+		foree_logger.Logger.Error("QuoteTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -463,7 +463,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	foree_logger.Logger.Info("QuoteTx_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
+	foree_logger.Logger.Info("QuoteTx_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
 
 	return &QuoteTransactionDTO{
 		QuoteId: quoteId,
@@ -474,7 +474,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
 	session, sErr := t.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("CreateTx_Fail",
+		foree_logger.Logger.Info("CreateTx_FAIL",
 			"sessionId", req.SessionId,
 			"ip", loadRealIp(ctx),
 			"cause", "session no found",
@@ -486,7 +486,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	quote := t.txQuoteRepo.GetUniqueById(ctx, req.QuoteId)
 
 	if quote == nil {
-		foree_logger.Logger.Warn("CreateTx_Fail",
+		foree_logger.Logger.Warn("CreateTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -521,7 +521,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		if len(foreeTx.Rewards) > 0 {
 			rewards, err := t.rewardRepo.GetAllRewardByOwnerIdAndIds(ctx, session.UserId, foreeTx.RewardIds)
 			if err != nil {
-				foree_logger.Logger.Error("CreateTx_Fail",
+				foree_logger.Logger.Error("CreateTx_FAIL",
 					"ip", loadRealIp(ctx),
 					"userId", session.UserId,
 					"sessionId", req.SessionId,
@@ -533,7 +533,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 			}
 			for _, reward := range rewards {
 				if reward.Status != transaction.RewardStatusActive {
-					foree_logger.Logger.Warn("CreateTx_Fail",
+					foree_logger.Logger.Warn("CreateTx_FAIL",
 						"ip", loadRealIp(ctx),
 						"userId", session.UserId,
 						"sessionId", req.SessionId,
@@ -557,7 +557,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 
 		dailyLimit, err := t.txLimitService.getDailyTxLimit(ctx, *session)
 		if err != nil {
-			foree_logger.Logger.Error("CreateTx_Fail",
+			foree_logger.Logger.Error("CreateTx_FAIL",
 				"ip", loadRealIp(ctx),
 				"userId", session.UserId,
 				"sessionId", req.SessionId,
@@ -569,7 +569,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		}
 
 		if foreeTx.SrcAmt.Amount+dailyLimit.UsedAmt.Amount > dailyLimit.MaxAmt.Amount {
-			foree_logger.Logger.Warn("QuoteTx_Fail",
+			foree_logger.Logger.Warn("QuoteTx_FAIL",
 				"ip", loadRealIp(ctx),
 				"userId", session.UserId,
 				"sessionId", req.SessionId,
@@ -584,7 +584,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		}
 
 		if _, err := t.txLimitService.addDailyTxLimit(ctx, *session, foreeTx.SrcAmt); err != nil {
-			foree_logger.Logger.Error("CreateTx_Fail",
+			foree_logger.Logger.Error("CreateTx_FAIL",
 				"ip", loadRealIp(ctx),
 				"userId", session.UserId,
 				"sessionId", req.SessionId,
@@ -605,7 +605,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		defer wg.Done()
 		id, err := t.foreeTxRepo.InsertForeeTx(ctx, *foreeTx)
 		if err != nil {
-			foree_logger.Logger.Error("CreateTx_Fail",
+			foree_logger.Logger.Error("CreateTx_FAIL",
 				"ip", loadRealIp(ctx),
 				"userId", session.UserId,
 				"sessionId", req.SessionId,
@@ -647,7 +647,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		foreeTx.Summary.NBPReference = transaction.GenerateNbpId(foree_constant.DefaultNBPIdPrefix, foreeTxID)
 		id, err := t.txSummaryRepo.InsertTxSummary(ctx, *foreeTx.Summary)
 		if err != nil {
-			foree_logger.Logger.Error("CreateTx_Fail",
+			foree_logger.Logger.Error("CreateTx_FAIL",
 				"ip", loadRealIp(ctx),
 				"userId", session.UserId,
 				"sessionId", req.SessionId,
@@ -670,7 +670,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 			feeJoin.ParentTxId = foreeTxID
 			_, err := t.feeJointRepo.InsertFeeJoint(ctx, *feeJoin)
 			if err != nil {
-				foree_logger.Logger.Error("CreateTx_Fail",
+				foree_logger.Logger.Error("CreateTx_FAIL",
 					"ip", loadRealIp(ctx),
 					"userId", session.UserId,
 					"sessionId", req.SessionId,
@@ -695,7 +695,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 			r.Status = transaction.RewardStatusPending
 			err := t.rewardRepo.UpdateRewardTxById(ctx, *r)
 			if err != nil {
-				foree_logger.Logger.Error("CreateTx_Fail",
+				foree_logger.Logger.Error("CreateTx_FAIL",
 					"ip", loadRealIp(ctx),
 					"userId", session.UserId,
 					"sessionId", req.SessionId,
@@ -730,7 +730,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 
 	go t.txProcessor.createAndProcessTx(*foreeTx)
 
-	foree_logger.Logger.Info("CreateTx_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "foreeTxId", foreeTxID)
+	foree_logger.Logger.Info("CreateTx_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "foreeTxId", foreeTxID)
 	return NewTxSummaryDetailDTO(foreeTx.Summary), nil
 }
 
@@ -745,7 +745,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 func (t *TransactionService) GetDailyTxLimit(ctx context.Context, req transport.SessionReq) (*DailyTxLimitDTO, transport.HError) {
 	session, sErr := t.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("GetDailyTxLimit_Fail",
+		foree_logger.Logger.Info("GetDailyTxLimit_FAIL",
 			"sessionId", req.SessionId,
 			"ip", loadRealIp(ctx),
 			"cause", "session no found",
@@ -755,7 +755,7 @@ func (t *TransactionService) GetDailyTxLimit(ctx context.Context, req transport.
 
 	limit, err := t.txLimitService.getDailyTxLimit(ctx, *session)
 	if err != nil {
-		foree_logger.Logger.Error("GetDailyTxLimit_Fail",
+		foree_logger.Logger.Error("GetDailyTxLimit_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -763,7 +763,7 @@ func (t *TransactionService) GetDailyTxLimit(ctx context.Context, req transport.
 		)
 		return nil, transport.WrapInteralServerError(err)
 	}
-	foree_logger.Logger.Debug("GetDailyTxLimit_Success",
+	foree_logger.Logger.Debug("GetDailyTxLimit_SUCCESS",
 		"ip", loadRealIp(ctx),
 		"userId", session.UserId,
 		"sessionId", req.SessionId,
@@ -774,7 +774,7 @@ func (t *TransactionService) GetDailyTxLimit(ctx context.Context, req transport.
 func (t *TransactionService) GetReward(ctx context.Context, req transport.SessionReq) ([]*RewardDTO, transport.HError) {
 	session, sErr := t.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("GetReward_Fail",
+		foree_logger.Logger.Info("GetReward_FAIL",
 			"sessionId", req.SessionId,
 			"ip", loadRealIp(ctx),
 			"cause", "session no found",
@@ -784,7 +784,7 @@ func (t *TransactionService) GetReward(ctx context.Context, req transport.Sessio
 
 	rewards, err := t.rewardRepo.GetAllActiveRewardByOwnerId(ctx, session.UserId)
 	if err != nil {
-		foree_logger.Logger.Error("GetReward_Fail",
+		foree_logger.Logger.Error("GetReward_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -798,14 +798,14 @@ func (t *TransactionService) GetReward(ctx context.Context, req transport.Sessio
 		ret[i] = NewRewardDTO(v)
 	}
 
-	foree_logger.Logger.Debug("GetReward_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
+	foree_logger.Logger.Debug("GetReward_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId)
 	return ret, nil
 }
 
 func (t *TransactionService) GetTxSummary(ctx context.Context, req GetTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
 	session, sErr := t.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("GetTxSummary_Fail",
+		foree_logger.Logger.Info("GetTxSummary_FAIL",
 			"sessionId", req.SessionId,
 			"ip", loadRealIp(ctx),
 			"cause", "session no found",
@@ -815,7 +815,7 @@ func (t *TransactionService) GetTxSummary(ctx context.Context, req GetTransactio
 
 	summaryTx, err := t.txSummaryRepo.GetUniqueTxSummaryByOwnerAndId(ctx, session.UserId, req.TransactionId)
 	if err != nil {
-		foree_logger.Logger.Error("GetTxSummary_Fail",
+		foree_logger.Logger.Error("GetTxSummary_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -828,7 +828,7 @@ func (t *TransactionService) GetTxSummary(ctx context.Context, req GetTransactio
 		return nil, nil
 	}
 
-	foree_logger.Logger.Debug("GetTxSummary_Success",
+	foree_logger.Logger.Debug("GetTxSummary_SUCCESS",
 		"ip", loadRealIp(ctx),
 		"userId", session.UserId,
 		"sessionId", req.SessionId,
@@ -839,7 +839,7 @@ func (t *TransactionService) GetTxSummary(ctx context.Context, req GetTransactio
 func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTransactionReq) ([]*TxSummaryDTO, transport.HError) {
 	session, sErr := t.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("QuerySummaryTxs_Fail",
+		foree_logger.Logger.Info("QuerySummaryTxs_FAIL",
 			"sessionId", req.SessionId,
 			"ip", loadRealIp(ctx),
 			"cause", "session no found",
@@ -857,7 +857,7 @@ func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTrans
 	}
 
 	if err != nil {
-		foree_logger.Logger.Error("QuerySummaryTxs_Fail",
+		foree_logger.Logger.Error("QuerySummaryTxs_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -872,7 +872,7 @@ func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTrans
 		rets[i] = NewTxSummaryDTO(v)
 	}
 
-	foree_logger.Logger.Debug("QuerySummaryTxs_Success",
+	foree_logger.Logger.Debug("QuerySummaryTxs_SUCCESS",
 		"ip", loadRealIp(ctx),
 		"userId", session.UserId,
 		"sessionId", req.SessionId,
@@ -884,7 +884,7 @@ func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTrans
 func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTransactionReq) (*TxCancelDTO, transport.HError) {
 	session, sErr := t.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("CancelTransaction_Fail",
+		foree_logger.Logger.Info("CancelTransaction_FAIL",
 			"sessionId", req.SessionId,
 			"ip", loadRealIp(ctx),
 			"cause", "session no found",
@@ -894,7 +894,7 @@ func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTr
 
 	summaryTx, err := t.txSummaryRepo.GetUniqueTxSummaryByOwnerAndId(ctx, session.UserId, req.TransactionId)
 	if err != nil {
-		foree_logger.Logger.Error("CancelTransaction_Fail",
+		foree_logger.Logger.Error("CancelTransaction_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -909,7 +909,7 @@ func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTr
 
 	fTx, err := t.txProcessor.LoadTx(summaryTx.ParentTxId)
 	if err != nil {
-		foree_logger.Logger.Error("CancelTransaction_Fail",
+		foree_logger.Logger.Error("CancelTransaction_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -925,7 +925,7 @@ func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTr
 		})
 		//TODO: log
 		if err != nil {
-			foree_logger.Logger.Error("CancelTransaction_Fail",
+			foree_logger.Logger.Error("CancelTransaction_FAIL",
 				"ip", loadRealIp(ctx),
 				"userId", session.UserId,
 				"sessionId", req.SessionId,
@@ -942,7 +942,7 @@ func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTr
 		})
 		//TODO: log
 		if err != nil {
-			foree_logger.Logger.Error("CancelTransaction_Fail",
+			foree_logger.Logger.Error("CancelTransaction_FAIL",
 				"ip", loadRealIp(ctx),
 				"userId", session.UserId,
 				"sessionId", req.SessionId,
@@ -953,7 +953,7 @@ func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTr
 			return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
 		}
 	} else {
-		foree_logger.Logger.Warn("CancelTransaction_Fail",
+		foree_logger.Logger.Warn("CancelTransaction_FAIL",
 			"ip", loadRealIp(ctx),
 			"userId", session.UserId,
 			"sessionId", req.SessionId,
@@ -964,7 +964,7 @@ func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTr
 		return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
 	}
 
-	foree_logger.Logger.Info("CancelTransaction_Success",
+	foree_logger.Logger.Info("CancelTransaction_SUCCESS",
 		"ip", loadRealIp(ctx),
 		"userId", session.UserId,
 		"sessionId", req.SessionId,

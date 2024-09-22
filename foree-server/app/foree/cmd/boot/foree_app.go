@@ -182,9 +182,9 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.txProcessor.SetIDMTxProcessor(app.idmTxProcessor)
 	app.txProcessor.SetNBPTxProcessor(app.nbpTxProcessor)
 
-	if err := app.ciTxProcessor.Start(); err != nil {
-		return err
-	}
+	// if err := app.ciTxProcessor.Start(); err != nil {
+	// 	return err
+	// }
 
 	if err := app.nbpTxProcessor.Start(); err != nil {
 		return err

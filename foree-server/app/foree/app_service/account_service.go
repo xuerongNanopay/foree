@@ -30,7 +30,7 @@ type AccountService struct {
 func (a *AccountService) VerifyContact(ctx context.Context, req CreateContactReq) (*VerifyContactDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("VerifyContact_Fail", "sessionId", req.SessionId, "cause", "session no found")
+		foree_logger.Logger.Info("VerifyContact_FAIL", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
@@ -70,7 +70,7 @@ func (a *AccountService) VerifyContact(ctx context.Context, req CreateContactReq
 func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq) (*ContactAccountDetailDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("CreateContact_Fail", "sessionId", req.SessionId, "cause", "session no found")
+		foree_logger.Logger.Info("CreateContact_FAIL", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
@@ -97,40 +97,40 @@ func (a *AccountService) CreateContact(ctx context.Context, req CreateContactReq
 
 	accId, err := a.contactAccountRepo.InsertContactAccount(ctx, newAcc)
 	if err != nil {
-		foree_logger.Logger.Error("CreateContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		foree_logger.Logger.Error("CreateContact_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	nAcc, err := a.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, accId)
 	if err != nil {
-		foree_logger.Logger.Error("CreateContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		foree_logger.Logger.Error("CreateContact_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if nAcc == nil {
-		foree_logger.Logger.Error("CreateContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", fmt.Errorf("can not retrieve created contact with id `%v`", accId))
+		foree_logger.Logger.Error("CreateContact_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", fmt.Errorf("can not retrieve created contact with id `%v`", accId))
 		return nil, transport.WrapInteralServerError(fmt.Errorf("can not retrieve created contact with id `%v`", accId))
 	}
 
-	foree_logger.Logger.Info("CreateContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "contactId", accId)
+	foree_logger.Logger.Info("CreateContact_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "contactId", accId)
 	return NewContactAccountDetailDTO(nAcc), nil
 }
 
 func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq) (*ContactAccountDetailDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("DeleteContact_Fail", "sessionId", req.SessionId, "cause", "session no found")
+		foree_logger.Logger.Info("DeleteContact_FAIL", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
 	acc, err := a.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
 	if err != nil {
-		foree_logger.Logger.Error("DeleteContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		foree_logger.Logger.Error("DeleteContact_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if acc == nil {
-		foree_logger.Logger.Error("DeleteContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", fmt.Sprintf("can't find active contact with id `%v`", req.ContactId))
+		foree_logger.Logger.Error("DeleteContact_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", fmt.Sprintf("can't find active contact with id `%v`", req.ContactId))
 		return nil, transport.NewFormError("Invaild contact deletion", "contactId", "Invalid contactId")
 	}
 
@@ -138,7 +138,7 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 	newAcc.Status = account.AccountStatusDelete
 	err = a.contactAccountRepo.UpdateActiveContactAccountByIdAndOwner(ctx, newAcc)
 	if err != nil {
-		foree_logger.Logger.Error("DeleteContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		foree_logger.Logger.Error("DeleteContact_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -149,35 +149,35 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 func (a *AccountService) GetActiveContact(ctx context.Context, req GetContactReq) (*ContactAccountDetailDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("GetActiveContact_Fail", "sessionId", req.SessionId, "cause", "session no found")
+		foree_logger.Logger.Info("GetActiveContact_FAIL", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
 	acc, err := a.contactAccountRepo.GetUniqueActiveContactAccountByOwnerAndId(ctx, session.User.ID, req.ContactId)
 	if err != nil {
-		foree_logger.Logger.Error("GetActiveContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		foree_logger.Logger.Error("GetActiveContact_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if acc == nil {
-		foree_logger.Logger.Error("GetActiveContact_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", fmt.Sprintf("can't find active contact with id `%v`", req.ContactId))
+		foree_logger.Logger.Error("GetActiveContact_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", fmt.Sprintf("can't find active contact with id `%v`", req.ContactId))
 		return nil, transport.NewFormError("Invaild contact det", "contactId", "Invalid contactId")
 	}
 
-	foree_logger.Logger.Debug("GetActiveContact_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
+	foree_logger.Logger.Debug("GetActiveContact_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId)
 	return NewContactAccountDetailDTO(acc), nil
 }
 
 func (a *AccountService) GetAllActiveContacts(ctx context.Context, req transport.SessionReq) ([]*ContactAccountSummaryDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("GetAllActiveContacts_Fail", "sessionId", req.SessionId, "cause", "session no found")
+		foree_logger.Logger.Info("GetAllActiveContacts_FAIL", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
 	accs, err := a.contactAccountRepo.GetAllActiveContactAccountByOwnerId(ctx, session.User.ID)
 	if err != nil {
-		foree_logger.Logger.Error("GetAllActiveContacts_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		foree_logger.Logger.Error("GetAllActiveContacts_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -185,20 +185,20 @@ func (a *AccountService) GetAllActiveContacts(ctx context.Context, req transport
 	for i, v := range accs {
 		ret[i] = NewContactAccountSummaryDTO(v)
 	}
-	foree_logger.Logger.Debug("GetAllActiveContacts_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
+	foree_logger.Logger.Debug("GetAllActiveContacts_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId)
 	return ret, nil
 }
 
 func (a *AccountService) QueryActiveContacts(ctx context.Context, req QueryContactReq) ([]*ContactAccountSummaryDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("QueryActiveContacts_Fail", "sessionId", req.SessionId, "cause", "session no found")
+		foree_logger.Logger.Info("QueryActiveContacts_FAIL", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
 	accs, err := a.contactAccountRepo.QueryActiveContactAccountByOwnerIdWithPagination(ctx, session.User.ID, req.Limit, req.Offset)
 	if err != nil {
-		foree_logger.Logger.Error("QueryActiveContacts_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		foree_logger.Logger.Error("QueryActiveContacts_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -207,20 +207,20 @@ func (a *AccountService) QueryActiveContacts(ctx context.Context, req QueryConta
 		ret[i] = NewContactAccountSummaryDTO(v)
 	}
 
-	foree_logger.Logger.Debug("QueryActiveContacts_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
+	foree_logger.Logger.Debug("QueryActiveContacts_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId)
 	return ret, nil
 }
 
 func (a *AccountService) GetAllActiveInteracs(ctx context.Context, req transport.SessionReq) ([]*InteracAccountSummaryDTO, transport.HError) {
 	session, sErr := a.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
-		foree_logger.Logger.Info("GetAllActiveInteracs_Fail", "sessionId", req.SessionId, "cause", "session no found")
+		foree_logger.Logger.Info("GetAllActiveInteracs_FAIL", "sessionId", req.SessionId, "cause", "session no found")
 		return nil, sErr
 	}
 
 	accs, err := a.interacAccountRepo.GetAllActiveInteracAccountByOwnerId(ctx, session.User.ID)
 	if err != nil {
-		foree_logger.Logger.Error("GetAllActiveInteracs_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		foree_logger.Logger.Error("GetAllActiveInteracs_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -229,6 +229,6 @@ func (a *AccountService) GetAllActiveInteracs(ctx context.Context, req transport
 		ret[i] = NewInteracAccountSummaryDTO(v)
 	}
 
-	foree_logger.Logger.Debug("GetAllActiveInteracs_Success", "ip", loadRealIp(ctx), "userId", session.UserId)
+	foree_logger.Logger.Debug("GetAllActiveInteracs_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId)
 	return ret, nil
 }

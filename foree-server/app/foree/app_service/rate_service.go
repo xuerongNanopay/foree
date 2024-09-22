@@ -37,9 +37,9 @@ func (r *RateService) start() {
 		case rateId := <-r.rateCacheInsertChan:
 			rate, err := r.rateRepo.GetUniqueRateById(context.TODO(), rateId)
 			if err != nil {
-				foree_logger.Logger.Error("Rate_Cache_Insert_Fail", "rateId", rateId, "cause", err.Error())
+				foree_logger.Logger.Error("Rate_Cache_Insert_FAIL", "rateId", rateId, "cause", err.Error())
 			} else if rate == nil {
-				foree_logger.Logger.Error("Rate_Cache_Insert_Fail", "rateId", rateId, "cause", "rate no found")
+				foree_logger.Logger.Error("Rate_Cache_Insert_FAIL", "rateId", rateId, "cause", "rate no found")
 			} else {
 				r.cache.Swap(rate.GetId(), CacheItem[transaction.Rate]{
 					item:      *rate,
@@ -49,9 +49,9 @@ func (r *RateService) start() {
 		case rateId := <-r.rateCacheUpdateChan:
 			rate, err := r.rateRepo.GetUniqueRateById(context.TODO(), rateId)
 			if err != nil {
-				foree_logger.Logger.Error("Rate_Cache_Update_Fail", "rateId", rateId, "cause", err.Error())
+				foree_logger.Logger.Error("Rate_Cache_Update_FAIL", "rateId", rateId, "cause", err.Error())
 			} else if rate == nil {
-				foree_logger.Logger.Error("Rate_Cache_Update_Fail", "rateId", rateId, "cause", "rate no found")
+				foree_logger.Logger.Error("Rate_Cache_Update_FAIL", "rateId", rateId, "cause", "rate no found")
 			} else {
 				r.cache.Swap(rate.GetId(), CacheItem[transaction.Rate]{
 					item:      *rate,
@@ -66,9 +66,9 @@ func (r *RateService) start() {
 				rateId, _ := k.(string)
 				rate, err := r.rateRepo.GetUniqueRateById(context.TODO(), rateId)
 				if err != nil {
-					foree_logger.Logger.Error("Rate_Cache_Refresh_Fail", "rateId", rateId, "cause", err.Error())
+					foree_logger.Logger.Error("Rate_Cache_Refresh_FAIL", "rateId", rateId, "cause", err.Error())
 				} else if rate == nil {
-					foree_logger.Logger.Error("Rate_Cache_Refresh_Fail", "rateId", rateId, "cause", "rate no found")
+					foree_logger.Logger.Error("Rate_Cache_Refresh_FAIL", "rateId", rateId, "cause", "rate no found")
 				} else {
 					r.cache.Swap(rate.GetId(), CacheItem[transaction.Rate]{
 						item:      *rate,

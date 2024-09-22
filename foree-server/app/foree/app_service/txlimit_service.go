@@ -45,9 +45,9 @@ func (t *TxLimitService) start() {
 		case limitGroup := <-t.txlimitCacheInsertChan:
 			txLimit, err := t.txLimitRepo.GetUniqueTxLimitByLimitGroup(limitGroup)
 			if err != nil {
-				foree_logger.Logger.Error("TxLimit_Cache_Insert_Fail", "limitGroup", limitGroup, "cause", err.Error())
+				foree_logger.Logger.Error("TxLimit_Cache_Insert_FAIL", "limitGroup", limitGroup, "cause", err.Error())
 			} else if txLimit == nil {
-				foree_logger.Logger.Error("TxLimit_Cache_Insert_Fail", "limitGroup", limitGroup, "cause", "transaction limit no found")
+				foree_logger.Logger.Error("TxLimit_Cache_Insert_FAIL", "limitGroup", limitGroup, "cause", "transaction limit no found")
 			} else {
 				t.cache.Store(limitGroup, CacheItem[transaction.TxLimit]{
 					item:      *txLimit,
@@ -57,9 +57,9 @@ func (t *TxLimitService) start() {
 		case limitGroup := <-t.txlimitCacheUpdateChan:
 			txLimit, err := t.txLimitRepo.GetUniqueTxLimitByLimitGroup(limitGroup)
 			if err != nil {
-				foree_logger.Logger.Error("TxLimit_Cache_Update_Fail", "limitGroup", limitGroup, "cause", err.Error())
+				foree_logger.Logger.Error("TxLimit_Cache_Update_FAIL", "limitGroup", limitGroup, "cause", err.Error())
 			} else if txLimit == nil {
-				foree_logger.Logger.Error("TxLimit_Cache_Update_Fail", "limitGroup", limitGroup, "cause", "transaction limit no found")
+				foree_logger.Logger.Error("TxLimit_Cache_Update_FAIL", "limitGroup", limitGroup, "cause", "transaction limit no found")
 			} else {
 				t.cache.Swap(limitGroup, CacheItem[transaction.TxLimit]{
 					item:      *txLimit,
@@ -74,9 +74,9 @@ func (t *TxLimitService) start() {
 				limitGroup, _ := k.(string)
 				txLimit, err := t.txLimitRepo.GetUniqueTxLimitByLimitGroup(limitGroup)
 				if err != nil {
-					foree_logger.Logger.Error("TxLimit_Cache_Refresh_Fail", "limitGroup", limitGroup, "cause", err.Error())
+					foree_logger.Logger.Error("TxLimit_Cache_Refresh_FAIL", "limitGroup", limitGroup, "cause", err.Error())
 				} else if txLimit == nil {
-					foree_logger.Logger.Error("TxLimit_Cache_Refresh_Fail", "limitGroup", limitGroup, "cause", "transaction limit no found")
+					foree_logger.Logger.Error("TxLimit_Cache_Refresh_FAIL", "limitGroup", limitGroup, "cause", "transaction limit no found")
 				} else {
 					t.cache.Swap(limitGroup, CacheItem[transaction.TxLimit]{
 						item:      *txLimit,

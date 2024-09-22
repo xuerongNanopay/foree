@@ -69,26 +69,26 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 	// Check if email already exists.
 	oldEmail, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
 	if err != nil {
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("Signup_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if oldEmail != nil {
-		foree_logger.Logger.Warn("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "email already exists")
+		foree_logger.Logger.Warn("Signup_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", "email already exists")
 		return nil, transport.NewFormError("Invaild signup", "email", "account already exists")
 	}
 
 	// Hashing password.
 	hashedPasswd, err := auth.HashPassword(req.Password)
 	if err != nil {
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("Signup_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	// Start DB transaction
 	dTx, err := a.db.Begin()
 	if err != nil {
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("Signup_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		dTx.Rollback()
 		return nil, transport.WrapInteralServerError(err)
 	}
@@ -102,7 +102,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 
 	if err != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("Signup_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -120,7 +120,7 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 
 	if err != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("Signup_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -133,37 +133,37 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 	})
 	if err != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "userId", userId, "cause", err.Error())
+		foree_logger.Logger.Error("Signup_FAIL", "ip", loadRealIp(ctx), "userId", userId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if err = dTx.Commit(); err != nil {
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("Signup_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	foree_logger.Logger.Info("Signup_Success", "ip", loadRealIp(ctx), "userId", userId, "emailPasswordId", epId)
+	foree_logger.Logger.Info("Signup_SUCCESS", "ip", loadRealIp(ctx), "userId", userId, "emailPasswordId", epId)
 
 	user, err := a.userRepo.GetUniqueUserById(userId)
 	if err != nil {
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("Signup_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if user == nil {
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "userId", userId, "cause", "unable to get user")
+		foree_logger.Logger.Error("Signup_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "userId", userId, "cause", "unable to get user")
 		return nil, transport.NewInteralServerError("unable to get user with id: `%v`", userId)
 	}
 
 	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdById(epId)
 
 	if err != nil {
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("Signup_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if ep == nil {
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "emailPasswordId", epId, "cause", "unable to get created emailPassword")
+		foree_logger.Logger.Error("Signup_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "emailPasswordId", epId, "cause", "unable to get created emailPassword")
 		return nil, transport.NewInteralServerError("unable to get EmailPasswd with id: `%v`", epId)
 	}
 
@@ -177,13 +177,13 @@ func (a *AuthService) SignUp(ctx context.Context, req SignUpReq) (*UserDTO, tran
 		EmailPasswd: ep,
 	})
 	if err != nil {
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("Signup_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	if session == nil {
-		foree_logger.Logger.Error("Signup_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "unable to get created session")
+		foree_logger.Logger.Error("Signup_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", "unable to get created session")
 		return nil, transport.NewInteralServerError("sesson `%s` not found", sessionId)
 	}
 	return NewUserDTO(session), nil
@@ -212,24 +212,24 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*Use
 		if session != nil {
 			userId = session.UserId
 		}
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		foree_logger.Logger.Warn("VerifyEmail_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
 		return nil, sErr
 	}
 
 	curEP, err := a.emailPasswordRepo.GetUniqueEmailPasswdById(session.EmailPasswd.ID)
 
 	if err != nil {
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		foree_logger.Logger.Warn("VerifyEmail_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if curEP.VerifyCode != req.Code {
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", "invalid code")
+		foree_logger.Logger.Warn("VerifyEmail_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", "invalid code")
 		return nil, transport.NewFormError("Invalid VerifyEmail Requst", "code", "invalid code")
 	}
 
 	if curEP.VerifyCodeExpiredAt == nil || curEP.VerifyCodeExpiredAt.Before(time.Now()) {
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", "code expired")
+		foree_logger.Logger.Warn("VerifyEmail_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", "code expired")
 		return nil, transport.NewFormError("Invalid VerifyEmail Requst", "code", "code expired")
 	}
 
@@ -239,7 +239,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*Use
 
 	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP)
 	if e != nil {
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", e.Error())
+		foree_logger.Logger.Warn("VerifyEmail_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", e.Error())
 		return nil, transport.WrapInteralServerError(e)
 	}
 
@@ -249,10 +249,10 @@ func (a *AuthService) VerifyEmail(ctx context.Context, req VerifyEmailReq) (*Use
 
 	session, e = a.sessionRepo.UpdateSession(newSession)
 	if e != nil {
-		foree_logger.Logger.Warn("VerifyEmail_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", e.Error())
+		foree_logger.Logger.Warn("VerifyEmail_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", e.Error())
 		return nil, transport.WrapInteralServerError(e)
 	}
-	foree_logger.Logger.Info("VerifyEmail_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
+	foree_logger.Logger.Info("VerifyEmail_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
 	return NewUserDTO(session), nil
 }
 
@@ -264,7 +264,7 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 		if session != nil {
 			userId = session.UserId
 		}
-		foree_logger.Logger.Warn("ResendVerifyCode_Fail", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", err.Error())
+		foree_logger.Logger.Warn("ResendVerifyCode_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, err
 	}
 
@@ -276,7 +276,7 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 
 	e := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP)
 	if e != nil {
-		foree_logger.Logger.Warn("ResendVerifyCode_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", e.Error())
+		foree_logger.Logger.Warn("ResendVerifyCode_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", e.Error())
 		return nil, transport.WrapInteralServerError(e)
 	}
 
@@ -288,11 +288,11 @@ func (a *AuthService) ResendVerifyCode(ctx context.Context, req transport.Sessio
 
 	_, e = a.sessionRepo.UpdateSession(newSession)
 	if e != nil {
-		foree_logger.Logger.Warn("ResendVerifyCode_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", e.Error())
+		foree_logger.Logger.Warn("ResendVerifyCode_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", e.Error())
 		return nil, transport.WrapInteralServerError(e)
 	}
 
-	foree_logger.Logger.Info("ResendVerifyCode_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
+	foree_logger.Logger.Info("ResendVerifyCode_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
 	return NewUserDTO(session), nil
 }
 
@@ -327,27 +327,27 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		if session != nil {
 			userId = session.UserId
 		}
-		foree_logger.Logger.Warn("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		foree_logger.Logger.Warn("CreateUser_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
 		return nil, sErr
 	}
 
 	curUser, err := a.userRepo.GetUniqueUserById(session.UserId)
 	if err != nil {
-		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		foree_logger.Logger.Error("CreateUser_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	// Ask user login
 	if curUser.Status != auth.UserStatusInitial {
 		a.sessionRepo.Delete(req.SessionId)
-		foree_logger.Logger.Warn("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", fmt.Sprintf("user in status `%v`", curUser.Status))
+		foree_logger.Logger.Warn("CreateUser_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", fmt.Sprintf("user in status `%v`", curUser.Status))
 		return nil, transport.NewUnauthorizedRequestError()
 	}
 
 	dTx, dErr := a.db.Begin()
 	if dErr != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", dErr.Error())
+		foree_logger.Logger.Error("CreateUser_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", dErr.Error())
 		return nil, transport.WrapInteralServerError(dErr)
 	}
 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
@@ -363,7 +363,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	_, ier := a.userIdentificationRepo.InsertUserIdentification(ctx, identification)
 	if ier != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", ier.Error())
+		foree_logger.Logger.Error("CreateUser_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", ier.Error())
 		return nil, transport.WrapInteralServerError(ier)
 	}
 
@@ -388,7 +388,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 
 	if updateErr != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("CreateUser_Fail", "userId", session.UserId, "cause", updateErr.Error())
+		foree_logger.Logger.Error("CreateUser_FAIL", "userId", session.UserId, "cause", updateErr.Error())
 		return nil, transport.WrapInteralServerError(updateErr)
 	}
 
@@ -401,32 +401,32 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	_, er := a.userExtraRepo.InsertUserExtra(ctx, userExtra)
 	if er != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", er.Error())
+		foree_logger.Logger.Error("CreateUser_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", er.Error())
 		return nil, transport.WrapInteralServerError(er)
 	}
 
 	if err := dTx.Commit(); err != nil {
-		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		foree_logger.Logger.Error("CreateUser_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	foree_logger.Logger.Info("CreateUser_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
+	foree_logger.Logger.Info("CreateUser_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
 
 	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(newUser.ID)
 	if er != nil {
-		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", er.Error())
+		foree_logger.Logger.Error("CreateUser_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", er.Error())
 		return nil, transport.WrapInteralServerError(er)
 	}
 
 	if userGroup == nil {
-		foree_logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", fmt.Sprintf("userGroup not found for owner `%v`", newUser.ID))
+		foree_logger.Logger.Error("Login_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", fmt.Sprintf("userGroup not found for owner `%v`", newUser.ID))
 		return nil, transport.NewInteralServerError("userGroup not found for owner `%v`", newUser.ID)
 	}
 
 	// Get Permission.
 	rolePermissions, pErr := a.rolePermissionRepo.GetAllEnabledRolePermissionByRoleName(userGroup.RoleGroup)
 	if pErr != nil {
-		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", pErr.Error())
+		foree_logger.Logger.Error("CreateUser_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", pErr.Error())
 		return nil, transport.WrapInteralServerError(pErr)
 	}
 
@@ -439,7 +439,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 
 	updateSession, sessionErr := a.sessionRepo.UpdateSession(newSession)
 	if sessionErr != nil {
-		foree_logger.Logger.Error("CreateUser_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", sessionErr.Error())
+		foree_logger.Logger.Error("CreateUser_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", sessionErr.Error())
 		return nil, transport.WrapInteralServerError(sessionErr)
 	}
 
@@ -464,7 +464,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		}
 		_, derr := a.interacAccountRepo.InsertInteracAccount(context.TODO(), acc)
 		if derr != nil {
-			foree_logger.Logger.Error("Default_Interac_Account_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", derr.Error())
+			foree_logger.Logger.Error("Default_Interac_Account_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", derr.Error())
 		}
 	}()
 
@@ -483,33 +483,33 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*UserDTO, transp
 	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
 
 	if err != nil {
-		foree_logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("Login_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if ep == nil {
-		foree_logger.Logger.Warn("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
+		foree_logger.Logger.Warn("Login_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
 		return nil, transport.NewFormError("Invaild signup", "email", "invalid email")
 	}
 
 	if ep.Status == auth.EPStatusDelete {
-		foree_logger.Logger.Warn("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` is in `%s` status", ep.Email, ep.Status))
+		foree_logger.Logger.Warn("Login_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` is in `%s` status", ep.Email, ep.Status))
 		return nil, transport.NewFormError("Invalid login request", "email", "invalid email")
 	}
 
 	if ep.Status == auth.EPStatusSuspend {
-		foree_logger.Logger.Warn("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` is in `%s` status", ep.Email, ep.Status))
+		foree_logger.Logger.Warn("Login_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` is in `%s` status", ep.Email, ep.Status))
 		return nil, transport.NewFormError("Invalid login request", "email", "your account is suspend. please contact us.")
 	}
 
 	if ep.LoginAttempts > maxLoginAttempts {
-		foree_logger.Logger.Warn("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` has try `%v` times", ep.Email, ep.LoginAttempts))
+		foree_logger.Logger.Warn("Login_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` has try `%v` times", ep.Email, ep.LoginAttempts))
 		return nil, transport.NewFormError("Invalid login request", "password", "max login attempts reached. please contact us.")
 	}
 
 	ok := auth.ComparePasswords(req.Password, []byte(ep.Passwd))
 	if !ok {
-		foree_logger.Logger.Warn("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "invalid password")
+		foree_logger.Logger.Warn("Login_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", "invalid password")
 		go func() {
 			newEP := *ep
 			newEP.LoginAttempts += 1
@@ -523,23 +523,23 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*UserDTO, transp
 	// Load user(user must exist, but not necessary to be active)
 	user, err := a.userRepo.GetUniqueUserById(ep.OwnerId)
 	if err != nil {
-		foree_logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("Login_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 	// User must exists
 	if user == nil {
-		foree_logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("owner `%v` no found", ep.OwnerId))
+		foree_logger.Logger.Error("Login_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("owner `%v` no found", ep.OwnerId))
 		return nil, transport.NewInteralServerError("User `%v` do not exists", ep.OwnerId)
 	}
 
 	userGroup, er := a.userGroupRepo.GetUniqueUserGroupByOwnerId(user.ID)
 	if er != nil {
-		foree_logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "user", user.ID, "cause", er.Error())
+		foree_logger.Logger.Error("Login_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "user", user.ID, "cause", er.Error())
 		return nil, transport.WrapInteralServerError(er)
 	}
 	//User group must exists
 	if userGroup == nil {
-		foree_logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("userGroup not found with owner `%v`", ep.OwnerId))
+		foree_logger.Logger.Error("Login_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("userGroup not found with owner `%v`", ep.OwnerId))
 		return nil, transport.NewInteralServerError("userGroup not found with owner `%v`", ep.OwnerId)
 	}
 
@@ -563,16 +563,16 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*UserDTO, transp
 
 	sessionId, err := a.sessionRepo.InsertSession(newSession)
 	if err != nil {
-		foree_logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "fail to insert session to session repo")
+		foree_logger.Logger.Error("Login_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", "fail to insert session to session repo")
 		return nil, transport.WrapInteralServerError(err)
 	}
 	session := a.sessionRepo.GetSessionUniqueById(sessionId)
 	if session == nil {
-		foree_logger.Logger.Error("Login_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "fail to get session from session repo")
+		foree_logger.Logger.Error("Login_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", "fail to get session from session repo")
 		return nil, transport.NewInteralServerError("sesson `%s` not found", sessionId)
 	}
 
-	foree_logger.Logger.Info("Login_Success", "ip", loadRealIp(ctx), "email", req.Email, "userAgent", loadUserAgent(ctx), "userId", user.ID)
+	foree_logger.Logger.Info("Login_SUCCESS", "ip", loadRealIp(ctx), "email", req.Email, "userAgent", loadUserAgent(ctx), "userId", user.ID)
 	return NewUserDTO(session), nil
 }
 
@@ -581,18 +581,18 @@ func (a *AuthService) ForgetPassword(ctx context.Context, req ForgetPasswordReq)
 	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
 
 	if err != nil {
-		foree_logger.Logger.Error("ForgetPassword_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("ForgetPassword_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 
 	}
 
 	if ep == nil {
-		foree_logger.Logger.Warn("ForgetPassword_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
+		foree_logger.Logger.Warn("ForgetPassword_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
 		return nil, transport.NewFormError("Invaild forget password request", "email", "invalid email")
 	}
 
 	if ep.LatestForgetPasswdUpdatedAt != nil && ep.LatestForgetPasswdUpdatedAt.After(time.Now().Add(-1*forgetPasswordUpdateInterval)) {
-		foree_logger.Logger.Warn("ForgetPassword_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "forget password update is to frequent")
+		foree_logger.Logger.Warn("ForgetPassword_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", "forget password update is to frequent")
 		return nil, transport.NewFormError("Invaild forget password request", "email", "password update too frequent")
 	}
 
@@ -603,11 +603,11 @@ func (a *AuthService) ForgetPassword(ctx context.Context, req ForgetPasswordReq)
 
 	err = a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP)
 	if err != nil {
-		foree_logger.Logger.Error("ForgetPassword_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("ForgetPassword_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		transport.WrapInteralServerError(err)
 	}
 
-	foree_logger.Logger.Info("ForgetPassword_Success", "ip", loadRealIp(ctx), "email", req.Email)
+	foree_logger.Logger.Info("ForgetPassword_SUCCESS", "ip", loadRealIp(ctx), "email", req.Email)
 
 	//TODO: send email with code
 
@@ -618,32 +618,32 @@ func (a *AuthService) ForgetPasswordVerify(ctx context.Context, req ForgetPasswo
 	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
 
 	if err != nil {
-		foree_logger.Logger.Error("ForgetPasswordVerify_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("ForgetPasswordVerify_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 
 	}
 
 	if ep.LatestForgetPasswdUpdatedAt != nil && ep.LatestForgetPasswdUpdatedAt.After(time.Now().Add(-1*forgetPasswordUpdateInterval)) {
-		foree_logger.Logger.Warn("ForgetPasswordVerify_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "forget password update is to frequent")
+		foree_logger.Logger.Warn("ForgetPasswordVerify_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", "forget password update is to frequent")
 		return nil, transport.NewFormError("Invaild forget password request", "email", "password update too frequent")
 	}
 
 	if ep == nil {
-		foree_logger.Logger.Warn("ForgetPasswordVerify_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
+		foree_logger.Logger.Warn("ForgetPasswordVerify_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
 		return nil, transport.NewFormError("Invaild forget password", "email", "invalid email")
 	}
 
 	if ep.RetrieveTokenExpiredAt == nil || ep.RetrieveTokenExpiredAt.Before(time.Now()) {
-		foree_logger.Logger.Warn("ForgetPasswordVerify_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "retrieve code expire")
+		foree_logger.Logger.Warn("ForgetPasswordVerify_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", "retrieve code expire")
 		return nil, transport.NewFormError("Invaild forget password", "retrieveCode", "retrieve code expired")
 	}
 
 	if ep.RetrieveToken != req.RetrieveCode {
-		foree_logger.Logger.Warn("ForgetPasswordVerify_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "invalid retrieve code")
+		foree_logger.Logger.Warn("ForgetPasswordVerify_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", "invalid retrieve code")
 		return nil, transport.NewFormError("Invaild forget password", "retrieveCode", "invalid retrieve code")
 	}
 
-	foree_logger.Logger.Info("ForgetPasswordVerify_Success", "ip", loadRealIp(ctx), "email", req.Email)
+	foree_logger.Logger.Info("ForgetPasswordVerify_SUCCESS", "ip", loadRealIp(ctx), "email", req.Email)
 
 	return nil, nil
 }
@@ -652,34 +652,34 @@ func (a *AuthService) ForgetPasswordUpdate(ctx context.Context, req ForgetPasswo
 	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdByEmail(req.Email)
 
 	if err != nil {
-		foree_logger.Logger.Error("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("ForgetPasswordUpdate_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 
 	}
 
 	if ep.LatestForgetPasswdUpdatedAt != nil && ep.LatestForgetPasswdUpdatedAt.After(time.Now().Add(-1*forgetPasswordUpdateInterval)) {
-		foree_logger.Logger.Warn("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "forget password update is to frequent")
+		foree_logger.Logger.Warn("ForgetPasswordUpdate_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", "forget password update is to frequent")
 		return nil, transport.NewFormError("Invaild forget password request", "email", "password update too frequent")
 	}
 
 	if ep == nil {
-		foree_logger.Logger.Warn("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
+		foree_logger.Logger.Warn("ForgetPasswordUpdate_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", fmt.Sprintf("email `%s` not found", req.Email))
 		return nil, transport.NewFormError("Invaild forget password", "email", "invalid email")
 	}
 
 	if ep.RetrieveTokenExpiredAt == nil || ep.RetrieveTokenExpiredAt.Before(time.Now()) {
-		foree_logger.Logger.Warn("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "retrieve code expire")
+		foree_logger.Logger.Warn("ForgetPasswordUpdate_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", "retrieve code expire")
 		return nil, transport.NewFormError("Invaild forget password", "retrieveCode", "retrieve code expired")
 	}
 
 	if ep.RetrieveToken != req.RetrieveCode {
-		foree_logger.Logger.Warn("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", "invalid retrieve code")
+		foree_logger.Logger.Warn("ForgetPasswordUpdate_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", "invalid retrieve code")
 		return nil, transport.NewFormError("Invaild forget password", "retrieveCode", "invalid retrieve code")
 	}
 
 	hashedPasswd, err := auth.HashPassword(req.NewPassword)
 	if err != nil {
-		foree_logger.Logger.Error("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("ForgetPasswordUpdate_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
@@ -692,13 +692,13 @@ func (a *AuthService) ForgetPasswordUpdate(ctx context.Context, req ForgetPasswo
 	err = a.emailPasswordRepo.UpdateEmailPasswdByEmail(context.Background(), newEP)
 
 	if err != nil {
-		foree_logger.Logger.Error("ForgetPasswordUpdate_Fail", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
+		foree_logger.Logger.Error("ForgetPasswordUpdate_FAIL", "ip", loadRealIp(ctx), "email", req.Email, "cause", err.Error())
 		transport.WrapInteralServerError(err)
 	}
 
 	//TODO: send email to user for notice
 
-	foree_logger.Logger.Info("ForgetPasswordUpdate_Success", "ip", loadRealIp(ctx), "email", req.Email)
+	foree_logger.Logger.Info("ForgetPasswordUpdate_SUCCESS", "ip", loadRealIp(ctx), "email", req.Email)
 	return nil, nil
 }
 
@@ -706,9 +706,9 @@ func (a *AuthService) Logout(ctx context.Context, req transport.SessionReq) (*au
 	oldSession, _ := a.VerifySession(ctx, req.SessionId)
 	a.sessionRepo.Delete(req.SessionId)
 	if oldSession != nil {
-		foree_logger.Logger.Debug("Logout_Success", "ip", loadRealIp(ctx), "userId", oldSession.UserId, "sessionId", req.SessionId)
+		foree_logger.Logger.Debug("Logout_SUCCESS", "ip", loadRealIp(ctx), "userId", oldSession.UserId, "sessionId", req.SessionId)
 	} else {
-		foree_logger.Logger.Debug("Logout_Success", "ip", loadRealIp(ctx), "sessionId", req.SessionId)
+		foree_logger.Logger.Debug("Logout_SUCCESS", "ip", loadRealIp(ctx), "sessionId", req.SessionId)
 	}
 	return nil, nil
 }
@@ -721,10 +721,10 @@ func (a *AuthService) GetUser(ctx context.Context, req transport.SessionReq) (*U
 			userId = session.UserId
 		}
 		// Normal error when the token expired
-		foree_logger.Logger.Info("GetUser_Fail", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		foree_logger.Logger.Info("GetUser_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
 		return nil, sErr
 	}
-	foree_logger.Logger.Info("GetUser_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
+	foree_logger.Logger.Info("GetUser_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId)
 	return NewUserDTO(session), nil
 }
 
@@ -736,13 +736,13 @@ func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) (*a
 			userId = session.UserId
 		}
 		// Normal error when the token expired
-		foree_logger.Logger.Info("ChangePasswd_Fail", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		foree_logger.Logger.Info("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
 		return nil, sErr
 	}
 
 	hashed, err := auth.HashPassword(req.Password)
 	if err != nil {
-		foree_logger.Logger.Error("ChangePasswd_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		foree_logger.Logger.Error("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 	ep := *session.EmailPasswd
@@ -750,10 +750,10 @@ func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) (*a
 
 	err = a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, ep)
 	if err != nil {
-		foree_logger.Logger.Error("ChangePasswd_Fail", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		foree_logger.Logger.Error("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
-	foree_logger.Logger.Info("ChangePasswd_Success", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId")
+	foree_logger.Logger.Info("ChangePasswd_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId")
 	return nil, nil
 }
 
@@ -803,15 +803,15 @@ func (a *AuthService) linkReferer(registerUser auth.User, req SignUpReq) {
 
 	referral, err := a.referralRepo.GetUniqueReferralByReferralCode(req.ReferralCode)
 	if err != nil {
-		foree_logger.Logger.Error("Link_Referer_Fail", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", err.Error())
+		foree_logger.Logger.Error("Link_Referer_FAIL", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", err.Error())
 		return
 	}
 	if referral == nil {
-		foree_logger.Logger.Warn("Link_Referer_Fail", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", "unknown ReferralCode")
+		foree_logger.Logger.Warn("Link_Referer_FAIL", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", "unknown ReferralCode")
 		return
 	}
 	if referral.RefereeId != 0 {
-		foree_logger.Logger.Warn("Link_Referer_Fail", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", "unknown ReferralCode")
+		foree_logger.Logger.Warn("Link_Referer_FAIL", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", "unknown ReferralCode")
 		return
 	}
 
@@ -822,10 +822,10 @@ func (a *AuthService) linkReferer(registerUser auth.User, req SignUpReq) {
 
 	err = a.referralRepo.UpdateReferralByReferralCode(newReferral)
 	if err != nil {
-		foree_logger.Logger.Error("Link_Referer_Fail", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", err.Error())
+		foree_logger.Logger.Error("Link_Referer_FAIL", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", err.Error())
 		return
 	}
-	foree_logger.Logger.Info("Link_Referer_success", "userId", registerUser.ID, "ReferrerId", referral.ReferrerId)
+	foree_logger.Logger.Info("Link_Referer_SUCCESS", "userId", registerUser.ID, "ReferrerId", referral.ReferrerId)
 }
 
 func verifySession(session *auth.Session) transport.HError {

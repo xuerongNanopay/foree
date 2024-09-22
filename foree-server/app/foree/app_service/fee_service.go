@@ -38,7 +38,7 @@ func (r *FeeService) start() {
 		case feeGroup := <-r.feeCacheInsertChan:
 			fees, err := r.feeRepo.GetAllEnableFeeByGroupName(context.TODO(), feeGroup)
 			if err != nil {
-				foree_logger.Logger.Error("Fee_Cache_Insert_Fail", "feeGroup", feeGroup, "cause", err.Error())
+				foree_logger.Logger.Error("Fee_Cache_Insert_FAIL", "feeGroup", feeGroup, "cause", err.Error())
 			} else {
 				r.cache.Store(feeGroup, CacheItem[[]*transaction.Fee]{
 					item:      fees,
@@ -48,7 +48,7 @@ func (r *FeeService) start() {
 		case feeGroup := <-r.feeCacheUpdateChan:
 			fees, err := r.feeRepo.GetAllEnableFeeByGroupName(context.TODO(), feeGroup)
 			if err != nil {
-				foree_logger.Logger.Error("Fee_Cache_Update_Fail", "feeGroup", feeGroup, "cause", err.Error())
+				foree_logger.Logger.Error("Fee_Cache_Update_FAIL", "feeGroup", feeGroup, "cause", err.Error())
 			} else {
 				r.cache.Swap(feeGroup, CacheItem[[]*transaction.Fee]{
 					item:      fees,
@@ -63,7 +63,7 @@ func (r *FeeService) start() {
 				feeGroup, _ := k.(string)
 				fees, err := r.feeRepo.GetAllEnableFeeByGroupName(context.TODO(), feeGroup)
 				if err != nil {
-					foree_logger.Logger.Error("Fee_Cache_Refresh_Fail", "feeGroup", feeGroup, "cause", err.Error())
+					foree_logger.Logger.Error("Fee_Cache_Refresh_FAIL", "feeGroup", feeGroup, "cause", err.Error())
 				} else {
 					r.cache.Swap(feeGroup, CacheItem[[]*transaction.Fee]{
 						item:      fees,

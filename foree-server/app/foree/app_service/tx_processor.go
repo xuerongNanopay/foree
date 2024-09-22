@@ -88,7 +88,7 @@ type TxProcessor struct {
 func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
 	foreeTx, err := p.createFullTx(tx)
 	if err != nil {
-		foree_logger.Logger.Error("CreateAndProcessTx_Fail",
+		foree_logger.Logger.Error("CreateAndProcessTx_FAIL",
 			"foreeTxId", tx.ID,
 			"cause", err.Error(),
 		)
@@ -97,7 +97,7 @@ func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
 
 	_, err = p.processTx(*foreeTx)
 	if err != nil {
-		foree_logger.Logger.Error("CreateAndProcessTx_Fail",
+		foree_logger.Logger.Error("CreateAndProcessTx_FAIL",
 			"foreeTxId", tx.ID,
 			"cause", err.Error(),
 		)
@@ -224,7 +224,7 @@ func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx
 	wg.Wait()
 	if ciErr != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("CreateFullTx_Fail",
+		foree_logger.Logger.Error("CreateFullTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"foreeTxId", tx.ID,
 			"cause", ciErr.Error(),
@@ -233,7 +233,7 @@ func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx
 	}
 	if idmErr != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("CreateFullTx_Fail",
+		foree_logger.Logger.Error("CreateFullTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"foreeTxId", tx.ID,
 			"cause", idmErr.Error(),
@@ -242,7 +242,7 @@ func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx
 	}
 	if coutErr != nil {
 		dTx.Rollback()
-		foree_logger.Logger.Error("CreateFullTx_Fail",
+		foree_logger.Logger.Error("CreateFullTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"foreeTxId", tx.ID,
 			"cause", coutErr.Error(),
@@ -255,7 +255,7 @@ func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx
 	tx.COUT = coutTx
 
 	if err = dTx.Commit(); err != nil {
-		foree_logger.Logger.Error("CreateFullTx_Fail",
+		foree_logger.Logger.Error("CreateFullTx_FAIL",
 			"ip", loadRealIp(ctx),
 			"foreeTxId", tx.ID,
 			"cause", err.Error(),
@@ -273,11 +273,11 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	ctx := context.Background()
 	foreeTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, id)
 	if err != nil {
-		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
+		foree_logger.Logger.Error("loadTx_FAIL", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if foreeTx == nil {
-		foree_logger.Logger.Warn("loadTx_Fail",
+		foree_logger.Logger.Warn("loadTx_FAIL",
 			"foreeTxId", id,
 			"cause", "foreeTx no found",
 		)
@@ -287,11 +287,11 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	// Load CI
 	ci, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, foreeTx.ID)
 	if err != nil {
-		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
+		foree_logger.Logger.Error("loadTx_FAIL", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if isEmptyCheck && ci == nil {
-		foree_logger.Logger.Warn("loadTx_Fail",
+		foree_logger.Logger.Warn("loadTx_FAIL",
 			"foreeTxId", id,
 			"cause", "InteracCITx no found",
 		)
@@ -300,11 +300,11 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 
 	CashInAcc, err := p.interacAccountRepo.GetUniqueInteracAccountById(ctx, ci.CashInAccId)
 	if err != nil {
-		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
+		foree_logger.Logger.Error("loadTx_FAIL", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if isEmptyCheck && CashInAcc == nil {
-		foree_logger.Logger.Warn("loadTx_Fail",
+		foree_logger.Logger.Warn("loadTx_FAIL",
 			"foreeTxId", id,
 			"interactTxId", ci.ID,
 			"interacAccountId", ci.CashInAccId,
@@ -319,11 +319,11 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	// Load IDM
 	idm, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, foreeTx.ID)
 	if err != nil {
-		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
+		foree_logger.Logger.Error("loadTx_FAIL", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if isEmptyCheck && idm == nil {
-		foree_logger.Logger.Warn("loadTx_Fail",
+		foree_logger.Logger.Warn("loadTx_FAIL",
 			"foreeTxId", id,
 			"cause", "idmTx no found",
 		)
@@ -334,11 +334,11 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	// Load COUT
 	cout, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, foreeTx.ID)
 	if err != nil {
-		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
+		foree_logger.Logger.Error("loadTx_FAIL", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if isEmptyCheck && cout == nil {
-		foree_logger.Logger.Warn("loadTx_Fail",
+		foree_logger.Logger.Warn("loadTx_FAIL",
 			"foreeTxId", id,
 			"cause", "nbpCOTx no found",
 		)
@@ -347,11 +347,11 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 
 	CashOutAcc, err := p.contactAccountRepo.GetUniqueContactAccountById(ctx, cout.CashOutAccId)
 	if err != nil {
-		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
+		foree_logger.Logger.Error("loadTx_FAIL", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if isEmptyCheck && CashOutAcc == nil {
-		foree_logger.Logger.Warn("loadTx_Fail",
+		foree_logger.Logger.Warn("loadTx_FAIL",
 			"foreeTxId", id,
 			"nbpCoTxId", cout.ID,
 			"contactAccountId", cout.CashOutAccId,
@@ -365,11 +365,11 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	// Load User
 	user, err := p.userRepo.GetUniqueUserById(foreeTx.OwnerId)
 	if err != nil {
-		foree_logger.Logger.Error("loadTx_Fail", "foreeTxId", id, "cause", err.Error())
+		foree_logger.Logger.Error("loadTx_FAIL", "foreeTxId", id, "cause", err.Error())
 		return nil, err
 	}
 	if isEmptyCheck && user == nil {
-		foree_logger.Logger.Warn("loadTx_Fail",
+		foree_logger.Logger.Warn("loadTx_FAIL",
 			"foreeTxId", id,
 			"ownerId", foreeTx.OwnerId,
 			"cause", "owner no found",
@@ -429,11 +429,11 @@ func (p *TxProcessor) next(fTxId int64) {
 	ctx := context.TODO()
 	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
 	if err != nil {
-		foree_logger.Logger.Error("tx_processor-next_Fail", "foreeTxId", fTxId, "cause", err.Error())
+		foree_logger.Logger.Error("tx_processor-next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
 	if fTx == nil {
-		foree_logger.Logger.Warn("tx_processor-next_Fail",
+		foree_logger.Logger.Warn("tx_processor-next_FAIL",
 			"foreeTxId", fTxId,
 			"cause", "unknown ForeeTx",
 		)
@@ -445,11 +445,11 @@ func (p *TxProcessor) rollback(fTxId int64) {
 	ctx := context.TODO()
 	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
 	if err != nil {
-		foree_logger.Logger.Error("tx_processor-rollback_Fail", "foreeTxId", fTxId, "cause", err.Error())
+		foree_logger.Logger.Error("tx_processor-rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
 	if fTx == nil {
-		foree_logger.Logger.Warn("tx_processor-rollback_Fail",
+		foree_logger.Logger.Warn("tx_processor-rollback_FAIL",
 			"foreeTxId", fTxId,
 			"cause", "unknown ForeeTx",
 		)
@@ -510,7 +510,7 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, fTx transaction.ForeeTx) 
 		case transaction.TxStatusInitial:
 			return p.ciTxProcessor.processTx(fTx)
 		case transaction.TxStatusSent:
-			return p.ciTxProcessor.waitFTx(fTx)
+			// return p.ciTxProcessor.waitFTx(fTx)
 		case transaction.TxStatusCompleted:
 			fTx.CurStage = transaction.TxStageIDM
 			fTx.CurStageStatus = transaction.TxStatusInitial
