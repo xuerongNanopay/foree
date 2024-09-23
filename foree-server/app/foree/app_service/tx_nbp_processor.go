@@ -4,15 +4,22 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sync"
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_constant "xue.io/go-pay/app/foree/constant"
+	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/constant"
 	"xue.io/go-pay/partner/nbp"
 )
+
+const coutTxRecheckInterval = 10 * time.Minute
+const coutTxRetryInterval = 4 * time.Second
+const nbpTxProcessorRefreshTicker = 5 * time.Minute
+const nbpTxProcessorRetryTicker = 2 * time.Second
 
 func NewNBPTxProcessor(
 	db *sql.DB,
@@ -23,7 +30,7 @@ func NewNBPTxProcessor(
 	userExtraRepo *foree_auth.UserExtraRepo,
 	userIdentificationRepo *foree_auth.UserIdentificationRepo,
 ) *NBPTxProcessor {
-	return &NBPTxProcessor{
+	ret := &NBPTxProcessor{
 		db:                     db,
 		foreeTxRepo:            foreeTxRepo,
 		txProcessor:            txProcessor,
@@ -35,9 +42,22 @@ func NewNBPTxProcessor(
 		waitFTxs:               make(map[int64]*transaction.ForeeTx, 256),
 		clearChan:              make(chan int64, 32),               // capacity with 32 should be enough.
 		forwardChan:            make(chan transaction.ForeeTx, 32), // capacity with 32 should be enough.
-		retryTicker:            time.NewTicker(5 * time.Minute),
-		checkStatusTicker:      time.NewTicker(3 * time.Minute),
+		retryTicker:            time.NewTicker(nbpTxProcessorRefreshTicker),
+		checkStatusTicker:      time.NewTicker(nbpTxProcessorRetryTicker),
 	}
+	go ret.start()
+	go ret.startRetry()
+	return ret
+}
+
+type NBPTxWaitWrapper struct {
+	coutTx    transaction.NBPCOTx
+	recheckAt time.Time
+}
+type NBPTxRetryWrapper struct {
+	fTx     transaction.ForeeTx
+	count   int
+	retryAt time.Time
 }
 
 type NBPTxProcessor struct {
@@ -50,99 +70,62 @@ type NBPTxProcessor struct {
 	userIdentificationRepo *foree_auth.UserIdentificationRepo
 	retryFTxs              map[int64]*transaction.ForeeTx
 	waitFTxs               map[int64]*transaction.ForeeTx
-	retryChan              chan transaction.ForeeTx
 	waitChan               chan transaction.ForeeTx
 	forwardChan            chan transaction.ForeeTx
-	retryTicker            *time.Ticker
 	checkStatusTicker      *time.Ticker
 	clearChan              chan int64
+	waits                  sync.Map
+	retires                sync.Map
+	statusRefreshChan      chan transaction.NBPCOTx
+	retryChan              chan transaction.ForeeTx
+	statusRefreshTicker    *time.Ticker
+	retryTicker            *time.Ticker
 }
 
-func (p *NBPTxProcessor) Start() error {
-	go p.startProcessor()
-	return nil
+func (p *NBPTxProcessor) start() {
+	for {
+		select {
+		case coutTx := <-p.statusRefreshChan:
+			_, ok := p.waits.Load(coutTx.NBPReference)
+			if ok {
+				continue
+			}
+			p.waits.Store(coutTx.NBPReference, NBPTxWaitWrapper{
+				coutTx:    coutTx,
+				recheckAt: time.Now().Add(ciTxRecheckInterval),
+			})
+		case <-p.statusRefreshTicker.C:
+			func() {}()
+		}
+	}
 }
 
-func (p *NBPTxProcessor) startProcessor() {
+func (p *NBPTxProcessor) startRetry() {
 	for {
 		select {
 		case fTx := <-p.retryChan:
-			_, ok := p.retryFTxs[fTx.ID]
+			_, ok := p.retires.Load(fTx.COUT.NBPReference)
 			if ok {
-				//Log duplicate
-			} else {
-				p.retryFTxs[fTx.ID] = &fTx
+				continue
 			}
+			p.retires.Store(fTx.COUT.NBPReference, NBPTxRetryWrapper{
+				fTx:     fTx,
+				count:   0,
+				retryAt: time.Now().Add(coutTxRetryInterval),
+			})
 		case <-p.retryTicker.C:
-			for k, fTx := range p.retryFTxs {
-				func() {
-					_, err := p.txProcessor.processTx(*fTx)
-					if err != nil {
-						//TODO: log error
-					}
-				}()
-				delete(p.retryFTxs, k)
-			}
-		case fTx := <-p.waitChan:
-			_, ok := p.waitFTxs[fTx.ID]
-			if ok {
-				//Log duplicate
-			} else {
-				p.waitFTxs[fTx.ID] = &fTx
-			}
-		case fTx := <-p.forwardChan:
-			_, ok := p.waitFTxs[fTx.ID]
-			if !ok {
-				//Log miss
-			} else {
-				delete(p.waitFTxs, fTx.ID)
-			}
 			go func() {
-				_, err := p.txProcessor.processTx(fTx)
-				if err != nil {
-					//log err
-				}
+				p.retires.Range(func(k, v) bool {
+
+					return true
+				})
 			}()
-		case foreeTxId := <-p.clearChan:
-			delete(p.waitFTxs, foreeTxId)
-		case <-p.checkStatusTicker.C:
-			req := nbp.TransactionStatusByIdsRequest{
-				Ids: nbp.NBPIds{},
-			}
-			for _, tx := range p.waitFTxs {
-				req.Ids = append(req.Ids, tx.COUT.NBPReference)
-			}
-
-			resp, err := p.nbpClient.TransactionStatusByIds(req)
-			if err != nil {
-				//TODO: Log
-				return
-			}
-			m := make(map[string]nbp.TransactionStatus, len(resp.TransactionStatuses))
-			for _, v := range resp.TransactionStatuses {
-				m[v.GlobalId] = v
-			}
-
-			for _, fTx := range p.waitFTxs {
-				func() {
-					s, ok := m[fTx.COUT.NBPReference]
-					if !ok {
-						//log: error
-						return
-					}
-					nTx, err := p.refreshNBPStatus(*fTx, s.Status)
-					if err != nil {
-						//Log error
-						return
-					}
-
-					if nTx.CurStageStatus != fTx.CurStageStatus {
-						p.forwardChan <- *nTx
-					}
-				}()
-			}
 		}
 	}
+}
+
+func (p *NBPTxProcessor) Start() error {
+	return nil
 }
 
 func (p *NBPTxProcessor) waitFTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
@@ -153,91 +136,105 @@ func (p *NBPTxProcessor) waitFTx(fTx transaction.ForeeTx) (*transaction.ForeeTx,
 	return &fTx, nil
 }
 
+func (p *NBPTxProcessor) process(parentTxId int64) {
+	ctx := context.TODO()
+	coutTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, parentTxId)
+	if err != nil {
+		foree_logger.Logger.Error("NBPTxProcessor-process", "parentTxId", parentTxId, "cause", err.Error())
+		return
+	}
+	if coutTx == nil {
+		foree_logger.Logger.Error("NBPTxProcessor-process", "parentTxId", parentTxId, "cause", "interacTx no found")
+		return
+	}
+}
+
 // We don't use transaction here, case NBP can check duplicate.
 func (p *NBPTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	// Safe check.
-	if fTx.CurStage != transaction.TxStageNBPCO && fTx.CurStageStatus != transaction.TxStatusInitial {
-		return nil, fmt.Errorf("NBPTxProcessor -- transaction `%v` is in status `%s` at stage `%s`", fTx.ID, fTx.CurStageStatus, fTx.Status)
-	}
+	return nil, nil
+	// // Safe check.
+	// if fTx.CurStage != transaction.TxStageNBPCO && fTx.CurStageStatus != transaction.TxStatusInitial {
+	// 	return nil, fmt.Errorf("NBPTxProcessor -- transaction `%v` is in status `%s` at stage `%s`", fTx.ID, fTx.CurStageStatus, fTx.Status)
+	// }
 
-	req, err := p.buildLoadRemittanceRequest(fTx)
-	if err != nil {
-		return nil, err
-	}
-	mode, err := mapNBPMode(fTx.COUT.CashOutAcc.Type)
-	if err != nil {
-		return nil, err
-	}
+	// req, err := p.buildLoadRemittanceRequest(fTx)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// mode, err := mapNBPMode(fTx.COUT.CashOutAcc.Type)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	var resp *nbp.LoadRemittanceResponse
+	// var resp *nbp.LoadRemittanceResponse
 
-	// Retry 5 times with 15 second interval.
-	for i := 0; i < 5; i++ {
-		resp, err = p.sendPaymentWithMode(*req, mode)
-		if err != nil {
-			return nil, err
-		}
-		//Retry case: 5xx, 401, 403
-		if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" || resp.ResponseCode == "406" {
-			time.Sleep(15 * time.Second)
-		} else {
-			break
-		}
+	// // Retry 5 times with 15 second interval.
+	// for i := 0; i < 5; i++ {
+	// 	resp, err = p.sendPaymentWithMode(*req, mode)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	//Retry case: 5xx, 401, 403
+	// 	if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" || resp.ResponseCode == "406" {
+	// 		time.Sleep(15 * time.Second)
+	// 	} else {
+	// 		break
+	// 	}
 
-	}
+	// }
 
-	dTx, err := p.db.Begin()
-	if err != nil {
-		dTx.Rollback()
-		//TODO: log err
-		return nil, err
-	}
+	// dTx, err := p.db.Begin()
+	// if err != nil {
+	// 	dTx.Rollback()
+	// 	//TODO: log err
+	// 	return nil, err
+	// }
 
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
-	curFTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.CI.ParentTxId)
-	if err != nil {
-		dTx.Rollback()
-		return nil, err
-	}
+	// ctx := context.Background()
+	// ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+	// curFTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.CI.ParentTxId)
+	// if err != nil {
+	// 	dTx.Rollback()
+	// 	return nil, err
+	// }
 
-	if curFTx.CurStage != transaction.TxStageNBPCO && curFTx.CurStageStatus != transaction.TxStatusInitial {
-		dTx.Rollback()
-		return nil, fmt.Errorf("NBPTxProcessor -- processTx -- ForeeTx `%v` is in stage `%s` at status `%s`", curFTx.ID, curFTx.CurStage, curFTx.CurStageStatus)
-	}
+	// if curFTx.CurStage != transaction.TxStageNBPCO && curFTx.CurStageStatus != transaction.TxStatusInitial {
+	// 	dTx.Rollback()
+	// 	return nil, fmt.Errorf("NBPTxProcessor -- processTx -- ForeeTx `%v` is in stage `%s` at status `%s`", curFTx.ID, curFTx.CurStage, curFTx.CurStageStatus)
+	// }
 
-	if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
-	} else if resp.StatusCode/100 == 2 || resp.ResponseCode == "405" {
-		fTx.COUT.Status = transaction.TxStatusSent
-		fTx.CurStageStatus = transaction.TxStatusSent
-	} else {
-		fTx.COUT.Status = transaction.TxStatusRejected
-		fTx.CurStageStatus = transaction.TxStatusRejected
-	}
+	// if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
+	// } else if resp.StatusCode/100 == 2 || resp.ResponseCode == "405" {
+	// 	fTx.COUT.Status = transaction.TxStatusSent
+	// 	fTx.CurStageStatus = transaction.TxStatusSent
+	// } else {
+	// 	fTx.COUT.Status = transaction.TxStatusRejected
+	// 	fTx.CurStageStatus = transaction.TxStatusRejected
+	// }
 
-	err = p.nbpTxRepo.UpdateNBPCOTxById(ctx, *fTx.COUT)
-	if err != nil {
-		dTx.Rollback()
-		return nil, err
-	}
+	// err = p.nbpTxRepo.UpdateNBPCOTxById(ctx, *fTx.COUT)
+	// if err != nil {
+	// 	dTx.Rollback()
+	// 	return nil, err
+	// }
 
-	err = p.foreeTxRepo.UpdateForeeTxById(ctx, fTx)
-	if err != nil {
-		dTx.Rollback()
-		return nil, err
-	}
+	// err = p.foreeTxRepo.UpdateForeeTxById(ctx, fTx)
+	// if err != nil {
+	// 	dTx.Rollback()
+	// 	return nil, err
+	// }
 
-	if err = dTx.Commit(); err != nil {
-		return nil, err
-	}
+	// if err = dTx.Commit(); err != nil {
+	// 	return nil, err
+	// }
 
-	if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
-		p.retryChan <- fTx
-	} else if resp.StatusCode/100 == 2 || resp.ResponseCode == "405" {
-		p.waitChan <- fTx
-	}
+	// if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
+	// 	p.retryChan <- fTx
+	// } else if resp.StatusCode/100 == 2 || resp.ResponseCode == "405" {
+	// 	p.waitChan <- fTx
+	// }
 
-	return &fTx, nil
+	// return &fTx, nil
 }
 
 func (p *NBPTxProcessor) refreshNBPStatus(fTx transaction.ForeeTx, nbpStatus string) (*transaction.ForeeTx, error) {
