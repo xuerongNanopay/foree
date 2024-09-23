@@ -257,7 +257,7 @@ func (p *CITxProcessor) process(parentTxId int64) {
 	case transaction.TxStatusSent:
 		p.statusPullingChan <- *ciTx
 	case transaction.TxStatusCompleted:
-		p.txProcessor.processRootTx(ciTx.ParentTxId)
+		p.txProcessor.next(ciTx.ParentTxId)
 	case transaction.TxStatusRejected:
 		p.txProcessor.rollback(ciTx.ParentTxId)
 	case transaction.TxStatusCancelled:
@@ -400,7 +400,7 @@ func (p *CITxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.T
 		return err
 	}
 	p.manualResolveChan <- ciTx.ScotiaPaymentId
-	go p.txProcessor.processRootTx(ciTx.ParentTxId)
+	go p.txProcessor.next(ciTx.ParentTxId)
 	return nil
 }
 
@@ -428,7 +428,7 @@ func (p *CITxProcessor) Cancel(parentTxId int64) error {
 		return err
 	}
 	p.manualResolveChan <- ciTx.ScotiaPaymentId
-	go p.txProcessor.processRootTx(ciTx.ParentTxId)
+	go p.txProcessor.next(ciTx.ParentTxId)
 	return nil
 }
 

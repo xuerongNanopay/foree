@@ -52,7 +52,7 @@ func (p *IDMTxProcessor) process(parentTxId int64) {
 	case transaction.TxStatusSuspend:
 		foree_logger.Logger.Debug("IDM_Processor-process", "parentTxId", parentTxId, "idmTxId", idmTx.ID, "idmTxStatus", idmTx.Status, "msg", "waiting for action")
 	case transaction.TxStatusCompleted:
-		p.txProcessor.processRootTx(idmTx.ParentTxId)
+		p.txProcessor.next(idmTx.ParentTxId)
 	case transaction.TxStatusRejected:
 		p.txProcessor.rollback(idmTx.ParentTxId)
 	default:
@@ -139,7 +139,7 @@ func (p *IDMTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.
 	if err != nil {
 		return err
 	}
-	go p.txProcessor.processRootTx(idmTx.ParentTxId)
+	go p.txProcessor.next(idmTx.ParentTxId)
 	return nil
 }
 

@@ -427,6 +427,10 @@ func (p *TxProcessor) processRootTx(fTxId int64) {
 	}
 }
 
+func (p *TxProcessor) next(fTxId int64) {
+
+}
+
 func (p *TxProcessor) rollback(fTxId int64) {
 	ctx := context.TODO()
 	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
