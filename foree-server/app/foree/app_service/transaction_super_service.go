@@ -10,14 +10,14 @@ import (
 )
 
 type TransactionSuperService struct {
-	db            *sql.DB
-	foreeTxRepo   *transaction.ForeeTxRepo
-	ciTxRepo      *transaction.InteracCITxRepo
-	interacTxRepo *transaction.InteracCITxRepo
-	idmTxRepo     *transaction.IdmTxRepo
-	npbTxRepo     *transaction.NBPCOTxRepo
-	ciTxProcessor *CITxProcessor
-	txProcessor   *TxProcessor
+	db                 *sql.DB
+	foreeTxRepo        *transaction.ForeeTxRepo
+	ciTxRepo           *transaction.InteracCITxRepo
+	interacTxRepo      *transaction.InteracCITxRepo
+	idmTxRepo          *transaction.IdmTxRepo
+	npbTxRepo          *transaction.NBPCOTxRepo
+	interacTxProcessor *InteracTxProcessor
+	txProcessor        *TxProcessor
 }
 
 func (t *TransactionSuperService) ForceCIStatusUpdate(ctx context.Context, fTxId int64, newStatus transaction.TxStage) (*transaction.ForeeTx, error) {

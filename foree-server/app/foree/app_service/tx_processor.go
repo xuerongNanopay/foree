@@ -54,8 +54,8 @@ func NewTxProcessor(
 	}
 }
 
-func (p *TxProcessor) SetCITxProcessor(ciTxProcessor *CITxProcessor) {
-	p.ciTxProcessor = ciTxProcessor
+func (p *TxProcessor) SetInteracTxProcessor(interacTxProcessor *InteracTxProcessor) {
+	p.interacTxProcessor = interacTxProcessor
 }
 
 func (p *TxProcessor) SetIDMTxProcessor(idmTxProcessor *IDMTxProcessor) {
@@ -80,7 +80,7 @@ type TxProcessor struct {
 	userRepo            *auth.UserRepo
 	contactAccountRepo  *account.ContactAccountRepo
 	interacAccountRepo  *account.InteracAccountRepo
-	ciTxProcessor       *CITxProcessor
+	interacTxProcessor  *InteracTxProcessor
 	idmTxProcessor      *IDMTxProcessor
 	nbpTxProcessor      *NBPTxProcessor
 }
@@ -415,7 +415,7 @@ func (p *TxProcessor) processRootTx(fTxId int64) {
 		//TODO: go update summaryTx
 		fallthrough
 	case transaction.TxStageInteracCI:
-		p.ciTxProcessor.process(fTxId)
+		p.interacTxProcessor.process(fTxId)
 	case transaction.TxStageIDM:
 		p.idmTxProcessor.process(fTxId)
 	default:
@@ -498,9 +498,9 @@ func (p *TxProcessor) doProcessTx(ctx context.Context, fTx transaction.ForeeTx) 
 	case transaction.TxStageInteracCI:
 		switch fTx.CurStageStatus {
 		case transaction.TxStatusInitial:
-			return p.ciTxProcessor.processTx(fTx)
+			return p.interacTxProcessor.processTx(fTx)
 		case transaction.TxStatusSent:
-			// return p.ciTxProcessor.waitFTx(fTx)
+			// return p.interacTxProcessor.waitFTx(fTx)
 		case transaction.TxStatusCompleted:
 			fTx.CurStage = transaction.TxStageIDM
 			fTx.CurStageStatus = transaction.TxStatusInitial

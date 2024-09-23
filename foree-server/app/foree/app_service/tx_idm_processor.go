@@ -81,7 +81,7 @@ func (p *IDMTxProcessor) idmTransferVeirfy(parentTxId int64) {
 		)
 	}
 	if resp.StatusCode/100 != 2 || resp.GetResultStatus() != "ACCEPT" {
-		foree_logger.Logger.Warn("CITxProcessor-idmTransferVeirfy_FAIL",
+		foree_logger.Logger.Warn("InteracTxProcessor-idmTransferVeirfy_FAIL",
 			"idmTxId", fTx.IDM.ID,
 			"httpResponseStatus", resp.StatusCode,
 			"httpRequest", resp.RawRequest,

@@ -66,7 +66,7 @@ type ForeeApp struct {
 	idmClient              idm.IDMClient
 	nbpClient              nbp.NBPClient
 	txProcessor            *foree_service.TxProcessor
-	ciTxProcessor          *foree_service.CITxProcessor
+	interacTxProcessor     *foree_service.InteracTxProcessor
 	idmTxProcessor         *foree_service.IDMTxProcessor
 	nbpTxProcessor         *foree_service.NBPTxProcessor
 	accountRouter          *foree_router.AccountRouter
@@ -153,7 +153,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.contactAccountRepo,
 		app.interacAccountRepo,
 	)
-	app.ciTxProcessor = foree_service.NewCITxProcessor(
+	app.interacTxProcessor = foree_service.NewInteracTxProcessor(
 		app.db,
 		foree_service.ScotiaProfile{},
 		app.scotiaClient,
@@ -179,11 +179,11 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.userIdnetificationRepo,
 	)
 
-	app.txProcessor.SetCITxProcessor(app.ciTxProcessor)
+	app.txProcessor.SetInteracTxProcessor(app.interacTxProcessor)
 	app.txProcessor.SetIDMTxProcessor(app.idmTxProcessor)
 	app.txProcessor.SetNBPTxProcessor(app.nbpTxProcessor)
 
-	// if err := app.ciTxProcessor.Start(); err != nil {
+	// if err := app.interacTxProcessor.Start(); err != nil {
 	// 	return err
 	// }
 

@@ -33,7 +33,7 @@ type ScotiaProfile struct {
 	GuaranteedPaymentRequested    bool
 }
 
-func NewCITxProcessor(
+func NewInteracTxProcessor(
 	db *sql.DB,
 	scotiaProfile ScotiaProfile,
 	scotiaClient scotia.ScotiaClient,
@@ -41,8 +41,8 @@ func NewCITxProcessor(
 	foreeTxRepo *transaction.ForeeTxRepo,
 	txSummaryRepo *transaction.TxSummaryRepo,
 	txProcessor *TxProcessor,
-) *CITxProcessor {
-	ret := &CITxProcessor{
+) *InteracTxProcessor {
+	ret := &InteracTxProcessor{
 		db:                  db,
 		scotiaProfile:       scotiaProfile,
 		scotiaClient:        scotiaClient,
@@ -66,7 +66,7 @@ type waitWrapper struct {
 	recheckAt time.Time
 }
 
-type CITxProcessor struct {
+type InteracTxProcessor struct {
 	db                  *sql.DB
 	scotiaProfile       ScotiaProfile
 	scotiaClient        scotia.ScotiaClient
@@ -82,7 +82,7 @@ type CITxProcessor struct {
 	statusRefreshticker *time.Ticker
 }
 
-func (p *CITxProcessor) start() {
+func (p *InteracTxProcessor) start() {
 	for {
 		select {
 		// Push into map.
@@ -240,7 +240,7 @@ func (p *CITxProcessor) start() {
 	}
 }
 
-func (p *CITxProcessor) process(parentTxId int64) {
+func (p *InteracTxProcessor) process(parentTxId int64) {
 	ctx := context.TODO()
 	ciTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, parentTxId)
 	if err != nil {
@@ -273,14 +273,14 @@ func (p *CITxProcessor) process(parentTxId int64) {
 	}
 }
 
-func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
+func (p *InteracTxProcessor) requestPayment(ciTx transaction.InteracCITx) {
 	resp, err := p.scotiaClient.RequestPayment(*p.createRequestPaymentReq(&ciTx))
 
 	if err != nil {
-		foree_logger.Logger.Error("CITxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
+		foree_logger.Logger.Error("InteracTxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
 	}
 	if resp.StatusCode/100 != 2 {
-		foree_logger.Logger.Warn("CITxProcessor-requestPayment_FAIL",
+		foree_logger.Logger.Warn("InteracTxProcessor-requestPayment_FAIL",
 			"interacTxId", ciTx.ID,
 			"httpResponseStatus", resp.StatusCode,
 			"httpRequest", resp.RawRequest,
@@ -293,7 +293,7 @@ func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
 		ciTx.Status = transaction.TxStatusRejected
 		err := p.interacTxRepo.UpdateInteracCITxById(context.TODO(), ciTx)
 		if err != nil {
-			foree_logger.Logger.Error("CITxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
+			foree_logger.Logger.Error("InteracTxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
 		}
 		p.process(ciTx.ParentTxId)
 		return
@@ -306,10 +306,10 @@ func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
 	})
 
 	if err != nil {
-		foree_logger.Logger.Error("CITxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
+		foree_logger.Logger.Error("InteracTxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
 	}
 	if statusResp.StatusCode/100 != 2 {
-		foree_logger.Logger.Warn("CITxProcessor-requestPayment_FAIL",
+		foree_logger.Logger.Warn("InteracTxProcessor-requestPayment_FAIL",
 			"interacTxId", ciTx.ID,
 			"httpResponseStatus", statusResp.StatusCode,
 			"httpRequest", statusResp.RawRequest,
@@ -322,7 +322,7 @@ func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
 		ciTx.Status = transaction.TxStatusRejected
 		err := p.interacTxRepo.UpdateInteracCITxById(context.TODO(), ciTx)
 		if err != nil {
-			foree_logger.Logger.Error("CITxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
+			foree_logger.Logger.Error("InteracTxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
 		}
 		p.process(ciTx.ParentTxId)
 		return
@@ -336,9 +336,9 @@ func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
 
 	err = p.interacTxRepo.UpdateInteracCITxById(context.TODO(), ciTx)
 	if err != nil {
-		foree_logger.Logger.Error("CITxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
+		foree_logger.Logger.Error("InteracTxProcessor-requestPayment_FAIL", "interacTxId", ciTx.ID, "cause", err.Error())
 	}
-	foree_logger.Logger.Info("CITxProcessor-requestPayment_SUCCESS",
+	foree_logger.Logger.Info("InteracTxProcessor-requestPayment_SUCCESS",
 		"interacTxId", ciTx.ID,
 	)
 
@@ -346,11 +346,11 @@ func (p *CITxProcessor) requestPayment(ciTx transaction.InteracCITx) {
 }
 
 // Scotia APi Call
-func (p *CITxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *InteracTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	return nil, nil
 }
 
-func (p *CITxProcessor) refreshScotiaStatus(ciTx transaction.InteracCITx) (transaction.TxStatus, string, error) {
+func (p *InteracTxProcessor) refreshScotiaStatus(ciTx transaction.InteracCITx) (transaction.TxStatus, string, error) {
 
 	detailResp, err := p.scotiaClient.PaymentDetail(scotia.PaymentDetailRequest{
 		PaymentId:  ciTx.ScotiaPaymentId,
@@ -361,7 +361,7 @@ func (p *CITxProcessor) refreshScotiaStatus(ciTx transaction.InteracCITx) (trans
 	}
 
 	if detailResp.StatusCode/100 != 2 {
-		return "", "", fmt.Errorf("CITxProcessor -- refreshScotiaStatusAndProcess -- scotia paymentdetail error: (httpCode: `%v`, request: `%s`, response: `%s`)", detailResp.StatusCode, detailResp.RawRequest, detailResp.RawResponse)
+		return "", "", fmt.Errorf("InteracTxProcessor -- refreshScotiaStatusAndProcess -- scotia paymentdetail error: (httpCode: `%v`, request: `%s`, response: `%s`)", detailResp.StatusCode, detailResp.RawRequest, detailResp.RawResponse)
 	}
 
 	scotiaStatus := detailResp.PaymentDetail.TransactionStatus
@@ -373,11 +373,11 @@ func (p *CITxProcessor) refreshScotiaStatus(ciTx transaction.InteracCITx) (trans
 	return newStatus, scotiaStatus, nil
 }
 
-func (p *CITxProcessor) Webhook(paymentId string) {
+func (p *InteracTxProcessor) Webhook(paymentId string) {
 	p.refreshStatusChan <- paymentId
 }
 
-func (p *CITxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.TxStatus) error {
+func (p *InteracTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.TxStatus) error {
 	if newTxStatus != transaction.TxStatusRejected && newTxStatus != transaction.TxStatusCompleted {
 		return fmt.Errorf("unsupport transaction status `%v`", newTxStatus)
 	}
@@ -404,7 +404,7 @@ func (p *CITxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.T
 	return nil
 }
 
-func (p *CITxProcessor) Cancel(parentTxId int64) error {
+func (p *InteracTxProcessor) Cancel(parentTxId int64) error {
 	ctx := context.TODO()
 	ciTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, parentTxId)
 	if err != nil {
@@ -461,7 +461,7 @@ func scotiaToInternalStatusMapper(scotiaStatus string) transaction.TxStatus {
 	}
 }
 
-func (p *CITxProcessor) createRequestPaymentReq(ciTx *transaction.InteracCITx) *scotia.RequestPaymentRequest {
+func (p *InteracTxProcessor) createRequestPaymentReq(ciTx *transaction.InteracCITx) *scotia.RequestPaymentRequest {
 	expireDate := time.Now().Add(time.Hour * time.Duration(p.scotiaProfile.ExpireInHours))
 
 	req := &scotia.RequestPaymentRequest{
