@@ -203,6 +203,7 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 			return
 		}
 		foree_logger.Logger.Info("IDM_Processor-loadRemittance_SUCCESS", "parentTxId", parentTxId)
+		p.process(nbpTx.ParentTxId)
 		return
 	}
 
@@ -224,94 +225,12 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 		)
 		return
 	}
+	p.process(nbpTx.ParentTxId)
 }
 
 // We don't use transaction here, case NBP can check duplicate.
 func (p *NBPTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	return nil, nil
-	// // Safe check.
-	// if fTx.CurStage != transaction.TxStageNBPCO && fTx.CurStageStatus != transaction.TxStatusInitial {
-	// 	return nil, fmt.Errorf("NBPTxProcessor -- transaction `%v` is in status `%s` at stage `%s`", fTx.ID, fTx.CurStageStatus, fTx.Status)
-	// }
-
-	// req, err := p.buildLoadRemittanceRequest(fTx)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// mode, err := mapNBPMode(fTx.COUT.CashOutAcc.Type)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// var resp *nbp.LoadRemittanceResponse
-
-	// // Retry 5 times with 15 second interval.
-	// for i := 0; i < 5; i++ {
-	// 	resp, err = p.sendPaymentWithMode(*req, mode)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	//Retry case: 5xx, 401, 403
-	// 	if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" || resp.ResponseCode == "406" {
-	// 		time.Sleep(15 * time.Second)
-	// 	} else {
-	// 		break
-	// 	}
-
-	// }
-
-	// dTx, err := p.db.Begin()
-	// if err != nil {
-	// 	dTx.Rollback()
-	// 	//TODO: log err
-	// 	return nil, err
-	// }
-
-	// ctx := context.Background()
-	// ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
-	// curFTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.CI.ParentTxId)
-	// if err != nil {
-	// 	dTx.Rollback()
-	// 	return nil, err
-	// }
-
-	// if curFTx.CurStage != transaction.TxStageNBPCO && curFTx.CurStageStatus != transaction.TxStatusInitial {
-	// 	dTx.Rollback()
-	// 	return nil, fmt.Errorf("NBPTxProcessor -- processTx -- ForeeTx `%v` is in stage `%s` at status `%s`", curFTx.ID, curFTx.CurStage, curFTx.CurStageStatus)
-	// }
-
-	// if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
-	// } else if resp.StatusCode/100 == 2 || resp.ResponseCode == "405" {
-	// 	fTx.COUT.Status = transaction.TxStatusSent
-	// 	fTx.CurStageStatus = transaction.TxStatusSent
-	// } else {
-	// 	fTx.COUT.Status = transaction.TxStatusRejected
-	// 	fTx.CurStageStatus = transaction.TxStatusRejected
-	// }
-
-	// err = p.nbpTxRepo.UpdateNBPCOTxById(ctx, *fTx.COUT)
-	// if err != nil {
-	// 	dTx.Rollback()
-	// 	return nil, err
-	// }
-
-	// err = p.foreeTxRepo.UpdateForeeTxById(ctx, fTx)
-	// if err != nil {
-	// 	dTx.Rollback()
-	// 	return nil, err
-	// }
-
-	// if err = dTx.Commit(); err != nil {
-	// 	return nil, err
-	// }
-
-	// if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
-	// 	p.retryChan <- fTx
-	// } else if resp.StatusCode/100 == 2 || resp.ResponseCode == "405" {
-	// 	p.waitChan <- fTx
-	// }
-
-	// return &fTx, nil
 }
 
 func (p *NBPTxProcessor) refreshNBPStatus(fTx transaction.ForeeTx, nbpStatus string) (*transaction.ForeeTx, error) {
