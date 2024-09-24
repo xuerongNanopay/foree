@@ -405,7 +405,7 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 	}
 
 	switch fTx.CurStage {
-	case "":
+	case transaction.TxStageBegin:
 		fTx.CurStage = transaction.TxStageInteracCI
 		err := p.foreeTxRepo.UpdateForeeTxById(ctx, *fTx)
 		if err != nil {
@@ -419,6 +419,8 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 		p.idmTxProcessor.process(fTxId)
 	case transaction.TxStageNBPCO:
 		p.nbpTxProcessor.process(fTxId)
+	case transaction.TxStageEnd:
+		foree_logger.Logger.Warn("processRootTx", "foreeTxId", fTx.ID, "cause", "process transaction that is in END stage already")
 	default:
 		foree_logger.Logger.Error("processRootTx",
 			"foreeTxId", fTx.ID,
