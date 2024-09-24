@@ -203,7 +203,7 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 			return
 		}
 		foree_logger.Logger.Info("IDM_Processor--loadRemittance_SUCCESS", "parentTxId", parentTxId)
-		p.process(nbpTx.ParentTxId)
+		p.statusRefreshChan <- nbpTx
 		return
 	}
 
