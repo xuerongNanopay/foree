@@ -229,14 +229,14 @@ func (p *InteracTxProcessor) start() {
 				)
 			}
 		case <-p.statusRefreshTicker.C:
-			waitCIs := make([]string, 0)
+			waitPaymentIds := make([]string, 0)
 			p.waits.Range(func(k, _ interface{}) bool {
 				paymentId, _ := k.(string)
-				waitCIs = append(waitCIs, paymentId)
+				waitPaymentIds = append(waitPaymentIds, paymentId)
 				return true
 			})
 			go func() {
-				for _, paymentId := range waitCIs {
+				for _, paymentId := range waitPaymentIds {
 					p.refreshStatusChan <- paymentId
 				}
 			}()

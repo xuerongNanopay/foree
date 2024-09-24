@@ -13,12 +13,13 @@ import (
 	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/partner/nbp"
+	string_util "xue.io/go-pay/util/string"
 )
 
 const nbpTxRecheckInterval = 10 * time.Minute
 const nbpTxRetryInterval = 10 * time.Second
 const nbpTxRetryAttempts = 5
-const nbpTxProcessorRefreshTicker = 5 * time.Minute
+const nbpTxStatusRefreshTicker = 5 * time.Minute
 
 func NewNBPTxProcessor(
 	db *sql.DB,
@@ -37,11 +38,8 @@ func NewNBPTxProcessor(
 		nbpClient:              nbpClient,
 		userExtraRepo:          userExtraRepo,
 		userIdentificationRepo: userIdentificationRepo,
-		retryFTxs:              make(map[int64]*transaction.ForeeTx, 64),
-		waitFTxs:               make(map[int64]*transaction.ForeeTx, 256),
-		clearChan:              make(chan int64, 32),               // capacity with 32 should be enough.
-		forwardChan:            make(chan transaction.ForeeTx, 32), // capacity with 32 should be enough.
-		checkStatusTicker:      time.NewTicker(nbpTxProcessorRefreshTicker),
+		statusRefreshChan:      make(chan transaction.NBPCOTx, 64),
+		statusRefreshTicker:    time.NewTicker(nbpTxStatusRefreshTicker),
 	}
 	go ret.start()
 	return ret
@@ -60,12 +58,6 @@ type NBPTxProcessor struct {
 	nbpClient              nbp.NBPClient
 	userExtraRepo          *foree_auth.UserExtraRepo
 	userIdentificationRepo *foree_auth.UserIdentificationRepo
-	retryFTxs              map[int64]*transaction.ForeeTx
-	waitFTxs               map[int64]*transaction.ForeeTx
-	waitChan               chan transaction.ForeeTx
-	forwardChan            chan transaction.ForeeTx
-	checkStatusTicker      *time.Ticker
-	clearChan              chan int64
 	waits                  sync.Map
 	statusRefreshChan      chan transaction.NBPCOTx
 	statusRefreshTicker    *time.Ticker
@@ -88,18 +80,22 @@ func (p *NBPTxProcessor) start() {
 				recheckAt: time.Now().Add(nbpTxRecheckInterval),
 			})
 		case <-p.statusRefreshTicker.C:
-			//TODO: check status.
-			func() {}()
+			waitNBPReferences := make([]string, 0)
+			p.waits.Range(func(k, _ interface{}) bool {
+				nbpReference, _ := k.(string)
+				waitNBPReferences = append(waitNBPReferences, nbpReference)
+				return true
+			})
+			chunks := string_util.ChunkSlice(waitNBPReferences, 8)
+			for _, c := range chunks {
+				p.refreshNBPStatuses(c)
+			}
 		}
 	}
 }
 
 func (p *NBPTxProcessor) waitFTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	if fTx.CurStage != transaction.TxStageInteracCI && fTx.CurStageStatus != transaction.TxStatusSent {
-		return nil, fmt.Errorf("NBPTxProcessor -- waitFTx -- ForeeTx `%v` is in stage `%s` at status `%s`", fTx.ID, fTx.CurStage, fTx.CurStageStatus)
-	}
-	p.waitChan <- fTx
-	return &fTx, nil
+	return nil, nil
 }
 
 func (p *NBPTxProcessor) process(parentTxId int64) {
