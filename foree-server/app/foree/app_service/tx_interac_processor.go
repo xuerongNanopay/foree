@@ -364,46 +364,46 @@ func (p *InteracTxProcessor) Webhook(paymentId string) {
 	p.refreshStatusChan <- paymentId
 }
 
-func (p *InteracTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.TxStatus) error {
+func (p *InteracTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.TxStatus) (bool, error) {
 	if newTxStatus != transaction.TxStatusRejected && newTxStatus != transaction.TxStatusCompleted {
-		return fmt.Errorf("unsupport transaction status `%v`", newTxStatus)
+		return false, fmt.Errorf("unsupport transaction status `%v`", newTxStatus)
 	}
 
 	ctx := context.TODO()
 	interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, parentTxId)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if interacTx == nil {
-		return fmt.Errorf("InteracCITx no found with parentTxId `%v`", parentTxId)
+		return false, fmt.Errorf("InteracCITx no found with parentTxId `%v`", parentTxId)
 	}
 	if interacTx.Status != transaction.TxStatusSent {
-		return fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSent, interacTx.Status)
+		return false, fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSent, interacTx.Status)
 	}
 
 	interacTx.Status = transaction.TxStatusCompleted
 	err = p.interacTxRepo.UpdateInteracCITxById(context.TODO(), *interacTx)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	p.waits.Delete(interacTx.ScotiaPaymentId)
 	go p.txProcessor.next(interacTx.ParentTxId)
-	return nil
+	return true, nil
 }
 
 // TODO: call scotial cancel api
-func (p *InteracTxProcessor) Cancel(parentTxId int64) error {
+func (p *InteracTxProcessor) Cancel(parentTxId int64) (bool, error) {
 	ctx := context.TODO()
 	interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, parentTxId)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if interacTx == nil {
-		return fmt.Errorf("InteracCITx no found with parentTxId `%v`", parentTxId)
+		return false, fmt.Errorf("InteracCITx no found with parentTxId `%v`", parentTxId)
 	}
 	if interacTx.Status != transaction.TxStatusSent {
-		return fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSent, interacTx.Status)
+		return false, fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSent, interacTx.Status)
 	}
 
 	//TODO: call scotial cancel api
@@ -411,11 +411,11 @@ func (p *InteracTxProcessor) Cancel(parentTxId int64) error {
 	interacTx.Status = transaction.TxStatusCancelled
 	err = p.interacTxRepo.UpdateInteracCITxById(context.TODO(), *interacTx)
 	if err != nil {
-		return err
+		return false, err
 	}
 	p.waits.Delete(interacTx.ScotiaPaymentId)
 	go p.txProcessor.rollback(interacTx.ParentTxId)
-	return nil
+	return true, nil
 }
 
 func scotiaToInternalStatusMapper(scotiaStatus string) transaction.TxStatus {

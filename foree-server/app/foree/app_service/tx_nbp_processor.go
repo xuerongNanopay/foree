@@ -286,46 +286,46 @@ func (p *NBPTxProcessor) refreshNBPStatuses(nbpReferences []string) {
 	}
 }
 
-func (p *NBPTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.TxStatus) error {
+func (p *NBPTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.TxStatus) (bool, error) {
 	if newTxStatus != transaction.TxStatusRejected && newTxStatus != transaction.TxStatusCompleted {
-		return fmt.Errorf("unsupport transaction status `%v`", newTxStatus)
+		return false, fmt.Errorf("unsupport transaction status `%v`", newTxStatus)
 	}
 
 	ctx := context.TODO()
 	nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, parentTxId)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if nbpTx == nil {
-		return fmt.Errorf("InteracCITx no found with parentTxId `%v`", parentTxId)
+		return false, fmt.Errorf("InteracCITx no found with parentTxId `%v`", parentTxId)
 	}
 	if nbpTx.Status != transaction.TxStatusSent {
-		return fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSent, nbpTx.Status)
+		return false, fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSent, nbpTx.Status)
 	}
 
 	nbpTx.Status = transaction.TxStatusCompleted
 	err = p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), *nbpTx)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	p.waits.Delete(nbpTx.NBPReference)
 	go p.txProcessor.next(nbpTx.ParentTxId)
-	return nil
+	return true, nil
 }
 
 // TODO: call scotial cancel api
-func (p *NBPTxProcessor) Cancel(parentTxId int64) error {
+func (p *NBPTxProcessor) Cancel(parentTxId int64) (bool, error) {
 	ctx := context.TODO()
 	nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, parentTxId)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if nbpTx == nil {
-		return fmt.Errorf("nbpTx no found with parentTxId `%v`", parentTxId)
+		return false, fmt.Errorf("nbpTx no found with parentTxId `%v`", parentTxId)
 	}
 	if nbpTx.Status != transaction.TxStatusSent {
-		return fmt.Errorf("expect nbpTx in `%v`, but got `%v`", transaction.TxStatusSent, nbpTx.Status)
+		return false, fmt.Errorf("expect nbpTx in `%v`, but got `%v`", transaction.TxStatusSent, nbpTx.Status)
 	}
 
 	//TODO: call scotial cancel api
@@ -334,11 +334,11 @@ func (p *NBPTxProcessor) Cancel(parentTxId int64) error {
 	nbpTx.Status = transaction.TxStatusCancelled
 	err = p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), *nbpTx)
 	if err != nil {
-		return err
+		return false, err
 	}
 	p.waits.Delete(nbpTx.NBPReference)
 	go p.txProcessor.rollback(nbpTx.ParentTxId)
-	return nil
+	return true, nil
 }
 
 func (p *NBPTxProcessor) sendPaymentWithMode(r nbp.LoadRemittanceRequest, mode nbp.PMTMode) (*nbp.LoadRemittanceResponse, error) {

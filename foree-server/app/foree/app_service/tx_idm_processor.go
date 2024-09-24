@@ -117,30 +117,30 @@ func (p *IDMTxProcessor) idmTransferVeirfy(parentTxId int64) {
 	p.process(idm.ParentTxId)
 }
 
-func (p *IDMTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.TxStatus) error {
+func (p *IDMTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.TxStatus) (bool, error) {
 	if newTxStatus != transaction.TxStatusRejected && newTxStatus != transaction.TxStatusCompleted {
-		return fmt.Errorf("unsupport transaction status `%v`", newTxStatus)
+		return false, fmt.Errorf("unsupport transaction status `%v`", newTxStatus)
 	}
 
 	ctx := context.TODO()
 	idmTx, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, parentTxId)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if idmTx == nil {
-		return fmt.Errorf("idmTx no found with parentTxId `%v`", parentTxId)
+		return false, fmt.Errorf("idmTx no found with parentTxId `%v`", parentTxId)
 	}
 	if idmTx.Status != transaction.TxStatusSent {
-		return fmt.Errorf("expect idmTx in `%v`, but got `%v`", transaction.TxStatusSent, idmTx.Status)
+		return false, fmt.Errorf("expect idmTx in `%v`, but got `%v`", transaction.TxStatusSent, idmTx.Status)
 	}
 
 	idmTx.Status = transaction.TxStatusCompleted
 	err = p.idmTxRepo.UpdateIDMTxById(context.TODO(), *idmTx)
 	if err != nil {
-		return err
+		return false, err
 	}
 	go p.txProcessor.next(idmTx.ParentTxId)
-	return nil
+	return true, nil
 }
 
 func (p *IDMTxProcessor) generateValidateTransferReq(tx *transaction.ForeeTx) *idm.IDMRequest {
