@@ -12,7 +12,6 @@ import (
 	foree_constant "xue.io/go-pay/app/foree/constant"
 	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/transaction"
-	"xue.io/go-pay/constant"
 	"xue.io/go-pay/partner/nbp"
 )
 
@@ -149,7 +148,7 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 		return
 	}
 
-	mode, err := mapNBPMode(fTx.COUT.CashOutAcc.Type)
+	mode, err := mapNBPMode(*fTx.COUT.CashOutAcc)
 	if err != nil {
 		foree_logger.Logger.Error("IDM_Processor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
 		return
@@ -258,54 +257,6 @@ func (p *NBPTxProcessor) refreshNBPStatuses(nbpReferences []string) {
 	}
 }
 
-func (p *NBPTxProcessor) refreshNBPStatus(fTx transaction.ForeeTx, nbpStatus string) (*transaction.ForeeTx, error) {
-	newStatus := nbpToInternalStatusMapper(nbpStatus)
-	if newStatus == transaction.TxStatusSent {
-		return &fTx, nil
-	}
-
-	dTx, err := p.db.Begin()
-	if err != nil {
-		dTx.Rollback()
-		return nil, err
-	}
-
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
-	curFTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.CI.ParentTxId)
-	if err != nil {
-		dTx.Rollback()
-		return nil, err
-	}
-
-	if curFTx.CurStage != transaction.TxStageNBPCO && curFTx.CurStageStatus != transaction.TxStatusSent {
-		dTx.Rollback()
-		p.clearChan <- fTx.ID
-		return nil, fmt.Errorf("NBPTxProcessor -- refreshNBPStatus -- ForeeTx `%v` is in stage `%s` at status `%s`", curFTx.ID, curFTx.CurStage, curFTx.CurStageStatus)
-	}
-
-	fTx.COUT.Status = newStatus
-	fTx.CurStageStatus = newStatus
-
-	err = p.nbpTxRepo.UpdateNBPCOTxById(ctx, *fTx.COUT)
-	if err != nil {
-		dTx.Rollback()
-		return nil, err
-	}
-
-	err = p.foreeTxRepo.UpdateForeeTxById(ctx, fTx)
-	if err != nil {
-		dTx.Rollback()
-		return nil, err
-	}
-
-	if err = dTx.Commit(); err != nil {
-		return nil, err
-	}
-
-	return &fTx, nil
-}
-
 func (p *NBPTxProcessor) sendPaymentWithMode(r nbp.LoadRemittanceRequest, mode nbp.PMTMode) (*nbp.LoadRemittanceResponse, error) {
 	switch mode {
 	case nbp.PMTModeCash:
@@ -388,18 +339,23 @@ func nbpToInternalStatusMapper(nbpStatus string) transaction.TxStatus {
 }
 
 // TODO: fix the issue
-func mapNBPMode(accType account.ContactAccountType) (nbp.PMTMode, error) {
-	// switch accType {
-	// case foree_constant.ContactAccountTypeCash:
-	// 	return nbp.PMTModeCash, nil
-	// case foree_constant.ContactAccountTypeThirdPartyPayments:
-	// 	return nbp.PMTModeThirdPartyPayments, nil
-	// case foree_constant.ContactAccountTypeAccountTransfers:
-	// 	return nbp.PMTModeAccountTransfers, nil
-	// default:
-	// 	return "", fmt.Errorf("NBPTxProcessor -- unknown contact account type `%s`", accType)
-	// }
-	return nbp.PMTModeCash, nil
+func mapNBPMode(contactAccount account.ContactAccount) (nbp.PMTMode, error) {
+	switch contactAccount.Type {
+	case foree_constant.ContactAccountTypeCash:
+		return nbp.PMTModeCash, nil
+	case foree_constant.ContactAccountTypeBankAccount:
+		if contactAccount.InstitutionName == "NBP" {
+			return nbp.PMTModeAccountTransfers, nil
+		} else {
+			return nbp.PMTModeThirdPartyPayments, nil
+		}
+	case foree_constant.ContactAccountTypeRDA:
+		fallthrough
+	case foree_constant.ContactAccountTypeMobileWallet:
+		return nbp.PMTModeThirdPartyPayments, nil
+	default:
+		return "", fmt.Errorf("NBPTxProcessor -- unknown contact account type `%s`", accType)
+	}
 }
 
 func mapNBPRemitterIdType(idType foree_auth.IdentificationType) nbp.RemitterIdType {
