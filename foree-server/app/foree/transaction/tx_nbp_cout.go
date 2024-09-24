@@ -32,6 +32,15 @@ const (
         where t.id = ?
 
     `
+	sQLNBPCOTxGetUniqueByNBPReference = `
+        SELECT 
+            t.id, t.status, t.amount, t.currency, t.nbp_reference,
+            t.cash_out_acc_id, t.parent_tx_id, t.owner_id,
+            t.created_at, t.updated_at
+        FROM nbp_co_tx t
+        where t.nbp_reference = ?
+
+    `
 	sQLNBPCOTxGetUniqueByParentTxId = `
         SELECT 
             t.id, t.status, t.amount, t.currency, t.nbp_reference,
@@ -146,6 +155,30 @@ func (repo *NBPCOTxRepo) GetUniqueNBPCOTxById(ctx context.Context, id int64) (*N
 
 func (repo *NBPCOTxRepo) GetUniqueNBPCOTxByParentTxId(ctx context.Context, id int64) (*NBPCOTx, error) {
 	rows, err := repo.db.Query(sQLNBPCOTxGetUniqueByParentTxId, id)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *NBPCOTx
+
+	for rows.Next() {
+		f, err = scanRowIntoNBPCOTx(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f == nil || f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func (repo *NBPCOTxRepo) GetUniqueNBPCOTxByNBPReference(ctx context.Context, nbpReference string) (*NBPCOTx, error) {
+	rows, err := repo.db.Query(sQLNBPCOTxGetUniqueByNBPReference, nbpReference)
 
 	if err != nil {
 		return nil, err

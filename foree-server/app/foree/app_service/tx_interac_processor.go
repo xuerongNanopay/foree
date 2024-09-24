@@ -151,6 +151,7 @@ func (p *InteracTxProcessor) start() {
 				)
 				continue
 			}
+			//No status change
 			if newStatus == w.interacTx.Status && newScotiaStatus == w.interacTx.ScotiaStatus {
 				foree_logger.Logger.Debug("InteracTxProcessor--scotiaWebhoodChan_still_in_waiting",
 					"socitaPaymentId", paymentId,
@@ -171,6 +172,7 @@ func (p *InteracTxProcessor) start() {
 				)
 				continue
 			}
+			//status laging.
 			if curCiTx.Status != transaction.TxStatusSent {
 				foree_logger.Logger.Warn("InteracTxProcessor--scotiaWebhoodChan_FAIL",
 					"socitaPaymentId", paymentId,
@@ -197,8 +199,8 @@ func (p *InteracTxProcessor) start() {
 				)
 				continue
 			}
-			// Still in send
-			if curCiTx.Status == w.interacTx.Status {
+			// Still in send.
+			if curCiTx.Status == transaction.TxStatusSent {
 				go p.txProcessor.onStatusUpdate(curCiTx.ParentTxId)
 				p.waits.Swap(paymentId, interacTxWrapper{
 					interacTx: *curCiTx,
@@ -207,7 +209,7 @@ func (p *InteracTxProcessor) start() {
 			} else {
 				p.waits.Delete(paymentId)
 				go p.process(curCiTx.ParentTxId)
-				foree_logger.Logger.Info("InteracTxProcessor--scotiaWebhoodChan_SUCCESS",
+				foree_logger.Logger.Info("InteracTxProcessor--scotiaWebhoodChan",
 					"socitaPaymentId", paymentId,
 					"interacCITxId", w.interacTx.ID,
 					"newInteracCITxStatus", newStatus,

@@ -94,10 +94,6 @@ func (p *NBPTxProcessor) start() {
 	}
 }
 
-func (p *NBPTxProcessor) waitFTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	return nil, nil
-}
-
 func (p *NBPTxProcessor) process(parentTxId int64) {
 	ctx := context.TODO()
 	nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, parentTxId)
@@ -250,6 +246,42 @@ func (p *NBPTxProcessor) refreshNBPStatuses(nbpReferences []string) {
 		if newTxStatus == transaction.TxStatusSent {
 			continue
 		}
+
+		curNBPTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByNBPReference(context.TODO(), nbpRef.GlobalId)
+		if err != nil {
+			foree_logger.Logger.Error("IDM_Processor--refreshNBPStatuses_FAIL",
+				"cause", err.Error(),
+			)
+			continue
+		}
+
+		if curNBPTx.Status != transaction.TxStatusSent {
+			foree_logger.Logger.Warn("IDM_Processor--refreshNBPStatuses_FAIL",
+				"nbpTxId", curNBPTx.ID,
+				"nbpReference", curNBPTx.NBPReference,
+				"currentNbpTxStatus", curNBPTx.Status,
+				"cause", "try to upddate nbpTx that is not in SENT status",
+			)
+			p.waits.Delete(curNBPTx.NBPReference)
+			continue
+		}
+
+		curNBPTx.Status = newTxStatus
+		err = p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), *curNBPTx)
+		if err != nil {
+			foree_logger.Logger.Error("IDM_Processor--refreshNBPStatuses_FAIL",
+				"cause", err.Error(),
+			)
+			continue
+		}
+		p.waits.Delete(curNBPTx.NBPReference)
+		go p.process(curNBPTx.ParentTxId)
+		foree_logger.Logger.Info("NBPTxProcessor--refreshNBPStatuses",
+			"nbpTxId", curNBPTx.ID,
+			"nbpReference", curNBPTx.NBPReference,
+			"newNBPTxStatus", curNBPTx.Status,
+			"msg", "NBP wait complete",
+		)
 	}
 }
 
