@@ -358,7 +358,7 @@ CREATE TABLE IF NOT EXISTS interac_ci_tx(
     FOREIGN KEY (parent_tx_id) REFERENCES foree_tx(id)
 );
 
-CREATE TABLE IF NOT EXISTS interac_refund_tx(
+CREATE TABLE IF NOT EXISTS foree_refund_tx(
     `id` SERIAL PRIMARY KEY,
     `status` VARCHAR(64) NOT NULL,
     `refund_interac_acc_id` BIGINT UNSIGNED NOT NULL,

@@ -11,29 +11,29 @@ import (
 )
 
 const (
-	sQLInteracRefundTxInsert = `
-		INSERT INTO interac_refund_tx
+	sQLForeeRefundTxInsert = `
+		INSERT INTO foree_refund_tx
 		(
 			status, refund_interac_acc_id, refund_amount, refund_currency, parent_tx_id, owner_id
 		) VALUES(?,?,?,?,?,?)
 	`
-	sQLInteracRefundTxUpdateById = `
-		UPDATE interac_refund_tx SET
+	sQLForeeRefundTxUpdateById = `
+		UPDATE foree_refund_tx SET
 			status = ?
 		where id = ?
 	`
-	sQLInteracRefundTxGetUniqueById = `
+	sQLForeeRefundTxGetUniqueById = `
 		SELECT
 			t.id, t.status, t.refund_interac_acc_id, refund_amount, refund_currency,
 			t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
-		FROM interac_refund_tx as t
+		FROM foree_refund_tx as t
 		WHERE t.id = ?
 	`
-	sQLInteracRefundTxGetUniqueByParentTxId = `
+	sQLForeeRefundTxGetUniqueByParentTxId = `
 		SELECT
 			t.id, t.status, t.refund_interac_acc_id, refund_amount, refund_currency,
 			t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
-		FROM interac_refund_tx as t
+		FROM foree_refund_tx as t
 		WHERE t.parent_tx_id = ?
 	`
 )
@@ -45,7 +45,7 @@ const (
 	RefundTxStatusRefunded RefundTxStatus = "REFUNDED"
 )
 
-type InteracRefundTx struct {
+type ForeeRefundTx struct {
 	ID                 int64            `json:"id"`
 	Status             RefundTxStatus   `json:"status"`
 	RefundInteracAccId int64            `json:"refundInteracAccId"`
@@ -58,15 +58,15 @@ type InteracRefundTx struct {
 	RefundInteracAcc *account.InteracAccount `json:"refundInteracAcc"`
 }
 
-func NewInteracRefundTxRepo(db *sql.DB) *InteracRefundTxRepo {
-	return &InteracRefundTxRepo{db: db}
+func NewForeeRefundTxRepo(db *sql.DB) *ForeeRefundTxRepo {
+	return &ForeeRefundTxRepo{db: db}
 }
 
-type InteracRefundTxRepo struct {
+type ForeeRefundTxRepo struct {
 	db *sql.DB
 }
 
-func (repo *InteracRefundTxRepo) InsertInteracRefundTx(ctx context.Context, tx InteracRefundTx) (int64, error) {
+func (repo *ForeeRefundTxRepo) InsertForeeRefundTx(ctx context.Context, tx ForeeRefundTx) (int64, error) {
 	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
 
 	var err error
@@ -74,7 +74,7 @@ func (repo *InteracRefundTxRepo) InsertInteracRefundTx(ctx context.Context, tx I
 
 	if ok {
 		result, err = dTx.Exec(
-			sQLInteracRefundTxInsert,
+			sQLForeeRefundTxInsert,
 			tx.Status,
 			tx.RefundInteracAccId,
 			tx.RefundAmt.Amount,
@@ -84,7 +84,7 @@ func (repo *InteracRefundTxRepo) InsertInteracRefundTx(ctx context.Context, tx I
 		)
 	} else {
 		result, err = repo.db.Exec(
-			sQLInteracRefundTxInsert,
+			sQLForeeRefundTxInsert,
 			tx.Status,
 			tx.RefundInteracAccId,
 			tx.RefundAmt.Amount,
@@ -104,16 +104,16 @@ func (repo *InteracRefundTxRepo) InsertInteracRefundTx(ctx context.Context, tx I
 	return id, nil
 }
 
-func (repo *InteracRefundTxRepo) UpdateInteracRefundTxById(ctx context.Context, tx InteracRefundTx) error {
+func (repo *ForeeRefundTxRepo) UpdateForeeRefundTxById(ctx context.Context, tx ForeeRefundTx) error {
 	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
 
 	var err error
 
 	if ok {
-		_, err = dTx.Exec(sQLInteracRefundTxUpdateById, tx.Status, tx.ID)
+		_, err = dTx.Exec(sQLForeeRefundTxUpdateById, tx.Status, tx.ID)
 
 	} else {
-		_, err = repo.db.Exec(sQLInteracRefundTxUpdateById, tx.Status, tx.ID)
+		_, err = repo.db.Exec(sQLForeeRefundTxUpdateById, tx.Status, tx.ID)
 
 	}
 	if err != nil {
@@ -122,18 +122,18 @@ func (repo *InteracRefundTxRepo) UpdateInteracRefundTxById(ctx context.Context, 
 	return nil
 }
 
-func (repo *InteracRefundTxRepo) GetUniqueInteracRefundTxByParentTxId(ctx context.Context, parentTxId int64) (*InteracRefundTx, error) {
-	rows, err := repo.db.Query(sQLInteracRefundTxGetUniqueByParentTxId, parentTxId)
+func (repo *ForeeRefundTxRepo) GetUniqueForeeRefundTxByParentTxId(ctx context.Context, parentTxId int64) (*ForeeRefundTx, error) {
+	rows, err := repo.db.Query(sQLForeeRefundTxGetUniqueByParentTxId, parentTxId)
 
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var f *InteracRefundTx
+	var f *ForeeRefundTx
 
 	for rows.Next() {
-		f, err = scanRowInteracRefundTx(rows)
+		f, err = scanRowForeeRefundTx(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -146,18 +146,18 @@ func (repo *InteracRefundTxRepo) GetUniqueInteracRefundTxByParentTxId(ctx contex
 	return f, nil
 }
 
-func (repo *InteracRefundTxRepo) GetUniqueInteracRefundTxById(ctx context.Context, id int64) (*InteracRefundTx, error) {
-	rows, err := repo.db.Query(sQLInteracRefundTxGetUniqueById, id)
+func (repo *ForeeRefundTxRepo) GetUniqueForeeRefundTxById(ctx context.Context, id int64) (*ForeeRefundTx, error) {
+	rows, err := repo.db.Query(sQLForeeRefundTxGetUniqueById, id)
 
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var f *InteracRefundTx
+	var f *ForeeRefundTx
 
 	for rows.Next() {
-		f, err = scanRowInteracRefundTx(rows)
+		f, err = scanRowForeeRefundTx(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -170,8 +170,8 @@ func (repo *InteracRefundTxRepo) GetUniqueInteracRefundTxById(ctx context.Contex
 	return f, nil
 }
 
-func scanRowInteracRefundTx(rows *sql.Rows) (*InteracRefundTx, error) {
-	tx := new(InteracRefundTx)
+func scanRowForeeRefundTx(rows *sql.Rows) (*ForeeRefundTx, error) {
+	tx := new(ForeeRefundTx)
 	err := rows.Scan(
 		&tx.ID,
 		&tx.Status,

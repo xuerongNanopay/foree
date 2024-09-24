@@ -6,7 +6,7 @@ drop table fees;
 drop table idm_compliance;
 drop table idm_tx;
 drop table interac_accounts;
-drop table interac_refund_tx;
+drop table foree_refund_tx;
 drop table interac_ci_tx;
 drop table nbp_co_tx;
 drop table rate;

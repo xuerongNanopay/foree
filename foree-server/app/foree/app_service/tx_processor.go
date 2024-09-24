@@ -28,7 +28,7 @@ func NewTxProcessor(
 	txHistoryRepo *transaction.TxHistoryRepo,
 	txSummaryRepo *transaction.TxSummaryRepo,
 	foreeTxRepo *transaction.ForeeTxRepo,
-	interacRefundTxRepo *transaction.InteracRefundTxRepo,
+	interacRefundTxRepo *transaction.ForeeRefundTxRepo,
 	rewardRepo *transaction.RewardRepo,
 	dailyTxLimiteRepo *transaction.DailyTxLimitRepo,
 	userRepo *auth.UserRepo,
@@ -72,7 +72,7 @@ type TxProcessor struct {
 	txHistoryRepo       *transaction.TxHistoryRepo
 	txSummaryRepo       *transaction.TxSummaryRepo
 	foreeTxRepo         *transaction.ForeeTxRepo
-	interacRefundTxRepo *transaction.InteracRefundTxRepo
+	interacRefundTxRepo *transaction.ForeeRefundTxRepo
 	rewardRepo          *transaction.RewardRepo
 	dailyTxLimiteRepo   *transaction.DailyTxLimitRepo
 	userRepo            *auth.UserRepo
@@ -709,7 +709,7 @@ func (p *TxProcessor) MaybeRefund(ctx context.Context, fTx transaction.ForeeTx) 
 
 	// Create refund transaction
 	if fTx.CI.Status == transaction.TxStatusCompleted {
-		_, err := p.interacRefundTxRepo.InsertInteracRefundTx(ctx, transaction.InteracRefundTx{
+		_, err := p.interacRefundTxRepo.InsertForeeRefundTx(ctx, transaction.ForeeRefundTx{
 			Status:             transaction.RefundTxStatusInitial,
 			RefundInteracAccId: fTx.CI.ID,
 			ParentTxId:         fTx.ID,

@@ -50,7 +50,7 @@ type ForeeApp struct {
 	foreeTxRepo            *transaction.ForeeTxRepo
 	txHistoryRepo          *transaction.TxHistoryRepo
 	interacCITxRepo        *transaction.InteracCITxRepo
-	interacRefundTxRepo    *transaction.InteracRefundTxRepo
+	interacRefundTxRepo    *transaction.ForeeRefundTxRepo
 	nbpCOTxRepo            *transaction.NBPCOTxRepo
 	txQuoteRepo            *transaction.TxQuoteRepo
 	txSummaryRepo          *transaction.TxSummaryRepo
@@ -125,7 +125,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.foreeTxRepo = transaction.NewForeeTxRepo(db)
 	app.txHistoryRepo = transaction.NewTxHistoryRepo(db)
 	app.interacCITxRepo = transaction.NewInteracCITxRepo(db)
-	app.interacRefundTxRepo = transaction.NewInteracRefundTxRepo(db)
+	app.interacRefundTxRepo = transaction.NewForeeRefundTxRepo(db)
 	app.nbpCOTxRepo = transaction.NewNBPCOTxRepo(db)
 	app.txQuoteRepo = transaction.NewTxQuoteRepo(5, 2048)
 	app.txSummaryRepo = transaction.NewTxSummaryRepo(db)
