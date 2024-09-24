@@ -52,7 +52,6 @@ func NewInteracTxProcessor(
 		txProcessor:         txProcessor,
 		statusRefreshChan:   make(chan transaction.InteracCITx, 64),
 		refreshStatusChan:   make(chan string, 64),
-		manualResolveChan:   make(chan string),
 		statusRecheckticker: time.NewTicker(5 * time.Minute),
 		statusRefreshTicker: time.NewTicker(5 * time.Minute),
 	}
@@ -77,7 +76,6 @@ type InteracTxProcessor struct {
 	waits               sync.Map
 	statusRefreshChan   chan transaction.InteracCITx
 	refreshStatusChan   chan string
-	manualResolveChan   chan string
 	statusRecheckticker *time.Ticker
 	statusRefreshTicker *time.Ticker
 }
@@ -208,26 +206,13 @@ func (p *InteracTxProcessor) start() {
 				})
 			} else {
 				p.waits.Delete(paymentId)
+				//moving forward
 				go p.process(curCiTx.ParentTxId)
 				foree_logger.Logger.Info("InteracTxProcessor--scotiaWebhoodChan",
 					"socitaPaymentId", paymentId,
 					"interacCITxId", w.interacTx.ID,
 					"newInteracCITxStatus", newStatus,
 					"newScotiaStatus", newScotiaStatus,
-				)
-			}
-		case paymentId := <-p.manualResolveChan:
-			_, ok := p.waits.Load(paymentId)
-			if !ok {
-				foree_logger.Logger.Warn("InteracTxProcessor--manualResolveChan_FAIL",
-					"socitaPaymentId", paymentId,
-					"cause", "unknown paymentId in the wait map",
-				)
-			} else {
-				p.waits.Delete(paymentId)
-				foree_logger.Logger.Info("InteracTxProcessor--manualResolveChan_SUCCESS",
-					"socitaPaymentId", paymentId,
-					"msg", "remove interacCiTx from map successfully",
 				)
 			}
 		case <-p.statusRefreshTicker.C:
@@ -401,11 +386,13 @@ func (p *InteracTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transact
 	if err != nil {
 		return err
 	}
-	p.manualResolveChan <- interacTx.ScotiaPaymentId
+
+	p.waits.Delete(interacTx.ScotiaPaymentId)
 	go p.txProcessor.next(interacTx.ParentTxId)
 	return nil
 }
 
+// TODO: call scotial cancel api
 func (p *InteracTxProcessor) Cancel(parentTxId int64) error {
 	ctx := context.TODO()
 	interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, parentTxId)
@@ -424,13 +411,14 @@ func (p *InteracTxProcessor) Cancel(parentTxId int64) error {
 	}
 
 	//TODO: call scotial cancel api
-	interacTx.Status = transaction.TxStatusCompleted
+	//TODO: if error return.
+	interacTx.Status = transaction.TxStatusCancelled
 	err = p.interacTxRepo.UpdateInteracCITxById(context.TODO(), *interacTx)
 	if err != nil {
 		return err
 	}
-	p.manualResolveChan <- interacTx.ScotiaPaymentId
-	go p.txProcessor.next(interacTx.ParentTxId)
+	p.waits.Delete(interacTx.ScotiaPaymentId)
+	go p.txProcessor.rollback(interacTx.ParentTxId)
 	return nil
 }
 
