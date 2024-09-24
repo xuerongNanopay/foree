@@ -89,6 +89,7 @@ func (p *NBPTxProcessor) start() {
 				recheckAt: time.Now().Add(nbpTxRecheckInterval),
 			})
 		case <-p.statusRefreshTicker.C:
+			//TODO: check status.
 			func() {}()
 		}
 	}
@@ -400,4 +401,25 @@ func generateLoadRemittanceFromContactAccount(acc *account.ContactAccount) strin
 		return fmt.Sprintf("%s,%s,%s,%s,%s", acc.Address1, acc.City, acc.Province, acc.PostalCode, acc.Country)
 	}
 	return fmt.Sprintf("%s,%s,%s,%s,%s,%s", acc.Address1, acc.Address2, acc.City, acc.Province, acc.PostalCode, acc.Country)
+}
+
+func chunkNBPIds(s []string, splitSize int) [][]string {
+	numberOfSlices := len(s) / splitSize
+	remainder := len(s) % splitSize
+
+	ret := make([][]string, 0)
+	start := 0
+	end := 0
+
+	for i := 0; i < numberOfSlices; i++ {
+		end += splitSize
+		ret = append(ret, s[start:end])
+		start = end
+	}
+
+	if remainder > 0 {
+		end = start + remainder
+		ret = append(ret, s[start:end])
+	}
+	return ret
 }
