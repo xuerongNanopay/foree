@@ -418,6 +418,8 @@ func (p *TxProcessor) processRootTx(fTxId int64) {
 		p.interacTxProcessor.process(fTxId)
 	case transaction.TxStageIDM:
 		p.idmTxProcessor.process(fTxId)
+	case transaction.TxStageNBPCO:
+		p.nbpTxProcessor.process(fTxId)
 	default:
 		foree_logger.Logger.Error("processRootTx",
 			"foreeTxId", fTx.ID,

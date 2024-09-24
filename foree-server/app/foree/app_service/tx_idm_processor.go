@@ -39,25 +39,25 @@ func (p *IDMTxProcessor) process(parentTxId int64) {
 	ctx := context.TODO()
 	idmTx, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, parentTxId)
 	if err != nil {
-		foree_logger.Logger.Error("IDM_Processor-process_FAIL", "parentTxId", parentTxId, "cause", err.Error())
+		foree_logger.Logger.Error("IDMTxProcessor-process_FAIL", "parentTxId", parentTxId, "cause", err.Error())
 		return
 	}
 	if idmTx == nil {
-		foree_logger.Logger.Error("IDM_Processor-process_FAIL", "parentTxId", parentTxId, "cause", "idmTx no found")
+		foree_logger.Logger.Error("IDMTxProcessor-process_FAIL", "parentTxId", parentTxId, "cause", "idmTx no found")
 		return
 	}
 	switch idmTx.Status {
 	case transaction.TxStatusInitial:
 		p.idmTransferVeirfy(parentTxId)
 	case transaction.TxStatusSuspend:
-		foree_logger.Logger.Debug("IDM_Processor-process", "parentTxId", parentTxId, "idmTxId", idmTx.ID, "idmTxStatus", idmTx.Status, "msg", "waiting for action")
+		foree_logger.Logger.Debug("IDMTxProcessor-process", "parentTxId", parentTxId, "idmTxId", idmTx.ID, "idmTxStatus", idmTx.Status, "msg", "waiting for action")
 	case transaction.TxStatusCompleted:
 		p.txProcessor.next(idmTx.ParentTxId)
 	case transaction.TxStatusRejected:
 		p.txProcessor.rollback(idmTx.ParentTxId)
 	default:
 		foree_logger.Logger.Error(
-			"IDM_Processor-process_FAIL",
+			"IDMTxProcessor-process_FAIL",
 			"parentTxId", parentTxId,
 			"interacCITxId", idmTx.ID,
 			"interacCITxStatus", idmTx.Status,
@@ -69,13 +69,13 @@ func (p *IDMTxProcessor) process(parentTxId int64) {
 func (p *IDMTxProcessor) idmTransferVeirfy(parentTxId int64) {
 	fTx, err := p.txProcessor.loadTx(parentTxId, true)
 	if err != nil {
-		foree_logger.Logger.Error("IDM_Processor-idmTransferVeirfy_FAIL", "parentTxId", parentTxId, "cause", err.Error())
+		foree_logger.Logger.Error("IDMTxProcessor-idmTransferVeirfy_FAIL", "parentTxId", parentTxId, "cause", err.Error())
 	}
 	req := p.generateValidateTransferReq(fTx)
 	resp, err := p.idmClient.Transfer(*req)
 	// Treat err and err response as Suspend.
 	if err != nil {
-		foree_logger.Logger.Error("IDM_Processor-idmTransferVeirfy_FAIL",
+		foree_logger.Logger.Error("IDMTxProcessor-idmTransferVeirfy_FAIL",
 			"parentTxId", parentTxId,
 			"cause", err.Error(),
 		)
@@ -94,7 +94,7 @@ func (p *IDMTxProcessor) idmTransferVeirfy(parentTxId int64) {
 		idm.Status = transaction.TxStatusSuspend
 		err = p.idmTxRepo.UpdateIDMTxById(context.TODO(), idm)
 		if err != nil {
-			foree_logger.Logger.Error("IDM_Processor-idmTransferVeirfy_FAIL",
+			foree_logger.Logger.Error("IDMTxProcessor-idmTransferVeirfy_FAIL",
 				"parentTxId", parentTxId,
 				"cause", err.Error(),
 			)
@@ -107,7 +107,7 @@ func (p *IDMTxProcessor) idmTransferVeirfy(parentTxId int64) {
 	idm.Status = transaction.TxStatusCompleted
 	err = p.idmTxRepo.UpdateIDMTxById(context.TODO(), idm)
 	if err != nil {
-		foree_logger.Logger.Error("IDM_Processor-idmTransferVeirfy_FAIL",
+		foree_logger.Logger.Error("IDMTxProcessor-idmTransferVeirfy_FAIL",
 			"parentTxId", parentTxId,
 			"cause", err.Error(),
 		)

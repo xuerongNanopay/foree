@@ -16,10 +16,10 @@ import (
 	"xue.io/go-pay/partner/nbp"
 )
 
-const coutTxRecheckInterval = 10 * time.Minute
-const coutTxRetryInterval = 4 * time.Second
+const nbpTxRecheckInterval = 10 * time.Minute
+const nbpTxRetryInterval = 10 * time.Second
+const nbpTxRetryAttempts = 5
 const nbpTxProcessorRefreshTicker = 5 * time.Minute
-const nbpTxProcessorRetryTicker = 2 * time.Second
 
 func NewNBPTxProcessor(
 	db *sql.DB,
@@ -42,22 +42,15 @@ func NewNBPTxProcessor(
 		waitFTxs:               make(map[int64]*transaction.ForeeTx, 256),
 		clearChan:              make(chan int64, 32),               // capacity with 32 should be enough.
 		forwardChan:            make(chan transaction.ForeeTx, 32), // capacity with 32 should be enough.
-		retryTicker:            time.NewTicker(nbpTxProcessorRefreshTicker),
-		checkStatusTicker:      time.NewTicker(nbpTxProcessorRetryTicker),
+		checkStatusTicker:      time.NewTicker(nbpTxProcessorRefreshTicker),
 	}
 	go ret.start()
-	go ret.startRetry()
 	return ret
 }
 
 type NBPTxWaitWrapper struct {
-	coutTx    transaction.NBPCOTx
+	nbpTx     transaction.NBPCOTx
 	recheckAt time.Time
-}
-type NBPTxRetryWrapper struct {
-	fTx     transaction.ForeeTx
-	count   int
-	retryAt time.Time
 }
 
 type NBPTxProcessor struct {
@@ -75,57 +68,30 @@ type NBPTxProcessor struct {
 	checkStatusTicker      *time.Ticker
 	clearChan              chan int64
 	waits                  sync.Map
-	retires                sync.Map
 	statusRefreshChan      chan transaction.NBPCOTx
-	retryChan              chan transaction.ForeeTx
 	statusRefreshTicker    *time.Ticker
-	retryTicker            *time.Ticker
 }
 
 func (p *NBPTxProcessor) start() {
 	for {
 		select {
-		case coutTx := <-p.statusRefreshChan:
-			_, ok := p.waits.Load(coutTx.NBPReference)
+		case nbpTx := <-p.statusRefreshChan:
+			_, ok := p.waits.Load(nbpTx.NBPReference)
 			if ok {
+				foree_logger.Logger.Warn("NBPTxProcessor-statusRefreshChan",
+					"nbpReference", nbpTx.NBPReference,
+					"msg", "nbpTx is in waiting aleardy",
+				)
 				continue
 			}
-			p.waits.Store(coutTx.NBPReference, NBPTxWaitWrapper{
-				coutTx:    coutTx,
-				recheckAt: time.Now().Add(ciTxRecheckInterval),
+			p.waits.Store(nbpTx.NBPReference, NBPTxWaitWrapper{
+				nbpTx:     nbpTx,
+				recheckAt: time.Now().Add(nbpTxRecheckInterval),
 			})
 		case <-p.statusRefreshTicker.C:
 			func() {}()
 		}
 	}
-}
-
-func (p *NBPTxProcessor) startRetry() {
-	for {
-		select {
-		case fTx := <-p.retryChan:
-			_, ok := p.retires.Load(fTx.COUT.NBPReference)
-			if ok {
-				continue
-			}
-			p.retires.Store(fTx.COUT.NBPReference, NBPTxRetryWrapper{
-				fTx:     fTx,
-				count:   0,
-				retryAt: time.Now().Add(coutTxRetryInterval),
-			})
-		case <-p.retryTicker.C:
-			go func() {
-				p.retires.Range(func(k, v) bool {
-
-					return true
-				})
-			}()
-		}
-	}
-}
-
-func (p *NBPTxProcessor) Start() error {
-	return nil
 }
 
 func (p *NBPTxProcessor) waitFTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
@@ -138,13 +104,124 @@ func (p *NBPTxProcessor) waitFTx(fTx transaction.ForeeTx) (*transaction.ForeeTx,
 
 func (p *NBPTxProcessor) process(parentTxId int64) {
 	ctx := context.TODO()
-	coutTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, parentTxId)
+	nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, parentTxId)
 	if err != nil {
 		foree_logger.Logger.Error("NBPTxProcessor-process", "parentTxId", parentTxId, "cause", err.Error())
 		return
 	}
-	if coutTx == nil {
+	if nbpTx == nil {
 		foree_logger.Logger.Error("NBPTxProcessor-process", "parentTxId", parentTxId, "cause", "interacTx no found")
+		return
+	}
+
+	switch nbpTx.Status {
+	case transaction.TxStatusInitial:
+		p.loadRemittance(nbpTx.ParentTxId)
+	case transaction.TxStatusSent:
+		p.statusRefreshChan <- *nbpTx
+	case transaction.TxStatusCompleted:
+		p.txProcessor.next(nbpTx.ParentTxId)
+	case transaction.TxStatusRejected:
+		p.txProcessor.rollback(nbpTx.ParentTxId)
+	case transaction.TxStatusCancelled:
+		p.txProcessor.rollback(nbpTx.ParentTxId)
+	default:
+		foree_logger.Logger.Error(
+			"NBPTxProcessor-process",
+			"parentTxId", parentTxId,
+			"nbpCITxId", nbpTx.ID,
+			"nbpCITxStatus", nbpTx.Status,
+			"cause", "unsupport status",
+		)
+	}
+}
+
+func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
+	fTx, err := p.txProcessor.loadTx(parentTxId, true)
+	if err != nil {
+		foree_logger.Logger.Error("IDM_Processor-loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
+		return
+	}
+	req, err := p.buildLoadRemittanceRequest(*fTx)
+	if err != nil {
+		foree_logger.Logger.Error("IDM_Processor-loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
+		return
+	}
+
+	mode, err := mapNBPMode(fTx.COUT.CashOutAcc.Type)
+	if err != nil {
+		foree_logger.Logger.Error("IDM_Processor-loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
+		return
+	}
+
+	//403: Internal Error
+	//405: Duplicate Global ID
+	//406: Remittance could not be load
+	//401: token error
+
+	// Retry 5 times with 15 second interval.
+	var resp *nbp.LoadRemittanceResponse
+	for i := 0; i < nbpTxRetryAttempts; i++ {
+		resp, err = p.sendPaymentWithMode(*req, mode)
+		if err != nil {
+			foree_logger.Logger.Error("IDM_Processor-loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
+			return
+		}
+		//Retry case: 5xx, 401, 403
+		if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" || resp.ResponseCode == "406" {
+			foree_logger.Logger.Warn("IDM_Processor-loadRemittance", "parentTxId", parentTxId, "retry", i)
+			time.Sleep(nbpTxRetryInterval)
+		} else {
+			break
+		}
+
+	}
+
+	// Retry later manully
+	if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
+		foree_logger.Logger.Error("IDM_Processor-loadRemittance_FAIL",
+			"parentTxId", parentTxId,
+			"httpStatus", resp.StatusCode,
+			"httpResponse", resp.RawResponse,
+			"msg", "please re-run the transaction.",
+		)
+		return
+	}
+
+	nbpTx := *fTx.COUT
+
+	// Success
+	if resp.StatusCode/100 == 2 || resp.ResponseCode == "405" {
+		nbpTx.Status = transaction.TxStatusSent
+		err := p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), nbpTx)
+		if err != nil {
+			foree_logger.Logger.Error("IDM_Processor-loadRemittance_FAIL",
+				"parentTxId", parentTxId,
+				"httpStatus", resp.StatusCode,
+				"cause", err.Error(),
+			)
+			return
+		}
+		foree_logger.Logger.Info("IDM_Processor-loadRemittance_SUCCESS", "parentTxId", parentTxId)
+		return
+	}
+
+	// Reject
+	foree_logger.Logger.Error("IDM_Processor-loadRemittance_FAIL",
+		"parentTxId", parentTxId,
+		"httpStatus", resp.StatusCode,
+		"httpRequest", resp.RawRequest,
+		"httpResponse", resp.RawResponse,
+		"msg", "please re-run the transaction.",
+	)
+	nbpTx.Status = transaction.TxStatusRejected
+	err = p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), nbpTx)
+	if err != nil {
+		foree_logger.Logger.Error("IDM_Processor-loadRemittance_FAIL",
+			"parentTxId", parentTxId,
+			"httpStatus", resp.StatusCode,
+			"cause", err.Error(),
+		)
 		return
 	}
 }

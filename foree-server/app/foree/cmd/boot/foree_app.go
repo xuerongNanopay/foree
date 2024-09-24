@@ -183,13 +183,6 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.txProcessor.SetIDMTxProcessor(app.idmTxProcessor)
 	app.txProcessor.SetNBPTxProcessor(app.nbpTxProcessor)
 
-	// if err := app.interacTxProcessor.Start(); err != nil {
-	// 	return err
-	// }
-
-	if err := app.nbpTxProcessor.Start(); err != nil {
-		return err
-	}
 	app.promotionService = foree_service.NewPromotionService(app.promotionRepo, app.rewardRepo, app.referralRepo)
 
 	//Initial service
