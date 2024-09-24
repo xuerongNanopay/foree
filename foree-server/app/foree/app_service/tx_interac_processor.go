@@ -89,7 +89,7 @@ func (p *InteracTxProcessor) start() {
 		case interacTx := <-p.statusRefreshChan:
 			_, ok := p.waits.Load(interacTx.ScotiaPaymentId)
 			if ok {
-				foree_logger.Logger.Warn("InteracTxProcessor-statusRefreshChan",
+				foree_logger.Logger.Warn("InteracTxProcessor--statusRefreshChan",
 					"interacTxId", interacTx.ID,
 					"msg", "interacTx is in waiting aleardy",
 				)
@@ -105,21 +105,21 @@ func (p *InteracTxProcessor) start() {
 			if !ok {
 				interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByScotiaPaymentId(context.TODO(), paymentId)
 				if err != nil {
-					foree_logger.Logger.Error("InteracTxProcessor-scotiaWebhoodChan_getInteracCiTxByScotiaPaymentId_FAIL",
+					foree_logger.Logger.Error("InteracTxProcessor--scotiaWebhoodChan_getInteracCiTxByScotiaPaymentId_FAIL",
 						"socitaPaymentId", paymentId,
 						"cause", err.Error(),
 					)
 					continue
 				}
 				if interacTx == nil {
-					foree_logger.Logger.Error("InteracTxProcessor-scotiaWebhoodChan_getInteracCiTxByScotiaPaymentId_FAIL",
+					foree_logger.Logger.Error("InteracTxProcessor--scotiaWebhoodChan_getInteracCiTxByScotiaPaymentId_FAIL",
 						"socitaPaymentId", paymentId,
 						"cause", "InteracTx no found",
 					)
 					continue
 				}
 				if interacTx.Status != transaction.TxStatusSent {
-					foree_logger.Logger.Warn("InteracTxProcessor-scotiaWebhoodChan_FAIL",
+					foree_logger.Logger.Warn("InteracTxProcessor--scotiaWebhoodChan_FAIL",
 						"socitaPaymentId", paymentId,
 						"interacCITxId", interacTx.ID,
 						"interacCITxStatus", interacTx.Status,
@@ -133,7 +133,7 @@ func (p *InteracTxProcessor) start() {
 				})
 				v, _ := p.waits.Load(paymentId)
 				w, _ = v.(interacTxWrapper)
-				foree_logger.Logger.Info("InteracTxProcessor-scotiaWebhoodChan",
+				foree_logger.Logger.Info("InteracTxProcessor--scotiaWebhoodChan",
 					"socitaPaymentId", paymentId,
 					"interacCITxId", interacTx.ID,
 					"interacCITxStatus", interacTx.Status,
@@ -143,7 +143,7 @@ func (p *InteracTxProcessor) start() {
 
 			newStatus, newScotiaStatus, err := p.refreshScotiaStatus(w.interacTx)
 			if err != nil {
-				foree_logger.Logger.Error("InteracTxProcessor-scotiaWebhoodChan_FAIL",
+				foree_logger.Logger.Error("InteracTxProcessor--scotiaWebhoodChan_FAIL",
 					"socitaPaymentId", paymentId,
 					"interacCITxId", w.interacTx.ID,
 					"interacCITxStatus", w.interacTx.Status,
@@ -152,7 +152,7 @@ func (p *InteracTxProcessor) start() {
 				continue
 			}
 			if newStatus == w.interacTx.Status && newScotiaStatus == w.interacTx.ScotiaStatus {
-				foree_logger.Logger.Debug("InteracTxProcessor-scotiaWebhoodChan_still_in_waiting",
+				foree_logger.Logger.Debug("InteracTxProcessor--scotiaWebhoodChan_still_in_waiting",
 					"socitaPaymentId", paymentId,
 					"foreeTxId", w.interacTx.ParentTxId,
 					"interacCITxId", w.interacTx.ID,
@@ -163,7 +163,7 @@ func (p *InteracTxProcessor) start() {
 			}
 			curCiTx, err := p.interacTxRepo.GetUniqueInteracCITxByScotiaPaymentId(context.TODO(), paymentId)
 			if err != nil {
-				foree_logger.Logger.Error("InteracTxProcessor-scotiaWebhoodChan_FAIL",
+				foree_logger.Logger.Error("InteracTxProcessor--scotiaWebhoodChan_FAIL",
 					"socitaPaymentId", paymentId,
 					"interacCITxId", w.interacTx.ID,
 					"interacCITxStatus", w.interacTx.Status,
@@ -172,7 +172,7 @@ func (p *InteracTxProcessor) start() {
 				continue
 			}
 			if curCiTx.Status != transaction.TxStatusSent {
-				foree_logger.Logger.Warn("InteracTxProcessor-scotiaWebhoodChan_FAIL",
+				foree_logger.Logger.Warn("InteracTxProcessor--scotiaWebhoodChan_FAIL",
 					"socitaPaymentId", paymentId,
 					"foreeTxId", curCiTx.ParentTxId,
 					"interacCITxId", curCiTx.ID,
@@ -188,7 +188,7 @@ func (p *InteracTxProcessor) start() {
 
 			err = p.interacTxRepo.UpdateInteracCITxById(context.TODO(), *curCiTx)
 			if err != nil {
-				foree_logger.Logger.Error("InteracTxProcessor-scotiaWebhoodChan_FAIL",
+				foree_logger.Logger.Error("InteracTxProcessor--scotiaWebhoodChan_FAIL",
 					"socitaPaymentId", paymentId,
 					"interacCITxId", w.interacTx.ID,
 					"newInteracCITxStatus", newStatus,
@@ -207,7 +207,7 @@ func (p *InteracTxProcessor) start() {
 			} else {
 				p.waits.Delete(paymentId)
 				go p.process(curCiTx.ParentTxId)
-				foree_logger.Logger.Info("InteracTxProcessor-scotiaWebhoodChan_SUCCESS",
+				foree_logger.Logger.Info("InteracTxProcessor--scotiaWebhoodChan_SUCCESS",
 					"socitaPaymentId", paymentId,
 					"interacCITxId", w.interacTx.ID,
 					"newInteracCITxStatus", newStatus,
@@ -217,13 +217,13 @@ func (p *InteracTxProcessor) start() {
 		case paymentId := <-p.manualResolveChan:
 			_, ok := p.waits.Load(paymentId)
 			if !ok {
-				foree_logger.Logger.Warn("InteracTxProcessor-manualResolveChan_FAIL",
+				foree_logger.Logger.Warn("InteracTxProcessor--manualResolveChan_FAIL",
 					"socitaPaymentId", paymentId,
 					"cause", "unknown paymentId in the wait map",
 				)
 			} else {
 				p.waits.Delete(paymentId)
-				foree_logger.Logger.Info("InteracTxProcessor-manualResolveChan_SUCCESS",
+				foree_logger.Logger.Info("InteracTxProcessor--manualResolveChan_SUCCESS",
 					"socitaPaymentId", paymentId,
 					"msg", "remove interacCiTx from map successfully",
 				)
@@ -281,10 +281,10 @@ func (p *InteracTxProcessor) requestPayment(interacTx transaction.InteracCITx) {
 	resp, err := p.scotiaClient.RequestPayment(*p.createRequestPaymentReq(&interacTx))
 
 	if err != nil {
-		foree_logger.Logger.Error("InteracTxProcessor-requestPayment_FAIL", "interacTxId", interacTx.ID, "cause", err.Error())
+		foree_logger.Logger.Error("InteracTxProcessor--requestPayment_FAIL", "interacTxId", interacTx.ID, "cause", err.Error())
 	}
 	if resp.StatusCode/100 != 2 {
-		foree_logger.Logger.Warn("InteracTxProcessor-requestPayment_FAIL",
+		foree_logger.Logger.Warn("InteracTxProcessor--requestPayment_FAIL",
 			"interacTxId", interacTx.ID,
 			"httpResponseStatus", resp.StatusCode,
 			"httpRequest", resp.RawRequest,
@@ -297,7 +297,7 @@ func (p *InteracTxProcessor) requestPayment(interacTx transaction.InteracCITx) {
 		interacTx.Status = transaction.TxStatusRejected
 		err := p.interacTxRepo.UpdateInteracCITxById(context.TODO(), interacTx)
 		if err != nil {
-			foree_logger.Logger.Error("InteracTxProcessor-requestPayment_FAIL", "interacTxId", interacTx.ID, "cause", err.Error())
+			foree_logger.Logger.Error("InteracTxProcessor--requestPayment_FAIL", "interacTxId", interacTx.ID, "cause", err.Error())
 		}
 		p.process(interacTx.ParentTxId)
 		return
@@ -310,10 +310,10 @@ func (p *InteracTxProcessor) requestPayment(interacTx transaction.InteracCITx) {
 	})
 
 	if err != nil {
-		foree_logger.Logger.Error("InteracTxProcessor-requestPayment_FAIL", "interacTxId", interacTx.ID, "cause", err.Error())
+		foree_logger.Logger.Error("InteracTxProcessor--requestPayment_FAIL", "interacTxId", interacTx.ID, "cause", err.Error())
 	}
 	if statusResp.StatusCode/100 != 2 {
-		foree_logger.Logger.Warn("InteracTxProcessor-requestPayment_FAIL",
+		foree_logger.Logger.Warn("InteracTxProcessor--requestPayment_FAIL",
 			"interacTxId", interacTx.ID,
 			"httpResponseStatus", statusResp.StatusCode,
 			"httpRequest", statusResp.RawRequest,
@@ -326,7 +326,7 @@ func (p *InteracTxProcessor) requestPayment(interacTx transaction.InteracCITx) {
 		interacTx.Status = transaction.TxStatusRejected
 		err := p.interacTxRepo.UpdateInteracCITxById(context.TODO(), interacTx)
 		if err != nil {
-			foree_logger.Logger.Error("InteracTxProcessor-requestPayment_FAIL", "interacTxId", interacTx.ID, "cause", err.Error())
+			foree_logger.Logger.Error("InteracTxProcessor--requestPayment_FAIL", "interacTxId", interacTx.ID, "cause", err.Error())
 		}
 		p.process(interacTx.ParentTxId)
 		return
@@ -340,10 +340,10 @@ func (p *InteracTxProcessor) requestPayment(interacTx transaction.InteracCITx) {
 
 	err = p.interacTxRepo.UpdateInteracCITxById(context.TODO(), interacTx)
 	if err != nil {
-		foree_logger.Logger.Error("InteracTxProcessor-requestPayment_FAIL", "interacTxId", interacTx.ID, "cause", err.Error())
+		foree_logger.Logger.Error("InteracTxProcessor--requestPayment_FAIL", "interacTxId", interacTx.ID, "cause", err.Error())
 		return
 	}
-	foree_logger.Logger.Info("InteracTxProcessor-requestPayment_SUCCESS",
+	foree_logger.Logger.Info("InteracTxProcessor--requestPayment_SUCCESS",
 		"interacTxId", interacTx.ID,
 	)
 
