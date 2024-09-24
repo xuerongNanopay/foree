@@ -223,7 +223,6 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 			"httpStatus", resp.StatusCode,
 			"cause", err.Error(),
 		)
-		return
 	}
 	p.process(nbpTx.ParentTxId)
 }

@@ -327,7 +327,6 @@ func (p *InteracTxProcessor) requestPayment(interacTx transaction.InteracCITx) {
 		err := p.interacTxRepo.UpdateInteracCITxById(context.TODO(), interacTx)
 		if err != nil {
 			foree_logger.Logger.Error("InteracTxProcessor-requestPayment_FAIL", "interacTxId", interacTx.ID, "cause", err.Error())
-			return
 		}
 		p.process(interacTx.ParentTxId)
 		return
