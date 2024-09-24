@@ -393,11 +393,11 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 	ctx := context.TODO()
 	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
 	if err != nil {
-		foree_logger.Logger.Error("processRootTx", "foreeTxId", fTxId, "cause", err.Error())
+		foree_logger.Logger.Error("TxProcessor--processRootTx", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
 	if fTx == nil {
-		foree_logger.Logger.Error("processRootTx",
+		foree_logger.Logger.Error("TxProcessor--processRootTx",
 			"foreeTxId", fTxId,
 			"cause", "unknown ForeeTx",
 		)
@@ -409,7 +409,7 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 		fTx.CurStage = transaction.TxStageInteracCI
 		err := p.foreeTxRepo.UpdateForeeTxById(ctx, *fTx)
 		if err != nil {
-			foree_logger.Logger.Error("processRootTx", "foreeTxId", fTx.ID, "cause", err.Error())
+			foree_logger.Logger.Error("TxProcessor--processRootTx", "foreeTxId", fTx.ID, "cause", err.Error())
 		}
 		//TODO: go update summaryTx
 		fallthrough
@@ -420,9 +420,9 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 	case transaction.TxStageNBPCO:
 		p.nbpTxProcessor.process(fTxId)
 	case transaction.TxStageEnd:
-		foree_logger.Logger.Warn("processRootTx", "foreeTxId", fTx.ID, "cause", "process transaction that is in END stage already")
+		foree_logger.Logger.Warn("TxProcessor--processRootTx", "foreeTxId", fTx.ID, "cause", "process transaction that is in END stage already")
 	default:
-		foree_logger.Logger.Error("processRootTx",
+		foree_logger.Logger.Error("TxProcessor--processRootTx",
 			"foreeTxId", fTx.ID,
 			"transactionStage", fTx.CurStage,
 			"cause", "unkown foreeTx stage",
@@ -434,11 +434,11 @@ func (p *TxProcessor) next(fTxId int64) {
 	ctx := context.TODO()
 	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
 	if err != nil {
-		foree_logger.Logger.Error("processRootTx", "foreeTxId", fTxId, "cause", err.Error())
+		foree_logger.Logger.Error("TxProcessor--next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
 	if fTx == nil {
-		foree_logger.Logger.Error("processRootTx",
+		foree_logger.Logger.Error("TxProcessor--next_FAIL",
 			"foreeTxId", fTxId,
 			"cause", "unknown ForeeTx",
 		)
@@ -446,8 +446,70 @@ func (p *TxProcessor) next(fTxId int64) {
 	}
 
 	switch fTx.CurStage {
-
+	case transaction.TxStageInteracCI:
+		interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, fTxId)
+		if err != nil {
+			foree_logger.Logger.Error("TxProcessor--next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+			return
+		}
+		if interacTx.Status != transaction.TxStatusCompleted {
+			foree_logger.Logger.Error(
+				"TxProcessor--next_FAIL",
+				"foreeTxId", fTxId,
+				"curState", fTx.CurStage,
+				"interacTxStatus", interacTx.Status,
+				"cause", "interacTx is not COMPLETED",
+			)
+			return
+		}
+		fTx.CurStage = transaction.TxStageIDM
+	case transaction.TxStageIDM:
+		idmTx, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, fTxId)
+		if err != nil {
+			foree_logger.Logger.Error("TxProcessor--next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+			return
+		}
+		if idmTx.Status != transaction.TxStatusCompleted {
+			foree_logger.Logger.Error(
+				"TxProcessor--next_FAIL",
+				"foreeTxId", fTxId,
+				"curState", fTx.CurStage,
+				"idmTxStatus", idmTx.Status,
+				"cause", "idmTx is not COMPLETED",
+			)
+			return
+		}
+		fTx.CurStage = transaction.TxStageIDM
+	case transaction.TxStageNBPCO:
+		nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, fTxId)
+		if err != nil {
+			foree_logger.Logger.Error("TxProcessor--next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+			return
+		}
+		if nbpTx.Status != transaction.TxStatusCompleted {
+			foree_logger.Logger.Error(
+				"TxProcessor--next_FAIL",
+				"foreeTxId", fTxId,
+				"curState", fTx.CurStage,
+				"nbpTxStatus", nbpTx.Status,
+				"cause", "nbpTx is not COMPLETED",
+			)
+			return
+		}
+		fTx.CurStage = transaction.TxStageEnd
+	default:
+		foree_logger.Logger.Error("TxProcessor--next_FAIL",
+			"curStage", fTx.CurStage,
+		)
+		return
 	}
+
+	err = p.foreeTxRepo.UpdateForeeTxById(context.TODO(), *fTx)
+	if err != nil {
+		foree_logger.Logger.Error("TxProcessor--next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		return
+	}
+	p.ProcessRootTx(fTxId)
 }
 
 func (p *TxProcessor) rollback(fTxId int64) {
