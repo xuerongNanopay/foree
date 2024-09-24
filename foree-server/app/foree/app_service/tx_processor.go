@@ -512,6 +512,7 @@ func (p *TxProcessor) next(fTxId int64) {
 	p.ProcessRootTx(fTxId)
 }
 
+// If stage can not process transaction, then it will call rollback to rolling back the transaction.
 func (p *TxProcessor) rollback(fTxId int64) {
 	ctx := context.TODO()
 	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
@@ -524,6 +525,34 @@ func (p *TxProcessor) rollback(fTxId int64) {
 			"foreeTxId", fTxId,
 			"cause", "unknown ForeeTx",
 		)
+		return
+	}
+
+	if fTx.CurStage == transaction.TxStageBegin {
+		goto NO_Refund
+	}
+
+	if fTx.CurStage == transaction.TxStageInteracCI {
+		interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, fTxId)
+		if err != nil {
+			foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+			return
+		}
+
+		if interacTx.Status == transaction.TxStatusInitial || interacTx.Status == transaction.TxStatusCancelled {
+			goto NO_Refund
+		}
+	}
+
+	//TODO: create a refund transaction.
+	return
+
+NO_Refund:
+	// No refund need.
+	fTx.CurStage = transaction.TxStageEnd
+	err = p.foreeTxRepo.UpdateForeeTxById(context.TODO(), *fTx)
+	if err != nil {
+		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
 }
