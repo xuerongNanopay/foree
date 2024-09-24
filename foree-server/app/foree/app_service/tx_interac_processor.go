@@ -406,10 +406,6 @@ func (p *InteracTxProcessor) Cancel(parentTxId int64) error {
 		return fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSent, interacTx.Status)
 	}
 
-	if interacTx.Status != transaction.TxStatusSent {
-		return fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSent, interacTx.Status)
-	}
-
 	//TODO: call scotial cancel api
 	//TODO: if error return.
 	interacTx.Status = transaction.TxStatusCancelled

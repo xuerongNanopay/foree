@@ -275,6 +275,7 @@ func (p *NBPTxProcessor) refreshNBPStatuses(nbpReferences []string) {
 			continue
 		}
 		p.waits.Delete(curNBPTx.NBPReference)
+		//moving forward
 		go p.process(curNBPTx.ParentTxId)
 		foree_logger.Logger.Info("NBPTxProcessor--refreshNBPStatuses",
 			"nbpTxId", curNBPTx.ID,
@@ -283,6 +284,61 @@ func (p *NBPTxProcessor) refreshNBPStatuses(nbpReferences []string) {
 			"msg", "NBP wait complete",
 		)
 	}
+}
+
+func (p *NBPTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.TxStatus) error {
+	if newTxStatus != transaction.TxStatusRejected && newTxStatus != transaction.TxStatusCompleted {
+		return fmt.Errorf("unsupport transaction status `%v`", newTxStatus)
+	}
+
+	ctx := context.TODO()
+	nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, parentTxId)
+	if err != nil {
+		return err
+	}
+	if nbpTx == nil {
+		return fmt.Errorf("InteracCITx no found with parentTxId `%v`", parentTxId)
+	}
+	if nbpTx.Status != transaction.TxStatusSent {
+		return fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSent, nbpTx.Status)
+	}
+
+	nbpTx.Status = transaction.TxStatusCompleted
+	err = p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), *nbpTx)
+	if err != nil {
+		return err
+	}
+
+	p.waits.Delete(nbpTx.NBPReference)
+	go p.txProcessor.next(nbpTx.ParentTxId)
+	return nil
+}
+
+// TODO: call scotial cancel api
+func (p *NBPTxProcessor) Cancel(parentTxId int64) error {
+	ctx := context.TODO()
+	nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, parentTxId)
+	if err != nil {
+		return err
+	}
+	if nbpTx == nil {
+		return fmt.Errorf("nbpTx no found with parentTxId `%v`", parentTxId)
+	}
+	if nbpTx.Status != transaction.TxStatusSent {
+		return fmt.Errorf("expect nbpTx in `%v`, but got `%v`", transaction.TxStatusSent, nbpTx.Status)
+	}
+
+	//TODO: call scotial cancel api
+	//TODO: if error return.
+
+	nbpTx.Status = transaction.TxStatusCancelled
+	err = p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), *nbpTx)
+	if err != nil {
+		return err
+	}
+	p.waits.Delete(nbpTx.NBPReference)
+	go p.txProcessor.rollback(nbpTx.ParentTxId)
+	return nil
 }
 
 func (p *NBPTxProcessor) sendPaymentWithMode(r nbp.LoadRemittanceRequest, mode nbp.PMTMode) (*nbp.LoadRemittanceResponse, error) {
