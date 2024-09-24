@@ -143,11 +143,6 @@ func (p *IDMTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.
 	return nil
 }
 
-// IDM API called
-func (p *IDMTxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	return nil, nil
-}
-
 func (p *IDMTxProcessor) generateValidateTransferReq(tx *transaction.ForeeTx) *idm.IDMRequest {
 	IsCashPickup := false
 	if tx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {

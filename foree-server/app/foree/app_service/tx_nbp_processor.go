@@ -240,11 +240,22 @@ func (p *NBPTxProcessor) refreshNBPStatuses(nbpReferences []string) {
 		)
 		return
 	}
-}
 
-// We don't use transaction here, case NBP can check duplicate.
-func (p *NBPTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	return nil, nil
+	if resp.StatusCode/100 != 2 {
+		foree_logger.Logger.Error("IDM_Processor--refreshNBPStatuses_FAIL",
+			"httpStatus", resp.StatusCode,
+			"httpRawRequest", resp.RawRequest,
+			"httpRawResponse", resp.RawResponse,
+		)
+		return
+	}
+
+	for _, nbpRef := range resp.TransactionStatuses {
+		newTxStatus := nbpToInternalStatusMapper(nbpRef.Status)
+		if newTxStatus == transaction.TxStatusSent {
+			continue
+		}
+	}
 }
 
 func (p *NBPTxProcessor) refreshNBPStatus(fTx transaction.ForeeTx, nbpStatus string) (*transaction.ForeeTx, error) {

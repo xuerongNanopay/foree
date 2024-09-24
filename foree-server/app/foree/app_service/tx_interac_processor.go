@@ -350,11 +350,6 @@ func (p *InteracTxProcessor) requestPayment(interacTx transaction.InteracCITx) {
 	p.process(interacTx.ParentTxId)
 }
 
-// Scotia APi Call
-func (p *InteracTxProcessor) processTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	return nil, nil
-}
-
 func (p *InteracTxProcessor) refreshScotiaStatus(interacTx transaction.InteracCITx) (transaction.TxStatus, string, error) {
 
 	detailResp, err := p.scotiaClient.PaymentDetail(scotia.PaymentDetailRequest{

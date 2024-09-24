@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"sync"
-	"time"
 
 	"xue.io/go-pay/app/foree/account"
 	foree_constant "xue.io/go-pay/app/foree/constant"
@@ -13,7 +12,6 @@ import (
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
-	time_util "xue.io/go-pay/util/time"
 )
 
 // Goal of Txprocessor:
@@ -86,22 +84,22 @@ type TxProcessor struct {
 }
 
 func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
-	foreeTx, err := p.createFullTx(tx)
-	if err != nil {
-		foree_logger.Logger.Error("CreateAndProcessTx_FAIL",
-			"foreeTxId", tx.ID,
-			"cause", err.Error(),
-		)
-		return
-	}
+	// foreeTx, err := p.createFullTx(tx)
+	// if err != nil {
+	// 	foree_logger.Logger.Error("CreateAndProcessTx_FAIL",
+	// 		"foreeTxId", tx.ID,
+	// 		"cause", err.Error(),
+	// 	)
+	// 	return
+	// }
 
-	_, err = p.processTx(*foreeTx)
-	if err != nil {
-		foree_logger.Logger.Error("CreateAndProcessTx_FAIL",
-			"foreeTxId", tx.ID,
-			"cause", err.Error(),
-		)
-	}
+	// _, err = p.processTx(*foreeTx)
+	// if err != nil {
+	// 	foree_logger.Logger.Error("CreateAndProcessTx_FAIL",
+	// 		"foreeTxId", tx.ID,
+	// 		"cause", err.Error(),
+	// 	)
+	// }
 }
 
 func (p *TxProcessor) loadAndProcessTx(foreeId int64) (*transaction.ForeeTx, error) {
@@ -111,10 +109,10 @@ func (p *TxProcessor) loadAndProcessTx(foreeId int64) (*transaction.ForeeTx, err
 	}
 
 	go func() {
-		_, err := p.processTx(*fTx)
-		if err != nil {
-			//TODO log
-		}
+		// _, err := p.processTx(*fTx)
+		// if err != nil {
+		// 	//TODO log
+		// }
 	}()
 
 	return fTx, nil
@@ -451,184 +449,6 @@ func (p *TxProcessor) rollback(fTxId int64) {
 
 func (p *TxProcessor) onStatusUpdate(fTxId int64) {
 
-}
-
-func (p *TxProcessor) processTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-
-	if tx.Type != transaction.TxTypeInteracToNBP {
-		return nil, fmt.Errorf("unknow ForeeTx type `%s` for transaction `%v`", tx.Type, tx.ID)
-	}
-	var err error
-	var nTx *transaction.ForeeTx
-	maxLoop := 16
-	i := 0
-	ctx := context.Background()
-	for {
-		nTx, err = p.doProcessTx(ctx, tx)
-		if err != nil {
-			return nil, err
-		}
-		if tx.CurStage == nTx.CurStage && nTx.CurStageStatus == tx.CurStageStatus {
-			p.updateTxSummary(context.TODO(), *nTx)
-			return nTx, nil
-		}
-		// Record the history.
-		go p.recordTxHistory(*transaction.NewTxHistory(nTx, ""))
-		tx = *nTx
-
-		if i > maxLoop {
-			return nil, fmt.Errorf("unexpect looping for ForeeTx `%v`", nTx.ID)
-		}
-		i += 1
-	}
-
-}
-
-func (p *TxProcessor) doProcessTx(ctx context.Context, fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	if fTx.Status == transaction.TxStatusInitial {
-		fTx.Status = transaction.TxStatusProcessing
-		fTx.CurStage = transaction.TxStageInteracCI
-		fTx.CurStageStatus = transaction.TxStatusInitial
-		return &fTx, nil
-	}
-	if fTx.Status == transaction.TxStatusCompleted || fTx.Status == transaction.TxStatusCancelled || fTx.Status == transaction.TxStatusRejected {
-		//TODO: log warn.
-		return &fTx, nil
-	}
-
-	switch fTx.CurStage {
-	case transaction.TxStageInteracCI:
-		switch fTx.CurStageStatus {
-		case transaction.TxStatusInitial:
-			return p.interacTxProcessor.processTx(fTx)
-		case transaction.TxStatusSent:
-			// return p.interacTxProcessor.waitFTx(fTx)
-		case transaction.TxStatusCompleted:
-			fTx.CurStage = transaction.TxStageIDM
-			fTx.CurStageStatus = transaction.TxStatusInitial
-			return &fTx, nil
-		case transaction.TxStatusRejected:
-			fTx.Status = transaction.TxStatusRejected
-			fTx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", fTx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
-			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
-				return nil, err
-			}
-			// Close remaing non-terminated transactions.
-			nT, err := p.closeRemainingTx(ctx, fTx)
-			if err != nil {
-				return nil, err
-			}
-			go p.MaybeRefund(ctx, *nT)
-			return nT, nil
-		case transaction.TxStatusCancelled:
-			fTx.Status = transaction.TxStatusCancelled
-			fTx.Conclusion = fmt.Sprintf("Cancelled in `%s` at %s", fTx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
-			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
-				return nil, err
-			}
-			// Close remaing non-terminated transactions.
-			nT, err := p.closeRemainingTx(ctx, fTx)
-			if err != nil {
-				return nil, err
-			}
-			go p.MaybeRefund(ctx, *nT)
-			return nT, nil
-		default:
-			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", fTx.ID, fTx.CurStageStatus, fTx.CurStage)
-		}
-	case transaction.TxStageIDM:
-		switch fTx.CurStageStatus {
-		case transaction.TxStatusInitial:
-			return p.idmTxProcessor.processTx(fTx)
-		case transaction.TxStatusCompleted:
-			//Move to next stage
-			fTx.CurStage = transaction.TxStageNBPCO
-			fTx.CurStageStatus = transaction.TxStatusInitial
-			return &fTx, nil
-		case transaction.TxStatusRejected:
-			// Set to ForeeTx to terminal status.
-			fTx.Status = transaction.TxStatusRejected
-			fTx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", fTx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
-			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
-				return nil, err
-			}
-			// Close remaing non-terminated transactions.
-			nT, err := p.closeRemainingTx(ctx, fTx)
-			if err != nil {
-				return nil, err
-			}
-			go p.MaybeRefund(ctx, *nT)
-			return nT, nil
-		case transaction.TxStatusSuspend:
-			//Wait to approve
-			//Log warn?
-		default:
-			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", fTx.ID, fTx.CurStageStatus, fTx.CurStage)
-		}
-	case transaction.TxStageNBPCO:
-		switch fTx.CurStageStatus {
-		case transaction.TxStatusInitial:
-			return p.nbpTxProcessor.processTx(fTx)
-		case transaction.TxStatusSent:
-			return p.nbpTxProcessor.waitFTx(fTx)
-		case transaction.TxStatusCompleted:
-			fTx.Status = transaction.TxStatusCompleted
-			fTx.Conclusion = fmt.Sprintf("Complete at %s.", time_util.NowInToronto().Format(time.RFC3339))
-			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
-				return nil, err
-			}
-			go p.RedeemReward(ctx, fTx)
-			return &fTx, nil
-		case transaction.TxStatusRejected:
-			fTx.Status = transaction.TxStatusRejected
-			fTx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", fTx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
-			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
-				return nil, err
-			}
-			go p.MaybeRefund(ctx, fTx)
-			return &fTx, nil
-		case transaction.TxStatusCancelled:
-			fTx.Status = transaction.TxStatusCancelled
-			fTx.Conclusion = fmt.Sprintf("Rejected in `%s` at %s", fTx.CurStage, time_util.NowInToronto().Format(time.RFC3339))
-			if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
-				return nil, err
-			}
-			go p.MaybeRefund(ctx, fTx)
-			return &fTx, nil
-		default:
-			return nil, fmt.Errorf("transaction `%v` in unknown status `%s` at statge `%s`", fTx.ID, fTx.CurStageStatus, fTx.CurStage)
-		}
-	default:
-		return nil, fmt.Errorf("transaction `%v` in unknown stage `%s`", fTx.ID, fTx.CurStage)
-	}
-	return &fTx, nil
-}
-
-func (p *TxProcessor) closeRemainingTx(ctx context.Context, fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	switch fTx.CurStage {
-	case transaction.TxStageInteracCI:
-		idm := fTx.IDM
-		co := fTx.COUT
-		idm.Status = transaction.TxStatusClosed
-		co.Status = transaction.TxStatusClosed
-		if err := p.idmTxRepo.UpdateIDMTxById(ctx, *idm); err != nil {
-			return nil, err
-		}
-		if err := p.nbpTxRepo.UpdateNBPCOTxById(ctx, *co); err != nil {
-			return nil, err
-		}
-		return &fTx, nil
-	case transaction.TxStageIDM:
-		co := fTx.COUT
-		co.Status = transaction.TxStatusClosed
-		if err := p.nbpTxRepo.UpdateNBPCOTxById(ctx, *co); err != nil {
-			return nil, err
-		}
-		return &fTx, nil
-	default:
-		//TODO: Log warn
-		return &fTx, nil
-	}
 }
 
 // TODO: reDesign.
