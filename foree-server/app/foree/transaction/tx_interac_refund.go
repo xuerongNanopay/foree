@@ -14,8 +14,8 @@ const (
 	sQLForeeRefundTxInsert = `
 		INSERT INTO foree_refund_tx
 		(
-			status, refund_interac_acc_id, refund_amount, refund_currency, parent_tx_id, owner_id
-		) VALUES(?,?,?,?,?,?)
+			status, refund_amount, refund_currency, parent_tx_id, owner_id
+		) VALUES(?,?,?,?,?)
 	`
 	sQLForeeRefundTxUpdateById = `
 		UPDATE foree_refund_tx SET
@@ -24,14 +24,14 @@ const (
 	`
 	sQLForeeRefundTxGetUniqueById = `
 		SELECT
-			t.id, t.status, t.refund_interac_acc_id, refund_amount, refund_currency,
+			t.id, t.status, refund_amount, refund_currency,
 			t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
 		FROM foree_refund_tx as t
 		WHERE t.id = ?
 	`
 	sQLForeeRefundTxGetUniqueByParentTxId = `
 		SELECT
-			t.id, t.status, t.refund_interac_acc_id, refund_amount, refund_currency,
+			t.id, t.status, refund_amount, refund_currency,
 			t.parent_tx_id, t.owner_id, t.created_at, t.updated_at
 		FROM foree_refund_tx as t
 		WHERE t.parent_tx_id = ?
@@ -46,14 +46,13 @@ const (
 )
 
 type ForeeRefundTx struct {
-	ID                 int64            `json:"id"`
-	Status             RefundTxStatus   `json:"status"`
-	RefundInteracAccId int64            `json:"refundInteracAccId"`
-	RefundAmt          types.AmountData `json:"refundAmt"`
-	ParentTxId         int64            `json:"parentTxId"`
-	OwnerId            int64            `json:"ownerId"`
-	CreatedAt          time.Time        `json:"createdAt"`
-	UpdatedAt          time.Time        `json:"updatedAt"`
+	ID         int64            `json:"id"`
+	Status     RefundTxStatus   `json:"status"`
+	RefundAmt  types.AmountData `json:"refundAmt"`
+	ParentTxId int64            `json:"parentTxId"`
+	OwnerId    int64            `json:"ownerId"`
+	CreatedAt  time.Time        `json:"createdAt"`
+	UpdatedAt  time.Time        `json:"updatedAt"`
 
 	RefundInteracAcc *account.InteracAccount `json:"refundInteracAcc"`
 }
@@ -76,7 +75,6 @@ func (repo *ForeeRefundTxRepo) InsertForeeRefundTx(ctx context.Context, tx Foree
 		result, err = dTx.Exec(
 			sQLForeeRefundTxInsert,
 			tx.Status,
-			tx.RefundInteracAccId,
 			tx.RefundAmt.Amount,
 			tx.RefundAmt.Currency,
 			tx.ParentTxId,
@@ -86,7 +84,6 @@ func (repo *ForeeRefundTxRepo) InsertForeeRefundTx(ctx context.Context, tx Foree
 		result, err = repo.db.Exec(
 			sQLForeeRefundTxInsert,
 			tx.Status,
-			tx.RefundInteracAccId,
 			tx.RefundAmt.Amount,
 			tx.RefundAmt.Currency,
 			tx.ParentTxId,
@@ -175,7 +172,6 @@ func scanRowForeeRefundTx(rows *sql.Rows) (*ForeeRefundTx, error) {
 	err := rows.Scan(
 		&tx.ID,
 		&tx.Status,
-		&tx.RefundInteracAccId,
 		&tx.RefundAmt.Amount,
 		&tx.RefundAmt.Currency,
 		&tx.ParentTxId,

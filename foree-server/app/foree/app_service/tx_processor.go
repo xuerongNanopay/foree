@@ -72,6 +72,7 @@ type TxProcessor struct {
 	txHistoryRepo       *transaction.TxHistoryRepo
 	txSummaryRepo       *transaction.TxSummaryRepo
 	foreeTxRepo         *transaction.ForeeTxRepo
+	foreeRefundRepo     *transaction.ForeeRefundTxRepo
 	interacRefundTxRepo *transaction.ForeeRefundTxRepo
 	rewardRepo          *transaction.RewardRepo
 	dailyTxLimiteRepo   *transaction.DailyTxLimitRepo
@@ -544,7 +545,22 @@ func (p *TxProcessor) rollback(fTxId int64) {
 		}
 	}
 
-	//TODO: create a refund transaction.
+	_, err = p.foreeRefundRepo.InsertForeeRefundTx(context.TODO(), transaction.ForeeRefundTx{
+		Status:     transaction.RefundTxStatusInitial,
+		RefundAmt:  fTx.TotalAmt,
+		ParentTxId: fTx.ID,
+		OwnerId:    fTx.OwnerId,
+	})
+	if err != nil {
+		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		return
+	}
+	fTx.CurStage = transaction.TxStageRefund
+	err = p.foreeTxRepo.UpdateForeeTxById(context.TODO(), *fTx)
+	if err != nil {
+		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		return
+	}
 	return
 
 NO_Refund:
