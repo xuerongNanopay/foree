@@ -388,7 +388,8 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 // This is internal process.
 // Yes, in theory the race condition exists, but unlikely to happen.
 // To avoid race condition, the simple strategy is pull from DB when we need.
-func (p *TxProcessor) processRootTx(fTxId int64) {
+// Always use goroutine on this method.
+func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 	ctx := context.TODO()
 	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
 	if err != nil {
