@@ -397,7 +397,7 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 		return
 	}
 	if fTx == nil {
-		foree_logger.Logger.Warn("processRootTx",
+		foree_logger.Logger.Error("processRootTx",
 			"foreeTxId", fTxId,
 			"cause", "unknown ForeeTx",
 		)
@@ -429,7 +429,23 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 }
 
 func (p *TxProcessor) next(fTxId int64) {
+	ctx := context.TODO()
+	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
+	if err != nil {
+		foree_logger.Logger.Error("processRootTx", "foreeTxId", fTxId, "cause", err.Error())
+		return
+	}
+	if fTx == nil {
+		foree_logger.Logger.Error("processRootTx",
+			"foreeTxId", fTxId,
+			"cause", "unknown ForeeTx",
+		)
+		return
+	}
 
+	switch fTx.CurStage {
+
+	}
 }
 
 func (p *TxProcessor) rollback(fTxId int64) {

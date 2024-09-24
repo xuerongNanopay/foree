@@ -81,10 +81,12 @@ const (
 type TxStage string
 
 const (
+	TxStageBegin     TxStage = "TX_BEGIN"
 	TxStageInteracCI TxStage = "INTERAC_CI"
 	TxStageIDM       TxStage = "Compliance_IDM"
 	TxStageNBPCO     TxStage = "NBP_CO"
 	TxStageRefund    TxStage = "REFUND"
+	TxStageEnd       TxStage = "TX_END"
 )
 
 // Only Support INITIAL, PROCESSING, CANCEL, COMPLETE.
