@@ -574,7 +574,36 @@ NO_Refund:
 }
 
 func (p *TxProcessor) onStatusUpdate(fTxId int64) {
+	ctx := context.TODO()
+	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
+	if err != nil {
+		foree_logger.Logger.Error("tx_processor-onStatusUpdate_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		return
+	}
+	if fTx == nil {
+		foree_logger.Logger.Warn("tx_processor-onStatusUpdate_FAIL",
+			"foreeTxId", fTxId,
+			"cause", "unknown ForeeTx",
+		)
+		return
+	}
+	var newSummaryStatus transaction.TxSummaryStatus
+	if fTx.CurStage == transaction.TxStageBegin {
+		newSummaryStatus = transaction.TxSummaryStatusInitial
+	}
+	if fTx.CurStage == transaction.TxStageInteracCI {
+		newSummaryStatus = transaction.TxSummaryStatusAwaitPayment
+	}
+	if fTx.CurStage == transaction.TxStageIDM {
+		newSummaryStatus = transaction.TxSummaryStatusInProgress
+	}
+	if fTx.CurStage == transaction.TxStageNBPCO {
+		//Specia case.
+	}
 
+	if newSummaryStatus != "TODO" {
+
+	}
 }
 
 // TODO: reDesign.
