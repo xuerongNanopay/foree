@@ -22,6 +22,9 @@ func (s *IDMClientMock) SetConfig(key string, value string) error {
 
 func (c *IDMClientMock) Transfer(req IDMRequest) (*IDMResponse, error) {
 	return &IDMResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode: 200,
+		},
 		FraudEvaluationResult: ResultStatusAccept,
 	}, nil
 }
