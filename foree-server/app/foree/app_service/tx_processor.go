@@ -755,28 +755,14 @@ func (p *TxProcessor) MaybeRefund(ctx context.Context, fTx transaction.ForeeTx) 
 	// Create refund transaction
 	if fTx.CI.Status == transaction.TxStatusCompleted {
 		_, err := p.interacRefundTxRepo.InsertForeeRefundTx(ctx, transaction.ForeeRefundTx{
-			Status:             transaction.RefundTxStatusInitial,
-			RefundInteracAccId: fTx.CI.ID,
-			ParentTxId:         fTx.ID,
-			OwnerId:            fTx.OwnerId,
+			Status:     transaction.RefundTxStatusInitial,
+			ParentTxId: fTx.ID,
+			OwnerId:    fTx.OwnerId,
 		})
 		if err != nil {
 			dTx.Rollback()
 			//TODO: Log error
 			return
 		}
-	}
-
-	fTx.CurStage = transaction.TxStageRefund
-
-	if err := p.foreeTxRepo.UpdateForeeTxById(ctx, fTx); err != nil {
-		dTx.Rollback()
-		//TODO: Log error
-		return
-	}
-
-	if err = dTx.Commit(); err != nil {
-		//TODO: Log error
-		return
 	}
 }
