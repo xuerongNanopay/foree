@@ -265,7 +265,12 @@ func (p *InteracTxProcessor) process(parentTxId int64) {
 }
 
 func (p *InteracTxProcessor) requestPayment(interacTx transaction.InteracCITx) {
-	resp, err := p.scotiaClient.RequestPayment(*p.createRequestPaymentReq(&interacTx))
+	fTx, err := p.txProcessor.loadTx(interacTx.ParentTxId, true)
+	if err != nil {
+		foree_logger.Logger.Error("InteracTxProcessor--requestPayment_FAIL", "interacTxId", interacTx.ID, "cause", err.Error())
+	}
+
+	resp, err := p.scotiaClient.RequestPayment(*p.createRequestPaymentReq(fTx))
 
 	if err != nil {
 		foree_logger.Logger.Error("InteracTxProcessor--requestPayment_FAIL", "interacTxId", interacTx.ID, "cause", err.Error())
@@ -447,7 +452,8 @@ func scotiaToInternalStatusMapper(scotiaStatus string) transaction.TxStatus {
 	}
 }
 
-func (p *InteracTxProcessor) createRequestPaymentReq(interacTx *transaction.InteracCITx) *scotia.RequestPaymentRequest {
+func (p *InteracTxProcessor) createRequestPaymentReq(fTx *transaction.ForeeTx) *scotia.RequestPaymentRequest {
+	interacTx := fTx.CI
 	expireDate := time.Now().Add(time.Hour * time.Duration(p.scotiaProfile.ExpireInHours))
 
 	req := &scotia.RequestPaymentRequest{

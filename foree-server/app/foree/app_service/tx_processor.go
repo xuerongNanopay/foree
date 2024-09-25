@@ -93,29 +93,14 @@ func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
 		return
 	}
 
-	_, err = p.loadAndProcessTx(foreeTx.ID)
-	if err != nil {
-		foree_logger.Logger.Error("CreateAndProcessTx_FAIL",
-			"foreeTxId", tx.ID,
-			"cause", err.Error(),
-		)
-	}
-}
-
-func (p *TxProcessor) loadAndProcessTx(foreeId int64) (*transaction.ForeeTx, error) {
-	fTx, err := p.loadTx(foreeId, true)
-	if err != nil {
-		return nil, err
-	}
-
-	go func() {
-		// _, err := p.processTx(*fTx)
-		// if err != nil {
-		// 	//TODO log
-		// }
-	}()
-
-	return fTx, nil
+	// _, err = p.loadAndProcessTx(foreeTx.ID)
+	// if err != nil {
+	// 	foree_logger.Logger.Error("CreateAndProcessTx_FAIL",
+	// 		"foreeTxId", tx.ID,
+	// 		"cause", err.Error(),
+	// 	)
+	// }
+	p.ProcessRootTx(foreeTx.ID)
 }
 
 // Create CI, COUT, IDM for ForeeTx
