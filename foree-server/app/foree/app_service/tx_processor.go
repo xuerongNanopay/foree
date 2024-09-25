@@ -84,22 +84,22 @@ type TxProcessor struct {
 }
 
 func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
-	// foreeTx, err := p.createFullTx(tx)
-	// if err != nil {
-	// 	foree_logger.Logger.Error("CreateAndProcessTx_FAIL",
-	// 		"foreeTxId", tx.ID,
-	// 		"cause", err.Error(),
-	// 	)
-	// 	return
-	// }
+	foreeTx, err := p.createFullTx(tx)
+	if err != nil {
+		foree_logger.Logger.Error("CreateAndProcessTx_FAIL",
+			"foreeTxId", tx.ID,
+			"cause", err.Error(),
+		)
+		return
+	}
 
-	// _, err = p.processTx(*foreeTx)
-	// if err != nil {
-	// 	foree_logger.Logger.Error("CreateAndProcessTx_FAIL",
-	// 		"foreeTxId", tx.ID,
-	// 		"cause", err.Error(),
-	// 	)
-	// }
+	_, err = p.loadAndProcessTx(foreeTx.ID)
+	if err != nil {
+		foree_logger.Logger.Error("CreateAndProcessTx_FAIL",
+			"foreeTxId", tx.ID,
+			"cause", err.Error(),
+		)
+	}
 }
 
 func (p *TxProcessor) loadAndProcessTx(foreeId int64) (*transaction.ForeeTx, error) {
