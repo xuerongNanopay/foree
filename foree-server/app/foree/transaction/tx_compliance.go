@@ -17,7 +17,7 @@ const (
     `
 	sQLIDMTxUpdateById = `
         UPDATE idm_tx SET 
-            status = ?, idm_reference = ?, t.idm_result = ?
+            status = ?, idm_reference = ?, idm_result = ?
         WHERE id = ?
     `
 	sQLIDMTxGetUniqueById = `
