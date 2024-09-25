@@ -34,16 +34,16 @@ type TxHistory struct {
 	CreatedAt  time.Time `json:"createdAt"`
 }
 
-func NewTxHistory(tx *ForeeTx, extraInfo string) *TxHistory {
-	return &TxHistory{
-		Stage:      tx.CurStage,
-		Status:     tx.CurStageStatus,
-		ExtraInfo:  extraInfo,
-		ParentTxId: tx.ID,
-		OwnerId:    tx.OwnerId,
-		CreatedAt:  time.Now(),
-	}
-}
+// func NewTxHistory(tx *ForeeTx, extraInfo string) *TxHistory {
+// 	return &TxHistory{
+// 		Stage:      tx.Stage,
+// 		Status:     tx.StageStatus,
+// 		ExtraInfo:  extraInfo,
+// 		ParentTxId: tx.ID,
+// 		OwnerId:    tx.OwnerId,
+// 		CreatedAt:  time.Now(),
+// 	}
+// }
 
 func NewTxHistoryRepo(db *sql.DB) *TxHistoryRepo {
 	return &TxHistoryRepo{db: db}

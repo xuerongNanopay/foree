@@ -15,42 +15,42 @@ const (
 	sQLForeeTxInsert = `
 		INSERT INTO foree_tx
 		(
-			type, status, rate, cin_acc_id, cout_acc_id,
+			type, rate, cin_acc_id, cout_acc_id,
 			src_amount, src_currency, dest_amount, dest_currency,
 			total_fee_amount, total_fee_currency, total_reward_amount, total_reward_currency,
-			total_amount, total_currency, cur_stage, cur_stage_status,
+			total_amount, total_currency, stage,
 			transaction_purpose, conclusion, owner_id
-		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	sQLForeeTxUpdateById = `
 	    UPDATE foree_tx SET 
-			status = ?, cur_stage = ?, cur_stage_status = ?, conclusion = ?
+			stage = ?, conclusion = ?
         WHERE id = ?
 	`
 	sQLForeeTxGetById = `
 	    SELECT 
-            t.id, t.type, t.status, t.rate,
+            t.id, t.type, t.rate,
 			t.cin_acc_id, t.cout_acc_id,
             t.src_amount, t.src_currency, 
             t.dest_amount, t.dest_currency,
 			t.total_fee_amount, t.total_fee_currency, 
             t.total_reward_amount, t.total_reward_currency, 
             t.total_amount, t.total_currency,
-			t.cur_stage, t.cur_stage_status, t.transaction_purpose, t.conclusion,
+			t.stage, t.transaction_purpose, t.conclusion,
             t.owner_id, t.created_at, t.updated_at
         FROM foree_tx t
         where t.id = ?
 	`
 	sQLForeeTxGetForUpdateById = `
 		SELECT 
-			t.id, t.type, t.status, t.rate,
+			t.id, t.type, t.rate,
 			t.cin_acc_id, t.cout_acc_id,
 			t.src_amount, t.src_currency, 
 			t.dest_amount, t.dest_currency,
 			t.total_fee_amount, t.total_fee_currency, 
 			t.total_reward_amount, t.total_reward_currency, 
 			t.total_amount, t.total_currency,
-			t.cur_stage, t.cur_stage_status, t.transaction_purpose, t.conclusion,
+			t.stage, t.transaction_purpose, t.conclusion,
 			t.owner_id, t.created_at, t.updated_at
 		FROM foree_tx t
 		where t.id = ?
@@ -93,7 +93,6 @@ const (
 type ForeeTx struct {
 	ID                 int64            `json:"id,omitempty"`
 	Type               TxType           `json:"type,omitempty"`
-	Status             TxStatus         `json:"status,omitempty"`
 	Rate               types.Amount     `json:"Rate,omitempty"`
 	CinAccId           int64            `json:"cinAccId,omitempty"`
 	CoutAccId          int64            `json:"coutAccId,omitempty"`
@@ -102,8 +101,7 @@ type ForeeTx struct {
 	TotalFeeAmt        types.AmountData `json:"totalFeeAmt,omitempty"`
 	TotalRewardAmt     types.AmountData `json:"totalRewardAmt,omitempty"`
 	TotalAmt           types.AmountData `json:"totalAmt,omitempty"`
-	CurStage           TxStage          `json:"curStage,omitempty"`
-	CurStageStatus     TxStatus         `json:"curStageStatus,omitempty"`
+	Stage              TxStage          `json:"curStage,omitempty"`
 	TransactionPurpose string           `json:"transactionPurpose,omitempty"`
 	Conclusion         string           `json:"conclusion,omitempty"`
 	OwnerId            int64            `json:"ownerId,omitempty"`
@@ -145,7 +143,6 @@ func (repo *ForeeTxRepo) InsertForeeTx(ctx context.Context, tx ForeeTx) (int64, 
 		result, err = dTx.Exec(
 			sQLForeeTxInsert,
 			tx.Type,
-			tx.Status,
 			tx.Rate,
 			tx.CinAccId,
 			tx.CoutAccId,
@@ -159,8 +156,7 @@ func (repo *ForeeTxRepo) InsertForeeTx(ctx context.Context, tx ForeeTx) (int64, 
 			tx.TotalRewardAmt.Currency,
 			tx.TotalAmt.Amount,
 			tx.TotalAmt.Currency,
-			tx.CurStage,
-			tx.CurStageStatus,
+			tx.Stage,
 			tx.TransactionPurpose,
 			tx.Conclusion,
 			tx.OwnerId,
@@ -169,7 +165,6 @@ func (repo *ForeeTxRepo) InsertForeeTx(ctx context.Context, tx ForeeTx) (int64, 
 		result, err = repo.db.Exec(
 			sQLForeeTxInsert,
 			tx.Type,
-			tx.Status,
 			tx.Rate,
 			tx.CinAccId,
 			tx.CoutAccId,
@@ -183,8 +178,7 @@ func (repo *ForeeTxRepo) InsertForeeTx(ctx context.Context, tx ForeeTx) (int64, 
 			tx.TotalRewardAmt.Currency,
 			tx.TotalAmt.Amount,
 			tx.TotalAmt.Currency,
-			tx.CurStage,
-			tx.CurStageStatus,
+			tx.Stage,
 			tx.TransactionPurpose,
 			tx.Conclusion,
 			tx.OwnerId,
@@ -205,9 +199,9 @@ func (repo *ForeeTxRepo) UpdateForeeTxById(ctx context.Context, tx ForeeTx) erro
 
 	var err error
 	if ok {
-		_, err = dTx.Exec(sQLForeeTxUpdateById, tx.Status, tx.CurStage, tx.CurStageStatus, tx.ID)
+		_, err = dTx.Exec(sQLForeeTxUpdateById, tx.Stage, tx.ID)
 	} else {
-		_, err = repo.db.Exec(sQLForeeTxUpdateById, tx.Status, tx.CurStage, tx.CurStageStatus, tx.ID)
+		_, err = repo.db.Exec(sQLForeeTxUpdateById, tx.Stage, tx.ID)
 	}
 
 	if err != nil {
@@ -279,7 +273,6 @@ func scanRowIntoForeeTx(rows *sql.Rows) (*ForeeTx, error) {
 	err := rows.Scan(
 		&tx.ID,
 		&tx.Type,
-		&tx.Status,
 		&tx.Rate,
 		&tx.CinAccId,
 		&tx.CoutAccId,
@@ -293,8 +286,7 @@ func scanRowIntoForeeTx(rows *sql.Rows) (*ForeeTx, error) {
 		&tx.TotalRewardAmt.Currency,
 		&tx.TotalAmt.Amount,
 		&tx.TotalAmt.Currency,
-		&tx.CurStage,
-		&tx.CurStageStatus,
+		&tx.Stage,
 		&tx.TransactionPurpose,
 		&tx.Conclusion,
 		&tx.OwnerId,

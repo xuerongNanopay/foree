@@ -281,7 +281,6 @@ CREATE TABLE IF NOT EXISTS referral(
 CREATE TABLE IF NOT EXISTS foree_tx(
     `id` SERIAL PRIMARY KEY,
     `type` VARCHAR(64) NOT NULL,
-    `status` VARCHAR(32) NOT NULL,
     `cin_acc_id` BIGINT UNSIGNED NOT NULL,
     `cout_acc_id` BIGINT UNSIGNED NOT NULL,
     `rate` DECIMAL(7, 2) NOT NULL,
@@ -295,8 +294,7 @@ CREATE TABLE IF NOT EXISTS foree_tx(
     `total_reward_currency` CHAR(3) NOT NULL,
     `total_amount` DECIMAL(11, 2) NOT NULL,
     `total_currency` CHAR(3) NOT NULL,
-    `cur_stage` VARCHAR(64) NOT NULL,
-    `cur_stage_status` VARCHAR(32) NOT NULL,
+    `stage` VARCHAR(64) NOT NULL,
     `transaction_purpose` VARCHAR(256) NOT NULL,
     `conclusion` VARCHAR(256) NOT NULL,
     `owner_id` BIGINT UNSIGNED NOT NULL,

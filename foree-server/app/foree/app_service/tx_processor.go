@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"xue.io/go-pay/app/foree/account"
-	foree_constant "xue.io/go-pay/app/foree/constant"
 	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
@@ -405,9 +404,9 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 		return
 	}
 
-	switch fTx.CurStage {
+	switch fTx.Stage {
 	case transaction.TxStageBegin:
-		fTx.CurStage = transaction.TxStageInteracCI
+		fTx.Stage = transaction.TxStageInteracCI
 		err := p.foreeTxRepo.UpdateForeeTxById(ctx, *fTx)
 		if err != nil {
 			foree_logger.Logger.Error("TxProcessor--processRootTx", "foreeTxId", fTx.ID, "cause", err.Error())
@@ -425,7 +424,7 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 	default:
 		foree_logger.Logger.Error("TxProcessor--processRootTx",
 			"foreeTxId", fTx.ID,
-			"transactionStage", fTx.CurStage,
+			"transactionStage", fTx.Stage,
 			"cause", "unkown foreeTx stage",
 		)
 	}
@@ -446,7 +445,7 @@ func (p *TxProcessor) next(fTxId int64) {
 		return
 	}
 
-	switch fTx.CurStage {
+	switch fTx.Stage {
 	case transaction.TxStageInteracCI:
 		interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, fTxId)
 		if err != nil {
@@ -457,13 +456,13 @@ func (p *TxProcessor) next(fTxId int64) {
 			foree_logger.Logger.Error(
 				"TxProcessor--next_FAIL",
 				"foreeTxId", fTxId,
-				"curState", fTx.CurStage,
+				"curState", fTx.Stage,
 				"interacTxStatus", interacTx.Status,
 				"cause", "interacTx is not COMPLETED",
 			)
 			return
 		}
-		fTx.CurStage = transaction.TxStageIDM
+		fTx.Stage = transaction.TxStageIDM
 	case transaction.TxStageIDM:
 		idmTx, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, fTxId)
 		if err != nil {
@@ -474,13 +473,13 @@ func (p *TxProcessor) next(fTxId int64) {
 			foree_logger.Logger.Error(
 				"TxProcessor--next_FAIL",
 				"foreeTxId", fTxId,
-				"curState", fTx.CurStage,
+				"curState", fTx.Stage,
 				"idmTxStatus", idmTx.Status,
 				"cause", "idmTx is not COMPLETED",
 			)
 			return
 		}
-		fTx.CurStage = transaction.TxStageIDM
+		fTx.Stage = transaction.TxStageIDM
 	case transaction.TxStageNBPCO:
 		nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, fTxId)
 		if err != nil {
@@ -491,16 +490,16 @@ func (p *TxProcessor) next(fTxId int64) {
 			foree_logger.Logger.Error(
 				"TxProcessor--next_FAIL",
 				"foreeTxId", fTxId,
-				"curState", fTx.CurStage,
+				"curState", fTx.Stage,
 				"nbpTxStatus", nbpTx.Status,
 				"cause", "nbpTx is not COMPLETED",
 			)
 			return
 		}
-		fTx.CurStage = transaction.TxStageEnd
+		fTx.Stage = transaction.TxStageEnd
 	default:
 		foree_logger.Logger.Error("TxProcessor--next_FAIL",
-			"curStage", fTx.CurStage,
+			"curStage", fTx.Stage,
 		)
 		return
 	}
@@ -529,11 +528,11 @@ func (p *TxProcessor) rollback(fTxId int64) {
 		return
 	}
 
-	if fTx.CurStage == transaction.TxStageBegin {
+	if fTx.Stage == transaction.TxStageBegin {
 		goto NO_Refund
 	}
 
-	if fTx.CurStage == transaction.TxStageInteracCI {
+	if fTx.Stage == transaction.TxStageInteracCI {
 		interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, fTxId)
 		if err != nil {
 			foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
@@ -555,7 +554,7 @@ func (p *TxProcessor) rollback(fTxId int64) {
 		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
-	fTx.CurStage = transaction.TxStageRefund
+	fTx.Stage = transaction.TxStageRefund
 	err = p.foreeTxRepo.UpdateForeeTxById(context.TODO(), *fTx)
 	if err != nil {
 		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
@@ -565,7 +564,7 @@ func (p *TxProcessor) rollback(fTxId int64) {
 
 NO_Refund:
 	// No refund need.
-	fTx.CurStage = transaction.TxStageEnd
+	fTx.Stage = transaction.TxStageEnd
 	err = p.foreeTxRepo.UpdateForeeTxById(context.TODO(), *fTx)
 	if err != nil {
 		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
@@ -588,16 +587,16 @@ func (p *TxProcessor) onStatusUpdate(fTxId int64) {
 		return
 	}
 	var newSummaryStatus transaction.TxSummaryStatus
-	if fTx.CurStage == transaction.TxStageBegin {
+	if fTx.Stage == transaction.TxStageBegin {
 		newSummaryStatus = transaction.TxSummaryStatusInitial
 	}
-	if fTx.CurStage == transaction.TxStageInteracCI {
+	if fTx.Stage == transaction.TxStageInteracCI {
 		newSummaryStatus = transaction.TxSummaryStatusAwaitPayment
 	}
-	if fTx.CurStage == transaction.TxStageIDM {
+	if fTx.Stage == transaction.TxStageIDM {
 		newSummaryStatus = transaction.TxSummaryStatusInProgress
 	}
-	if fTx.CurStage == transaction.TxStageNBPCO {
+	if fTx.Stage == transaction.TxStageNBPCO {
 		//Specia case.
 	}
 
@@ -608,38 +607,38 @@ func (p *TxProcessor) onStatusUpdate(fTxId int64) {
 
 // TODO: reDesign.
 func (p *TxProcessor) updateTxSummary(ctx context.Context, fTx transaction.ForeeTx) {
-	txSummary := *fTx.Summary
-	txSummary.IsCancelAllowed = false
+	// txSummary := *fTx.Summary
+	// txSummary.IsCancelAllowed = false
 
-	if fTx.Status == transaction.TxStatusInitial {
-		txSummary.Status = transaction.TxSummaryStatusInitial
-	} else if fTx.Status == transaction.TxStatusProcessing {
-		if fTx.CurStage == transaction.TxStageInteracCI && fTx.CurStageStatus == transaction.TxStatusSent {
-			txSummary.Status = transaction.TxSummaryStatusAwaitPayment
-			txSummary.IsCancelAllowed = true
-		} else if fTx.CurStage == transaction.TxStageNBPCO && fTx.CurStageStatus == transaction.TxStatusSent && fTx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
-			txSummary.Status = transaction.TxSummaryStatusPickup
-			txSummary.IsCancelAllowed = true
-		} else {
-			txSummary.Status = transaction.TxSummaryStatusInProgress
-		}
-	} else if fTx.Status == transaction.TxStatusCompleted {
-		txSummary.Status = transaction.TxSummaryStatusCompleted
-	} else if fTx.Status == transaction.TxStatusCancelled || fTx.Status == transaction.TxStatusRejected {
-		//TODO: check refund.
-		txSummary.Status = transaction.TxSummaryStatusCancelled
-	} else {
-		//TODO: log error
-		return
-	}
+	// if fTx.Status == transaction.TxStatusInitial {
+	// 	txSummary.Status = transaction.TxSummaryStatusInitial
+	// } else if fTx.Status == transaction.TxStatusProcessing {
+	// 	if fTx.Stage == transaction.TxStageInteracCI && fTx.StageStatus == transaction.TxStatusSent {
+	// 		txSummary.Status = transaction.TxSummaryStatusAwaitPayment
+	// 		txSummary.IsCancelAllowed = true
+	// 	} else if fTx.Stage == transaction.TxStageNBPCO && fTx.StageStatus == transaction.TxStatusSent && fTx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
+	// 		txSummary.Status = transaction.TxSummaryStatusPickup
+	// 		txSummary.IsCancelAllowed = true
+	// 	} else {
+	// 		txSummary.Status = transaction.TxSummaryStatusInProgress
+	// 	}
+	// } else if fTx.Status == transaction.TxStatusCompleted {
+	// 	txSummary.Status = transaction.TxSummaryStatusCompleted
+	// } else if fTx.Status == transaction.TxStatusCancelled || fTx.Status == transaction.TxStatusRejected {
+	// 	//TODO: check refund.
+	// 	txSummary.Status = transaction.TxSummaryStatusCancelled
+	// } else {
+	// 	//TODO: log error
+	// 	return
+	// }
 
-	if txSummary.Status != fTx.Summary.Status {
-		err := p.txSummaryRepo.UpdateTxSummaryById(ctx, txSummary)
-		if err != nil {
-			//TODO: log
-			return
-		}
-	}
+	// if txSummary.Status != fTx.Summary.Status {
+	// 	err := p.txSummaryRepo.UpdateTxSummaryById(ctx, txSummary)
+	// 	if err != nil {
+	// 		//TODO: log
+	// 		return
+	// 	}
+	// }
 
 }
 
@@ -681,88 +680,88 @@ func (p *TxProcessor) RedeemReward(ctx context.Context, fTx transaction.ForeeTx)
 	}
 }
 
-func (p *TxProcessor) MaybeRefund(ctx context.Context, fTx transaction.ForeeTx) {
-	dTx, err := p.db.Begin()
-	if err != nil {
-		dTx.Rollback()
-		//TODO: log err
-		return
-	}
+// func (p *TxProcessor) MaybeRefund(ctx context.Context, fTx transaction.ForeeTx) {
+// 	dTx, err := p.db.Begin()
+// 	if err != nil {
+// 		dTx.Rollback()
+// 		//TODO: log err
+// 		return
+// 	}
 
-	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+// 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
 
-	foreeTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.ID)
-	if err != nil {
-		dTx.Rollback()
-		//TODO: log err
-		return
-	}
+// 	foreeTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.ID)
+// 	if err != nil {
+// 		dTx.Rollback()
+// 		//TODO: log err
+// 		return
+// 	}
 
-	if foreeTx.Status != transaction.TxStatusCancelled && foreeTx.Status != transaction.TxStatusRejected {
-		dTx.Rollback()
-		//TODO: log err
-		return
-	}
+// 	if foreeTx.Status != transaction.TxStatusCancelled && foreeTx.Status != transaction.TxStatusRejected {
+// 		dTx.Rollback()
+// 		//TODO: log err
+// 		return
+// 	}
 
-	if foreeTx.CurStage == transaction.TxStageRefund {
-		dTx.Rollback()
-		//TODO: double refund.
-		return
-	}
+// 	if foreeTx.Stage == transaction.TxStageRefund {
+// 		dTx.Rollback()
+// 		//TODO: double refund.
+// 		return
+// 	}
 
-	rewards, err := p.rewardRepo.GetAllRewardByAppliedTransactionId(ctx, fTx.ID)
-	if err != nil {
-		dTx.Rollback()
-		//TODO: Log error
-		return
-	}
+// 	rewards, err := p.rewardRepo.GetAllRewardByAppliedTransactionId(ctx, fTx.ID)
+// 	if err != nil {
+// 		dTx.Rollback()
+// 		//TODO: Log error
+// 		return
+// 	}
 
-	// Refund rewards.
-	for _, v := range rewards {
-		v.Status = transaction.RewardStatusDelete
-		err := p.rewardRepo.UpdateRewardTxById(ctx, *v)
-		if err != nil {
-			dTx.Rollback()
-			//TODO: Log error
-			return
-		}
-		v.Status = transaction.RewardStatusActive
-		_, err = p.rewardRepo.InsertReward(ctx, *v)
-		if err != nil {
-			dTx.Rollback()
-			//TODO: Log error
-			return
-		}
-	}
+// 	// Refund rewards.
+// 	for _, v := range rewards {
+// 		v.Status = transaction.RewardStatusDelete
+// 		err := p.rewardRepo.UpdateRewardTxById(ctx, *v)
+// 		if err != nil {
+// 			dTx.Rollback()
+// 			//TODO: Log error
+// 			return
+// 		}
+// 		v.Status = transaction.RewardStatusActive
+// 		_, err = p.rewardRepo.InsertReward(ctx, *v)
+// 		if err != nil {
+// 			dTx.Rollback()
+// 			//TODO: Log error
+// 			return
+// 		}
+// 	}
 
-	// Refund limit.
-	reference := transaction.GetDailyTxLimitReference(&fTx)
-	dailyLimit, err := p.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, reference)
-	if err != nil {
-		dTx.Rollback()
-		//TODO: Log error
-		return
-	}
+// 	// Refund limit.
+// 	reference := transaction.GetDailyTxLimitReference(&fTx)
+// 	dailyLimit, err := p.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, reference)
+// 	if err != nil {
+// 		dTx.Rollback()
+// 		//TODO: Log error
+// 		return
+// 	}
 
-	dailyLimit.UsedAmt.Amount += fTx.SrcAmt.Amount
+// 	dailyLimit.UsedAmt.Amount += fTx.SrcAmt.Amount
 
-	if err := p.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
-		dTx.Rollback()
-		//TODO: Log error
-		return
-	}
+// 	if err := p.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
+// 		dTx.Rollback()
+// 		//TODO: Log error
+// 		return
+// 	}
 
-	// Create refund transaction
-	if fTx.CI.Status == transaction.TxStatusCompleted {
-		_, err := p.interacRefundTxRepo.InsertForeeRefundTx(ctx, transaction.ForeeRefundTx{
-			Status:     transaction.RefundTxStatusInitial,
-			ParentTxId: fTx.ID,
-			OwnerId:    fTx.OwnerId,
-		})
-		if err != nil {
-			dTx.Rollback()
-			//TODO: Log error
-			return
-		}
-	}
-}
+// 	// Create refund transaction
+// 	if fTx.CI.Status == transaction.TxStatusCompleted {
+// 		_, err := p.interacRefundTxRepo.InsertForeeRefundTx(ctx, transaction.ForeeRefundTx{
+// 			Status:     transaction.RefundTxStatusInitial,
+// 			ParentTxId: fTx.ID,
+// 			OwnerId:    fTx.OwnerId,
+// 		})
+// 		if err != nil {
+// 			dTx.Rollback()
+// 			//TODO: Log error
+// 			return
+// 		}
+// 	}
+// }

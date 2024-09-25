@@ -370,9 +370,9 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	foreeTx := &transaction.ForeeTx{
-		Type:   transaction.TxTypeInteracToNBP,
-		Status: transaction.TxStatusInitial,
-		Rate:   types.Amount(rate.CalculateForwardAmount(req.SrcAmount)),
+		Type:  transaction.TxTypeInteracToNBP,
+		Stage: transaction.TxStageBegin,
+		Rate:  types.Amount(rate.CalculateForwardAmount(req.SrcAmount)),
 		SrcAmt: types.AmountData{
 			Amount:   types.Amount(req.SrcAmount),
 			Currency: req.SrcCurrency,
@@ -668,6 +668,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		defer wg.Done()
 		for _, feeJoin := range foreeTx.FeeJoints {
 			feeJoin.ParentTxId = foreeTxID
+			feeJoin.OwnerId = session.UserId
 			_, err := t.feeJointRepo.InsertFeeJoint(ctx, *feeJoin)
 			if err != nil {
 				foree_logger.Logger.Error("CreateTx_FAIL",
@@ -881,97 +882,97 @@ func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTrans
 }
 
 // Check transaction status, see if is able to cancel.
-func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTransactionReq) (*TxCancelDTO, transport.HError) {
-	session, sErr := t.authService.GetSession(ctx, req.SessionId)
-	if session == nil {
-		foree_logger.Logger.Info("CancelTransaction_FAIL",
-			"sessionId", req.SessionId,
-			"ip", loadRealIp(ctx),
-			"cause", "session no found",
-		)
-		return nil, sErr
-	}
+// func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTransactionReq) (*TxCancelDTO, transport.HError) {
+// 	session, sErr := t.authService.GetSession(ctx, req.SessionId)
+// 	if session == nil {
+// 		foree_logger.Logger.Info("CancelTransaction_FAIL",
+// 			"sessionId", req.SessionId,
+// 			"ip", loadRealIp(ctx),
+// 			"cause", "session no found",
+// 		)
+// 		return nil, sErr
+// 	}
 
-	summaryTx, err := t.txSummaryRepo.GetUniqueTxSummaryByOwnerAndId(ctx, session.UserId, req.TransactionId)
-	if err != nil {
-		foree_logger.Logger.Error("CancelTransaction_FAIL",
-			"ip", loadRealIp(ctx),
-			"userId", session.UserId,
-			"sessionId", req.SessionId,
-			"cause", err.Error(),
-		)
-		return nil, transport.WrapInteralServerError(err)
-	}
+// 	summaryTx, err := t.txSummaryRepo.GetUniqueTxSummaryByOwnerAndId(ctx, session.UserId, req.TransactionId)
+// 	if err != nil {
+// 		foree_logger.Logger.Error("CancelTransaction_FAIL",
+// 			"ip", loadRealIp(ctx),
+// 			"userId", session.UserId,
+// 			"sessionId", req.SessionId,
+// 			"cause", err.Error(),
+// 		)
+// 		return nil, transport.WrapInteralServerError(err)
+// 	}
 
-	if summaryTx == nil {
-		return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "no found")
-	}
+// 	if summaryTx == nil {
+// 		return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "no found")
+// 	}
 
-	fTx, err := t.txProcessor.LoadTx(summaryTx.ParentTxId)
-	if err != nil {
-		foree_logger.Logger.Error("CancelTransaction_FAIL",
-			"ip", loadRealIp(ctx),
-			"userId", session.UserId,
-			"sessionId", req.SessionId,
-			"cause", err.Error(),
-		)
-		return nil, transport.WrapInteralServerError(err)
-	}
+// 	fTx, err := t.txProcessor.LoadTx(summaryTx.ParentTxId)
+// 	if err != nil {
+// 		foree_logger.Logger.Error("CancelTransaction_FAIL",
+// 			"ip", loadRealIp(ctx),
+// 			"userId", session.UserId,
+// 			"sessionId", req.SessionId,
+// 			"cause", err.Error(),
+// 		)
+// 		return nil, transport.WrapInteralServerError(err)
+// 	}
 
-	if fTx.CurStage == transaction.TxStageInteracCI && fTx.CurStageStatus == transaction.TxStatusSent {
-		resp, err := t.scotiaClient.CancelPayment(scotia.CancelPaymentRequest{
-			PaymentId:    fTx.CI.ScotiaPaymentId,
-			CancelReason: req.CancelReason,
-		})
-		//TODO: log
-		if err != nil {
-			foree_logger.Logger.Error("CancelTransaction_FAIL",
-				"ip", loadRealIp(ctx),
-				"userId", session.UserId,
-				"sessionId", req.SessionId,
-				"cause", err.Error(),
-			)
-			return nil, transport.WrapInteralServerError(err)
-		} else if resp.StatusCode/100 != 2 {
-			return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
-		}
-	} else if fTx.CurStage == transaction.TxStageNBPCO && fTx.CurStageStatus == transaction.TxStatusSent && fTx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
-		resp, err := t.nbpClient.CancelTransaction(nbp.CancelTransactionRequest{
-			GlobalId:           fTx.COUT.NBPReference,
-			CancellationReason: req.CancelReason,
-		})
-		//TODO: log
-		if err != nil {
-			foree_logger.Logger.Error("CancelTransaction_FAIL",
-				"ip", loadRealIp(ctx),
-				"userId", session.UserId,
-				"sessionId", req.SessionId,
-				"cause", err.Error(),
-			)
-			return nil, transport.WrapInteralServerError(err)
-		} else if resp.StatusCode/100 != 2 {
-			return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
-		}
-	} else {
-		foree_logger.Logger.Warn("CancelTransaction_FAIL",
-			"ip", loadRealIp(ctx),
-			"userId", session.UserId,
-			"sessionId", req.SessionId,
-			"foreeTxId", fTx.ID,
-			"CurStage", fTx.CurStage,
-			"CurStageStatus", fTx.CurStageStatus,
-		)
-		return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
-	}
+// 	if fTx.Stage == transaction.TxStageInteracCI && fTx.StageStatus == transaction.TxStatusSent {
+// 		resp, err := t.scotiaClient.CancelPayment(scotia.CancelPaymentRequest{
+// 			PaymentId:    fTx.CI.ScotiaPaymentId,
+// 			CancelReason: req.CancelReason,
+// 		})
+// 		//TODO: log
+// 		if err != nil {
+// 			foree_logger.Logger.Error("CancelTransaction_FAIL",
+// 				"ip", loadRealIp(ctx),
+// 				"userId", session.UserId,
+// 				"sessionId", req.SessionId,
+// 				"cause", err.Error(),
+// 			)
+// 			return nil, transport.WrapInteralServerError(err)
+// 		} else if resp.StatusCode/100 != 2 {
+// 			return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
+// 		}
+// 	} else if fTx.Stage == transaction.TxStageNBPCO && fTx.StageStatus == transaction.TxStatusSent && fTx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
+// 		resp, err := t.nbpClient.CancelTransaction(nbp.CancelTransactionRequest{
+// 			GlobalId:           fTx.COUT.NBPReference,
+// 			CancellationReason: req.CancelReason,
+// 		})
+// 		//TODO: log
+// 		if err != nil {
+// 			foree_logger.Logger.Error("CancelTransaction_FAIL",
+// 				"ip", loadRealIp(ctx),
+// 				"userId", session.UserId,
+// 				"sessionId", req.SessionId,
+// 				"cause", err.Error(),
+// 			)
+// 			return nil, transport.WrapInteralServerError(err)
+// 		} else if resp.StatusCode/100 != 2 {
+// 			return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
+// 		}
+// 	} else {
+// 		foree_logger.Logger.Warn("CancelTransaction_FAIL",
+// 			"ip", loadRealIp(ctx),
+// 			"userId", session.UserId,
+// 			"sessionId", req.SessionId,
+// 			"foreeTxId", fTx.ID,
+// 			"Stage", fTx.Stage,
+// 			"StageStatus", fTx.StageStatus,
+// 		)
+// 		return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
+// 	}
 
-	foree_logger.Logger.Info("CancelTransaction_SUCCESS",
-		"ip", loadRealIp(ctx),
-		"userId", session.UserId,
-		"sessionId", req.SessionId,
-		"foreeTxId", fTx.ID,
-	)
-	return &TxCancelDTO{
-		TransactionId: req.TransactionId,
-		Message:       "cancel successfully",
-	}, nil
-}
+// 	foree_logger.Logger.Info("CancelTransaction_SUCCESS",
+// 		"ip", loadRealIp(ctx),
+// 		"userId", session.UserId,
+// 		"sessionId", req.SessionId,
+// 		"foreeTxId", fTx.ID,
+// 	)
+// 	return &TxCancelDTO{
+// 		TransactionId: req.TransactionId,
+// 		Message:       "cancel successfully",
+// 	}, nil
+// }

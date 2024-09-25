@@ -28,8 +28,8 @@ type TransactionSuperService struct {
 // 	}
 
 // 	// Double check to avoid create DB transaction if not necessary.
-// 	if fTx.CurStage != transaction.TxStageInteracCI && fTx.CurStageStatus != transaction.TxStatusSent {
-// 		return nil, fmt.Errorf("forceCIStatusUpdate -- transaction `%v` is currently in status `%s` at stage `%s`", fTxId, fTx.CurStageStatus, fTx.CurStage)
+// 	if fTx.Stage != transaction.TxStageInteracCI && fTx.StageStatus != transaction.TxStatusSent {
+// 		return nil, fmt.Errorf("forceCIStatusUpdate -- transaction `%v` is currently in status `%s` at stage `%s`", fTxId, fTx.StageStatus, fTx.Stage)
 // 	}
 
 // 	dTx, err := t.db.Begin()
@@ -49,13 +49,13 @@ type TransactionSuperService struct {
 // 	}
 
 // 	// Recheck with DB transaction.
-// 	if cfTx.CurStage != transaction.TxStageInteracCI && cfTx.CurStageStatus != transaction.TxStatusSent {
+// 	if cfTx.Stage != transaction.TxStageInteracCI && cfTx.StageStatus != transaction.TxStatusSent {
 // 		dTx.Rollback()
-// 		return nil, fmt.Errorf("forceCIStatusUpdate -- transaction `%v` is currently in status `%s` at stage `%s`", fTxId, cfTx.CurStageStatus, cfTx.CurStage)
+// 		return nil, fmt.Errorf("forceCIStatusUpdate -- transaction `%v` is currently in status `%s` at stage `%s`", fTxId, cfTx.StageStatus, cfTx.Stage)
 // 	}
 
 // 	fTx.CI.Status = transaction.TxStatus(newStatus)
-// 	fTx.CurStageStatus = transaction.TxStatus(newStatus)
+// 	fTx.StageStatus = transaction.TxStatus(newStatus)
 
 // 	err = t.interacTxRepo.UpdateInteracCITxById(ctx, *fTx.CI)
 // 	if err != nil {
@@ -94,8 +94,8 @@ type TransactionSuperService struct {
 // 	}
 
 // 	// Double check to avoid create DB transaction if not necessary.
-// 	if fTx.CurStage != transaction.TxStageIDM && fTx.CurStageStatus != transaction.TxStatusSuspend {
-// 		return nil, fmt.Errorf("forceCIStatusUpdate -- transaction `%v` is currently in status `%s` at stage `%s`", fTxId, fTx.CurStageStatus, fTx.CurStage)
+// 	if fTx.Stage != transaction.TxStageIDM && fTx.StageStatus != transaction.TxStatusSuspend {
+// 		return nil, fmt.Errorf("forceCIStatusUpdate -- transaction `%v` is currently in status `%s` at stage `%s`", fTxId, fTx.StageStatus, fTx.Stage)
 // 	}
 
 // 	dTx, err := t.db.Begin()
@@ -115,13 +115,13 @@ type TransactionSuperService struct {
 // 	}
 
 // 	// Recheck with DB transaction.
-// 	if cfTx.CurStage != transaction.TxStageIDM && cfTx.CurStageStatus != transaction.TxStatusSuspend {
+// 	if cfTx.Stage != transaction.TxStageIDM && cfTx.StageStatus != transaction.TxStatusSuspend {
 // 		dTx.Rollback()
-// 		return nil, fmt.Errorf("forceCIStatusUpdate -- transaction `%v` is currently in status `%s` at stage `%s`", fTxId, cfTx.CurStageStatus, cfTx.CurStage)
+// 		return nil, fmt.Errorf("forceCIStatusUpdate -- transaction `%v` is currently in status `%s` at stage `%s`", fTxId, cfTx.StageStatus, cfTx.Stage)
 // 	}
 
 // 	fTx.CI.Status = transaction.TxStatus(newStatus)
-// 	fTx.CurStageStatus = transaction.TxStatus(newStatus)
+// 	fTx.StageStatus = transaction.TxStatus(newStatus)
 
 // 	err = t.interacTxRepo.UpdateInteracCITxById(ctx, *fTx.CI)
 // 	if err != nil {
