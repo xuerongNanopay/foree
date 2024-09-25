@@ -204,6 +204,7 @@ func scanRowIntoIDMTx(rows *sql.Rows) (*IDMTx, error) {
 		&tx.Ip,
 		&tx.UserAgent,
 		&tx.IDMReference,
+		&tx.IDMResult,
 		&tx.ParentTxId,
 		&tx.OwnerId,
 		&tx.CreatedAt,
