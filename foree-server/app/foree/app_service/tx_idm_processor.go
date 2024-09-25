@@ -71,6 +71,7 @@ func (p *IDMTxProcessor) idmTransferVeirfy(parentTxId int64) {
 	if err != nil {
 		foree_logger.Logger.Error("IDMTxProcessor--idmTransferVeirfy_FAIL", "parentTxId", parentTxId, "cause", err.Error())
 	}
+
 	req := p.generateValidateTransferReq(fTx)
 	resp, err := p.idmClient.Transfer(*req)
 	// Treat err and err response as Suspend.
@@ -184,7 +185,7 @@ func (p *IDMTxProcessor) generateValidateTransferReq(tx *transaction.ForeeTx) *i
 		PayoutAmount:            idm.IDMAmount(tx.DestAmt.Amount),
 		PayoutCurrency:          tx.DestAmt.Currency,
 		TransactionIdentifier:   fmt.Sprintf("%012d", tx.ID),
-		TransactionRefId:        tx.Summary.NBPReference,
+		TransactionRefId:        tx.COUT.NBPReference,
 		Ip:                      tx.Ip,
 		SrcAccountIdentifier:    fmt.Sprintf("%09d", tx.CI.CashInAccId),
 		DestAccountIdentifier:   fmt.Sprintf("%09d", tx.COUT.CashOutAccId),
