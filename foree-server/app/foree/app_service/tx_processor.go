@@ -395,6 +395,7 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 		err := p.foreeTxRepo.UpdateForeeTxById(ctx, *fTx)
 		if err != nil {
 			foree_logger.Logger.Error("TxProcessor--processRootTx", "foreeTxId", fTx.ID, "cause", err.Error())
+			return
 		}
 		//TODO: go update summaryTx
 		fallthrough

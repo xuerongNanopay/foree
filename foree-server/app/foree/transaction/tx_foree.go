@@ -199,9 +199,9 @@ func (repo *ForeeTxRepo) UpdateForeeTxById(ctx context.Context, tx ForeeTx) erro
 
 	var err error
 	if ok {
-		_, err = dTx.Exec(sQLForeeTxUpdateById, tx.Stage, tx.ID)
+		_, err = dTx.Exec(sQLForeeTxUpdateById, tx.Stage, tx.Conclusion, tx.ID)
 	} else {
-		_, err = repo.db.Exec(sQLForeeTxUpdateById, tx.Stage, tx.ID)
+		_, err = repo.db.Exec(sQLForeeTxUpdateById, tx.Stage, tx.Conclusion, tx.ID)
 	}
 
 	if err != nil {
