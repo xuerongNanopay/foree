@@ -499,7 +499,7 @@ func (p *TxProcessor) next(fTxId int64) {
 		foree_logger.Logger.Error("TxProcessor--next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
-	if fTx.Stage == transaction.TxStageEnd {
+	if fTx.Stage != transaction.TxStageEnd {
 		p.ProcessRootTx(fTxId)
 	}
 }

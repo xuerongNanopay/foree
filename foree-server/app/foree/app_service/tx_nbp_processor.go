@@ -19,7 +19,7 @@ import (
 const nbpTxRecheckInterval = 10 * time.Minute
 const nbpTxRetryInterval = 10 * time.Second
 const nbpTxRetryAttempts = 5
-const nbpTxStatusRefreshTicker = 5 * time.Minute
+const nbpTxStatusRefreshTicker = 2 * time.Minute
 
 func NewNBPTxProcessor(
 	db *sql.DB,

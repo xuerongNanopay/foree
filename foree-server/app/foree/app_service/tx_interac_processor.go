@@ -14,6 +14,7 @@ import (
 
 const DefaultScotiaProfileName = "FOREE"
 const interacTxRecheckInterval = 10 * time.Minute
+const statusRefrehInterval = 5 * time.Minute
 
 type ScotiaProfile struct {
 	Name                          string
@@ -53,7 +54,7 @@ func NewInteracTxProcessor(
 		statusRefreshChan:   make(chan transaction.InteracCITx, 64),
 		refreshStatusChan:   make(chan string, 64),
 		statusRecheckticker: time.NewTicker(5 * time.Minute),
-		statusRefreshTicker: time.NewTicker(5 * time.Minute),
+		statusRefreshTicker: time.NewTicker(statusRefrehInterval),
 	}
 	go ret.start()
 	//TODO: load all wait transaction from DB
