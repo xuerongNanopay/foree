@@ -596,7 +596,7 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 	if fTx == nil {
 		foree_logger.Logger.Warn("tx_processor-updateSummaryTx_FAIL",
 			"foreeTxId", fTxId,
-			"cause", "unknown ForeeTx",
+			"cause", "ForeeTx no found",
 		)
 		return
 	}
@@ -605,14 +605,32 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 		foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
-
-	var newSummaryStatus transaction.TxSummaryStatus
+	newSumTx := *sumTx
 	if fTx.Stage == transaction.TxStageBegin {
-		newSummaryStatus = transaction.TxSummaryStatusInitial
+		newSumTx.Status = transaction.TxSummaryStatusInitial
 	} else if fTx.Stage == transaction.TxStageInteracCI {
-		newSummaryStatus = transaction.TxSummaryStatusAwaitPayment
+		interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(context.TODO(), fTx.ID)
+		if err != nil {
+			foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+			return
+		}
+		if interacTx == nil {
+			foree_logger.Logger.Warn("tx_processor-updateSummaryTx_FAIL",
+				"foreeTxId", fTxId,
+				"cause", "InteracTx no found",
+			)
+			return
+		}
+		if interacTx.Status == transaction.TxStatusInitial {
+			newSumTx.Status = transaction.TxSummaryStatusInitial
+		} else if interacTx.Status == transaction.TxStatusSent {
+			newSumTx.Status = transaction.TxSummaryStatusAwaitPayment
+			newSumTx.PaymentUrl = interacTx.PaymentUrl
+		} else {
+			newSumTx.Status = transaction.TxSummaryStatusInProgress
+		}
 	} else if fTx.Stage == transaction.TxStageIDM {
-		newSummaryStatus = transaction.TxSummaryStatusInProgress
+		newSumTx.Status = transaction.TxSummaryStatusInProgress
 	} else if fTx.Stage == transaction.TxStageNBPCO {
 		nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(context.TODO(), fTx.ID)
 		if err != nil {
@@ -620,25 +638,24 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 			return
 		}
 		if nbpTx.Mode == nbp.PMTModeCash && nbpTx.Status == transaction.TxStatusSent {
-			newSummaryStatus = transaction.TxSummaryStatusPickup
+			newSumTx.Status = transaction.TxSummaryStatusPickup
 		} else {
-			newSummaryStatus = transaction.TxSummaryStatusInProgress
+			newSumTx.Status = transaction.TxSummaryStatusInProgress
 		}
 	} else if fTx.Stage == transaction.TxStageSuccess {
-		newSummaryStatus = transaction.TxSummaryStatusCompleted
+		newSumTx.Status = transaction.TxSummaryStatusCompleted
 	} else if fTx.Stage == transaction.TxStageCancel {
-		newSummaryStatus = transaction.TxSummaryStatusCancelled
+		newSumTx.Status = transaction.TxSummaryStatusCancelled
 	} else if fTx.Stage == transaction.TxStageRefund {
 		//TODO:
-		newSummaryStatus = transaction.TxSummaryStatusRefunded
+		newSumTx.Status = transaction.TxSummaryStatusRefunded
 	} else {
 		foree_logger.Logger.Error("TxProcessor--updateSummaryTx_FAIL", "stage", fTx.Stage, "cause", "unknow stage")
 		return
 	}
 
-	if sumTx.Status != newSummaryStatus {
-		sumTx.Status = newSummaryStatus
-		err = p.txSummaryRepo.UpdateTxSummaryById(context.TODO(), *sumTx)
+	if sumTx.Status != newSumTx.Status {
+		err = p.txSummaryRepo.UpdateTxSummaryById(context.TODO(), newSumTx)
 		if err != nil {
 			foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 			return

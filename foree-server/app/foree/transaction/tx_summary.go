@@ -333,6 +333,7 @@ func scanRowIntoTxSummary(rows *sql.Rows) (*TxSummary, error) {
 		&tx.Type,
 		&tx.Status,
 		&tx.Rate,
+		&tx.PaymentUrl,
 		&tx.SrcAccId,
 		&tx.DestAccId,
 		&tx.SrcAccSummary,
