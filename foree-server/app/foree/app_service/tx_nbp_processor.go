@@ -142,7 +142,7 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 		return
 	}
 
-	mode, err := mapNBPMode(*fTx.COUT.CashOutAcc)
+	mode, err := mapNBPMode(fTx.COUT.CashOutAcc)
 	if err != nil {
 		foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
 		return
@@ -421,25 +421,6 @@ func nbpToInternalStatusMapper(nbpStatus string) transaction.TxStatus {
 		return transaction.TxStatusCancelled
 	default:
 		return transaction.TxStatusSent
-	}
-}
-
-func mapNBPMode(contactAccount account.ContactAccount) (nbp.PMTMode, error) {
-	switch contactAccount.Type {
-	case foree_constant.ContactAccountTypeCash:
-		return nbp.PMTModeCash, nil
-	case foree_constant.ContactAccountTypeBankAccount:
-		if contactAccount.InstitutionName == "NBP" {
-			return nbp.PMTModeAccountTransfers, nil
-		} else {
-			return nbp.PMTModeThirdPartyPayments, nil
-		}
-	case foree_constant.ContactAccountTypeRDA:
-		fallthrough
-	case foree_constant.ContactAccountTypeMobileWallet:
-		return nbp.PMTModeThirdPartyPayments, nil
-	default:
-		return "", fmt.Errorf("NBPTxProcessor -- unknown contact account type `%s`", contactAccount.Type)
 	}
 }
 

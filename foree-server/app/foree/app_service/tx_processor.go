@@ -104,7 +104,7 @@ func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
 }
 
 // Create CI, COUT, IDM for ForeeTx
-func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx, error) {
+func (p *TxProcessor) createFullTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
 	wg := sync.WaitGroup{}
 	dTx, err := p.db.Begin()
 	if err != nil {
@@ -116,7 +116,7 @@ func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
 
-	_, err = p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, tx.ID)
+	_, err = p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.ID)
 	if err != nil {
 		dTx.Rollback()
 		//TODO: log err
@@ -130,11 +130,11 @@ func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx
 		defer wg.Done()
 		ciId, err := p.interacTxRepo.InsertInteracCITx(ctx, transaction.InteracCITx{
 			Status:      transaction.TxStatusInitial,
-			CashInAccId: tx.CinAccId,
-			EndToEndId:  tx.Summary.NBPReference,
-			Amt:         tx.SrcAmt,
-			ParentTxId:  tx.ID,
-			OwnerId:     tx.OwnerId,
+			CashInAccId: fTx.CinAccId,
+			EndToEndId:  fTx.Summary.NBPReference,
+			Amt:         fTx.SrcAmt,
+			ParentTxId:  fTx.ID,
+			OwnerId:     fTx.OwnerId,
 		})
 		if err != nil {
 			ciErr = err
@@ -157,10 +157,10 @@ func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx
 		defer wg.Done()
 		idmId, err := p.idmTxRepo.InsertIDMTx(ctx, transaction.IDMTx{
 			Status:     transaction.TxStatusInitial,
-			Ip:         tx.Ip,
-			UserAgent:  tx.UserAgent,
-			ParentTxId: tx.ID,
-			OwnerId:    tx.OwnerId,
+			Ip:         fTx.Ip,
+			UserAgent:  fTx.UserAgent,
+			ParentTxId: fTx.ID,
+			OwnerId:    fTx.OwnerId,
 		})
 		if err != nil {
 			idmErr = err
@@ -181,13 +181,31 @@ func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx
 	var coutErr error
 	createCout := func() {
 		defer wg.Done()
+		coutAcc, err := p.contactAccountRepo.GetUniqueContactAccountById(ctx, fTx.CoutAccId)
+		if err != nil {
+			coutErr = err
+			return
+		}
+
+		if coutAcc == nil {
+			coutErr = fmt.Errorf("cash out account no found with id `%v`", fTx.CoutAccId)
+			return
+		}
+
+		mode, err := mapNBPMode(coutAcc)
+		if err != nil {
+			coutErr = err
+			return
+		}
+
 		coutId, err := p.nbpTxRepo.InsertNBPCOTx(ctx, transaction.NBPCOTx{
 			Status:       transaction.TxStatusInitial,
-			Amt:          tx.DestAmt,
-			NBPReference: tx.Summary.NBPReference,
-			CashOutAccId: tx.CoutAccId,
-			ParentTxId:   tx.ID,
-			OwnerId:      tx.OwnerId,
+			Mode:         mode,
+			Amt:          fTx.DestAmt,
+			NBPReference: fTx.Summary.NBPReference,
+			CashOutAccId: fTx.CoutAccId,
+			ParentTxId:   fTx.ID,
+			OwnerId:      fTx.OwnerId,
 		})
 		if err != nil {
 			coutErr = err
@@ -209,7 +227,7 @@ func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx
 		dTx.Rollback()
 		foree_logger.Logger.Error("CreateFullTx_FAIL",
 			"ip", loadRealIp(ctx),
-			"foreeTxId", tx.ID,
+			"foreeTxId", fTx.ID,
 			"cause", ciErr.Error(),
 		)
 		return nil, ciErr
@@ -218,7 +236,7 @@ func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx
 		dTx.Rollback()
 		foree_logger.Logger.Error("CreateFullTx_FAIL",
 			"ip", loadRealIp(ctx),
-			"foreeTxId", tx.ID,
+			"foreeTxId", fTx.ID,
 			"cause", idmErr.Error(),
 		)
 		return nil, idmErr
@@ -227,25 +245,25 @@ func (p *TxProcessor) createFullTx(tx transaction.ForeeTx) (*transaction.ForeeTx
 		dTx.Rollback()
 		foree_logger.Logger.Error("CreateFullTx_FAIL",
 			"ip", loadRealIp(ctx),
-			"foreeTxId", tx.ID,
+			"foreeTxId", fTx.ID,
 			"cause", coutErr.Error(),
 		)
 		return nil, coutErr
 	}
 
-	tx.CI = ciTx
-	tx.IDM = idmTx
-	tx.COUT = coutTx
+	fTx.CI = ciTx
+	fTx.IDM = idmTx
+	fTx.COUT = coutTx
 
 	if err = dTx.Commit(); err != nil {
 		foree_logger.Logger.Error("CreateFullTx_FAIL",
 			"ip", loadRealIp(ctx),
-			"foreeTxId", tx.ID,
+			"foreeTxId", fTx.ID,
 			"cause", err.Error(),
 		)
 		return nil, err
 	}
-	return &tx, nil
+	return &fTx, nil
 }
 
 func (p *TxProcessor) LoadTx(id int64) (*transaction.ForeeTx, error) {

@@ -8,6 +8,7 @@ import (
 	"xue.io/go-pay/app/foree/account"
 	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/constant"
+	"xue.io/go-pay/partner/nbp"
 )
 
 const (
@@ -51,18 +52,10 @@ const (
     `
 )
 
-type NBPMode string
-
-const (
-	NBPModeCash               NBPMode = "CASH"
-	NBPModeAccountTransfers   NBPMode = "ACCOUNT_TRANSFERS"
-	NBPModeThirdPartyPayments NBPMode = "THIRD_PARTY_PAYMENTS"
-)
-
 type NBPCOTx struct {
 	ID           int64                   `json:"id"`
 	Status       TxStatus                `json:"status"`
-	Mode         NBPMode                 `json:"mode"`
+	Mode         nbp.PMTMode             `json:"mode"`
 	Amt          types.AmountData        `json:"amt"`
 	NBPReference string                  `json:"nbpReference"`
 	CashOutAccId int64                   `json:"CashOutAccId"`
