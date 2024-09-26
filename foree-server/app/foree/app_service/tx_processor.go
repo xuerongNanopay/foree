@@ -11,6 +11,7 @@ import (
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
+	"xue.io/go-pay/partner/nbp"
 )
 
 // Goal of Txprocessor:
@@ -427,7 +428,7 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 		p.idmTxProcessor.process(fTxId)
 	case transaction.TxStageNBPCO:
 		p.nbpTxProcessor.process(fTxId)
-	case transaction.TxStageEnd:
+	case transaction.TxStageSuccess:
 		foree_logger.Logger.Warn("TxProcessor--processRootTx", "foreeTxId", fTx.ID, "cause", "process transaction that is in END stage already")
 	default:
 		foree_logger.Logger.Error("TxProcessor--processRootTx",
@@ -504,7 +505,7 @@ func (p *TxProcessor) next(fTxId int64) {
 			)
 			return
 		}
-		fTx.Stage = transaction.TxStageEnd
+		fTx.Stage = transaction.TxStageSuccess
 	default:
 		foree_logger.Logger.Error("TxProcessor--next_FAIL",
 			"curStage", fTx.Stage,
@@ -518,7 +519,7 @@ func (p *TxProcessor) next(fTxId int64) {
 		return
 	}
 	//TODO: update summary.
-	if fTx.Stage != transaction.TxStageEnd {
+	if fTx.Stage != transaction.TxStageSuccess {
 		p.ProcessRootTx(fTxId)
 	} else {
 		foree_logger.Logger.Info("TxProcessor", "foreeTxId", fTxId, "msg", "transaction terminate")
@@ -577,7 +578,7 @@ func (p *TxProcessor) rollback(fTxId int64) {
 
 NO_Refund:
 	// No refund need.
-	fTx.Stage = transaction.TxStageEnd
+	fTx.Stage = transaction.TxStageSuccess
 	err = p.foreeTxRepo.UpdateForeeTxById(context.TODO(), *fTx)
 	if err != nil {
 		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
@@ -599,6 +600,12 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 		)
 		return
 	}
+	sumTx, err := p.txSummaryRepo.GetUniqueTxSummaryByParentTxId(context.TODO(), fTx.ID)
+	if err != nil {
+		foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		return
+	}
+
 	var newSummaryStatus transaction.TxSummaryStatus
 	if fTx.Stage == transaction.TxStageBegin {
 		newSummaryStatus = transaction.TxSummaryStatusInitial
@@ -607,11 +614,37 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 	} else if fTx.Stage == transaction.TxStageIDM {
 		newSummaryStatus = transaction.TxSummaryStatusInProgress
 	} else if fTx.Stage == transaction.TxStageNBPCO {
-		//Specia case.
+		nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(context.TODO(), fTx.ID)
+		if err != nil {
+			foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+			return
+		}
+		if nbpTx.Mode == nbp.PMTModeCash && nbpTx.Status == transaction.TxStatusSent {
+			newSummaryStatus = transaction.TxSummaryStatusPickup
+		} else {
+			newSummaryStatus = transaction.TxSummaryStatusInProgress
+		}
+	} else if fTx.Stage == transaction.TxStageSuccess {
+		newSummaryStatus = transaction.TxSummaryStatusCompleted
+	} else if fTx.Stage == transaction.TxStageCancel {
+		newSummaryStatus = transaction.TxSummaryStatusCancelled
+	} else if fTx.Stage == transaction.TxStageRefund {
+		//TODO:
+		newSummaryStatus = transaction.TxSummaryStatusRefunded
+	} else {
+		foree_logger.Logger.Error("TxProcessor--updateSummaryTx_FAIL", "stage", fTx.Stage, "cause", "unknow stage")
+		return
 	}
 
-	if newSummaryStatus != "TODO" {
+	if sumTx.Status != newSummaryStatus {
+		sumTx.Status = newSummaryStatus
+		err = p.txSummaryRepo.UpdateTxSummaryById(context.TODO(), *sumTx)
+		if err != nil {
+			foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+			return
+		}
 
+		foree_logger.Logger.Debug("tx_processor-updateSummaryTx_Success", "oldSummaryStatus", sumTx.Status, "newSummaryStatus", newSummaryStatus)
 	}
 }
 

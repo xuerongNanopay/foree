@@ -86,7 +86,8 @@ const (
 	TxStageIDM       TxStage = "Compliance_IDM"
 	TxStageNBPCO     TxStage = "NBP_CO"
 	TxStageRefund    TxStage = "REFUND"
-	TxStageEnd       TxStage = "TX_END"
+	TxStageCancel    TxStage = "CANCEL"
+	TxStageSuccess   TxStage = "TX_SUCCESS"
 )
 
 // Only Support INITIAL, PROCESSING, CANCEL, COMPLETE.
