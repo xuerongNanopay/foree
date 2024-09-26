@@ -68,7 +68,7 @@ const (
             t.nbp_reference, t.is_cancel_allowed, t.parent_tx_id, t.owner_id, 
             t.created_at, t.updated_at
         FROM tx_summary t
-        where t.ParentTxId = ?
+        where t.parent_tx_id = ?
     `
 	sQLTxSummaryGetAllByOwnerIdWithPagination = `
 	    SELECT
