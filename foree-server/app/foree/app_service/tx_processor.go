@@ -661,7 +661,7 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 			return
 		}
 
-		foree_logger.Logger.Debug("tx_processor-updateSummaryTx_Success", "oldSummaryStatus", sumTx.Status, "newSummaryStatus", newSummaryStatus)
+		foree_logger.Logger.Debug("tx_processor-updateSummaryTx_Success", "oldSummaryStatus", sumTx.Status, "newSummaryStatus", newSumTx.Status)
 	}
 }
 
