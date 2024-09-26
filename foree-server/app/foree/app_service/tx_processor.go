@@ -501,6 +501,8 @@ func (p *TxProcessor) next(fTxId int64) {
 	}
 	if fTx.Stage != transaction.TxStageEnd {
 		p.ProcessRootTx(fTxId)
+	} else {
+		foree_logger.Logger.Error("TxProcessor", "foreeTxId", fTxId, "msg", "transaction terminate")
 	}
 }
 
