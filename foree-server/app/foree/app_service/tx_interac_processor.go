@@ -14,7 +14,7 @@ import (
 
 const DefaultScotiaProfileName = "FOREE"
 const interacTxRecheckInterval = 10 * time.Minute
-const statusRefrehInterval = 5 * time.Minute
+const statusRefrehInterval = 2 * time.Minute
 
 type ScotiaProfile struct {
 	Name                          string
