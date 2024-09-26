@@ -101,6 +101,11 @@ func (p *IDMTxProcessor) idmTransferVeirfy(parentTxId int64) {
 			)
 			return
 		}
+		foree_logger.Logger.Warn("IDMTxProcessor--idmTransferVeirfy",
+			"parentTxId", parentTxId,
+			"idmTxId", fTx.IDM.ID,
+			"msg", "idm did not approve",
+		)
 		return
 	}
 
@@ -114,6 +119,11 @@ func (p *IDMTxProcessor) idmTransferVeirfy(parentTxId int64) {
 		)
 		return
 	}
+	foree_logger.Logger.Info("IDMTxProcessor--idmTransferVeirfy",
+		"parentTxId", parentTxId,
+		"idmTxId", fTx.IDM.ID,
+		"msg", "IDM approve",
+	)
 
 	p.process(idm.ParentTxId)
 }

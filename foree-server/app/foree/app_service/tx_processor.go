@@ -388,7 +388,11 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 		)
 		return
 	}
-
+	foree_logger.Logger.Debug("TxProcessor--processRootTx",
+		"foreeTxId", fTxId,
+		"stage", fTx.Stage,
+		"msg", "transaction process",
+	)
 	switch fTx.Stage {
 	case transaction.TxStageBegin:
 		fTx.Stage = transaction.TxStageInteracCI
@@ -465,7 +469,7 @@ func (p *TxProcessor) next(fTxId int64) {
 			)
 			return
 		}
-		fTx.Stage = transaction.TxStageIDM
+		fTx.Stage = transaction.TxStageNBPCO
 	case transaction.TxStageNBPCO:
 		nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, fTxId)
 		if err != nil {
@@ -495,7 +499,9 @@ func (p *TxProcessor) next(fTxId int64) {
 		foree_logger.Logger.Error("TxProcessor--next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
-	p.ProcessRootTx(fTxId)
+	if fTx.Stage == transaction.TxStageEnd {
+		p.ProcessRootTx(fTxId)
+	}
 }
 
 // If stage can not process transaction, then it will call rollback to rolling back the transaction.

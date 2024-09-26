@@ -129,20 +129,21 @@ func (p *NBPTxProcessor) process(parentTxId int64) {
 }
 
 func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
+	fmt.Println("vvvvvvvvv")
 	fTx, err := p.txProcessor.loadTx(parentTxId, true)
 	if err != nil {
-		foree_logger.Logger.Error("IDM_Processor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
+		foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
 		return
 	}
 	req, err := p.buildLoadRemittanceRequest(*fTx)
 	if err != nil {
-		foree_logger.Logger.Error("IDM_Processor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
+		foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
 		return
 	}
 
 	mode, err := mapNBPMode(*fTx.COUT.CashOutAcc)
 	if err != nil {
-		foree_logger.Logger.Error("IDM_Processor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
+		foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
 		return
 	}
 
@@ -156,12 +157,12 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 	for i := 0; i < nbpTxRetryAttempts; i++ {
 		resp, err = p.sendPaymentWithMode(*req, mode)
 		if err != nil {
-			foree_logger.Logger.Error("IDM_Processor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
+			foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
 			return
 		}
 		//Retry case: 5xx, 401, 403
 		if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" || resp.ResponseCode == "406" {
-			foree_logger.Logger.Warn("IDM_Processor--loadRemittance", "parentTxId", parentTxId, "retry", i)
+			foree_logger.Logger.Warn("NBPTxProcessor--loadRemittance", "parentTxId", parentTxId, "retry", i)
 			time.Sleep(nbpTxRetryInterval)
 		} else {
 			break
@@ -171,7 +172,7 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 
 	// Retry later manully
 	if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
-		foree_logger.Logger.Error("IDM_Processor--loadRemittance_FAIL",
+		foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL",
 			"parentTxId", parentTxId,
 			"httpStatus", resp.StatusCode,
 			"httpResponse", resp.RawResponse,
@@ -187,20 +188,20 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 		nbpTx.Status = transaction.TxStatusSent
 		err := p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), nbpTx)
 		if err != nil {
-			foree_logger.Logger.Error("IDM_Processor--loadRemittance_FAIL",
+			foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL",
 				"parentTxId", parentTxId,
 				"httpStatus", resp.StatusCode,
 				"cause", err.Error(),
 			)
 			return
 		}
-		foree_logger.Logger.Info("IDM_Processor--loadRemittance_SUCCESS", "parentTxId", parentTxId)
+		foree_logger.Logger.Info("NBPTxProcessor--loadRemittance_SUCCESS", "parentTxId", parentTxId)
 		p.statusRefreshChan <- nbpTx
 		return
 	}
 
 	// Reject
-	foree_logger.Logger.Error("IDM_Processor--loadRemittance_FAIL",
+	foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL",
 		"parentTxId", parentTxId,
 		"httpStatus", resp.StatusCode,
 		"httpRequest", resp.RawRequest,
@@ -210,7 +211,7 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 	nbpTx.Status = transaction.TxStatusRejected
 	err = p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), nbpTx)
 	if err != nil {
-		foree_logger.Logger.Error("IDM_Processor--loadRemittance_FAIL",
+		foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL",
 			"parentTxId", parentTxId,
 			"httpStatus", resp.StatusCode,
 			"cause", err.Error(),
@@ -226,14 +227,14 @@ func (p *NBPTxProcessor) refreshNBPStatuses(nbpReferences []string) {
 	})
 
 	if err != nil {
-		foree_logger.Logger.Error("IDM_Processor--refreshNBPStatuses_FAIL",
+		foree_logger.Logger.Error("NBPTxProcessor--refreshNBPStatuses_FAIL",
 			"cause", err.Error(),
 		)
 		return
 	}
 
 	if resp.StatusCode/100 != 2 {
-		foree_logger.Logger.Error("IDM_Processor--refreshNBPStatuses_FAIL",
+		foree_logger.Logger.Error("NBPTxProcessor--refreshNBPStatuses_FAIL",
 			"httpStatus", resp.StatusCode,
 			"httpRawRequest", resp.RawRequest,
 			"httpRawResponse", resp.RawResponse,
@@ -249,14 +250,14 @@ func (p *NBPTxProcessor) refreshNBPStatuses(nbpReferences []string) {
 
 		curNBPTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByNBPReference(context.TODO(), nbpRef.GlobalId)
 		if err != nil {
-			foree_logger.Logger.Error("IDM_Processor--refreshNBPStatuses_FAIL",
+			foree_logger.Logger.Error("NBPTxProcessor--refreshNBPStatuses_FAIL",
 				"cause", err.Error(),
 			)
 			continue
 		}
 
 		if curNBPTx.Status != transaction.TxStatusSent {
-			foree_logger.Logger.Warn("IDM_Processor--refreshNBPStatuses_FAIL",
+			foree_logger.Logger.Warn("NBPTxProcessor--refreshNBPStatuses_FAIL",
 				"nbpTxId", curNBPTx.ID,
 				"nbpReference", curNBPTx.NBPReference,
 				"currentNbpTxStatus", curNBPTx.Status,
@@ -269,7 +270,7 @@ func (p *NBPTxProcessor) refreshNBPStatuses(nbpReferences []string) {
 		curNBPTx.Status = newTxStatus
 		err = p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), *curNBPTx)
 		if err != nil {
-			foree_logger.Logger.Error("IDM_Processor--refreshNBPStatuses_FAIL",
+			foree_logger.Logger.Error("NBPTxProcessor--refreshNBPStatuses_FAIL",
 				"cause", err.Error(),
 			)
 			continue

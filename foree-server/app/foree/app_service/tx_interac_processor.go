@@ -97,6 +97,10 @@ func (p *InteracTxProcessor) start() {
 				interacTx: interacTx,
 				recheckAt: time.Now().Add(interacTxRecheckInterval),
 			})
+			foree_logger.Logger.Info("InteracTxProcessor--statusRefreshChan",
+				"interacTxId", interacTx.ID,
+				"msg", "enqueue in interac transaction wait pool",
+			)
 		case paymentId := <-p.refreshStatusChan:
 			v, ok := p.waits.Load(paymentId)
 			w, _ := v.(interacTxWrapper)
