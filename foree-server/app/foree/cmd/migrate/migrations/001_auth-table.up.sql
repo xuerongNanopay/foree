@@ -374,7 +374,7 @@ CREATE TABLE IF NOT EXISTS foree_refund_tx(
 CREATE TABLE IF NOT EXISTS nbp_co_tx(
     `id` SERIAL PRIMARY KEY,
     `status` VARCHAR(64) NOT NULL,
-    `mode` VARCHAR(16) DEFAULT '',
+    `mode` VARCHAR(64) DEFAULT '',
     `amount` DECIMAL(11, 2) NOT NULL,
     `currency` CHAR(3) NOT NULL,
     `nbp_reference` VARCHAR(128) DEFAULT '',
