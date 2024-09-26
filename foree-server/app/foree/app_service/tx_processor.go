@@ -499,6 +499,7 @@ func (p *TxProcessor) next(fTxId int64) {
 		foree_logger.Logger.Error("TxProcessor--next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
+	//TODO: update summary.
 	if fTx.Stage != transaction.TxStageEnd {
 		p.ProcessRootTx(fTxId)
 	} else {
@@ -566,15 +567,15 @@ NO_Refund:
 	}
 }
 
-func (p *TxProcessor) onStatusUpdate(fTxId int64) {
+func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 	ctx := context.TODO()
 	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
 	if err != nil {
-		foree_logger.Logger.Error("tx_processor-onStatusUpdate_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
 	if fTx == nil {
-		foree_logger.Logger.Warn("tx_processor-onStatusUpdate_FAIL",
+		foree_logger.Logger.Warn("tx_processor-updateSummaryTx_FAIL",
 			"foreeTxId", fTxId,
 			"cause", "unknown ForeeTx",
 		)
@@ -583,14 +584,11 @@ func (p *TxProcessor) onStatusUpdate(fTxId int64) {
 	var newSummaryStatus transaction.TxSummaryStatus
 	if fTx.Stage == transaction.TxStageBegin {
 		newSummaryStatus = transaction.TxSummaryStatusInitial
-	}
-	if fTx.Stage == transaction.TxStageInteracCI {
+	} else if fTx.Stage == transaction.TxStageInteracCI {
 		newSummaryStatus = transaction.TxSummaryStatusAwaitPayment
-	}
-	if fTx.Stage == transaction.TxStageIDM {
+	} else if fTx.Stage == transaction.TxStageIDM {
 		newSummaryStatus = transaction.TxSummaryStatusInProgress
-	}
-	if fTx.Stage == transaction.TxStageNBPCO {
+	} else if fTx.Stage == transaction.TxStageNBPCO {
 		//Specia case.
 	}
 
@@ -600,41 +598,41 @@ func (p *TxProcessor) onStatusUpdate(fTxId int64) {
 }
 
 // TODO: reDesign.
-func (p *TxProcessor) updateTxSummary(ctx context.Context, fTx transaction.ForeeTx) {
-	// txSummary := *fTx.Summary
-	// txSummary.IsCancelAllowed = false
+// func (p *TxProcessor) updateTxSummary(ctx context.Context, fTx transaction.ForeeTx) {
+// txSummary := *fTx.Summary
+// txSummary.IsCancelAllowed = false
 
-	// if fTx.Status == transaction.TxStatusInitial {
-	// 	txSummary.Status = transaction.TxSummaryStatusInitial
-	// } else if fTx.Status == transaction.TxStatusProcessing {
-	// 	if fTx.Stage == transaction.TxStageInteracCI && fTx.StageStatus == transaction.TxStatusSent {
-	// 		txSummary.Status = transaction.TxSummaryStatusAwaitPayment
-	// 		txSummary.IsCancelAllowed = true
-	// 	} else if fTx.Stage == transaction.TxStageNBPCO && fTx.StageStatus == transaction.TxStatusSent && fTx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
-	// 		txSummary.Status = transaction.TxSummaryStatusPickup
-	// 		txSummary.IsCancelAllowed = true
-	// 	} else {
-	// 		txSummary.Status = transaction.TxSummaryStatusInProgress
-	// 	}
-	// } else if fTx.Status == transaction.TxStatusCompleted {
-	// 	txSummary.Status = transaction.TxSummaryStatusCompleted
-	// } else if fTx.Status == transaction.TxStatusCancelled || fTx.Status == transaction.TxStatusRejected {
-	// 	//TODO: check refund.
-	// 	txSummary.Status = transaction.TxSummaryStatusCancelled
-	// } else {
-	// 	//TODO: log error
-	// 	return
-	// }
+// if fTx.Status == transaction.TxStatusInitial {
+// 	txSummary.Status = transaction.TxSummaryStatusInitial
+// } else if fTx.Status == transaction.TxStatusProcessing {
+// 	if fTx.Stage == transaction.TxStageInteracCI && fTx.StageStatus == transaction.TxStatusSent {
+// 		txSummary.Status = transaction.TxSummaryStatusAwaitPayment
+// 		txSummary.IsCancelAllowed = true
+// 	} else if fTx.Stage == transaction.TxStageNBPCO && fTx.StageStatus == transaction.TxStatusSent && fTx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
+// 		txSummary.Status = transaction.TxSummaryStatusPickup
+// 		txSummary.IsCancelAllowed = true
+// 	} else {
+// 		txSummary.Status = transaction.TxSummaryStatusInProgress
+// 	}
+// } else if fTx.Status == transaction.TxStatusCompleted {
+// 	txSummary.Status = transaction.TxSummaryStatusCompleted
+// } else if fTx.Status == transaction.TxStatusCancelled || fTx.Status == transaction.TxStatusRejected {
+// 	//TODO: check refund.
+// 	txSummary.Status = transaction.TxSummaryStatusCancelled
+// } else {
+// 	//TODO: log error
+// 	return
+// }
 
-	// if txSummary.Status != fTx.Summary.Status {
-	// 	err := p.txSummaryRepo.UpdateTxSummaryById(ctx, txSummary)
-	// 	if err != nil {
-	// 		//TODO: log
-	// 		return
-	// 	}
-	// }
+// if txSummary.Status != fTx.Summary.Status {
+// 	err := p.txSummaryRepo.UpdateTxSummaryById(ctx, txSummary)
+// 	if err != nil {
+// 		//TODO: log
+// 		return
+// 	}
+// }
 
-}
+// }
 
 func (p *TxProcessor) recordTxHistory(h transaction.TxHistory) {
 	if _, err := p.txHistoryRepo.InserTxHistory(context.Background(), h); err != nil {

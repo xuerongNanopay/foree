@@ -126,6 +126,7 @@ func (p *NBPTxProcessor) process(parentTxId int64) {
 			"cause", "unsupport status",
 		)
 	}
+	go p.txProcessor.updateSummaryTx(nbpTx.ParentTxId)
 }
 
 func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {

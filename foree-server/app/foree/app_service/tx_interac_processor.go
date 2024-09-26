@@ -204,7 +204,6 @@ func (p *InteracTxProcessor) start() {
 			}
 			// Still in send.
 			if curCiTx.Status == transaction.TxStatusSent {
-				go p.txProcessor.onStatusUpdate(curCiTx.ParentTxId)
 				p.waits.Swap(paymentId, interacTxWrapper{
 					interacTx: *curCiTx,
 					recheckAt: time.Now().Add(interacTxRecheckInterval),
@@ -267,6 +266,7 @@ func (p *InteracTxProcessor) process(parentTxId int64) {
 			"cause", "unsupport status",
 		)
 	}
+	go p.txProcessor.updateSummaryTx(interacTx.ParentTxId)
 }
 
 func (p *InteracTxProcessor) requestPayment(interacTx transaction.InteracCITx) {

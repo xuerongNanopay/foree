@@ -14,9 +14,9 @@ const (
 	sQLNBPCOTxInsert = `
         INSERT INTO nbp_co_tx
         (
-            status, amount, currency, nbp_reference,
+            status, mode, amount, currency, nbp_reference,
 			cash_out_acc_id, parent_tx_id, owner_id
-        ) VALUES(?,?,?,?,?,?,?)
+        ) VALUES(?,?,?,?,?,?,?,?)
     `
 	sQLNBPCOTxUpdateById = `
         UPDATE nbp_co_tx SET 
@@ -25,7 +25,7 @@ const (
     `
 	sQLNBPCOTxGetUniqueById = `
         SELECT 
-            t.id, t.status, t.amount, t.currency, t.nbp_reference,
+            t.id, t.status, t.mode, t.amount, t.currency, t.nbp_reference,
             t.cash_out_acc_id, t.parent_tx_id, t.owner_id,
             t.created_at, t.updated_at
         FROM nbp_co_tx t
@@ -34,7 +34,7 @@ const (
     `
 	sQLNBPCOTxGetUniqueByNBPReference = `
         SELECT 
-            t.id, t.status, t.amount, t.currency, t.nbp_reference,
+            t.id, t.status, t.mode, t.amount, t.currency, t.nbp_reference,
             t.cash_out_acc_id, t.parent_tx_id, t.owner_id,
             t.created_at, t.updated_at
         FROM nbp_co_tx t
@@ -43,7 +43,7 @@ const (
     `
 	sQLNBPCOTxGetUniqueByParentTxId = `
         SELECT 
-            t.id, t.status, t.amount, t.currency, t.nbp_reference,
+            t.id, t.status, t.mode, t.amount, t.currency, t.nbp_reference,
             t.cash_out_acc_id, t.parent_tx_id, t.owner_id,
             t.created_at, t.updated_at
         FROM nbp_co_tx t
@@ -51,9 +51,18 @@ const (
     `
 )
 
+type NBPMode string
+
+const (
+	NBPModeCash               NBPMode = "CASH"
+	NBPModeAccountTransfers   NBPMode = "ACCOUNT_TRANSFERS"
+	NBPModeThirdPartyPayments NBPMode = "THIRD_PARTY_PAYMENTS"
+)
+
 type NBPCOTx struct {
 	ID           int64                   `json:"id"`
 	Status       TxStatus                `json:"status"`
+	Mode         NBPMode                 `json:"mode"`
 	Amt          types.AmountData        `json:"amt"`
 	NBPReference string                  `json:"nbpReference"`
 	CashOutAccId int64                   `json:"CashOutAccId"`
@@ -82,6 +91,7 @@ func (repo *NBPCOTxRepo) InsertNBPCOTx(ctx context.Context, tx NBPCOTx) (int64, 
 		result, err = dTx.Exec(
 			sQLNBPCOTxInsert,
 			tx.Status,
+			tx.Mode,
 			tx.Amt.Amount,
 			tx.Amt.Currency,
 			tx.NBPReference,
@@ -93,6 +103,7 @@ func (repo *NBPCOTxRepo) InsertNBPCOTx(ctx context.Context, tx NBPCOTx) (int64, 
 		result, err = repo.db.Exec(
 			sQLNBPCOTxInsert,
 			tx.Status,
+			tx.Mode,
 			tx.Amt.Amount,
 			tx.Amt.Currency,
 			tx.NBPReference,
@@ -206,6 +217,7 @@ func scanRowIntoNBPCOTx(rows *sql.Rows) (*NBPCOTx, error) {
 	err := rows.Scan(
 		&tx.ID,
 		&tx.Status,
+		&tx.Mode,
 		&tx.Amt.Amount,
 		&tx.Amt.Currency,
 		&tx.NBPReference,
