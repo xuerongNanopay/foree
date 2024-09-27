@@ -38,16 +38,9 @@ const (
 	`
 )
 
-type RefundTxStatus string
-
-const (
-	RefundTxStatusInitial  RefundTxStatus = "INITIAL"
-	RefundTxStatusRefunded RefundTxStatus = "REFUNDED"
-)
-
 type ForeeRefundTx struct {
 	ID         int64            `json:"id"`
-	Status     RefundTxStatus   `json:"status"`
+	Status     TxStatus         `json:"status"`
 	RefundAmt  types.AmountData `json:"refundAmt"`
 	ParentTxId int64            `json:"parentTxId"`
 	OwnerId    int64            `json:"ownerId"`

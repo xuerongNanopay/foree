@@ -548,7 +548,30 @@ func (p *TxProcessor) rollback(fTxId int64) {
 		return
 	}
 
-	//TODO: safe check on terminal stage.
+	if fTx.Stage == transaction.TxStageRefunding || fTx.Stage == transaction.TxStageCancel || fTx.Stage == transaction.TxStageSuccess {
+		foree_logger.Logger.Warn("tx_processor-rollback_FAIL",
+			"foreeTxId", fTxId,
+			"curStage", fTx.Stage,
+			"cause", "transaction is in stage that can't rollback",
+		)
+		return
+	}
+
+	dbTx, err := p.db.Begin()
+	if err != nil {
+		foree_logger.Logger.Error("tx_processor-rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		dbTx.Rollback()
+		return
+	}
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dbTx)
+
+	//Close remaining transaction.
+	err = p.closeRemainingTx(ctx, fTxId)
+	if err != nil {
+		foree_logger.Logger.Error("tx_processor-rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		dbTx.Rollback()
+		return
+	}
 
 	if fTx.Stage == transaction.TxStageBegin {
 		goto NO_Refund
@@ -558,37 +581,48 @@ func (p *TxProcessor) rollback(fTxId int64) {
 		interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, fTxId)
 		if err != nil {
 			foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+			dbTx.Rollback()
 			return
 		}
 
+		// The case that we can safely cancel transaction.
 		if interacTx.Status == transaction.TxStatusInitial || interacTx.Status == transaction.TxStatusCancelled {
 			goto NO_Refund
 		}
 	}
 
-	_, err = p.foreeRefundRepo.InsertForeeRefundTx(context.TODO(), transaction.ForeeRefundTx{
-		Status:     transaction.RefundTxStatusInitial,
+	_, err = p.foreeRefundRepo.InsertForeeRefundTx(ctx, transaction.ForeeRefundTx{
+		Status:     transaction.TxStatusInitial,
 		RefundAmt:  fTx.TotalAmt,
 		ParentTxId: fTx.ID,
 		OwnerId:    fTx.OwnerId,
 	})
+
 	if err != nil {
 		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		dbTx.Rollback()
 		return
 	}
 	fTx.Stage = transaction.TxStageRefunding
-	err = p.foreeTxRepo.UpdateForeeTxById(context.TODO(), *fTx)
+	err = p.foreeTxRepo.UpdateForeeTxById(ctx, *fTx)
 	if err != nil {
+		dbTx.Rollback()
 		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
-	return
+	goto COMMIT
 
 NO_Refund:
 	// No refund need.
-	fTx.Stage = transaction.TxStageSuccess
-	err = p.foreeTxRepo.UpdateForeeTxById(context.TODO(), *fTx)
+	fTx.Stage = transaction.TxStageCancel
+	err = p.foreeTxRepo.UpdateForeeTxById(ctx, *fTx)
 	if err != nil {
+		dbTx.Rollback()
+		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		return
+	}
+COMMIT:
+	if err = dbTx.Commit(); err != nil {
 		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}

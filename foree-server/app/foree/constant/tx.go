@@ -9,5 +9,4 @@ var AllowTransactionsStatus = map[string]bool{
 	string(transaction.TxSummaryStatusCompleted):    true,
 	string(transaction.TxSummaryStatusCancelled):    true,
 	string(transaction.TxSummaryStatusRefunding):    true,
-	string(transaction.TxSummaryStatusRefunded):     true,
 }
