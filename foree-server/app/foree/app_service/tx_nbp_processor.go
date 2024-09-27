@@ -111,8 +111,10 @@ func (p *NBPTxProcessor) process(parentTxId int64) {
 		p.loadRemittance(nbpTx.ParentTxId)
 	case transaction.TxStatusSent:
 		p.statusRefreshChan <- *nbpTx
+		go p.txProcessor.updateSummaryTx(nbpTx.ParentTxId)
 	case transaction.TxStatusCompleted:
 		p.txProcessor.next(nbpTx.ParentTxId)
+		go p.txProcessor.updateSummaryTx(nbpTx.ParentTxId)
 	case transaction.TxStatusRejected:
 		p.txProcessor.rollback(nbpTx.ParentTxId)
 	case transaction.TxStatusCancelled:
@@ -126,7 +128,6 @@ func (p *NBPTxProcessor) process(parentTxId int64) {
 			"cause", "unsupport status",
 		)
 	}
-	go p.txProcessor.updateSummaryTx(nbpTx.ParentTxId)
 }
 
 func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {

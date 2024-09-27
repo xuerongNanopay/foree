@@ -251,8 +251,10 @@ func (p *InteracTxProcessor) process(parentTxId int64) {
 		p.requestPayment(*interacTx)
 	case transaction.TxStatusSent:
 		p.statusRefreshChan <- *interacTx
+		go p.txProcessor.updateSummaryTx(interacTx.ParentTxId)
 	case transaction.TxStatusCompleted:
 		p.txProcessor.next(interacTx.ParentTxId)
+		go p.txProcessor.updateSummaryTx(interacTx.ParentTxId)
 	case transaction.TxStatusRejected:
 		p.txProcessor.rollback(interacTx.ParentTxId)
 	case transaction.TxStatusCancelled:
@@ -266,7 +268,6 @@ func (p *InteracTxProcessor) process(parentTxId int64) {
 			"cause", "unsupport status",
 		)
 	}
-	go p.txProcessor.updateSummaryTx(interacTx.ParentTxId)
 }
 
 func (p *InteracTxProcessor) requestPayment(interacTx transaction.InteracCITx) {

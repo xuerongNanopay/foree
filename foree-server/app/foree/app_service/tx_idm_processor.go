@@ -64,7 +64,6 @@ func (p *IDMTxProcessor) process(parentTxId int64) {
 			"cause", "unsupport status",
 		)
 	}
-	go p.txProcessor.updateSummaryTx(idmTx.ParentTxId)
 }
 
 func (p *IDMTxProcessor) idmTransferVeirfy(parentTxId int64) {
