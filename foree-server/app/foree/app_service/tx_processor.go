@@ -594,45 +594,55 @@ NO_Refund:
 	}
 }
 
-func (p *TxProcessor) closeRemainingTx(ctx context.Context, fTxId int64) {
+func (p *TxProcessor) closeRemainingTx(ctx context.Context, fTxId int64) error {
 	interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, fTxId)
 	if err != nil {
-		foree_logger.Logger.Error("tx_processor-closeRemainingTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
-		return
+		return err
 	}
 	if interacTx == nil {
-		foree_logger.Logger.Warn("tx_processor-closeRemainingTx_FAIL",
-			"foreeTxId", fTxId,
-			"cause", "interacTx no found",
-		)
-		return
+		return fmt.Errorf("interacTx no found with parentTxId `%v`", fTxId)
 	}
 
 	idmTx, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, fTxId)
 	if err != nil {
-		foree_logger.Logger.Error("tx_processor-closeRemainingTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
-		return
+		return err
 	}
 	if idmTx == nil {
-		foree_logger.Logger.Warn("tx_processor-closeRemainingTx_FAIL",
-			"foreeTxId", fTxId,
-			"cause", "idmTx no found",
-		)
-		return
+		return fmt.Errorf("idmTx no found with parentTxId `%v`", fTxId)
 	}
 
 	nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, fTxId)
 	if err != nil {
-		foree_logger.Logger.Error("tx_processor-closeRemainingTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
-		return
+		return err
 	}
 	if nbpTx == nil {
-		foree_logger.Logger.Warn("tx_processor-closeRemainingTx_FAIL",
-			"foreeTxId", fTxId,
-			"cause", "nbpTx no found",
-		)
-		return
+		return fmt.Errorf("nbpTx no found with parentTxId `%v`", fTxId)
 	}
+
+	if interacTx.Status == transaction.TxStatusInitial {
+		newInteracTx := *interacTx
+		newInteracTx.Status = transaction.TxStatusClosed
+		if err := p.interacTxRepo.UpdateInteracCITxById(ctx, newInteracTx); err != nil {
+			return err
+		}
+	}
+
+	if idmTx.Status == transaction.TxStatusInitial {
+		newInteracTx := *idmTx
+		newInteracTx.Status = transaction.TxStatusClosed
+		if err := p.idmTxRepo.UpdateIDMTxById(ctx, newInteracTx); err != nil {
+			return err
+		}
+	}
+
+	if nbpTx.Status == transaction.TxStatusInitial {
+		newInteracTx := *nbpTx
+		newInteracTx.Status = transaction.TxStatusClosed
+		if err := p.nbpTxRepo.UpdateNBPCOTxById(ctx, newInteracTx); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (p *TxProcessor) updateSummaryTx(fTxId int64) {
