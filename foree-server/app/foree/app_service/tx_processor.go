@@ -429,8 +429,7 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 	case transaction.TxStageNBPCO:
 		p.nbpTxProcessor.process(fTxId)
 	case transaction.TxStageRefunding:
-		//TODO: check if cancel transaction complete.
-		//If yes, move stage to cancel.
+		p.next(fTxId)
 	case transaction.TxStageSuccess:
 		foree_logger.Logger.Warn("TxProcessor--processRootTx", "foreeTxId", fTx.ID, "cause", "process transaction that is SUCCESS already")
 	case transaction.TxStageCancel:
@@ -511,6 +510,15 @@ func (p *TxProcessor) next(fTxId int64) {
 			return
 		}
 		fTx.Stage = transaction.TxStageSuccess
+	case transaction.TxStageRefunding:
+		refundTx, err := p.foreeRefundRepo.GetUniqueForeeRefundTxByParentTxId(ctx, fTxId)
+		if err != nil {
+			foree_logger.Logger.Error("TxProcessor--next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+			return
+		}
+		if refundTx.Status == transaction.TxStatusCompleted || refundTx.Status == transaction.TxStatusClosed {
+			fTx.Stage = transaction.TxStageCancel
+		}
 	default:
 		foree_logger.Logger.Error("TxProcessor--next_FAIL",
 			"curStage", fTx.Stage,
@@ -767,10 +775,6 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 	}
 }
 
-func (p *TxProcessor) processRefund(ctx context.Context, fTxId int64) error {
-	return nil
-}
-
 func (p *TxProcessor) revertRewardAndTxLimit(ctx context.Context, fTx transaction.ForeeTx) error {
 	//Refund Reward.
 	rewards, err := p.rewardRepo.GetAllRewardByAppliedTransactionId(ctx, fTx.ID)
@@ -804,42 +808,4 @@ func (p *TxProcessor) revertRewardAndTxLimit(ctx context.Context, fTx transactio
 		return err
 	}
 	return nil
-}
-
-func (p *TxProcessor) recordTxHistory(h transaction.TxHistory) {
-	if _, err := p.txHistoryRepo.InserTxHistory(context.Background(), h); err != nil {
-		fmt.Println(err.Error())
-	}
-}
-
-func (p *TxProcessor) RedeemReward(ctx context.Context, fTx transaction.ForeeTx) {
-	dTx, err := p.db.Begin()
-	if err != nil {
-		dTx.Rollback()
-		//TODO: log err
-		return
-	}
-
-	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
-	rewards, err := p.rewardRepo.GetAllRewardByAppliedTransactionId(ctx, fTx.ID)
-	if err != nil {
-		dTx.Rollback()
-		//TODO: Log error
-		return
-	}
-
-	for _, v := range rewards {
-		v.Status = transaction.RewardStatusRedeemed
-		err := p.rewardRepo.UpdateRewardTxById(ctx, *v)
-		if err != nil {
-			dTx.Rollback()
-			//TODO: Log error
-			return
-		}
-	}
-
-	if err = dTx.Commit(); err != nil {
-		//TODO: Log error
-		return
-	}
 }
