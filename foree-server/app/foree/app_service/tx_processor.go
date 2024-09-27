@@ -523,7 +523,7 @@ func (p *TxProcessor) next(fTxId int64) {
 		foree_logger.Logger.Error("TxProcessor--next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
-	//TODO: update summary.
+
 	if fTx.Stage != transaction.TxStageSuccess {
 		p.ProcessRootTx(fTxId)
 	} else {
@@ -567,6 +567,14 @@ func (p *TxProcessor) rollback(fTxId int64) {
 
 	//Close remaining transaction.
 	err = p.closeRemainingTx(ctx, fTxId)
+	if err != nil {
+		foree_logger.Logger.Error("tx_processor-rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		dbTx.Rollback()
+		return
+	}
+
+	//Revert rewards and dayly limit.
+	err = p.revertRewardAndTxLimit(ctx, *fTx)
 	if err != nil {
 		foree_logger.Logger.Error("tx_processor-rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		dbTx.Rollback()
@@ -759,6 +767,45 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 	}
 }
 
+func (p *TxProcessor) processRefund(ctx context.Context, fTxId int64) error {
+	return nil
+}
+
+func (p *TxProcessor) revertRewardAndTxLimit(ctx context.Context, fTx transaction.ForeeTx) error {
+	//Refund Reward.
+	rewards, err := p.rewardRepo.GetAllRewardByAppliedTransactionId(ctx, fTx.ID)
+	if err != nil {
+		return err
+	}
+
+	//TODO: check the reward type for non_refundable rewards.
+	for _, reward := range rewards {
+		r := *reward
+		r.Status = nbp.AccStatusActive
+		r.AppliedTransactionId = 0
+		if err := p.rewardRepo.UpdateRewardTxById(ctx, r); err != nil {
+			return err
+		}
+	}
+
+	//Refund daily limit.
+	dailyLimit, err := p.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, fTx.LimitReference)
+	if err != nil {
+		return err
+	}
+
+	if dailyLimit == nil {
+		return nil
+	}
+
+	dailyLimit.UsedAmt.Amount += fTx.SrcAmt.Amount
+
+	if err := p.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (p *TxProcessor) recordTxHistory(h transaction.TxHistory) {
 	if _, err := p.txHistoryRepo.InserTxHistory(context.Background(), h); err != nil {
 		fmt.Println(err.Error())
@@ -796,89 +843,3 @@ func (p *TxProcessor) RedeemReward(ctx context.Context, fTx transaction.ForeeTx)
 		return
 	}
 }
-
-// func (p *TxProcessor) MaybeRefund(ctx context.Context, fTx transaction.ForeeTx) {
-// 	dTx, err := p.db.Begin()
-// 	if err != nil {
-// 		dTx.Rollback()
-// 		//TODO: log err
-// 		return
-// 	}
-
-// 	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
-
-// 	foreeTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.ID)
-// 	if err != nil {
-// 		dTx.Rollback()
-// 		//TODO: log err
-// 		return
-// 	}
-
-// 	if foreeTx.Status != transaction.TxStatusCancelled && foreeTx.Status != transaction.TxStatusRejected {
-// 		dTx.Rollback()
-// 		//TODO: log err
-// 		return
-// 	}
-
-// 	if foreeTx.Stage == transaction.TxStageRefund {
-// 		dTx.Rollback()
-// 		//TODO: double refund.
-// 		return
-// 	}
-
-// 	rewards, err := p.rewardRepo.GetAllRewardByAppliedTransactionId(ctx, fTx.ID)
-// 	if err != nil {
-// 		dTx.Rollback()
-// 		//TODO: Log error
-// 		return
-// 	}
-
-// 	// Refund rewards.
-// 	for _, v := range rewards {
-// 		v.Status = transaction.RewardStatusDelete
-// 		err := p.rewardRepo.UpdateRewardTxById(ctx, *v)
-// 		if err != nil {
-// 			dTx.Rollback()
-// 			//TODO: Log error
-// 			return
-// 		}
-// 		v.Status = transaction.RewardStatusActive
-// 		_, err = p.rewardRepo.InsertReward(ctx, *v)
-// 		if err != nil {
-// 			dTx.Rollback()
-// 			//TODO: Log error
-// 			return
-// 		}
-// 	}
-
-// 	// Refund limit.
-// 	reference := transaction.GetDailyTxLimitReference(&fTx)
-// 	dailyLimit, err := p.dailyTxLimiteRepo.GetUniqueDailyTxLimitByReference(ctx, reference)
-// 	if err != nil {
-// 		dTx.Rollback()
-// 		//TODO: Log error
-// 		return
-// 	}
-
-// 	dailyLimit.UsedAmt.Amount += fTx.SrcAmt.Amount
-
-// 	if err := p.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
-// 		dTx.Rollback()
-// 		//TODO: Log error
-// 		return
-// 	}
-
-// 	// Create refund transaction
-// 	if fTx.CI.Status == transaction.TxStatusCompleted {
-// 		_, err := p.interacRefundTxRepo.InsertForeeRefundTx(ctx, transaction.ForeeRefundTx{
-// 			Status:     transaction.RefundTxStatusInitial,
-// 			ParentTxId: fTx.ID,
-// 			OwnerId:    fTx.OwnerId,
-// 		})
-// 		if err != nil {
-// 			dTx.Rollback()
-// 			//TODO: Log error
-// 			return
-// 		}
-// 	}
-// }

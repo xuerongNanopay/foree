@@ -370,9 +370,10 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	foreeTx := &transaction.ForeeTx{
-		Type:  transaction.TxTypeInteracToNBP,
-		Stage: transaction.TxStageBegin,
-		Rate:  types.Amount(rate.CalculateForwardAmount(req.SrcAmount)),
+		Type:           transaction.TxTypeInteracToNBP,
+		Stage:          transaction.TxStageBegin,
+		LimitReference: dailyLimit.Reference,
+		Rate:           types.Amount(rate.CalculateForwardAmount(req.SrcAmount)),
 		SrcAmt: types.AmountData{
 			Amount:   types.Amount(req.SrcAmount),
 			Currency: req.SrcCurrency,

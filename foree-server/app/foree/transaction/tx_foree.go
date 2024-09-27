@@ -15,12 +15,12 @@ const (
 	sQLForeeTxInsert = `
 		INSERT INTO foree_tx
 		(
-			type, rate, cin_acc_id, cout_acc_id,
+			type, rate, cin_acc_id, cout_acc_id, limit_reference,
 			src_amount, src_currency, dest_amount, dest_currency,
 			total_fee_amount, total_fee_currency, total_reward_amount, total_reward_currency,
 			total_amount, total_currency, stage,
 			transaction_purpose, conclusion, owner_id
-		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+		) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	`
 	sQLForeeTxUpdateById = `
 	    UPDATE foree_tx SET 
@@ -30,7 +30,7 @@ const (
 	sQLForeeTxGetById = `
 	    SELECT 
             t.id, t.type, t.rate,
-			t.cin_acc_id, t.cout_acc_id,
+			t.cin_acc_id, t.cout_acc_id, t.limit_reference,
             t.src_amount, t.src_currency, 
             t.dest_amount, t.dest_currency,
 			t.total_fee_amount, t.total_fee_currency, 
@@ -44,7 +44,7 @@ const (
 	sQLForeeTxGetForUpdateById = `
 		SELECT 
 			t.id, t.type, t.rate,
-			t.cin_acc_id, t.cout_acc_id,
+			t.cin_acc_id, t.cout_acc_id, t.limit_reference,
 			t.src_amount, t.src_currency, 
 			t.dest_amount, t.dest_currency,
 			t.total_fee_amount, t.total_fee_currency, 
@@ -97,6 +97,7 @@ type ForeeTx struct {
 	Rate               types.Amount     `json:"Rate,omitempty"`
 	CinAccId           int64            `json:"cinAccId,omitempty"`
 	CoutAccId          int64            `json:"coutAccId,omitempty"`
+	LimitReference     string           `json:"limitReference,omitempty"`
 	SrcAmt             types.AmountData `json:"srcAmt,omitempty"`
 	DestAmt            types.AmountData `json:"destAmt,omitempty"`
 	TotalFeeAmt        types.AmountData `json:"totalFeeAmt,omitempty"`
@@ -147,6 +148,7 @@ func (repo *ForeeTxRepo) InsertForeeTx(ctx context.Context, tx ForeeTx) (int64, 
 			tx.Rate,
 			tx.CinAccId,
 			tx.CoutAccId,
+			tx.LimitReference,
 			tx.SrcAmt.Amount,
 			tx.SrcAmt.Currency,
 			tx.DestAmt.Amount,
@@ -169,6 +171,7 @@ func (repo *ForeeTxRepo) InsertForeeTx(ctx context.Context, tx ForeeTx) (int64, 
 			tx.Rate,
 			tx.CinAccId,
 			tx.CoutAccId,
+			tx.LimitReference,
 			tx.SrcAmt.Amount,
 			tx.SrcAmt.Currency,
 			tx.DestAmt.Amount,
@@ -277,6 +280,7 @@ func scanRowIntoForeeTx(rows *sql.Rows) (*ForeeTx, error) {
 		&tx.Rate,
 		&tx.CinAccId,
 		&tx.CoutAccId,
+		&tx.LimitReference,
 		&tx.SrcAmt.Amount,
 		&tx.SrcAmt.Currency,
 		&tx.DestAmt.Amount,

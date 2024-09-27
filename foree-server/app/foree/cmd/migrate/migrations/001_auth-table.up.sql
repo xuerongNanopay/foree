@@ -283,6 +283,7 @@ CREATE TABLE IF NOT EXISTS foree_tx(
     `type` VARCHAR(64) NOT NULL,
     `cin_acc_id` BIGINT UNSIGNED NOT NULL,
     `cout_acc_id` BIGINT UNSIGNED NOT NULL,
+    `limit_reference` VARCHAR(64) NOT NULL,
     `rate` DECIMAL(7, 2) NOT NULL,
     `src_amount` DECIMAL(11, 2) NOT NULL,
     `src_currency` CHAR(3) NOT NULL,
