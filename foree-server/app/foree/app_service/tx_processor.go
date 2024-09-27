@@ -626,6 +626,7 @@ COMMIT:
 		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
+	go p.updateSummaryTx(fTxId)
 }
 
 func (p *TxProcessor) closeRemainingTx(ctx context.Context, fTxId int64) error {
