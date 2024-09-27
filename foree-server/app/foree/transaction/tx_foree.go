@@ -82,11 +82,12 @@ type TxStage string
 
 const (
 	TxStageBegin     TxStage = "TX_BEGIN"
-	TxStageInteracCI TxStage = "INTERAC_CI"
-	TxStageIDM       TxStage = "Compliance_IDM"
-	TxStageNBPCO     TxStage = "NBP_CO"
-	TxStageRefund    TxStage = "REFUND"
-	TxStageCancel    TxStage = "CANCEL"
+	TxStageInteracCI TxStage = "CASHIN_INTERAC"
+	TxStageIDM       TxStage = "COMPLIANCE_IDM"
+	TxStageNBPCO     TxStage = "CASHOUT_NBP"
+	TxStageRefunding TxStage = "TX_REFUNDING"
+	TxStageRefunded  TxStage = "TX_REFUNDED"
+	TxStageCancel    TxStage = "TX_CANCEL"
 	TxStageSuccess   TxStage = "TX_SUCCESS"
 )
 

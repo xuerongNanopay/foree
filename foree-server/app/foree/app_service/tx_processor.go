@@ -428,8 +428,12 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 		p.idmTxProcessor.process(fTxId)
 	case transaction.TxStageNBPCO:
 		p.nbpTxProcessor.process(fTxId)
+	case transaction.TxStageRefund:
+		//TODO
 	case transaction.TxStageSuccess:
-		foree_logger.Logger.Warn("TxProcessor--processRootTx", "foreeTxId", fTx.ID, "cause", "process transaction that is in END stage already")
+		foree_logger.Logger.Warn("TxProcessor--processRootTx", "foreeTxId", fTx.ID, "cause", "process transaction that is SUCCESS already")
+	case transaction.TxStageCancel:
+		foree_logger.Logger.Warn("TxProcessor--processRootTx", "foreeTxId", fTx.ID, "cause", "process transaction that is CANCEL already")
 	default:
 		foree_logger.Logger.Error("TxProcessor--processRootTx",
 			"foreeTxId", fTx.ID,
