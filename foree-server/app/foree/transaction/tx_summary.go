@@ -20,7 +20,6 @@ const (
 	TxSummaryStatusCancelled    TxSummaryStatus = "Cancelled"
 	TxSummaryStatusPickup       TxSummaryStatus = "Ready To Pickup"
 	TxSummaryStatusRefunding    TxSummaryStatus = "Refunding"
-	TxSummaryStatusRefunded     TxSummaryStatus = "Refunded"
 )
 
 const (

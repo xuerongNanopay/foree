@@ -428,8 +428,9 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 		p.idmTxProcessor.process(fTxId)
 	case transaction.TxStageNBPCO:
 		p.nbpTxProcessor.process(fTxId)
-	case transaction.TxStageRefund:
-		//TODO
+	case transaction.TxStageRefunding:
+		//TODO: check if cancel transaction complete.
+		//If yes, move stage to cancel.
 	case transaction.TxStageSuccess:
 		foree_logger.Logger.Warn("TxProcessor--processRootTx", "foreeTxId", fTx.ID, "cause", "process transaction that is SUCCESS already")
 	case transaction.TxStageCancel:
@@ -531,6 +532,7 @@ func (p *TxProcessor) next(fTxId int64) {
 }
 
 // If stage can not process transaction, then it will call rollback to rolling back the transaction.
+// Close remaining
 func (p *TxProcessor) rollback(fTxId int64) {
 	ctx := context.TODO()
 	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
@@ -545,6 +547,8 @@ func (p *TxProcessor) rollback(fTxId int64) {
 		)
 		return
 	}
+
+	//TODO: safe check on terminal stage.
 
 	if fTx.Stage == transaction.TxStageBegin {
 		goto NO_Refund
@@ -572,7 +576,7 @@ func (p *TxProcessor) rollback(fTxId int64) {
 		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
-	fTx.Stage = transaction.TxStageRefund
+	fTx.Stage = transaction.TxStageRefunding
 	err = p.foreeTxRepo.UpdateForeeTxById(context.TODO(), *fTx)
 	if err != nil {
 		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
@@ -586,6 +590,47 @@ NO_Refund:
 	err = p.foreeTxRepo.UpdateForeeTxById(context.TODO(), *fTx)
 	if err != nil {
 		foree_logger.Logger.Error("TxProcessor--rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		return
+	}
+}
+
+func (p *TxProcessor) closeRemainingTx(ctx context.Context, fTxId int64) {
+	interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, fTxId)
+	if err != nil {
+		foree_logger.Logger.Error("tx_processor-closeRemainingTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		return
+	}
+	if interacTx == nil {
+		foree_logger.Logger.Warn("tx_processor-closeRemainingTx_FAIL",
+			"foreeTxId", fTxId,
+			"cause", "interacTx no found",
+		)
+		return
+	}
+
+	idmTx, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, fTxId)
+	if err != nil {
+		foree_logger.Logger.Error("tx_processor-closeRemainingTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		return
+	}
+	if idmTx == nil {
+		foree_logger.Logger.Warn("tx_processor-closeRemainingTx_FAIL",
+			"foreeTxId", fTxId,
+			"cause", "idmTx no found",
+		)
+		return
+	}
+
+	nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, fTxId)
+	if err != nil {
+		foree_logger.Logger.Error("tx_processor-closeRemainingTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		return
+	}
+	if nbpTx == nil {
+		foree_logger.Logger.Warn("tx_processor-closeRemainingTx_FAIL",
+			"foreeTxId", fTxId,
+			"cause", "nbpTx no found",
+		)
 		return
 	}
 }
@@ -650,9 +695,9 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 		newSumTx.Status = transaction.TxSummaryStatusCompleted
 	} else if fTx.Stage == transaction.TxStageCancel {
 		newSumTx.Status = transaction.TxSummaryStatusCancelled
-	} else if fTx.Stage == transaction.TxStageRefund {
+	} else if fTx.Stage == transaction.TxStageRefunding {
 		//TODO:
-		newSumTx.Status = transaction.TxSummaryStatusRefunded
+		newSumTx.Status = transaction.TxSummaryStatusRefunding
 	} else {
 		foree_logger.Logger.Error("TxProcessor--updateSummaryTx_FAIL", "stage", fTx.Stage, "cause", "unknow stage")
 		return
@@ -668,43 +713,6 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 		foree_logger.Logger.Debug("tx_processor-updateSummaryTx_Success", "oldSummaryStatus", sumTx.Status, "newSummaryStatus", newSumTx.Status)
 	}
 }
-
-// TODO: reDesign.
-// func (p *TxProcessor) updateTxSummary(ctx context.Context, fTx transaction.ForeeTx) {
-// txSummary := *fTx.Summary
-// txSummary.IsCancelAllowed = false
-
-// if fTx.Status == transaction.TxStatusInitial {
-// 	txSummary.Status = transaction.TxSummaryStatusInitial
-// } else if fTx.Status == transaction.TxStatusProcessing {
-// 	if fTx.Stage == transaction.TxStageInteracCI && fTx.StageStatus == transaction.TxStatusSent {
-// 		txSummary.Status = transaction.TxSummaryStatusAwaitPayment
-// 		txSummary.IsCancelAllowed = true
-// 	} else if fTx.Stage == transaction.TxStageNBPCO && fTx.StageStatus == transaction.TxStatusSent && fTx.COUT.CashOutAcc.Type == foree_constant.ContactAccountTypeCash {
-// 		txSummary.Status = transaction.TxSummaryStatusPickup
-// 		txSummary.IsCancelAllowed = true
-// 	} else {
-// 		txSummary.Status = transaction.TxSummaryStatusInProgress
-// 	}
-// } else if fTx.Status == transaction.TxStatusCompleted {
-// 	txSummary.Status = transaction.TxSummaryStatusCompleted
-// } else if fTx.Status == transaction.TxStatusCancelled || fTx.Status == transaction.TxStatusRejected {
-// 	//TODO: check refund.
-// 	txSummary.Status = transaction.TxSummaryStatusCancelled
-// } else {
-// 	//TODO: log error
-// 	return
-// }
-
-// if txSummary.Status != fTx.Summary.Status {
-// 	err := p.txSummaryRepo.UpdateTxSummaryById(ctx, txSummary)
-// 	if err != nil {
-// 		//TODO: log
-// 		return
-// 	}
-// }
-
-// }
 
 func (p *TxProcessor) recordTxHistory(h transaction.TxHistory) {
 	if _, err := p.txHistoryRepo.InserTxHistory(context.Background(), h); err != nil {

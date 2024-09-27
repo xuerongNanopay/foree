@@ -86,7 +86,6 @@ const (
 	TxStageIDM       TxStage = "COMPLIANCE_IDM"
 	TxStageNBPCO     TxStage = "CASHOUT_NBP"
 	TxStageRefunding TxStage = "TX_REFUNDING"
-	TxStageRefunded  TxStage = "TX_REFUNDED"
 	TxStageCancel    TxStage = "TX_CANCEL"
 	TxStageSuccess   TxStage = "TX_SUCCESS"
 )
