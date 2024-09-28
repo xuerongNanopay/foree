@@ -291,7 +291,7 @@ func (p *InteracTxProcessor) requestPayment(interacTx transaction.InteracCITx) {
 		)
 	}
 
-	if err != nil && resp.StatusCode/100 != 2 {
+	if err != nil || resp.StatusCode/100 != 2 {
 		interacTx.Status = transaction.TxStatusRejected
 		err := p.interacTxRepo.UpdateInteracCITxById(context.TODO(), interacTx)
 		if err != nil {
@@ -320,7 +320,7 @@ func (p *InteracTxProcessor) requestPayment(interacTx transaction.InteracCITx) {
 		)
 	}
 
-	if err != nil && statusResp.StatusCode/100 != 2 {
+	if err != nil || statusResp.StatusCode/100 != 2 {
 		interacTx.Status = transaction.TxStatusRejected
 		err := p.interacTxRepo.UpdateInteracCITxById(context.TODO(), interacTx)
 		if err != nil {
