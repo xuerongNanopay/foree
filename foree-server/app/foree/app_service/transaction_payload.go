@@ -107,17 +107,16 @@ func (q GetAllTransactionReq) Validate() *transport.BadRequestError {
 type QueryTransactionReq struct {
 	transport.SessionReq
 	Status string `json:""`
-	Offset int    `json:"offset" validate:"required,gte=0"`
-	Limit  int    `json:"limit" validate:"required,gt=0"`
+	Offset int    `json:"offset" validate:"gte=0"`
+	Limit  int    `json:"limit" validate:"gt=0"`
 }
 
 func (q QueryTransactionReq) Validate() *transport.BadRequestError {
-
 	ret := validateStruct(q, "Invalid query transaction request")
 
 	// Check status
 	_, ok := foree_constant.AllowTransactionsStatus[q.Status]
-	if !ok {
+	if !ok && q.Status != "" {
 		ret.AddDetails("status", fmt.Sprintf("invalid status `%v`", q.Status))
 	}
 

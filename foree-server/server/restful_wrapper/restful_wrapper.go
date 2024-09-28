@@ -11,6 +11,8 @@ import (
 	reflect_util "xue.io/go-pay/util/reflect"
 )
 
+const sessionIdKey = "SESSION_ID"
+
 func RestGetWrapper[P any, Q any](
 	handler func(context.Context, P) (Q, transport.HError),
 	beforeProcess func(context.Context, *http.Request, P) (context.Context, transport.HError),
@@ -28,13 +30,18 @@ func RestGetWrapper[P any, Q any](
 			}
 
 			for _, k := range reflect_util.GetAllFieldNamesOfStruct(&req) {
+				sField, sTag := reflect_util.GetTagOfStruct(&req, k)
+				rawTag, ok := sTag.Lookup("json")
+				paramName := sField.Name
+				if ok {
+					paramName = rawTag
+				}
 				query := r.URL.Query()
-				if query.Has(k) {
-					reflect_util.TrySetStuctValueFromString(&req, k, query.Get(k))
+				if query.Has(paramName) {
+					reflect_util.TrySetStuctValueFromString(&req, sField.Name, query.Get(paramName))
 				}
 			}
-
-			sessionId := r.Header.Get("SESSION_ID")
+			sessionId := r.Header.Get(sessionIdKey)
 			reflect_util.TrySetStuctValueFromString(&req, "SessionId", sessionId)
 
 			var resp Q
@@ -87,7 +94,7 @@ func RestPostWrapper[P any, Q any](
 		ctx := context.Background()
 		resp, herr := func() (Q, transport.HError) {
 
-			sessionId := r.Header.Get("SESSION_ID")
+			sessionId := r.Header.Get(sessionIdKey)
 			reflect_util.TrySetStuctValueFromString(&req, "SessionId", sessionId)
 
 			var resp Q
