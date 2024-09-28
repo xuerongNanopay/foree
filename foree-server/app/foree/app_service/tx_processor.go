@@ -602,7 +602,7 @@ func (p *TxProcessor) rollback(fTxId int64) {
 		}
 
 		// The case that we can safely cancel transaction.
-		if interacTx.Status == transaction.TxStatusInitial || interacTx.Status == transaction.TxStatusCancelled {
+		if interacTx.Status == transaction.TxStatusInitial || interacTx.Status == transaction.TxStatusCancelled || interacTx.Status == transaction.TxStatusRejected {
 			goto NO_Refund
 		}
 	}
@@ -802,10 +802,11 @@ func (p *TxProcessor) revertRewardAndTxLimit(ctx context.Context, fTx transactio
 		return nil
 	}
 
-	dailyLimit.UsedAmt.Amount += fTx.SrcAmt.Amount
+	dailyLimit.UsedAmt.Amount -= fTx.SrcAmt.Amount
 
 	if err := p.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
 		return err
 	}
+	foree_logger.Logger.Info("Refund Transaction limit", "foreeTxId", fTx.ID, "refundAmout", fTx.SrcAmt.Amount)
 	return nil
 }
