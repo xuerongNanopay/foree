@@ -28,6 +28,12 @@ class TransactionService {
   async confirmQuote(quoteId, {signal}={signal}) {
     return await this.#httpFormClient.post("/create_transaction", {quoteId}, {signal})
   }
+
+  async getTransactions({status="", offset=0, limit=10}={status, offset, limit}, {signal}={signal}) {
+    const searchParams = new URLSearchParams({status, offset, limit})
+    console.log(searchParams.toString())
+    return await this.#httpClient.get(`/transactions?${searchParams.toString()}`)
+  }
 }
 
 export default TransactionService
