@@ -131,7 +131,6 @@ func (p *NBPTxProcessor) process(parentTxId int64) {
 }
 
 func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
-	fmt.Println("vvvvvvvvv")
 	fTx, err := p.txProcessor.loadTx(parentTxId, true)
 	if err != nil {
 		foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
@@ -144,6 +143,7 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 	}
 
 	mode, err := mapNBPMode(fTx.COUT.CashOutAcc)
+	fmt.Println("ddd", mode)
 	if err != nil {
 		foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
 		return
@@ -174,7 +174,7 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 
 	// Retry later manully
 	if resp.StatusCode/100 == 5 || resp.ResponseCode == "401" || resp.ResponseCode == "403" {
-		foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL",
+		foree_logger.Logger.Warn("NBPTxProcessor--loadRemittance_FAIL",
 			"parentTxId", parentTxId,
 			"httpStatus", resp.StatusCode,
 			"httpResponse", resp.RawResponse,
@@ -203,12 +203,12 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 	}
 
 	// Reject
-	foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL",
+	foree_logger.Logger.Warn("NBPTxProcessor--loadRemittance_FAIL",
 		"parentTxId", parentTxId,
 		"httpStatus", resp.StatusCode,
 		"httpRequest", resp.RawRequest,
 		"httpResponse", resp.RawResponse,
-		"msg", "please re-run the transaction.",
+		"msg", "nbp call failed",
 	)
 	nbpTx.Status = transaction.TxStatusRejected
 	err = p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), nbpTx)
