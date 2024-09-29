@@ -83,8 +83,8 @@ const TransactionTab = () => {
           <View className="mt-2 flex flex-row items-center">
             <View className="flex-1">
               <View className="flex flex-row">
-                <View className="border-[1px] border-green-800 rounded-2xl p-2 bg-[#9cd1b9]">
-                  <Text className="text-green-800 font-psemibold">{selectedStatus}</Text>
+                <View className={`border-[1px] rounded-2xl p-2 ${transactionStatuses.find(x=>x.id===selectedStatus).borderColor} ${transactionStatuses.find(x=>x.id===selectedStatus).selectBgColor}`}>
+                  <Text className={`font-psemibold ${transactionStatuses.find(x=>x.id===selectedStatus).textColor}`}>{selectedStatus}</Text>
                 </View>
               </View>
             </View>
@@ -125,57 +125,51 @@ const TransactionTab = () => {
 const transactionStatuses = [
   {
     id:"All",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
+    borderColor: "border-slate-800",
+    textColor: "text-slate-800",
+    selectBgColor: "bg-slate-200",
   },
   { 
     id:"Initial",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
+    borderColor: "border-purple-800",
+    textColor: "text-purple-800",
+    selectBgColor: "bg-purple-200",
   },
   { 
     id:"Await Payment",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
+    borderColor: "border-yellow-800",
+    textColor: "text-yellow-800",
+    selectBgColor: "bg-yellow-200",
   },
   { 
     id:"In Progress",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
+    borderColor: "border-purple-800",
+    textColor: "text-purple-800",
+    selectBgColor: "bg-purple-200",
   },
   { 
     id:"Completed",
     borderColor: "border-green-800",
     textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
+    selectBgColor: "bg-green-200",
   },
   { 
     id:"Cancelled",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
+    borderColor: "border-red-800",
+    textColor: "text-red-800",
+    selectBgColor: "bg-red-200",
   },
   { 
     id:"Ready To Pickup",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
+    borderColor: "border-yellow-800",
+    textColor: "text-yellow-800",
+    selectBgColor: "bg-yellow-200",
   },
   { 
     id:"Refunding",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
-  },
-  { 
-    id:"Refunded",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-[#9cd1b9]",
+    borderColor: "border-yellow-800",
+    textColor: "text-yellow-800",
+    selectBgColor: "bg-yellow-200",
   }
 ]
 
