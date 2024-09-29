@@ -106,7 +106,7 @@ func (q GetAllTransactionReq) Validate() *transport.BadRequestError {
 
 type QueryTransactionReq struct {
 	transport.SessionReq
-	Status string `json:""`
+	Status string `json:"status"`
 	Offset int    `json:"offset" validate:"gte=0"`
 	Limit  int    `json:"limit" validate:"gt=0"`
 }
