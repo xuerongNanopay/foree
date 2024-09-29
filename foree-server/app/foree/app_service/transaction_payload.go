@@ -116,7 +116,7 @@ func (q QueryTransactionReq) Validate() *transport.BadRequestError {
 
 	// Check status
 	_, ok := foree_constant.AllowTransactionsStatus[q.Status]
-	if !ok && q.Status != "" {
+	if !ok && q.Status != "" && q.Status != "All" {
 		ret.AddDetails("status", fmt.Sprintf("invalid status `%v`", q.Status))
 	}
 

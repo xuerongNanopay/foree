@@ -852,7 +852,7 @@ func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTrans
 	var summaryTxs []*transaction.TxSummary
 	var err error
 
-	if req.Status == "" {
+	if req.Status == "" || req.Status == "All" {
 		summaryTxs, err = t.txSummaryRepo.GetAllTxSummaryByOwnerIdWithPagination(ctx, session.UserId, req.Limit, req.Offset)
 	} else {
 		summaryTxs, err = t.txSummaryRepo.QueryTxSummaryByOwnerIdAndStatusWithPagination(ctx, session.UserId, req.Status, req.Limit, req.Offset)
