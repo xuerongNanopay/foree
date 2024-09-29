@@ -1,25 +1,53 @@
 import { View, Text, SafeAreaView, TouchableOpacity, FlatList, Image } from 'react-native'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { router, useFocusEffect } from 'expo-router'
 
 import { icons } from '../../constants'
+import { transactionService } from '../../service'
 
 const TransactionTab = () => {
   const [selectedStatus, setSelectedStatus] = useState('All')
+  const [page, setPage] = useState(0)
+  const maxSize = 10
+  
 
   useFocusEffect(useCallback(() => {
     setSelectedStatus('All')
+    setPage(0)
     const  controller = new AbortController()
     return () => {
       controller.abort()
     }
   }, []))
 
+  useEffect(() => {
+    const controller = new AbortController()
+    const getTransactions = async() => {
+      try {
+        const resp = await transactionService.getTransactions({status: selectedStatus, offset:page*10, limit:maxSize}, {signal: controller.signal})
+        if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
+          console.error("get transactions", resp.status, resp.data)
+        } else {
+          console.log(resp.data.data)
+        }
+      } catch (e) {
+        console.error("get transactions", e, e.response, e.response?.status, e.response?.data)
+      }
+    }
+    getTransactions()
+    return () => {
+      controller.abort()
+    }
+  },[page, selectedStatus])
+
   const statusChipItem = useCallback(({item}) => {
     const bgColor = selectedStatus === item.id ? `${item.selectBgColor}` : ""
     return (
       <TouchableOpacity 
-        onPress={() => setSelectedStatus(item.id)}
+        onPress={() => {
+          setPage(0)
+          setSelectedStatus(item.id)
+        }}
         className={`p-2 border-[1px] ${item.borderColor} rounded-2xl mr-2 ${bgColor}`}
       >
         <Text className={`${item.textColor}`}>{item.id}</Text>
@@ -29,7 +57,7 @@ const TransactionTab = () => {
 
   return (
     <SafeAreaView>
-      <View className="flex h-full px-4 pt-4">
+      <View className="h-full px-4 pt-4">
         <View className="pb-2 mb-4 border-b-[1px] border-slate-300">
           {/* Title */}
           <View className="flex flex-row items-center pb-2 mb-2 border-b-[1px] border-slate-300">
@@ -46,7 +74,7 @@ const TransactionTab = () => {
           {/* Status */}
           <View className="flex flex-row items-center">
             <TouchableOpacity
-              onPress={() => {console.log("TODO: transaction refresh")}}
+              onPress={() => {setPage(0)}}
               className="border-[1px] border-slate-400 rounded-lg p-1"
             >
               <Image
@@ -89,11 +117,15 @@ const TransactionTab = () => {
               </View>
             </View>
             <View className="flex flex-row items-center">
-              <Text className="mr-2">1-50</Text>
+              <Text className="mr-2">{`${page*maxSize+1}-${page*(maxSize)+maxSize}`}</Text>
               <TouchableOpacity
-                onPress={()=> {console.log("TODO: transaction left")}}
+                onPress={()=> {
+                  setPage((page) => {
+                    return page > 0 ? page-1 : page
+                  })
+                }}
                 activeOpacity={0.7}
-                disabled={false}
+                disabled={page==0}
                 className="mr-2 p-2"
               >
                 <Image
@@ -103,7 +135,11 @@ const TransactionTab = () => {
                 />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={()=> {console.log("TODO: transaction right")}}
+                onPress={()=> {
+                  setPage((page) => {
+                    return page+1
+                  })
+                }}
                 activeOpacity={0.7}
                 disabled={false}
                 className="mr-2 p-2"
@@ -117,6 +153,9 @@ const TransactionTab = () => {
             </View>
           </View>
         </View>
+        <FlatList
+          className="border"
+        />
       </View>
     </SafeAreaView>
   )
