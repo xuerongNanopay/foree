@@ -289,6 +289,44 @@ type TxSummaryDetailDTO struct {
 	DestAccount     *SumContactAccountDTO       `json:"destAccount,omitempty"`
 }
 
+func NewTxSummaryDetailDTO(tx *transaction.TxSummary) *TxSummaryDetailDTO {
+	ret := &TxSummaryDetailDTO{
+		ID:              tx.ID,
+		Summary:         tx.Summary,
+		Type:            tx.Type,
+		Status:          tx.Status,
+		Rate:            tx.Rate,
+		PaymentUrl:      tx.PaymentUrl,
+		SrcAccSummary:   tx.SrcAccSummary,
+		SrcAmount:       tx.SrcAmount,
+		SrcCurrency:     tx.SrcCurrency,
+		DestAccSummary:  tx.DestAccSummary,
+		DestAmount:      tx.DestAmount,
+		DestCurrency:    tx.DestCurrency,
+		TotalAmount:     tx.TotalAmount,
+		TotalCurrency:   tx.TotalCurrency,
+		FeeAmount:       tx.FeeAmount,
+		FeeCurrency:     tx.FeeCurrency,
+		RewardAmount:    tx.RewardAmount,
+		RewardCurrency:  tx.RewardCurrency,
+		IsCancelAllowed: tx.IsCancelAllowed,
+	}
+
+	if tx.CreatedAt != nil {
+		ret.CreateAt = tx.CreatedAt.UnixMilli()
+	}
+
+	if tx.SrcAccount != nil {
+		ret.SrcAccount = NewSumInteracAccountDTO(tx.SrcAccount)
+	}
+
+	if tx.DestAccount != nil {
+		ret.DestAccount = NewSumContactAccountDTO(tx.DestAccount)
+	}
+
+	return ret
+}
+
 func NewSumInteracAccountDTO(acc *account.InteracAccount) *SumInteracAccountDTO {
 	return &SumInteracAccountDTO{
 		ID:          acc.ID,
@@ -359,44 +397,6 @@ type SumContactAccountDTO struct {
 	BranchNumber    string                     `json:"branchNumber"`
 	AccountNumber   string                     `json:"accountNumber"`
 	AccountHash     string                     `json:"accountHash"`
-}
-
-func NewTxSummaryDetailDTO(tx *transaction.TxSummary) *TxSummaryDetailDTO {
-	ret := &TxSummaryDetailDTO{
-		ID:              tx.ID,
-		Summary:         tx.Summary,
-		Type:            tx.Type,
-		Status:          tx.Status,
-		Rate:            tx.Rate,
-		PaymentUrl:      tx.PaymentUrl,
-		SrcAccSummary:   tx.SrcAccSummary,
-		SrcAmount:       tx.SrcAmount,
-		SrcCurrency:     tx.SrcCurrency,
-		DestAccSummary:  tx.DestAccSummary,
-		DestAmount:      tx.DestAmount,
-		DestCurrency:    tx.DestCurrency,
-		TotalAmount:     tx.TotalAmount,
-		TotalCurrency:   tx.TotalCurrency,
-		FeeAmount:       tx.FeeAmount,
-		FeeCurrency:     tx.FeeCurrency,
-		RewardAmount:    tx.RewardAmount,
-		RewardCurrency:  tx.RewardCurrency,
-		IsCancelAllowed: tx.IsCancelAllowed,
-	}
-
-	if tx.CreatedAt != nil {
-		ret.CreateAt = tx.CreatedAt.UnixMilli()
-	}
-
-	if tx.SrcAccount != nil {
-		ret.SrcAccount = NewSumInteracAccountDTO(tx.SrcAccount)
-	}
-
-	if tx.DestAccount != nil {
-		ret.DestAccount = NewSumContactAccountDTO(tx.DestAccount)
-	}
-
-	return ret
 }
 
 type QuoteTransactionDTO struct {
