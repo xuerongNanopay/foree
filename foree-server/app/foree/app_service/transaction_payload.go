@@ -222,6 +222,7 @@ type TxSummaryDTO struct {
 	Type            string                      `json:"type,omitempty"`
 	Status          transaction.TxSummaryStatus `json:"status,omitempty"`
 	Rate            string                      `json:"rate,omitempty"`
+	NBPReference    string                      `json:"nbpReference,omitempty"`
 	PaymentUrl      string                      `json:"paymentUrl,omitempty"`
 	SrcAccSummary   string                      `json:"srcAccSummary"`
 	SrcAmount       types.Amount                `json:"srcAmount"`
@@ -229,7 +230,7 @@ type TxSummaryDTO struct {
 	DestAccSummary  string                      `json:"destAccSummary"`
 	DestAmount      types.Amount                `json:"destAmount"`
 	DestCurrency    string                      `json:"destCurrency"`
-	TotalAmount     string                      `json:"totalAmount,omitempty"`
+	TotalAmount     types.Amount                `json:"totalAmount,omitempty"`
 	TotalCurrency   string                      `json:"totalCurrency,omitempty"`
 	IsCancelAllowed bool                        `json:"isCancelAllowed,omitempty"`
 	CreateAt        int64                       `json:"createAt,omitempty"`
@@ -243,13 +244,14 @@ func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
 		Status:          tx.Status,
 		Rate:            tx.Rate,
 		PaymentUrl:      tx.PaymentUrl,
+		NBPReference:    tx.NBPReference,
 		SrcAccSummary:   tx.SrcAccSummary,
 		SrcAmount:       tx.SrcAmount,
 		SrcCurrency:     tx.SrcCurrency,
 		DestAccSummary:  tx.DestAccSummary,
 		DestAmount:      tx.DestAmount,
 		DestCurrency:    tx.DestCurrency,
-		TotalAmount:     tx.Rate,
+		TotalAmount:     tx.TotalAmount,
 		TotalCurrency:   tx.TotalCurrency,
 		IsCancelAllowed: tx.IsCancelAllowed,
 	}
@@ -268,6 +270,7 @@ type TxSummaryDetailDTO struct {
 	Status          transaction.TxSummaryStatus `json:"status,omitempty"`
 	Rate            string                      `json:"rate,omitempty"`
 	PaymentUrl      string                      `json:"paymentUrl,omitempty"`
+	NBPReference    string                      `json:"nbpReference,omitempty"`
 	SrcAccSummary   string                      `json:"srcAccSummary"`
 	SrcAmount       types.Amount                `json:"srcAmount"`
 	SrcCurrency     string                      `json:"srcCurrency"`
