@@ -660,7 +660,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 			)
 			txSummaryErr = transport.WrapInteralServerError(err)
 		}
-		foreeTx.Summary.ID = id
+		foreeTx.Summary.ID = sumId
 	}
 	wg.Add(1)
 	go createSummaryTx()
