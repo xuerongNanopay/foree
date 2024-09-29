@@ -38,7 +38,7 @@ const HomeTab = () => {
     }
     const getLastestTransactions = async() => {
       try {
-        const resp = await transactionService.getTransactions({offset:0, limit:10}, {signal: controller.signal})
+        const resp = await transactionService.getTransactions({offset:0, limit:5}, {signal: controller.signal})
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("get transactions", resp.status, resp.data)
         } else {
