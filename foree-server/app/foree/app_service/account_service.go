@@ -142,7 +142,7 @@ func (a *AccountService) DeleteContact(ctx context.Context, req DeleteContactReq
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	foree_logger.Logger.Info("DeleteContact_Info", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "contactId", req.ContactId)
+	foree_logger.Logger.Info("DeleteContact_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "contactId", req.ContactId)
 	return nil, nil
 }
 
