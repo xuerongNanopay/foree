@@ -167,9 +167,9 @@ const transactionStatuses = [
   },
   { 
     id:"Refunding",
-    borderColor: "border-yellow-800",
-    textColor: "text-yellow-800",
-    selectBgColor: "bg-yellow-200",
+    borderColor: "border-purple-800",
+    textColor: "text-purple-800",
+    selectBgColor: "bg-purple-200",
   }
 ]
 

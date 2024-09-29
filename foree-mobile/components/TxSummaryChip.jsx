@@ -41,9 +41,9 @@ const SummaryTxStatusChipStyles = {
     bgColor: "bg-yellow-200",
   },
   [TxSummaryStatusRefunding]: {
-    borderColor: "border-yellow-800",
-    textColor: "text-yellow-800",
-    bgColor: "bg-yellow-200",
+    borderColor: "border-purple-800",
+    textColor: "text-purple-800",
+    bgColor: "bg-purple-200",
   },
 }
 

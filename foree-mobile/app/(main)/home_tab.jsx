@@ -42,7 +42,6 @@ const HomeTab = () => {
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("get transactions", resp.status, resp.data)
         } else {
-          console.log(resp.data.data)
           setLastestTxs(resp.data.data)
         }
       } catch (e) {
