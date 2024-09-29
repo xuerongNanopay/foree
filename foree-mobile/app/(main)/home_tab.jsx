@@ -1,5 +1,5 @@
 import { View, Text, SafeAreaView, FlatList, ScrollView, Image, Touchable, TouchableOpacity } from 'react-native'
-import { Link, useFocusEffect } from 'expo-router'
+import { Link, router, useFocusEffect } from 'expo-router'
 import React, { useState, useCallback } from 'react'
 
 import { icons } from '../../constants'
@@ -114,7 +114,8 @@ const HomeTab = () => {
               latestTxs.map((tx, idx) => {
                 return(
                   <TouchableOpacity 
-                    key={tx.id} 
+                    key={tx.id}
+                    onPress={() => router.push(`/transaction/${tx.id}`)}
                     className={`py-2 ${idx !== latestTxs.length-1 ? "border-b-[1px] border-[#b6d4c7]" : ""}`}
                   >
                     <View className="px-3 mb-1 flex-row items-center justify-between">

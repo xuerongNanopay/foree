@@ -29,11 +29,11 @@ const TransactionLayout = () => {
           }} title="Back" color="#004d40"/>
         }}
       />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="[transactionId]"
         options={{
           headerShown: true,
-          title:"Contact Detail",
+          title:"Transaction Detail",
           headerTintColor:"#004d40",
           headerLeft: () => <Button onPress={() => {
             if ( router.canGoBack() ) {
@@ -43,7 +43,7 @@ const TransactionLayout = () => {
             }
           }} title="Back" color="#004d40"/>
         }}
-      /> */}
+      />
       </Stack>
     </>
   )

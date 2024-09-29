@@ -6,7 +6,7 @@ import { accountService } from '../../service'
 import { formatName } from '../../util/foree_util'
 import Regions from '../../constants/region'
 import Countries from '../../constants/country'
-import { ContactTransferBankAccount, ContactTransferCashPickup, ContactTransferMethods } from '../../constants/contacts'
+import { ContactTransferCashPickup, ContactTransferMethods } from '../../constants/contacts'
 
 const ContactDetail = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -36,6 +36,7 @@ const ContactDetail = () => {
   }, [])
 
   onDelete = () => {
+    setIsSubmitting(true)
     Alert.alert("Delete", "Are you sure?",[
       {text: 'Continue', onPress: async () => {
         try {
@@ -48,9 +49,13 @@ const ContactDetail = () => {
           }
         } catch (e) {
           console.error(e)
+        } finally {
+          setIsSubmitting(false)
         }
       }},
-      {text: 'Cancel', onPress: () => {}}
+      {text: 'Cancel', onPress: () => {
+        setIsSubmitting(false)
+      }}
     ])
   }
 
@@ -148,7 +153,7 @@ const ContactDetail = () => {
             <TouchableOpacity
               activeOpacity={0.7}
               className="py-2 px-4 rounded-xl border-[1px] border-red-600 bg-red-100"
-              disabled={false}
+              disabled={isSubmitting}
               onPress={onDelete}
             >
               <Text className="font-psemibold text-red-600 text-lg">Delete</Text>
