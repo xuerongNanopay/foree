@@ -34,6 +34,10 @@ class TransactionService {
     console.log(searchParams.toString())
     return await this.#httpClient.get(`/transactions?${searchParams.toString()}`)
   }
+
+  async getTransaction(transactionId, {signal}={signal}) {
+    return await this.#httpClient.get(`/transactions/${transactionId}`)
+  }
 }
 
 export default TransactionService

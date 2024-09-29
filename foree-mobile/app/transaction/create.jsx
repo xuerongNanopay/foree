@@ -68,15 +68,6 @@ const TransactionCreate = () => {
     validate()
   }, [form])
 
-  // useEffect(() => {
-  //   console.log("aaa", contacts.length, sourceAccounts.length)
-  //   if ( !!contacts && contacts.length > 0 && !!sourceAccounts && sourceAccounts.length >0 ) {
-  //     setIsEditable(true)
-  //   } else {
-  //     setIsEditable(false)
-  //   }
-  // }, [contacts, sourceAccounts])
-
   useFocusEffect(useCallback(() => {
     const  controller = new AbortController()
     const getAllContacts = async (signal) => {
@@ -184,8 +175,15 @@ const TransactionCreate = () => {
   const submit = async () => {
     setIsSubmitting(true)
     try {
-      const resp = transactionService.confirmQuote(quote.quoteId)
-      console.log(resp.data)
+      const resp = await transactionService.confirmQuote(quote.quoteId)
+      console.log('vvvv', resp.status)
+      if ( resp.status / 100 !== 2 ) {
+        console.warn("create transaction", resp.status, resp.data)
+        router.replace(`/transaction`)
+      } else {
+        console.log(resp.data)
+        router.replace(`/transaction/${resp.data.data.id}`)
+      }
     } catch (e) {
       console.log(e)
     } finally {
