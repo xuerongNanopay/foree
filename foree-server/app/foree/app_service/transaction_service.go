@@ -424,9 +424,11 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		Type:           string(coutAcc.Type),
 		Status:         transaction.TxSummaryStatusInitial,
 		Rate:           rate.ToSummary(),
+		SrcAccId:       ciAcc.ID,
 		SrcAccSummary:  foreeTx.InteracAcc.GetLegalName(),
 		SrcAmount:      foreeTx.SrcAmt.Amount,
 		SrcCurrency:    foreeTx.SrcAmt.Currency,
+		DestAccId:      coutAcc.ID,
 		DestAccSummary: foreeTx.ContactAcc.GetLegalName(),
 		DestAmount:     foreeTx.DestAmt.Amount,
 		DestCurrency:   foreeTx.DestAmt.Currency,
@@ -642,11 +644,12 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 
 	// Create TxSummary
 	var txSummaryErr transport.HError
+	var sumId int64
 	createSummaryTx := func() {
 		defer wg.Done()
 		foreeTx.Summary.ParentTxId = foreeTxID
 		foreeTx.Summary.NBPReference = transaction.GenerateNbpId(foree_constant.DefaultNBPIdPrefix, foreeTxID)
-		id, err := t.txSummaryRepo.InsertTxSummary(ctx, *foreeTx.Summary)
+		sumId, err = t.txSummaryRepo.InsertTxSummary(ctx, *foreeTx.Summary)
 		if err != nil {
 			foree_logger.Logger.Error("CreateTx_FAIL",
 				"ip", loadRealIp(ctx),
@@ -730,10 +733,15 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		return nil, transport.WrapInteralServerError(err)
 	}
 
-	go t.txProcessor.createAndProcessTx(*foreeTx)
+	// go t.txProcessor.createAndProcessTx(*foreeTx)
+	t.txProcessor.createAndProcessTx(*foreeTx)
 
 	foree_logger.Logger.Info("CreateTx_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "foreeTxId", foreeTxID)
-	return NewTxSummaryDetailDTO(foreeTx.Summary), nil
+
+	return t.GetTxSummary(ctx, GetTransactionReq{
+		SessionReq:    req.SessionReq,
+		TransactionId: sumId,
+	})
 }
 
 // func (t *TransactionService) GetTxLimit(user auth.User) (*transaction.TxLimit, error) {
@@ -829,6 +837,42 @@ func (t *TransactionService) GetTxSummary(ctx context.Context, req GetTransactio
 	if summaryTx == nil {
 		return nil, nil
 	}
+
+	wg := sync.WaitGroup{}
+
+	var interacAcc *account.InteracAccount
+	getInteracAccount := func() {
+		defer wg.Done()
+		interacAcc, err = t.interacAccountRepo.GetUniqueInteracAccountById(ctx, summaryTx.SrcAccId)
+		if err != nil {
+			foree_logger.Logger.Warn("GetTxSummary",
+				"sumTxId", req.TransactionId,
+				"msg", "load interacAccount failed",
+				"cause", err.Error(),
+			)
+		}
+	}
+	wg.Add(1)
+	go getInteracAccount()
+
+	var contactAcc *account.ContactAccount
+	getContactAccount := func() {
+		defer wg.Done()
+		contactAcc, err = t.contactAccountRepo.GetUniqueContactAccountById(ctx, summaryTx.DestAccId)
+		if err != nil {
+			foree_logger.Logger.Warn("GetTxSummary",
+				"sumTxId", req.TransactionId,
+				"msg", "load contactAccount failed",
+				"cause", err.Error(),
+			)
+		}
+	}
+	wg.Add(1)
+	go getContactAccount()
+
+	wg.Wait()
+	summaryTx.SrcAccount = interacAcc
+	summaryTx.DestAccount = contactAcc
 
 	foree_logger.Logger.Debug("GetTxSummary_SUCCESS",
 		"ip", loadRealIp(ctx),
