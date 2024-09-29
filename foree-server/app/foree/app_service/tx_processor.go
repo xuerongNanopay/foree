@@ -736,6 +736,7 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 		} else if interacTx.Status == transaction.TxStatusSent {
 			newSumTx.Status = transaction.TxSummaryStatusAwaitPayment
 			newSumTx.PaymentUrl = interacTx.PaymentUrl
+			newSumTx.IsCancelAllowed = true
 		} else {
 			newSumTx.Status = transaction.TxSummaryStatusInProgress
 		}
@@ -749,6 +750,7 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 		}
 		if nbpTx.Mode == nbp.PMTModeCash && nbpTx.Status == transaction.TxStatusSent {
 			newSumTx.Status = transaction.TxSummaryStatusPickup
+			newSumTx.IsCancelAllowed = true
 		} else {
 			newSumTx.Status = transaction.TxSummaryStatusInProgress
 		}
@@ -764,7 +766,7 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 		return
 	}
 
-	if sumTx.Status != newSumTx.Status {
+	if sumTx.Status != newSumTx.Status || newSumTx.IsCancelAllowed != sumTx.IsCancelAllowed {
 		err = p.txSummaryRepo.UpdateTxSummaryById(context.TODO(), newSumTx)
 		if err != nil {
 			foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
