@@ -34,7 +34,12 @@ trimStringInObject = (o) => {
   return newO
 }
 
+formatStringWithLimit = (s, maxLength=14) => {
+  return s.substring(0, maxLength) + (s.length > maxLength ? "..." : "")
+}
+
 export default {
-    containSubsequence,
-    trimStringInObject
+  containSubsequence,
+  trimStringInObject,
+  formatStringWithLimit
 }

@@ -1,21 +1,23 @@
 import { View, Text, SafeAreaView, FlatList, ScrollView, Image, Touchable, TouchableOpacity } from 'react-native'
 import { Link, useFocusEffect } from 'expo-router'
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 
-import { icons, images } from '../../constants'
+import { icons } from '../../constants'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { transactionService } from '../../service'
 import Currency from '../../constants/currency'
+import string_util from '../../util/string_util'
+import TxSummaryChip from '../../components/TxSummaryChip'
 
 const HomeTab = () => {
   const { user } = useGlobalContext()
-  // const navigation = useNavigation()
   const [ cpRate , setCPRate ] = useState({
     srcAmount: 0,
     srcCurrency: "CAD",
     destAmount: 0,
     destCurrency: "PKR",
   })
+  const [ latestTxs, setLastestTxs] = useState([])
   
   useFocusEffect(useCallback(() => {
     const controller = new AbortController()
@@ -33,9 +35,22 @@ const HomeTab = () => {
       } catch (e) {
         console.error("get rate", e, e.response, e.response?.status, e.response?.data)
       }
-  
+    }
+    const getLastestTransactions = async() => {
+      try {
+        const resp = await transactionService.getTransactions({offset:0, limit:10}, {signal: controller.signal})
+        if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
+          console.error("get transactions", resp.status, resp.data)
+        } else {
+          console.log(resp.data.data)
+          setLastestTxs(resp.data.data)
+        }
+      } catch (e) {
+        console.error("get transactions", e, e.response, e.response?.status, e.response?.data)
+      }
     }
     getRate()
+    getLastestTransactions()
     return () => {
       controller.abort()
     }
@@ -89,38 +104,44 @@ const HomeTab = () => {
             </View>
             <Text className="font-psemibold mt-2">Refer today & start earning the rewards</Text>
           </View>
-          <View className="bg-[#ccded6] rounded-2xl py-4 my-4">
+          {
+            !latestTxs || latestTxs.length === 0 ? <></> :
+            <View className="bg-[#ccded6] rounded-2xl py-4 my-4">
             <View className="px-4 pb-2 border-b-[1px] border-[#b6d4c7]">
               <Text className="font-pbold text-lg">Recent Activities</Text>
             </View>
-            {/* <FlatList
-              data={[{id:1}, {id:2}]}
-              keyExtractor={(item) => item.id}
-              renderItem={({item}) => (
-                <Text>{item.id}</Text>
-              )}
-            /> */}
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
-            <Text>1111</Text>
+            {
+              latestTxs.map((tx, idx) => {
+                return(
+                  <TouchableOpacity 
+                    key={tx.id} 
+                    className={`py-2 ${idx !== latestTxs.length-1 ? "border-b-[1px] border-[#b6d4c7]" : ""}`}
+                  >
+                    <View className="px-3 mb-1 flex-row items-center justify-between">
+                      <Text className="font-semibold">{!!tx.destAccSummary ? string_util.formatStringWithLimit(tx.destAccSummary, 14) : ""}</Text>
+                      <Text className="font-semibold text-slate-600">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(tx.destAmount)}{!!tx.destCurrency ? ` ${tx.destCurrency}` : ''}</Text>
+                    </View>
+                    <View className="px-3 mb-1 flex-row items-center justify-between">
+                      <Text className="font-semibold">Amount Debited</Text>
+                      <Text className="font-semibold text-slate-600">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(tx.totalAmount)}{!!tx.totalCurrency ? ` ${tx.totalCurrency}` : ''}</Text>
+                    </View>
+                    <View className="px-3 flex-row items-center justify-between">
+                      <Text className="italic text-slate-600">{tx.nbpReference}</Text>
+                      <TxSummaryChip
+                        status={tx.status}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                )
+              })
+            }
             <View className="px-4 border-t-[1px] border-[#b6d4c7]">
               <Link href="/transaction" className="pt-2">
                 <Text className="font-pregular text-center">See more...</Text>
               </Link>
             </View>
           </View>
+          }
         </ScrollView>
       </View>
     </SafeAreaView>
