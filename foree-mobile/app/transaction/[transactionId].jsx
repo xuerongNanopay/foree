@@ -1,7 +1,8 @@
-import { View, Text } from 'react-native'
+import { View, Text, ScrollView } from 'react-native'
 import { useLocalSearchParams } from 'expo-router'
 import React, { useState, useEffect } from 'react'
 import { transactionService } from '../../service'
+import TxSummaryChip from '../../components/TxSummaryChip'
 
 const TransactionDetail = () => {
   const { transactionId } = useLocalSearchParams()
@@ -32,9 +33,23 @@ const TransactionDetail = () => {
   }, [])
 
   return (
-    <View>
-    <Text>TransactionDetail</Text>
-    </View>
+    <>
+      {
+        !sumTx ? <></>:
+        <View className="px-2">
+          <View className="mt-6 flex items-center">
+            <Text className="text-xl text-slate-600 mb-4">Total Amount</Text>
+            <Text className="font-semibold text-slate-800 text-xl mb-4">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(sumTx.totalAmount)}{!!sumTx.totalCurrency ? ` ${sumTx.totalCurrency}` : ''}</Text>
+            <View>
+              <TxSummaryChip status={sumTx.status}/>
+            </View>
+          </View>
+          <ScrollView>
+
+          </ScrollView>
+        </View>
+      }
+    </>
   )
 }
 

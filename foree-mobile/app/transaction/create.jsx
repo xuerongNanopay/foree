@@ -520,7 +520,7 @@ const TransactionCreate = () => {
                 <Text className="font-bold" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(txSum.rewardAmount)}{!!txSum.rewardCurrency ? ` ${txSum.rewardCurrency}` : ''}</Text>
               </View>
               <View className="flex flex-row justify-between items-center mb-1">
-                <Text className="font-semibold text-green-800">Amount Debited</Text>
+                <Text className="font-semibold text-green-800">Total Amount</Text>
                 <Text className="font-bold text-green-800" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(txSum.totalAmount)} {txSum.totalCurrency}</Text>
               </View>
           </View>

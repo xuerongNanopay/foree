@@ -92,7 +92,7 @@ const TransactionTab = () => {
           <Text className="font-semibold text-slate-600">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(tx.destAmount)}{!!tx.destCurrency ? ` ${tx.destCurrency}` : ''}</Text>
         </View>
         <View className="mb-1 flex-row items-center justify-between">
-          <Text className="font-semibold">Amount Debited</Text>
+          <Text className="font-semibold">Total Amount</Text>
           <Text className="font-semibold text-slate-600">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(tx.totalAmount)}{!!tx.totalCurrency ? ` ${tx.totalCurrency}` : ''}</Text>
         </View>
         <View className="flex-row items-center justify-between">
