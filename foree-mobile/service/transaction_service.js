@@ -36,11 +36,12 @@ class TransactionService {
 
   async countTransactions({status="", offset=0, limit=10}={status, offset, limit}, {signal}={signal}) {
     const searchParams = new URLSearchParams({status, offset, limit})
+    console.log(searchParams.toString())
     return await this.#httpClient.get(`/transactions/length?${searchParams.toString()}`)
   }
 
   async getTransaction(transactionId, {signal}={signal}) {
-    return await this.#httpClient.get(`/transactions/${transactionId}`)
+    return await this.#httpClient.get(`/transaction/${transactionId}`)
   }
 }
 

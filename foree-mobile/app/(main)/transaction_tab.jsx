@@ -8,6 +8,8 @@ import { transactionService } from '../../service'
 const TransactionTab = () => {
   const [selectedStatus, setSelectedStatus] = useState('All')
   const [page, setPage] = useState(0)
+  const [count, setCount] = useState(1000)
+  const [txs, setTxs] = useState([])
   const maxSize = 10
   
 
@@ -28,13 +30,28 @@ const TransactionTab = () => {
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("get transactions", resp.status, resp.data)
         } else {
-          console.log(resp.data.data)
+          setTxs(resp.data.data)
         }
       } catch (e) {
         console.error("get transactions", e, e.response, e.response?.status, e.response?.data)
       }
     }
+    const countTransactions = async() => {
+      try {
+        const resp = await transactionService.countTransactions({status: selectedStatus, offset:page*10, limit:maxSize}, {signal: controller.signal})
+        if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
+          console.error("count transactions", resp.status, resp.data)
+        } else {
+          console.log(resp.data.data)
+          setCount(resp.data.data.count)
+        }
+      } catch (e) {
+        console.error("count transactions", e, e.response, e.response?.status, e.response?.data)
+      }
+    }
+
     getTransactions()
+    countTransactions()
     return () => {
       controller.abort()
     }
@@ -121,7 +138,7 @@ const TransactionTab = () => {
               <TouchableOpacity
                 onPress={()=> {
                   setPage((page) => {
-                    return page > 0 ? page-1 : page
+                    return page > 0 ? page-1 : 0
                   })
                 }}
                 activeOpacity={0.7}
@@ -137,7 +154,7 @@ const TransactionTab = () => {
               <TouchableOpacity
                 onPress={()=> {
                   setPage((page) => {
-                    return page+1
+                    return (page+1)*maxSize > count ? page : page+1
                   })
                 }}
                 activeOpacity={0.7}
