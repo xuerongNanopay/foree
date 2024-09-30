@@ -22,11 +22,10 @@ const TransactionTab = () => {
     }
   }, []))
 
-  useEffect(() => {
-    const controller = new AbortController()
+  const loadTransactions = (signal) => {
     const getTransactions = async() => {
       try {
-        const resp = await transactionService.getTransactions({status: selectedStatus, offset:page*10, limit:maxSize}, {signal: controller.signal})
+        const resp = await transactionService.getTransactions({status: selectedStatus, offset:page*10, limit:maxSize}, {signal: signal})
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("get transactions", resp.status, resp.data)
         } else {
@@ -38,7 +37,7 @@ const TransactionTab = () => {
     }
     const countTransactions = async() => {
       try {
-        const resp = await transactionService.countTransactions({status: selectedStatus, offset:page*10, limit:maxSize}, {signal: controller.signal})
+        const resp = await transactionService.countTransactions({status: selectedStatus, offset:page*10, limit:maxSize}, {signal: signal})
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("count transactions", resp.status, resp.data)
         } else {
@@ -52,6 +51,11 @@ const TransactionTab = () => {
 
     getTransactions()
     countTransactions()
+  }
+
+  useEffect(() => {
+    const controller = new AbortController()
+    loadTransactions(controller.signal)
     return () => {
       controller.abort()
     }
@@ -62,7 +66,9 @@ const TransactionTab = () => {
     return (
       <TouchableOpacity 
         onPress={() => {
-          setPage(0)
+          setPage(_ => {
+            return 0
+          })
           setSelectedStatus(item.id)
         }}
         className={`p-2 border-[1px] ${item.borderColor} rounded-2xl mr-2 ${bgColor}`}
@@ -91,7 +97,12 @@ const TransactionTab = () => {
           {/* Status */}
           <View className="flex flex-row items-center">
             <TouchableOpacity
-              onPress={() => {setPage(0)}}
+              onPress={() => {setPage((page) => {
+                if ( page === 0 ) {
+                  loadTransactions()
+                  return page
+                } else return 0
+              })}}
               className="border-[1px] border-slate-400 rounded-lg p-1"
             >
               <Image
