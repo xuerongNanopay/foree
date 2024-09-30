@@ -572,6 +572,14 @@ func (a *AuthService) Login(ctx context.Context, req LoginReq) (*UserDTO, transp
 		return nil, transport.NewInteralServerError("sesson `%s` not found", sessionId)
 	}
 
+	go func() {
+		newEP := *ep
+		newEP.LoginAttempts = 0
+		if err := a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEP); err != nil {
+			foree_logger.Logger.Error("Login_reset_login_attempts_FAIL", "emailPasswdId", newEP.ID, "cause", err.Error())
+		}
+
+	}()
 	foree_logger.Logger.Info("Login_SUCCESS", "ip", loadRealIp(ctx), "email", req.Email, "userAgent", loadUserAgent(ctx), "userId", user.ID)
 	return NewUserDTO(session), nil
 }
