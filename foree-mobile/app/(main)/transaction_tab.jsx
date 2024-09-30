@@ -85,7 +85,7 @@ const TransactionTab = () => {
     return(
       <TouchableOpacity
         onPress={() => router.push(`/transaction/${tx.id}`)}
-        className={`py-1 px-1 ${index%2===0 ? "bg-slate-200": ""}`}
+        className={`py-1 px-1 ${index%2===1 ? "bg-slate-200": ""}`}
       >
         <View className="mb-1 flex-row items-center justify-between">
           <Text className="font-semibold">{!!tx.destAccSummary ? string_util.formatStringWithLimit(tx.destAccSummary, 14) : ""}</Text>
