@@ -346,7 +346,7 @@ func (repo *TxSummaryRepo) CountTxSummaryByOwnerId(ctx context.Context, ownerId 
 
 func (repo *TxSummaryRepo) CountTxSummaryByOwnerIdAndStatus(ctx context.Context, ownerId int64, status string) (int, error) {
 	var count int
-	if err := repo.db.QueryRow(sQLTxSummaryCountByOwnerId, ownerId).Scan(&count); err != nil {
+	if err := repo.db.QueryRow(sQLTxSummaryCountByOwnerIdAndStatus, ownerId, status).Scan(&count); err != nil {
 		return 0, err
 	}
 	return count, nil
