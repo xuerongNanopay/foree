@@ -69,6 +69,12 @@ const (
         FROM tx_summary t
         where t.parent_tx_id = ?
     `
+	sQLTxSummaryCountByOwnerId = `
+		SELECT
+			COUNT(*) as total_summary_transactions
+		FROM tx_summary t
+		where t.owner_id = ?
+	`
 	sQLTxSummaryGetAllByOwnerIdWithPagination = `
 	    SELECT
 	        t.id, t.summary, t.type, t.status, t.rate,
@@ -85,7 +91,7 @@ const (
 	    ORDER BY t.created_at DESC
 	    LIMIT ? OFFSET ?
 	`
-	sQLTxSummaryQueryByOwnerIdAndStatusWithPagination = `
+	sQLTxSummaryGetAllByOwnerIdAndStatusWithPagination = `
 	    SELECT
 	        t.id, t.summary, t.type, t.status, t.rate,
 			t.payment_url, t.src_acc_id, t.dest_acc_id,
@@ -100,6 +106,12 @@ const (
 	    where t.owner_id = ? AND t.status = ?
 	    ORDER BY t.created_at DESC
 	    LIMIT ? OFFSET ?
+	`
+	sQLTxSummaryCountByOwnerIdAndStatus = `
+		SELECT
+			COUNT(*) as total_summary_transactions
+		FROM tx_summary t
+		where t.owner_id = ? AND t.status = ?
 	`
 )
 
@@ -300,8 +312,8 @@ func (repo *TxSummaryRepo) GetAllTxSummaryByOwnerIdWithPagination(ctx context.Co
 	return accounts, nil
 }
 
-func (repo *TxSummaryRepo) QueryTxSummaryByOwnerIdAndStatusWithPagination(ctx context.Context, ownerId int64, status string, limit, offset int) ([]*TxSummary, error) {
-	rows, err := repo.db.Query(sQLTxSummaryQueryByOwnerIdAndStatusWithPagination, ownerId, status, limit, offset)
+func (repo *TxSummaryRepo) GetAllTxSummaryByOwnerIdAndStatusWithPagination(ctx context.Context, ownerId int64, status string, limit, offset int) ([]*TxSummary, error) {
+	rows, err := repo.db.Query(sQLTxSummaryGetAllByOwnerIdAndStatusWithPagination, ownerId, status, limit, offset)
 
 	if err != nil {
 		return nil, err
@@ -322,6 +334,22 @@ func (repo *TxSummaryRepo) QueryTxSummaryByOwnerIdAndStatusWithPagination(ctx co
 	}
 
 	return accounts, nil
+}
+
+func (repo *TxSummaryRepo) CountTxSummaryByOwnerId(ctx context.Context, ownerId int64) (int, error) {
+	var count int
+	if err := repo.db.QueryRow(sQLTxSummaryCountByOwnerId, ownerId).Scan(&count); err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (repo *TxSummaryRepo) CountTxSummaryByOwnerIdAndStatus(ctx context.Context, ownerId int64, status string) (int, error) {
+	var count int
+	if err := repo.db.QueryRow(sQLTxSummaryCountByOwnerId, ownerId).Scan(&count); err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func scanRowIntoTxSummary(rows *sql.Rows) (*TxSummary, error) {

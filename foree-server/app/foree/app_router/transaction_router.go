@@ -90,5 +90,14 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 			c.transactionService.QuerySummaryTxs,
 		),
 	).Methods("GET")
+	router.HandleFunc(
+		"/transactions/length",
+		sessionGetWrapper(
+			"CountSummaryTxs",
+			foree_service.PermissionForeeTxSummaryRead,
+			c.authService,
+			c.transactionService.CountSummaryTxs,
+		),
+	).Methods("GET")
 
 }

@@ -899,7 +899,7 @@ func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTrans
 	if req.Status == "" || req.Status == "All" {
 		summaryTxs, err = t.txSummaryRepo.GetAllTxSummaryByOwnerIdWithPagination(ctx, session.UserId, req.Limit, req.Offset)
 	} else {
-		summaryTxs, err = t.txSummaryRepo.QueryTxSummaryByOwnerIdAndStatusWithPagination(ctx, session.UserId, req.Status, req.Limit, req.Offset)
+		summaryTxs, err = t.txSummaryRepo.GetAllTxSummaryByOwnerIdAndStatusWithPagination(ctx, session.UserId, req.Status, req.Limit, req.Offset)
 	}
 
 	if err != nil {
@@ -924,6 +924,45 @@ func (t *TransactionService) QuerySummaryTxs(ctx context.Context, req QueryTrans
 		"sessionId", req.SessionId,
 	)
 	return rets, nil
+}
+
+func (t *TransactionService) CountSummaryTxs(ctx context.Context, req QueryTransactionReq) (*TxSummarieCountDTO, transport.HError) {
+	session, sErr := t.authService.GetSession(ctx, req.SessionId)
+	if session == nil {
+		foree_logger.Logger.Info("CountSummaryTxs_FAIL",
+			"sessionId", req.SessionId,
+			"ip", loadRealIp(ctx),
+			"cause", "session no found",
+		)
+		return nil, sErr
+	}
+	var count int
+	var err error
+
+	if req.Status == "" || req.Status == "All" {
+		count, err = t.txSummaryRepo.CountTxSummaryByOwnerId(ctx, session.UserId)
+	} else {
+		count, err = t.txSummaryRepo.CountTxSummaryByOwnerIdAndStatus(ctx, session.UserId, req.Status)
+	}
+
+	if err != nil {
+		foree_logger.Logger.Error("CountSummaryTxs_FAIL",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"cause", err.Error(),
+		)
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	foree_logger.Logger.Debug("CountSummaryTxs_SUCCESS",
+		"ip", loadRealIp(ctx),
+		"userId", session.UserId,
+		"sessionId", req.SessionId,
+	)
+	return &TxSummarieCountDTO{
+		Count: count,
+	}, nil
 }
 
 // Check transaction status, see if is able to cancel.

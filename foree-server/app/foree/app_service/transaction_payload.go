@@ -216,6 +216,10 @@ type TxCancelDTO struct {
 	Message       string `json:"message,omitempty"`
 }
 
+type TxSummarieCountDTO struct {
+	Count int `json:"count"`
+}
+
 type TxSummaryDTO struct {
 	ID              int64                       `json:"id,omitempty"`
 	Summary         string                      `json:"summary,omitempty"`
