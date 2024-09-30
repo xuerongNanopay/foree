@@ -269,7 +269,7 @@ func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
 
 type TxSummaryDetailDTO struct {
 	ID              int64                       `json:"id,omitempty"`
-	Summary         string                      `json:"sumary,omitempty"`
+	Summary         string                      `json:"summary,omitempty"`
 	Type            string                      `json:"type,omitempty"`
 	Status          transaction.TxSummaryStatus `json:"status,omitempty"`
 	Rate            string                      `json:"rate,omitempty"`
