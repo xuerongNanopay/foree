@@ -70,9 +70,8 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 	).Methods("GET")
 
 	// Summary Transaction detail
-	router.HandleFunc("/transactions/{TransactionId}", simpleGetWrapper(c.transactionService.GetTxSummary)).Methods("GET")
 	router.HandleFunc(
-		"/transactions/{TransactionId}",
+		"/transaction/{TransactionId}",
 		sessionGetWrapper(
 			"GetTxSummary",
 			foree_service.PermissionForeeTxSummaryRead,
