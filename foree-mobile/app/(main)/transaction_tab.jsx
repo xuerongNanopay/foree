@@ -4,6 +4,8 @@ import { router, useFocusEffect } from 'expo-router'
 
 import { icons } from '../../constants'
 import { transactionService } from '../../service'
+import string_util from '../../util/string_util'
+import TxSummaryChip from '../../components/TxSummaryChip'
 
 const TransactionTab = () => {
   const [selectedStatus, setSelectedStatus] = useState('All')
@@ -13,14 +15,14 @@ const TransactionTab = () => {
   const maxSize = 10
   
 
-  useFocusEffect(useCallback(() => {
-    setSelectedStatus('All')
-    setPage(0)
-    const  controller = new AbortController()
-    return () => {
-      controller.abort()
-    }
-  }, []))
+  // useFocusEffect(useCallback(() => {
+  //   setSelectedStatus('All')
+  //   setPage(0)
+  //   const  controller = new AbortController()
+  //   return () => {
+  //     controller.abort()
+  //   }
+  // }, []))
 
   const loadTransactions = (signal) => {
     const getTransactions = async() => {
@@ -78,6 +80,30 @@ const TransactionTab = () => {
     )
   },[selectedStatus])
 
+  const TxItem = ({index, item}) => {
+    const tx = item
+    return(
+      <TouchableOpacity
+        onPress={() => router.push(`/transaction/${tx.id}`)}
+        className={`py-1 px-1 ${index%2===0 ? "bg-slate-200": ""}`}
+      >
+        <View className="mb-1 flex-row items-center justify-between">
+          <Text className="font-semibold">{!!tx.destAccSummary ? string_util.formatStringWithLimit(tx.destAccSummary, 14) : ""}</Text>
+          <Text className="font-semibold text-slate-600">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(tx.destAmount)}{!!tx.destCurrency ? ` ${tx.destCurrency}` : ''}</Text>
+        </View>
+        <View className="mb-1 flex-row items-center justify-between">
+          <Text className="font-semibold">Amount Debited</Text>
+          <Text className="font-semibold text-slate-600">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(tx.totalAmount)}{!!tx.totalCurrency ? ` ${tx.totalCurrency}` : ''}</Text>
+        </View>
+        <View className="flex-row items-center justify-between">
+          <Text className="italic text-slate-600">{tx.nbpReference}</Text>
+          <TxSummaryChip
+            status={tx.status}
+          />
+        </View>
+      </TouchableOpacity>
+    )
+  }
   return (
     <SafeAreaView>
       <View className="h-full px-4 pt-4">
@@ -182,7 +208,16 @@ const TransactionTab = () => {
           </View>
         </View>
         <FlatList
-          className="border"
+          data={txs}
+          keyExtractor={tx => tx.id}
+          renderItem={TxItem}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          ListEmptyComponent={
+            <View>
+              <Text className="text-center font-pbold text-xl text-slate-600 mt-44">⛔ No Transactions</Text>
+            </View>
+          }
         />
       </View>
     </SafeAreaView>

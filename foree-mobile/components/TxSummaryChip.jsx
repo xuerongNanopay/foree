@@ -11,9 +11,9 @@ const TxSummaryStatusRefunding    = "Refunding"
 
 const SummaryTxStatusChipStyles = {
   [TxSummaryStatusInitial]: {
-    borderColor: "border-slate-800",
-    textColor: "text-slate-800",
-    bgColor: "bg-slate-200",
+    borderColor: "border-purple-800",
+    textColor: "text-purple-800",
+    bgColor: "bg-purple-200",
   },
   [TxSummaryStatusAwaitPayment]: {
     borderColor: "border-yellow-800",
