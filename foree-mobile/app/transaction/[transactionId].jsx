@@ -59,6 +59,7 @@ const TransactionDetail = () => {
   )
 }
 
+//Why do this: it looks tailwind has issue with dynamic css.
 const StatusView = (tx) => {
   const sumTx = SummaryTxStatuses[tx?.status]
   switch (tx.status) {
@@ -91,11 +92,11 @@ const StatusView = (tx) => {
             <Text className={`text-yellow-800`}>{sumTx.description}</Text>
           </View>
           {
-            tx.status !== TxSummaryStatusAwaitPayment ? <></>:
+            !tx.paymentUrl ? <></>:
             <View className="flex flex-row justify-end">
               <TouchableOpacity
                 onPress={() => {
-                  Linking.openURL("http://www.google.ca")
+                  Linking.openURL(tx.paymentUrl)
                 }}
                 className={`mr-3 border-2 ${sumTx.borderColor} py-1 px-2 rounded-lg`}
               >
