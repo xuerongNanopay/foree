@@ -40,7 +40,7 @@ func (s *ScotiaClientMock) PaymentStatus(req PaymentStatusRequest) (*PaymentStat
 		},
 		PaymentStatuses: []PaymentStatusData{
 			{
-				GatewayUrl: "www.google.ca",
+				GatewayUrl: "www.http://www.google.ca",
 			},
 		},
 	}, nil
