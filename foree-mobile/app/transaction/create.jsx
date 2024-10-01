@@ -494,12 +494,12 @@ const TransactionCreate = () => {
             <Text className="font-semibold text-slate-500">Destination Account</Text>
             <Text className="font-bold mb-1 text-lg">
               {
-                txSum.destAccount.type == ContactTransferCashPickup ?
+                txSum.destAccount.transferMethod == ContactTransferCashPickup ?
                 <Text className="font-bold mb-1 text-lg">Cash Pickup</Text> : 
                 <Text className="font-bold mb-1 text-lg">
-                  {!! txSum.destAccount.institutionName ?  txSum.destAccount.institutionName.slice(0, 16) + ( txSum.destAccount.institutionName.length > 16 ? "..." : "") : ""}
+                  {!! txSum.destAccount.bankName ?  txSum.destAccount.bankName.slice(0, 16) + ( txSum.destAccount.bankName.length > 16 ? "..." : "") : ""}
                   <Text className="italic">
-                    ({!!txSum.destAccount.accountNumber ? txSum.destAccount.accountNumber.slice(0, 13) + (txSum.destAccount.accountNumber.length > 13 ? "..." : "") : ""})
+                    ({!!txSum.destAccount.accountNoOrIBAN ? txSum.destAccount.accountNoOrIBAN.slice(0, 13) + (txSum.destAccount.accountNoOrIBAN.length > 13 ? "..." : "") : ""})
                   </Text>
                 </Text>
               }

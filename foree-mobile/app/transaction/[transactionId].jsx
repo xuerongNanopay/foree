@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router'
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { transactionService } from '../../service'
 import { SummaryTxStatuses, TxSummaryStatusAwaitPayment, TxSummaryStatusCancelled, TxSummaryStatusCompleted, TxSummaryStatusInitial, TxSummaryStatusInProgress } from '../../constants/summary_tx'
-import { currencyFormatter } from '../../util/foree_util';
+import { currencyFormatter, formatContactMethod, formatName } from '../../util/foree_util';
 
 
 const TransactionDetail = () => {
@@ -53,6 +53,27 @@ const TransactionDetail = () => {
             className="px-2 pt-4"
           >
             {StatusView(sumTx)}
+            <View
+              className="mt-4 border-[1px] rounded-md px-2 py-2 border-slate-400"
+            >
+              <View className="pb-1 border-b-[1px] border-slate-300">
+                <Text className="text-slate-500 mb-1">Created</Text>
+                <Text className="font-psemibold text-slate-600">{new Date(sumTx.createAt).toLocaleString()}</Text>
+              </View>
+              <View className="mt-2 pb-1">
+                <Text className="text-slate-500 mb-1">Reference #</Text>
+                <Text className="font-psemibold text-slate-600">{sumTx.nbpReference}</Text>
+              </View>
+              {
+                !sumTx.destAccount ? <></>:
+                <View className="pt-2 border-t-[1px] border-slate-300">
+                  <Text className="text-slate-500 mb-1">Remitee</Text>
+                  <Text className="font-psemibold text-slate-600">{formatName(sumTx.destAccount)}</Text>
+                  <Text className="text-slate-500 mt-1 mb-1">Receive Method</Text>
+                  <Text className="font-psemibold text-slate-600">{formatContactMethod(sumTx.destAccount, max=20)}</Text>
+                </View>
+              }
+            </View>
           </ScrollView>
         </SafeAreaView>
       }

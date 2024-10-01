@@ -14,9 +14,9 @@ export const formatName = ({firstName, middleName, lastName}, max=30) => {
   return fullName
 }
 
-export const formatContactMethod = ({transferMethod, bankName, accountNoOrIBAN}, max=20) => {
+export const formatContactMethod = ({transferMethod, bankName, accountNoOrIBAN}, max=14) => {
   if ( transferMethod === ContactTransferCashPickup ) return "Cash Pickup"
-  return `${!!bankName ? bankName.slice(0, 14) + (bankName.length > 14 ? "..." : "") : ""}(${!!accountNoOrIBAN ? accountNoOrIBAN.slice(0, 14) + (accountNoOrIBAN.length > 14 ? "..." : "") : ""})`
+  return `${!!bankName ? bankName.slice(0, max) + (bankName.length > max ? "..." : "") : ""}(${!!accountNoOrIBAN ? accountNoOrIBAN.slice(0, max) + (accountNoOrIBAN.length > max ? "..." : "") : ""})`
 }
 
 export const currencyFormatter = (amount, currency) => {
