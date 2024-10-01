@@ -46,7 +46,7 @@ const TransactionDetail = () => {
             </View>
             {
               //see: https://stackoverflow.com/questions/36938742/touchablehighlight-not-clickable-if-position-absolute
-              1 !== 1 ? <></> :
+              1 === 1 ? <></> :
               <View
                 className="absolute p-1 right-3 top-1"
               >
@@ -111,6 +111,17 @@ const TransactionDetail = () => {
                   <Text className="text-slate-500">Total Amount</Text>
                   <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.totalAmount, sumTx.totalCurrency)}</Text>
                 </View>
+                {
+                  1 !== 1 ? <></> :
+                  <TouchableOpacity
+                    onPress={() => {
+                      console.log("TODO: cancel transaction")
+                    }}
+                    className = "mt-3 p-2 w-24 border border-red-800 rounded-lg flex"
+                  >
+                  <Text className="font-psemibold text-center text-red-800">Cancel</Text>
+                </TouchableOpacity>
+                }
               </View>
           </ScrollView>
           </View>
