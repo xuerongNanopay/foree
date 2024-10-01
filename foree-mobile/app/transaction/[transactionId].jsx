@@ -42,62 +42,63 @@ const TransactionDetail = () => {
     <>
       {
         !sumTx ? <></>:
-        <SafeAreaView
-          className="h-full flex flex-col"
-        >
-          <View className="mt-6 flex items-center">
-            <Text className="text-xl text-slate-600 mb-4">Total Amount</Text>
-            <Text className="font-semibold text-slate-800 text-xl mb-2">{currencyFormatter(sumTx.totalAmount, sumTx.totalCurrency)}</Text>
-          </View>
-          <ScrollView
-            className="px-2 pt-4"
-          >
-            {StatusView(sumTx)}
-            <View
-              className="mt-4 border-[1px] rounded-md px-2 py-2 border-slate-400"
+        <SafeAreaView>
+          <View className="h-full flex">
+            <View className="mt-6 flex items-center">
+              <Text className="text-xl text-slate-600 mb-4">Total Amount</Text>
+              <Text className="font-semibold text-slate-800 text-xl mb-2">{currencyFormatter(sumTx.totalAmount, sumTx.totalCurrency)}</Text>
+            </View>
+            <ScrollView
+              className="flex-1 px-2 py-4"
+              showsVerticalScrollIndicator={false}
             >
-              <View className="pb-1 border-b-[1px] border-slate-300">
-                <Text className="text-slate-500 mb-1">Created</Text>
-                <Text className="font-psemibold text-slate-600">{new Date(sumTx.createAt).toLocaleString()}</Text>
-              </View>
-              <View className="mt-2 pb-1">
-                <Text className="text-slate-500 mb-1">Reference #</Text>
-                <Text className="font-psemibold text-slate-600">{sumTx.nbpReference}</Text>
-              </View>
-              {
-                !sumTx.destAccount ? <></>:
-                <View className="pt-2 border-t-[1px] border-slate-300">
-                  <Text className="text-slate-500 mb-1">Remitee</Text>
-                  <Text className="font-psemibold text-slate-600">{formatName(sumTx.destAccount)}</Text>
-                  <Text className="text-slate-500 mt-1 mb-1">Receive Amount</Text>
-                  <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.destAmount, sumTx.destCurrency)}</Text>
-                  <Text className="text-slate-500 mt-1 mb-1">Receive Method</Text>
-                  <Text className="font-psemibold text-slate-600">{formatContactMethod(sumTx.destAccount, max=20)}</Text>
+              {StatusView(sumTx)}
+              <View
+                className="mt-4 border-[1px] rounded-md px-2 py-2 border-slate-400"
+              >
+                <View className="pb-1 border-b-[1px] border-slate-300">
+                  <Text className="text-slate-500 mb-1">Created</Text>
+                  <Text className="font-psemibold text-slate-600">{new Date(sumTx.createAt).toLocaleString()}</Text>
                 </View>
-              }
-            </View>
-            <View
-              className="mt-5"
-            >
-              <Text className="font-psemibold text-lg">Details</Text>
-              <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
-                <Text className="text-slate-500">Exchange Rate</Text>
-                <Text className="font-psemibold text-slate-600">{sumTx.rate}</Text>
+                <View className="mt-2 pb-1">
+                  <Text className="text-slate-500 mb-1">Reference #</Text>
+                  <Text className="font-psemibold text-slate-600">{sumTx.nbpReference}</Text>
+                </View>
+                {
+                  !sumTx.destAccount ? <></>:
+                  <View className="pt-2 border-t-[1px] border-slate-300">
+                    <Text className="text-slate-500 mb-1">Remitee</Text>
+                    <Text className="font-psemibold text-slate-600">{formatName(sumTx.destAccount)}</Text>
+                    <Text className="text-slate-500 mt-1 mb-1">Receive Amount</Text>
+                    <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.destAmount, sumTx.destCurrency)}</Text>
+                    <Text className="text-slate-500 mt-1 mb-1">Receive Method</Text>
+                    <Text className="font-psemibold text-slate-600">{formatContactMethod(sumTx.destAccount, max=20)}</Text>
+                  </View>
+                }
               </View>
-              <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
-                <Text className="text-slate-500">Fees</Text>
-                <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.feeAmount, sumTx.feeCurrency)}</Text>
+              <View
+                className="mt-5 mb-10"
+              >
+                <Text className="font-psemibold text-lg">Details</Text>
+                <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
+                  <Text className="text-slate-500">Exchange Rate</Text>
+                  <Text className="font-psemibold text-slate-600">{sumTx.rate}</Text>
+                </View>
+                <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
+                  <Text className="text-slate-500">Fees</Text>
+                  <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.feeAmount, sumTx.feeCurrency)}</Text>
+                </View>
+                <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
+                  <Text className="text-slate-500">Rewards</Text>
+                  <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.rewardAmount, sumTx.rewardCurrency)}</Text>
+                </View>
+                <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
+                  <Text className="text-slate-500">Total Amount</Text>
+                  <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.totalAmount, sumTx.totalCurrency)}</Text>
+                </View>
               </View>
-              <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
-                <Text className="text-slate-500">Rewards</Text>
-                <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.rewardAmount, sumTx.rewardCurrency)}</Text>
-              </View>
-              <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
-                <Text className="text-slate-500">Total Amount</Text>
-                <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.totalAmount, sumTx.totalCurrency)}</Text>
-              </View>
-            </View>
           </ScrollView>
+          </View>
         </SafeAreaView>
       }
     </>
