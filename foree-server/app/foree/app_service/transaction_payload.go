@@ -301,6 +301,7 @@ func NewTxSummaryDetailDTO(tx *transaction.TxSummary) *TxSummaryDetailDTO {
 		Status:          tx.Status,
 		Rate:            tx.Rate,
 		PaymentUrl:      tx.PaymentUrl,
+		NBPReference:    tx.NBPReference,
 		SrcAccSummary:   tx.SrcAccSummary,
 		SrcAmount:       tx.SrcAmount,
 		SrcCurrency:     tx.SrcCurrency,
@@ -386,7 +387,7 @@ func NewSumContactAccountDTO(acc *account.ContactAccount) *SumContactAccountDTO 
 type SumContactAccountDTO struct {
 	ID              int64                      `json:"id"`
 	Status          account.AccountStatus      `json:"status"`
-	Type            account.ContactAccountType `json:"type"`
+	Type            account.ContactAccountType `json:"transferMethod"`
 	FirstName       string                     `json:"firstName"`
 	MiddleName      string                     `json:"middleName"`
 	LastName        string                     `json:"lastName"`
@@ -397,9 +398,9 @@ type SumContactAccountDTO struct {
 	Country         string                     `json:"country"`
 	PostalCode      string                     `json:"postalCode"`
 	PhoneNumber     string                     `json:"phoneNumber"`
-	InstitutionName string                     `json:"institutionName"`
+	InstitutionName string                     `json:"bankName"`
 	BranchNumber    string                     `json:"branchNumber"`
-	AccountNumber   string                     `json:"accountNumber"`
+	AccountNumber   string                     `json:"accountNoOrIBAN"`
 	AccountHash     string                     `json:"accountHash"`
 }
 
