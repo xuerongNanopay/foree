@@ -3,7 +3,7 @@ import * as Linking from 'expo-linking';
 import { useLocalSearchParams } from 'expo-router'
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { transactionService } from '../../service'
-import { SummaryTxStatuses, TxSummaryStatusAwaitPayment, TxSummaryStatusCancelled, TxSummaryStatusCompleted, TxSummaryStatusInitial, TxSummaryStatusInProgress } from '../../constants/summary_tx'
+import { SummaryTxStatuses, TxSummaryStatusAwaitPayment, TxSummaryStatusCancelled, TxSummaryStatusCompleted, TxSummaryStatusInitial, TxSummaryStatusInProgress, TxSummaryStatusPickup, TxSummaryStatusRefunding } from '../../constants/summary_tx'
 import { currencyFormatter, formatContactMethod, formatName } from '../../util/foree_util';
 
 
@@ -69,10 +69,33 @@ const TransactionDetail = () => {
                 <View className="pt-2 border-t-[1px] border-slate-300">
                   <Text className="text-slate-500 mb-1">Remitee</Text>
                   <Text className="font-psemibold text-slate-600">{formatName(sumTx.destAccount)}</Text>
+                  <Text className="text-slate-500 mt-1 mb-1">Receive Amount</Text>
+                  <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.destAmount, sumTx.destCurrency)}</Text>
                   <Text className="text-slate-500 mt-1 mb-1">Receive Method</Text>
                   <Text className="font-psemibold text-slate-600">{formatContactMethod(sumTx.destAccount, max=20)}</Text>
                 </View>
               }
+            </View>
+            <View
+              className="mt-5"
+            >
+              <Text className="font-psemibold text-lg">Details</Text>
+              <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
+                <Text className="text-slate-500">Exchange Rate</Text>
+                <Text className="font-psemibold text-slate-600">{sumTx.rate}</Text>
+              </View>
+              <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
+                <Text className="text-slate-500">Fees</Text>
+                <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.feeAmount, sumTx.feeCurrency)}</Text>
+              </View>
+              <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
+                <Text className="text-slate-500">Rewards</Text>
+                <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.rewardAmount, sumTx.rewardCurrency)}</Text>
+              </View>
+              <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
+                <Text className="text-slate-500">Total Amount</Text>
+                <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.totalAmount, sumTx.totalCurrency)}</Text>
+              </View>
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -190,16 +213,16 @@ const StatusView = (tx) => {
       )
     case TxSummaryStatusPickup:
       return (
-        <View className={`border-[1px] p-2 rounded-md border-red-800 bg-red-200`}>
+        <View className={`border-[1px] p-2 rounded-md border-yellow-800 bg-yellow-200`}>
           <View
-            className={`border-b-[1px] border-red-300`}
+            className={`border-b-[1px] border-yellow-300`}
           >
-            <Text className={`font-semibold text-lg text-red-800`}>
+            <Text className={`font-semibold text-lg text-yellow-800`}>
               {sumTx.label}
             </Text>
           </View>
           <View className="mt-2">
-            <Text className={`text-red-800`}>{sumTx.description}</Text>
+            <Text className={`text-yellow-800`}>{sumTx.description}</Text>
           </View>
         </View>
       )
