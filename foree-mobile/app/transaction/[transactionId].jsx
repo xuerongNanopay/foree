@@ -1,9 +1,9 @@
-import { View, Text, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native'
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, StyleSheet } from 'react-native'
 import * as Linking from 'expo-linking';
 import { useLocalSearchParams } from 'expo-router'
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { transactionService } from '../../service'
-import { SummaryTxStatuses, TxSummaryStatusAwaitPayment, TxSummaryStatusInitial } from '../../constants/summary_tx'
+import { SummaryTxStatuses, TxSummaryStatusAwaitPayment, TxSummaryStatusCancelled, TxSummaryStatusCompleted, TxSummaryStatusInitial, TxSummaryStatusInProgress } from '../../constants/summary_tx'
 
 
 const TransactionDetail = () => {
@@ -60,34 +60,144 @@ const TransactionDetail = () => {
 }
 
 const StatusView = (tx) => {
-  const sumTx = SummaryTxStatuses[tx.status]
-  return (
-    <View className={`border-[1px] p-2 rounded-md ${sumTx.borderColor} ${sumTx.bgColor}`}>
-      <View
-        className={`border-b-[1px] ${sumTx.borderColor}`}
-      >
-        <Text className={`font-semibold text-lg ${sumTx.textColor}`}>
-          {sumTx.label}
-        </Text>
-      </View>
-      <View className="mt-2">
-        <Text className={`${sumTx.textColor}`}>{sumTx.description}</Text>
-      </View>
-      {
-        tx.status !== TxSummaryStatusAwaitPayment ? <></>:
-        <View className="flex flex-row justify-end">
-          <TouchableOpacity
-            onPress={() => {
-              Linking.openURL("http://www.google.ca")
-            }}
-            className={`mr-3 border-2 ${sumTx.borderColor} py-1 px-2 rounded-lg`}
+  const sumTx = SummaryTxStatuses[tx?.status]
+  switch (tx.status) {
+    case TxSummaryStatusInitial:
+      return (
+        <View className={`border-[1px] p-2 rounded-md border-purple-800 bg-purple-200`}>
+          <View
+            className={`border-b-[1px] border-purple-400`}
           >
-            <Text className={`font-psemibold ${sumTx.textColor}`}>Pay Now</Text>
-          </TouchableOpacity>
+            <Text className={`font-semibold text-lg text-purple-800`}>
+              {sumTx.label}
+            </Text>
+          </View>
+          <View className="mt-2">
+            <Text className={`text-purple-800`}>{sumTx.description}</Text>
+          </View>
         </View>
-      }
-    </View>
-  )
+      )
+    case TxSummaryStatusAwaitPayment:
+      return (
+        <View className={`border-[1px] p-2 rounded-md border-yellow-800 bg-yellow-200`}>
+          <View
+            className={`border-b-[1px] border-yellow-400`}
+          >
+            <Text className={`font-semibold text-lg text-yellow-800`}>
+              {sumTx.label}
+            </Text>
+          </View>
+          <View className="mt-2">
+            <Text className={`text-yellow-800`}>{sumTx.description}</Text>
+          </View>
+          {
+            tx.status !== TxSummaryStatusAwaitPayment ? <></>:
+            <View className="flex flex-row justify-end">
+              <TouchableOpacity
+                onPress={() => {
+                  Linking.openURL("http://www.google.ca")
+                }}
+                className={`mr-3 border-2 ${sumTx.borderColor} py-1 px-2 rounded-lg`}
+              >
+                <Text className={`font-psemibold ${sumTx.textColor}`}>Pay Now</Text>
+              </TouchableOpacity>
+            </View>
+          }
+        </View>
+      )
+    case TxSummaryStatusInitial:
+      return (
+        <View className={`border-[1px] p-2 rounded-md border-purple-800 bg-purple-200`}>
+          <View
+            className={`border-b-[1px] border-purple-300`}
+          >
+            <Text className={`font-semibold text-lg text-purple-800`}>
+              {sumTx.label}
+            </Text>
+          </View>
+          <View className="mt-2">
+            <Text className={`text-purple-800`}>{sumTx.description}</Text>
+          </View>
+        </View>
+      )
+    case TxSummaryStatusInProgress:
+      return (
+        <View className={`border-[1px] p-2 rounded-md border-purple-800 bg-purple-200`}>
+          <View
+            className={`border-b-[1px] border-purple-300`}
+          >
+            <Text className={`font-semibold text-lg text-purple-800`}>
+              {sumTx.label}
+            </Text>
+          </View>
+          <View className="mt-2">
+            <Text className={`text-purple-800`}>{sumTx.description}</Text>
+          </View>
+        </View>
+      )
+    case TxSummaryStatusCompleted:
+      return (
+        <View className={`border-[1px] p-2 rounded-md border-green-800 bg-green-200`}>
+          <View
+            className={`border-b-[1px] border-green-300`}
+          >
+            <Text className={`font-semibold text-lg text-green-800`}>
+              {sumTx.label}
+            </Text>
+          </View>
+          <View className="mt-2">
+            <Text className={`text-green-800`}>{sumTx.description}</Text>
+          </View>
+        </View>
+      )
+    case TxSummaryStatusCancelled:
+      return (
+        <View className={`border-[1px] p-2 rounded-md border-red-800 bg-red-200`}>
+          <View
+            className={`border-b-[1px] border-red-300`}
+          >
+            <Text className={`font-semibold text-lg text-red-800`}>
+              {sumTx.label}
+            </Text>
+          </View>
+          <View className="mt-2">
+            <Text className={`text-red-800`}>{sumTx.description}</Text>
+          </View>
+        </View>
+      )
+    case TxSummaryStatusPickup:
+      return (
+        <View className={`border-[1px] p-2 rounded-md border-red-800 bg-red-200`}>
+          <View
+            className={`border-b-[1px] border-red-300`}
+          >
+            <Text className={`font-semibold text-lg text-red-800`}>
+              {sumTx.label}
+            </Text>
+          </View>
+          <View className="mt-2">
+            <Text className={`text-red-800`}>{sumTx.description}</Text>
+          </View>
+        </View>
+      )
+    case TxSummaryStatusRefunding:
+      return (
+        <View className={`border-[1px] p-2 rounded-md border-purple-800 bg-purple-200`}>
+          <View
+            className={`border-b-[1px] border-purple-300`}
+          >
+            <Text className={`font-semibold text-lg text-purple-800`}>
+              {sumTx.label}
+            </Text>
+          </View>
+          <View className="mt-2">
+            <Text className={`text-purple-800`}>{sumTx.description}</Text>
+          </View>
+        </View>
+      )
+    default:
+      return <></>
+  }
 }
 
 export default TransactionDetail
