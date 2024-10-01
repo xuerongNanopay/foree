@@ -18,3 +18,7 @@ export const formatContactMethod = ({transferMethod, bankName, accountNoOrIBAN},
   if ( transferMethod === ContactTransferCashPickup ) return "Cash Pickup"
   return `${!!bankName ? bankName.slice(0, 14) + (bankName.length > 14 ? "..." : "") : ""}(${!!accountNoOrIBAN ? accountNoOrIBAN.slice(0, 14) + (accountNoOrIBAN.length > 14 ? "..." : "") : ""})`
 }
+
+export const currencyFormatter = (amount, currency) => {
+  return `$${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(amount)}${!!currency ? ` ${currency}` : ''}`
+}

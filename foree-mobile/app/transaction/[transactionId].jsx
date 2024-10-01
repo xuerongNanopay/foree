@@ -4,6 +4,7 @@ import { useLocalSearchParams } from 'expo-router'
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { transactionService } from '../../service'
 import { SummaryTxStatuses, TxSummaryStatusAwaitPayment, TxSummaryStatusCancelled, TxSummaryStatusCompleted, TxSummaryStatusInitial, TxSummaryStatusInProgress } from '../../constants/summary_tx'
+import { currencyFormatter } from '../../util/foree_util';
 
 
 const TransactionDetail = () => {
@@ -46,7 +47,7 @@ const TransactionDetail = () => {
         >
           <View className="mt-6 flex items-center">
             <Text className="text-xl text-slate-600 mb-4">Total Amount</Text>
-            <Text className="font-semibold text-slate-800 text-xl mb-2">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(sumTx.totalAmount)}{!!sumTx.totalCurrency ? ` ${sumTx.totalCurrency}` : ''}</Text>
+            <Text className="font-semibold text-slate-800 text-xl mb-2">{currencyFormatter(sumTx.totalAmount, sumTx.totalCurrency)}</Text>
           </View>
           <ScrollView
             className="px-2 pt-4"
