@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, Image } from 'react-native'
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, Image, Alert } from 'react-native'
 import * as Linking from 'expo-linking';
 import { useLocalSearchParams } from 'expo-router'
 import React, { useState, useEffect } from 'react'
@@ -115,7 +115,12 @@ const TransactionDetail = () => {
                   1 !== 1 ? <></> :
                   <TouchableOpacity
                     onPress={() => {
-                      console.log("TODO: cancel transaction")
+                      Alert.alert("Warming", "Are you sure to cancel the transaction?", [
+                        {text: 'Cancel', onPress: () => {}},
+                        {text: 'Continue', onPress: () => {
+                          console.log("TODO: cancel")
+                        }},
+                      ])
                     }}
                     className = "mt-3 p-2 w-24 border border-red-800 rounded-lg flex"
                   >
