@@ -1,8 +1,10 @@
-import { View, Text, ScrollView } from 'react-native'
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native'
+import * as Linking from 'expo-linking';
 import { useLocalSearchParams } from 'expo-router'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { transactionService } from '../../service'
-import TxSummaryChip from '../../components/TxSummaryChip'
+import { SummaryTxStatuses, TxSummaryStatusAwaitPayment, TxSummaryStatusInitial } from '../../constants/summary_tx'
+
 
 const TransactionDetail = () => {
   const { transactionId } = useLocalSearchParams()
@@ -32,24 +34,59 @@ const TransactionDetail = () => {
     }
   }, [])
 
+  const sumTxStatus = useMemo(() => {
+    return SummaryTxStatuses[!!sumTx ? sumTx.status : TxSummaryStatusInitial]
+  }, [sumTx])
   return (
     <>
       {
         !sumTx ? <></>:
-        <View className="px-2">
+        <SafeAreaView
+          className="h-full flex flex-col"
+        >
           <View className="mt-6 flex items-center">
             <Text className="text-xl text-slate-600 mb-4">Total Amount</Text>
-            <Text className="font-semibold text-slate-800 text-xl mb-4">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(sumTx.totalAmount)}{!!sumTx.totalCurrency ? ` ${sumTx.totalCurrency}` : ''}</Text>
-            <View>
-              <TxSummaryChip status={sumTx.status}/>
-            </View>
+            <Text className="font-semibold text-slate-800 text-xl mb-2">${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(sumTx.totalAmount)}{!!sumTx.totalCurrency ? ` ${sumTx.totalCurrency}` : ''}</Text>
           </View>
-          <ScrollView>
-
+          <ScrollView
+            className="px-2 pt-4"
+          >
+            {StatusView(sumTx)}
           </ScrollView>
-        </View>
+        </SafeAreaView>
       }
     </>
+  )
+}
+
+const StatusView = (tx) => {
+  const sumTx = SummaryTxStatuses[tx.status]
+  return (
+    <View className={`border-[1px] p-2 rounded-md ${sumTx.borderColor} ${sumTx.bgColor}`}>
+      <View
+        className={`border-b-[1px] ${sumTx.borderColor}`}
+      >
+        <Text className={`font-semibold text-lg ${sumTx.textColor}`}>
+          {sumTx.label}
+        </Text>
+      </View>
+      <View className="mt-2">
+        <Text className={`${sumTx.textColor}`}>{sumTx.description}</Text>
+      </View>
+      {
+        tx.status !== TxSummaryStatusAwaitPayment ? <></>:
+        <View className="flex flex-row justify-end">
+          <TouchableOpacity
+            onPress={() => {
+              Linking.openURL("http://www.google.ca")
+            }}
+            className={`mr-3 border-2 ${sumTx.borderColor} py-1 px-2 rounded-lg`}
+          >
+            <Text className={`font-psemibold ${sumTx.textColor}`}>Pay Now</Text>
+          </TouchableOpacity>
+        </View>
+      }
+    </View>
   )
 }
 
