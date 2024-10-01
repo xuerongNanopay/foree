@@ -15,13 +15,11 @@ const TransactionDetail = () => {
     const controller = new AbortController()
     const getTransactionDetail = async () => {
       try {
-        console.log(transactionId)
         const resp = await transactionService.getTransaction(transactionId, {signal: controller.signal})
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("get transaction detail", resp.status, resp.data)
           router.replace('/transaction')
         } else {
-          console.log(resp.data.data)
           setSumTx(resp.data.data)
         }
       } catch (e) {
