@@ -1,10 +1,11 @@
-import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, Image } from 'react-native'
 import * as Linking from 'expo-linking';
 import { useLocalSearchParams } from 'expo-router'
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { transactionService } from '../../service'
 import { SummaryTxStatuses, TxSummaryStatusAwaitPayment, TxSummaryStatusCancelled, TxSummaryStatusCompleted, TxSummaryStatusInitial, TxSummaryStatusInProgress, TxSummaryStatusPickup, TxSummaryStatusRefunding } from '../../constants/summary_tx'
 import { currencyFormatter, formatContactMethod, formatName } from '../../util/foree_util';
+import { icons } from '../../constants';
 
 
 const TransactionDetail = () => {
@@ -33,21 +34,37 @@ const TransactionDetail = () => {
     }
   }, [])
 
-  const sumTxStatus = useMemo(() => {
-    return SummaryTxStatuses[!!sumTx ? sumTx.status : TxSummaryStatusInitial]
-  }, [sumTx])
   return (
     <>
       {
         !sumTx ? <></>:
         <SafeAreaView>
-          <View className="h-full flex">
+          <View className="h-full relative">
             <View className="mt-6 flex items-center">
               <Text className="text-xl text-slate-600 mb-4">Total Amount</Text>
               <Text className="font-semibold text-slate-800 text-xl mb-2">{currencyFormatter(sumTx.totalAmount, sumTx.totalCurrency)}</Text>
             </View>
+            {
+              //see: https://stackoverflow.com/questions/36938742/touchablehighlight-not-clickable-if-position-absolute
+              1 !== 1 ? <></> :
+              <View
+                className="absolute p-1 right-3 top-1"
+              >
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  className="p-2"
+                  onPress={() => console.log("more todo1")}
+                >
+                  <Image
+                    source={icons.caretDownDark}
+                    className="w-[17px] h-[17px]"
+                    resizeMode='contain'
+                  />
+                </TouchableOpacity>
+              </View>
+            }
             <ScrollView
-              className="flex-1 px-2 py-4"
+              className="px-2 py-4"
               showsVerticalScrollIndicator={false}
             >
               {StatusView(sumTx)}

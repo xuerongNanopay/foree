@@ -19,6 +19,8 @@ import bell from "../assets/icons/bell.png"
 import notificationBell from "../assets/icons/notification-bell.png"
 import checkboxUncheckDark from "../assets/icons/checkbox-uncheck-dark.png"
 import checkboxCheckDark from "../assets/icons/checkbox-check-dark.png"
+import moreDark from "../assets/icons/more-dark.png"
+import caretDownDark from "../assets/icons/caret-down-dark.png"
 
 export default {
   play,
@@ -41,5 +43,7 @@ export default {
   bell,
   notificationBell,
   checkboxUncheckDark,
-  checkboxCheckDark
+  checkboxCheckDark,
+  moreDark,
+  caretDownDark
 }
