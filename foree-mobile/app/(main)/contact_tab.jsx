@@ -76,12 +76,13 @@ const ContactTab = () => {
           showsVerticalScrollIndicator={false}
         >
           {
-            showContacts.map(contact => {
+            showContacts.map((contact, idx) => {
               return (
                 <TouchableOpacity 
                   key={contact.id}
                   onPress={() => router.push(`/contact/${contact.id}`)}
                   activeOpacity={0.7}
+                  className={`mb-2 p-2 border-b-[1px] border-slate-400`}
                 >
                   <ContactListItem contact={contact}/>
                 </TouchableOpacity>
@@ -100,7 +101,7 @@ const ContactListItem = ({
   if ( ! contact ) return <></>
 
   return (
-    <View className="mb-2 p-2 rounded-lg bg-[#ccded6]">
+    <View>
       <Text className="font-bold">{formatName(contact)}</Text>
       <FormatContactTransferInfo {...contact}/>
       <FormatContactTransferRecentActivity {...contact}/>
