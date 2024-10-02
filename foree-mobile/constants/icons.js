@@ -21,6 +21,7 @@ import checkboxUncheckDark from "../assets/icons/checkbox-uncheck-dark.png"
 import checkboxCheckDark from "../assets/icons/checkbox-check-dark.png"
 import moreDark from "../assets/icons/more-dark.png"
 import caretDownDark from "../assets/icons/caret-down-dark.png"
+import settingDark from "../assets/icons/settings-dark.png"
 
 export default {
   play,
@@ -45,5 +46,6 @@ export default {
   checkboxUncheckDark,
   checkboxCheckDark,
   moreDark,
-  caretDownDark
+  caretDownDark,
+  settingDark
 }

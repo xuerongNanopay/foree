@@ -81,15 +81,15 @@ const TabsLayout = () => {
           }}
         />
         <Tabs.Screen 
-          name="profile_tab"
+          name="settings_tab"
           options={{
-            title: 'Profile',
+            title: 'settings',
             headerShown: false,
             tabBarIcon:({ color, forced}) => (
               <TabIcon 
-                icon={icons.profile}
+                icon={icons.settingDark}
                 color={color}
-                name="Profile"
+                name="settings"
                 forced={forced}
               />
             )
