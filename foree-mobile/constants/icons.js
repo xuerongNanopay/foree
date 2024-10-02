@@ -25,6 +25,7 @@ import settingDark from "../assets/icons/settings-dark.png"
 import userOutline from "../assets/icons/user-outline.png"
 import signOutOutline from "../assets/icons/sign-out-outline.png"
 import infoOutline from "../assets/icons/information-outline.png"
+import ringingFull from "../assets/icons/ringing-full.png"
 
 export default {
   play,
@@ -53,5 +54,6 @@ export default {
   settingDark,
   userOutline,
   signOutOutline,
-  infoOutline
+  infoOutline,
+  ringingFull
 }

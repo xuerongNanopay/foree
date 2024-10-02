@@ -214,17 +214,18 @@ const StatusView = (tx) => {
         </View>
       )
     case TxSummaryStatusCompleted:
+      // color see:https://loading.io/color/feature/Greens-7/
       return (
-        <View className={`border-[1px] p-2 rounded-md border-green-800 bg-green-200`}>
+        <View className={`border-[1px] p-2 rounded-md border-[#005a32] bg-[#c7e9c0]`}>
           <View
-            className={`border-b-[1px] border-green-300`}
+            className={`border-b-[1px] border-[#41ab5d]`}
           >
-            <Text className={`font-semibold text-lg text-green-800`}>
+            <Text className={`font-semibold text-lg text-[#005a32]`}>
               {sumTx.label}
             </Text>
           </View>
           <View className="mt-2">
-            <Text className={`text-green-800`}>{sumTx.description}</Text>
+            <Text className={`text-[#005a32]`}>{sumTx.description}</Text>
           </View>
         </View>
       )

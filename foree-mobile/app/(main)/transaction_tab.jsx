@@ -251,9 +251,9 @@ const transactionStatuses = [
   },
   { 
     id:"Completed",
-    borderColor: "border-green-800",
-    textColor: "text-green-800",
-    selectBgColor: "bg-green-200",
+    borderColor: "border-[#005a32]",
+    textColor: "text-[#005a32]",
+    selectBgColor: "bg-[#c7e9c0]",
   },
   { 
     id:"Cancelled",

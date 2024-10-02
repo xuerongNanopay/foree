@@ -67,9 +67,10 @@ const HomeTab = () => {
             onPress={() => {console.log("TODO: notifications")}}
           >
             <Image
-              source={icons.bell}
+              source={icons.ringingFull}
               resizeMode='contain'
               className="w-[30px] h-[30px] mr-2"
+              tintColor={"#005a32"}
             />
           </TouchableOpacity>
         </View>
