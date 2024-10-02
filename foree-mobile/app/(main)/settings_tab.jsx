@@ -47,6 +47,9 @@ const ProfileTab = () => {
                 <Text className="font-psemibold text-xl">Account</Text>
               </View>
               <TouchableOpacity
+                onPress={() => {
+                  router.push("/settings/profile")
+                }}
                 className="flex flex-row items-center justify-between py-2"
               >
                 <Text className="font-semibold text-lg text-slate-500">Personal Settings</Text>
@@ -58,6 +61,9 @@ const ProfileTab = () => {
                 />
               </TouchableOpacity>
               <TouchableOpacity
+                onPress={() => {
+                  router.push("/settings/update_passwd")
+                }}
                 className="flex flex-row items-center justify-between py-2"
               >
                 <Text className="font-semibold text-lg text-slate-500">Change Password</Text>
@@ -69,6 +75,9 @@ const ProfileTab = () => {
                 />
               </TouchableOpacity>
               <TouchableOpacity
+                onPress={() => {
+                  router.push("/settings/notification_settings")
+                }}
                 className="flex flex-row items-center justify-between py-2"
               >
                 <Text className="font-semibold text-lg text-slate-500">Notification Settings</Text>
