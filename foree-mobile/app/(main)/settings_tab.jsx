@@ -88,6 +88,20 @@ const ProfileTab = () => {
                   tintColor={"#adb5bd"}
                 />
               </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  router.push("/settings/profile")
+                }}
+                className="flex flex-row items-center justify-between py-2"
+              >
+                <Text className="font-semibold text-lg text-slate-500">Refer Others</Text>
+                <Image
+                  source={icons.rightArrowDark}
+                  className="h-[14px] w-[14px]"
+                  resizeMode='contain'
+                  tintColor={"#adb5bd"}
+                />
+              </TouchableOpacity>
             </View>
             <View>
               <View className="mb-2 border-b-2 border-slate-300 flex flex-row items-center">
