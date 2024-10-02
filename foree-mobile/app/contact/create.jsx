@@ -54,16 +54,22 @@ const ContactCreate = () => {
       const resp = await accountService.createContact(string_util.trimStringInObject(form))
       if ( resp.status / 100 !== 2 ) {
         console.warn("create contact", resp.status, resp.data)
+        if ( router.canGoBack() ) {
+          router.back()
+        } else {
+          router.replace('/contact_tab')
+        }
         return
       }
+      router.replace((`/contact/${resp.data.data.id}`))
     } catch (err) {
       console.error("create contact", err, err.response.data)
-    } finally {
       if ( router.canGoBack() ) {
         router.back()
       } else {
         router.replace('/contact_tab')
       }
+    } finally {
       setIsSubmitting(false)
     }
   }
@@ -345,7 +351,7 @@ const ContactCreate = () => {
       <ReviewItem title="Country" value={Countries[form.country]?`${Countries[form.country]?.unicodeIcon} ${Countries[form.country]?.name}`: ""}/>
       <ReviewItem title="Postal Code" value={form.postalCode}/>
       <ReviewItem title="Phone Number" value={form.phoneNumber}/>
-      <ReviewItem title="Relationship to Contact" value={PersonalRelationships.find(r => r.name === form.PersonalRelationships)?.["name"]}/>
+      <ReviewItem title="Relationship to Contact" value={PersonalRelationships.find(r => r.name === form.relationshipToContact)?.["name"]}/>
       <ReviewItem title="Transfer Method" value={ContactTransferMethods.find(r => r.value === form.transferMethod)?.["name"]}/>
       {
         !!form.transferMethod && form.transferMethod !== "CASH_PICKUP" ? 
