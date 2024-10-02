@@ -80,6 +80,50 @@ const ProfileTab = () => {
                 />
               </TouchableOpacity>
             </View>
+            <View>
+              <View className="mb-2 border-b-2 border-slate-300 flex flex-row items-center">
+                <Image
+                  source={icons.infoOutline}
+                  className="h-[14px] w-[14px] mr-2"
+                  resizeMode='contain'
+                  tintColor={"#005a32"}
+                />
+                <Text className="font-psemibold text-xl">Info</Text>
+              </View>
+              <TouchableOpacity
+                className="flex flex-row items-center justify-between py-2"
+              >
+                <Text className="font-semibold text-lg text-slate-500">Contacts</Text>
+                <Image
+                  source={icons.rightArrowDark}
+                  className="h-[14px] w-[14px]"
+                  resizeMode='contain'
+                  tintColor={"#adb5bd"}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex flex-row items-center justify-between py-2"
+              >
+                <Text className="font-semibold text-lg text-slate-500">Terms and Conditions</Text>
+                <Image
+                  source={icons.rightArrowDark}
+                  className="h-[14px] w-[14px]"
+                  resizeMode='contain'
+                  tintColor={"#adb5bd"}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex flex-row items-center justify-between py-2"
+              >
+                <Text className="font-semibold text-lg text-slate-500">Privacy Policy</Text>
+                <Image
+                  source={icons.rightArrowDark}
+                  className="h-[14px] w-[14px]"
+                  resizeMode='contain'
+                  tintColor={"#adb5bd"}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </View>

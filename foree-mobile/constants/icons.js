@@ -24,6 +24,7 @@ import caretDownDark from "../assets/icons/caret-down-dark.png"
 import settingDark from "../assets/icons/settings-dark.png"
 import userOutline from "../assets/icons/user-outline.png"
 import signOutOutline from "../assets/icons/sign-out-outline.png"
+import infoOutline from "../assets/icons/information-outline.png"
 
 export default {
   play,
@@ -51,5 +52,6 @@ export default {
   caretDownDark,
   settingDark,
   userOutline,
-  signOutOutline
+  signOutOutline,
+  infoOutline
 }
