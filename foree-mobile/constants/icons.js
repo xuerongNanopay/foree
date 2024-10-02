@@ -22,6 +22,8 @@ import checkboxCheckDark from "../assets/icons/checkbox-check-dark.png"
 import moreDark from "../assets/icons/more-dark.png"
 import caretDownDark from "../assets/icons/caret-down-dark.png"
 import settingDark from "../assets/icons/settings-dark.png"
+import userOutline from "../assets/icons/user-outline.png"
+import signOutOutline from "../assets/icons/sign-out-outline.png"
 
 export default {
   play,
@@ -47,5 +49,7 @@ export default {
   checkboxCheckDark,
   moreDark,
   caretDownDark,
-  settingDark
+  settingDark,
+  userOutline,
+  signOutOutline
 }
