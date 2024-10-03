@@ -227,6 +227,59 @@ const ContactSupportModal = ({
             </View>
           </View>
         </View>
+        <View
+          className="mt-6 py-4 px-4 rounded-2xl bg-white"
+        >
+          <Text className="text-slate-400 font-pregular">Social Media</Text>
+          <View
+            className="mt-4 flex flex-row items-center"
+          >
+            <View
+              className="bg-slate-200 rounded-full mr-2"
+            >
+              <Image
+                source={icons.instagramColor}
+                className="w-[30px] h-[30px]"
+              />
+            </View>
+            <View>
+              <Text className="font-light text-xs text-slate-400">Instagram</Text>
+              <Text className="font-pregular text-lg text-slate-800">@aaaaaaa</Text>
+            </View>
+          </View>
+          <View
+            className="mt-4 flex flex-row items-center"
+          >
+            <View
+              className="bg-slate-200 rounded-full mr-2"
+            >
+              <Image
+                source={icons.twitterColor}
+                className="w-[30px] h-[30px]"
+              />
+            </View>
+            <View>
+              <Text className="font-light text-xs text-slate-400">Twitter</Text>
+              <Text className="font-pregular text-lg text-slate-800">@aaaaaaaa</Text>
+            </View>
+          </View>
+          <View
+            className="mt-4 flex flex-row items-center"
+          >
+            <View
+              className="bg-slate-200 rounded-full mr-2"
+            >
+              <Image
+                source={icons.facebookColor}
+                className="w-[30px] h-[30px]"
+              />
+            </View>
+            <View>
+              <Text className="font-light text-xs text-slate-400">Facebook</Text>
+              <Text className="font-pregular text-lg text-slate-800">@aaaaaaaa</Text>
+            </View>
+          </View>
+        </View>
       </View>
     </SafeAreaView>
   </Modal>

@@ -28,6 +28,9 @@ import infoOutline from "../assets/icons/information-outline.png"
 import ringingFull from "../assets/icons/ringing-full.png"
 import phoneOutline from "../assets/icons/phone-outline.png"
 import mailOutline from "../assets/icons/mail-outline.png"
+import twitterColor from "../assets/icons/twitter-color.png"
+import instagramColor from "../assets/icons/instagram-color.png"
+import facebookColor from "../assets/icons/facebook-color.png"
 
 export default {
   play,
@@ -59,5 +62,8 @@ export default {
   infoOutline,
   ringingFull,
   phoneOutline,
-  mailOutline
+  mailOutline,
+  twitterColor,
+  instagramColor,
+  facebookColor
 }
