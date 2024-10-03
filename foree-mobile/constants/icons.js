@@ -31,6 +31,7 @@ import mailOutline from "../assets/icons/mail-outline.png"
 import twitterColor from "../assets/icons/twitter-color.png"
 import instagramColor from "../assets/icons/instagram-color.png"
 import facebookColor from "../assets/icons/facebook-color.png"
+import composeFull from "../assets/icons/compose-full.png"
 
 export default {
   play,
@@ -65,5 +66,6 @@ export default {
   mailOutline,
   twitterColor,
   instagramColor,
-  facebookColor
+  facebookColor,
+  composeFull
 }
