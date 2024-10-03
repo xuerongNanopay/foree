@@ -16,7 +16,6 @@ const TransactionTab = () => {
   const navigation = useNavigation()
 
   useFocusEffect(useCallback(() => {
-    console.log("aaa")
     const controller = new AbortController()
     if ( page == 0 && selectedStatus == "All") {
       loadTransactions(controller.signal)
