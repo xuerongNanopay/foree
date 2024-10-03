@@ -66,6 +66,7 @@ const ForgetPasswordUpdate = () => {
           </Text>
           <FormField
             title="New Password"
+            isPassword={true}
             value={form.newPassword}
             handleChangeText={(e) => setForm({
               ...form,
