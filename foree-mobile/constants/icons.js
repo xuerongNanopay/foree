@@ -26,6 +26,8 @@ import userOutline from "../assets/icons/user-outline.png"
 import signOutOutline from "../assets/icons/sign-out-outline.png"
 import infoOutline from "../assets/icons/information-outline.png"
 import ringingFull from "../assets/icons/ringing-full.png"
+import phoneOutline from "../assets/icons/phone-outline.png"
+import mailOutline from "../assets/icons/mail-outline.png"
 
 export default {
   play,
@@ -55,5 +57,7 @@ export default {
   userOutline,
   signOutOutline,
   infoOutline,
-  ringingFull
+  ringingFull,
+  phoneOutline,
+  mailOutline
 }

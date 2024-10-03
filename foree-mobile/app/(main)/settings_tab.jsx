@@ -1,4 +1,4 @@
-import { Alert, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { Link, router } from 'expo-router'
 import { icons } from '../../constants'
@@ -96,7 +96,7 @@ const ProfileTab = () => {
                 }}
                 className="flex flex-row items-center justify-between py-2"
               >
-                <Text className="font-semibold text-lg text-slate-500">Refer Others</Text>
+                <Text className="font-semibold text-lg text-slate-500">Invitation</Text>
                 <Image
                   source={icons.rightArrowDark}
                   className="h-[14px] w-[14px]"
@@ -116,6 +116,10 @@ const ProfileTab = () => {
                 <Text className="font-psemibold text-xl">Info</Text>
               </View>
               <TouchableOpacity
+                onPress={() => {
+                  console.log("aaa")
+                  setShowContactSupport(true)
+                }}
                 className="flex flex-row items-center justify-between py-2"
               >
                 <Text className="font-semibold text-lg text-slate-500">Contacts Support</Text>
@@ -126,6 +130,10 @@ const ProfileTab = () => {
                   tintColor={"#adb5bd"}
                 />
               </TouchableOpacity>
+              <ContactSupportModal 
+                visible={showContactSupport}
+                closeModal={() => setShowContactSupport(false)}
+              />
               <TouchableOpacity
                 className="flex flex-row items-center justify-between py-2"
               >
@@ -157,26 +165,68 @@ const ProfileTab = () => {
 }
 
 const ContactSupportModal = ({
-  visible=false
+  visible=false,
+  closeModal=_=>{}
 }) => (
   <Modal
-    visiable={visible}
-    animationType='slide'
+    visible={visible}
+    animationType='fade'
   >
-    <SafeAreaView className="full">
-      <View className="flex-1 flex flex-row items-center">
+    <SafeAreaView className="h-full bg-slate-200">
+      <TouchableOpacity 
+        className="mt-4 mb-4 px-4 flex flex-row items-center"
+        onPress={_ => closeModal()}
+      >
+        <Image
+          source={icons.leftArrowDark}
+          className="w-[14px] h-[14px] mr-2"
+          tintColor={"#475569"}
+        />
         <Text
-          onPress={() => {
-            setVisible(false)
-            setShowList(list)
-          }}
-          className="py-2 px-4 text-2xl font-bold text-slate-600"
+          className="font-psemibold text-2xl text-slate-600"
+        >Contact Us</Text>
+      </TouchableOpacity>
+      <View className="px-2">
+        <Text className="px-2 font-light text-slate-600">You can get in touch with us through below platforms. Our Team will reach out to you as soon as it would be possible</Text>
+        <View
+          className="mt-6 py-4 px-4 rounded-2xl bg-white"
         >
-          &#8592;
-        </Text>
-        <Text
-          className="font-psemibold text-xl text-slate-600"
-        >{modalTitle}</Text>
+          <Text className="text-slate-400 font-pregular">Customer Support</Text>
+          <View
+            className="mt-4 flex flex-row items-center"
+          >
+            <View
+              className="p-2 bg-slate-200 rounded-full mr-2"
+            >
+              <Image
+                source={icons.phoneOutline}
+                className="w-[14px] h-[14px]"
+                tintColor={"#475569"}
+              />
+            </View>
+            <View>
+              <Text className="font-light text-xs text-slate-400">Customer Number</Text>
+              <Text className="font-pregular text-lg text-slate-800">+1(555)123-4567</Text>
+            </View>
+          </View>
+          <View
+            className="mt-4 flex flex-row items-center"
+          >
+            <View
+              className="p-2 bg-slate-200 rounded-full mr-2"
+            >
+              <Image
+                source={icons.mailOutline}
+                className="w-[14px] h-[14px]"
+                tintColor={"#475569"}
+              />
+            </View>
+            <View>
+              <Text className="font-light text-xs text-slate-400">Email Address</Text>
+              <Text className="font-pregular text-lg text-slate-800">help@xxxxxx.com</Text>
+            </View>
+          </View>
+        </View>
       </View>
     </SafeAreaView>
   </Modal>
