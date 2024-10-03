@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView, TouchableOpacity, FlatList, Image } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
-import { router, useFocusEffect } from 'expo-router'
+import { router, useFocusEffect, useNavigation } from 'expo-router'
 
 import { icons } from '../../constants'
 import { transactionService } from '../../service'
@@ -13,11 +13,19 @@ const TransactionTab = () => {
   const [count, setCount] = useState(1000)
   const [txs, setTxs] = useState([])
   const maxSize = 10
+  const navigation = useNavigation()
 
   useFocusEffect(useCallback(() => {
-    setSelectedStatus('All')
-    setPage(0)
+    console.log("aaa")
+    const controller = new AbortController()
+    if ( page == 0 && selectedStatus == "All") {
+      loadTransactions(controller.signal)
+    } else {
+      setSelectedStatus('All')
+      setPage(0)
+    }
     return () => {
+      controller.abort()
     }
   }, []))
   
