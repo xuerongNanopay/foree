@@ -11,7 +11,8 @@ const variants = {
 
 const FormField = ({
   title, 
-  value, 
+  value,
+  isPassword=false,
   placeholder, 
   handleChangeText, 
   containerStyles,
@@ -44,12 +45,12 @@ const FormField = ({
           placeholder={placeholder}
           placeholderTextColor="#BDBDBD"
           onChangeText={handleChangeText}
-          secureTextEntry={title === 'Password' && !showPassword}
+          secureTextEntry={(title === 'Password'||isPassword) && !showPassword}
           keyboardType={keyboardType} 
           editable={editable}
         />
 
-        {title === 'Password' && (
+        {(title === 'Password'||isPassword) && (
           <TouchableOpacity
             onPress={()=> setShowPassword(!showPassword)}
           >

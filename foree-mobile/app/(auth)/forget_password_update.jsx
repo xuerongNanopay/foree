@@ -73,7 +73,6 @@ const ForgetPasswordUpdate = () => {
             })}
             errorMessage={errors['newPassword']}
             containerStyles="mt-7"
-            keyboardType="email-address"
           />
           <CustomButton
             title="Update"
