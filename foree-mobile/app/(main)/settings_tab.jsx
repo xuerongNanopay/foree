@@ -1,9 +1,11 @@
 import { Alert, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, router } from 'expo-router'
 import { icons } from '../../constants'
 
 const ProfileTab = () => {
+  const [showContactSupport, setShowContactSupport] = useState(false)
+
   return (
     <SafeAreaView
       className=""
@@ -116,7 +118,7 @@ const ProfileTab = () => {
               <TouchableOpacity
                 className="flex flex-row items-center justify-between py-2"
               >
-                <Text className="font-semibold text-lg text-slate-500">Contacts</Text>
+                <Text className="font-semibold text-lg text-slate-500">Contacts Support</Text>
                 <Image
                   source={icons.rightArrowDark}
                   className="h-[14px] w-[14px]"
@@ -154,6 +156,29 @@ const ProfileTab = () => {
   )
 }
 
+const ContactSupportModal = ({
+  visible=false
+}) => (
+  <Modal
+    visiable={visible}
+    animationType='slide'
+  >
+    <SafeAreaView className="full">
+      <View className="flex-1 flex flex-row items-center">
+        <Text
+          onPress={() => {
+            setVisible(false)
+            setShowList(list)
+          }}
+          className="py-2 px-4 text-2xl font-bold text-slate-600"
+        >
+          &#8592;
+        </Text>
+        <Text
+          className="font-psemibold text-xl text-slate-600"
+        >{modalTitle}</Text>
+      </View>
+    </SafeAreaView>
+  </Modal>
+)
 export default ProfileTab
-
-const styles = StyleSheet.create({})

@@ -13,17 +13,14 @@ const TransactionTab = () => {
   const [count, setCount] = useState(1000)
   const [txs, setTxs] = useState([])
   const maxSize = 10
+
+  useFocusEffect(useCallback(() => {
+    setSelectedStatus('All')
+    setPage(0)
+    return () => {
+    }
+  }, []))
   
-
-  // useFocusEffect(useCallback(() => {
-  //   setSelectedStatus('All')
-  //   setPage(0)
-  //   const  controller = new AbortController()
-  //   return () => {
-  //     controller.abort()
-  //   }
-  // }, []))
-
   const loadTransactions = (signal) => {
     const getTransactions = async() => {
       try {
@@ -43,7 +40,6 @@ const TransactionTab = () => {
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("count transactions", resp.status, resp.data)
         } else {
-          console.log(resp.data.data)
           setCount(resp.data.data.count)
         }
       } catch (e) {

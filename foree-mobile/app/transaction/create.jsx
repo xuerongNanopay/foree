@@ -176,16 +176,14 @@ const TransactionCreate = () => {
     setIsSubmitting(true)
     try {
       const resp = await transactionService.confirmQuote(quote.quoteId)
-      console.log('vvvv', resp.status)
       if ( resp.status / 100 !== 2 ) {
         console.warn("create transaction", resp.status, resp.data)
         router.replace(`/transaction`)
       } else {
-        console.log(resp.data)
         router.replace(`/transaction/${resp.data.data.id}`)
       }
     } catch (e) {
-      console.log(e)
+      console.error(e)
     } finally {
       setIsSubmitting(false)
     }
