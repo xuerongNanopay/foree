@@ -28,10 +28,10 @@ const SettingLayout = () => {
       }}
     />
     <Stack.Screen
-      name="profile"
+      name="personal_settings"
       options={{
         headerShown: true,
-        title:"Profile",
+        title:"Personal Settings",
         headerTintColor:"#004d40",
         headerLeft: () => <Button onPress={() => {
           if ( router.canGoBack() ) {

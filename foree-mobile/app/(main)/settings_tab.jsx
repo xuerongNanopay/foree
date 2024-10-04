@@ -50,7 +50,7 @@ const ProfileTab = () => {
               </View>
               <TouchableOpacity
                 onPress={() => {
-                  router.push("/settings/profile")
+                  router.push("/settings/personal_settings")
                 }}
                 className="flex flex-row items-center justify-between py-2"
               >
