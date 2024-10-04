@@ -474,6 +474,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}, nil
 }
 
+// Investigation: Can we run parallel query inside single mysql transaction.
 func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransactionReq) (*TxSummaryDetailDTO, transport.HError) {
 	session, sErr := t.authService.GetSession(ctx, req.SessionId)
 	if session == nil {
