@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView } from 'react-native'
+import { View, Text, SafeAreaView, Alert, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
@@ -71,12 +71,17 @@ const UpdatePasswd = () => {
           errorMessage={errors['newPassword']}
           containerStyles="mt-7"
         />
-        <CustomButton
-          title="Update"
-          handlePress={submit}
-          containerStyles="mt-7"
-          disabled={isSubmitting || isError}
-        />
+        <TouchableOpacity
+          className="mt-8 py-2 border-2 border-[#005a32] bg-[#c7e9c0] rounded-xl"
+          onPress={() => {
+            Alert.alert("Change password", "Are you sure?", [
+              {text: 'Continue', onPress: () => {console.log("TODO: close account")}},
+              {text: 'Cancel', onPress: () => {}},
+            ])
+          }}
+        >
+          <Text className="font-pbold text-lg text-[#005a32] text-center">Update</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   )
