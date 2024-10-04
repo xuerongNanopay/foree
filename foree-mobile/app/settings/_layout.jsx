@@ -76,7 +76,7 @@ const SettingLayout = () => {
       name="notification_settings"
       options={{
         headerShown: true,
-        title:"Notication",
+        title:"Notication Settings",
         headerTintColor:"#004d40",
         headerLeft: () => <Button onPress={() => {
           if ( router.canGoBack() ) {
