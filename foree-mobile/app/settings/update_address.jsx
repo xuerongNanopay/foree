@@ -1,11 +1,111 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import { View, Text, SafeAreaView } from 'react-native'
+import React, { useState } from 'react'
+import ModalSelect from '../../components/ModalSelect'
+import Regions from '../../constants/region'
+import Countries from '../../constants/country'
+import FormField from '../../components/FormField'
+
+const FieldItem = ({
+  title,
+  value,
+  handleChangeText,
+  editable=true,
+  keyboardType='ascii-capable',
+  errorMessage,
+}) => (
+  <FormField
+    title={title}
+    value={value}
+    handleChangeText={handleChangeText}
+    keyboardType={keyboardType}
+    containerStyles="mt-2"
+    variant='flat'
+    editable={editable}
+    errorMessage={errorMessage}
+  />
+)
+
+const SelectProvinceItem = (province) => (
+  <Text className="font-pregular py-3 text-xl">
+    {province["name"]}
+  </Text>
+)
 
 const UpdateAddress = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errors, setErrors] = useState({})
+  const [form, setForm] = useState({
+    address1: '',
+    address2: '',
+    city: '',
+    province: '',
+    country: 'CA',
+    postalCode: ''
+  })
+
+
   return (
-    <View>
-      <Text>UpdateAddress</Text>
-    </View>
+    <SafeAreaView classname="h-full">
+      <View className="h-full bg-slate-100 pt-2 px-3 border">
+        <FieldItem title="Address Line 1" value={form.address1}
+          errorMessage={errors['address1']}
+          handleChangeText={(e) => setForm((form) => ({
+            ...form,
+            address1:e
+          }))}
+        />
+        <FieldItem title="Address Line 2" value={form.address2}
+          errorMessage={errors['address2']}
+          handleChangeText={(e) => setForm((form) => ({
+            ...form,
+            address2:e
+          }))}
+        />
+        <FieldItem title="City" value={form.city}
+          errorMessage={errors['city']}
+          handleChangeText={(e) => setForm((form) => ({
+            ...form,
+            city:e
+          }))}
+        />
+        <ModalSelect
+          title="Province"
+          modalTitle="select a province"
+          errorMessage={errors['province']}
+          containerStyles="mt-2"
+          value={form.province}
+          variant='flat'
+          searchKey="name"
+          keyExtractor="name"
+          showExtractor="name"
+          valueExtractor="isoCode"
+          listView={SelectProvinceItem}
+          list={Object.values(Regions[form.country])}
+          onPress={(o) => {
+            setForm((form) => ({
+              ...form,
+              province: o
+            }))
+          }}
+          placeholder="select a province"
+        />
+        <FieldItem title="Country" value={`${Countries[form.country]?.unicodeIcon} ${Countries[form.country]?.name}`}
+          errorMessage={errors['country']}
+          handleChangeText={(e) => setForm((form) => ({
+            ...form,
+            country:e
+          }))}
+          editable={false}
+        />
+        <FieldItem title="Postal Code" value={form.postalCode}
+          errorMessage={errors['postalCode']}
+          handleChangeText={(e) => setForm((form) => ({
+            ...form,
+            postalCode:e
+          }))}
+        />
+      </View>
+    </SafeAreaView>
   )
 }
 
