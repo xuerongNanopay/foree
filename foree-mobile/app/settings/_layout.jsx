@@ -43,10 +43,55 @@ const SettingLayout = () => {
       }}
     />
     <Stack.Screen
+      name="update_address"
+      options={{
+        headerShown: true,
+        title:"Update Address",
+        headerTintColor:"#004d40",
+        headerLeft: () => <Button onPress={() => {
+          if ( router.canGoBack() ) {
+            router.back()
+          } else {
+            router.replace("/settings_tab")
+          }
+        }} title="Back" color="#004d40"/>
+      }}
+    />
+    <Stack.Screen
+      name="update_phone_number"
+      options={{
+        headerShown: true,
+        title:"Update Phone Number",
+        headerTintColor:"#004d40",
+        headerLeft: () => <Button onPress={() => {
+          if ( router.canGoBack() ) {
+            router.back()
+          } else {
+            router.replace("/settings_tab")
+          }
+        }} title="Back" color="#004d40"/>
+      }}
+    />
+    <Stack.Screen
       name="notification_settings"
       options={{
         headerShown: true,
         title:"Notication",
+        headerTintColor:"#004d40",
+        headerLeft: () => <Button onPress={() => {
+          if ( router.canGoBack() ) {
+            router.back()
+          } else {
+            router.replace("/settings_tab")
+          }
+        }} title="Back" color="#004d40"/>
+      }}
+    />
+    <Stack.Screen
+      name="invitation"
+      options={{
+        headerShown: true,
+        title:"Invitation",
         headerTintColor:"#004d40",
         headerLeft: () => <Button onPress={() => {
           if ( router.canGoBack() ) {

@@ -92,7 +92,7 @@ const ProfileTab = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
-                  router.push("/settings/profile")
+                  router.push("/settings/invitation")
                 }}
                 className="flex flex-row items-center justify-between py-2"
               >

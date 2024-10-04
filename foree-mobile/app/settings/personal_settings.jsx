@@ -1,6 +1,7 @@
 import { View, Text, SafeAreaView, ScrollView, Image, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { icons } from '../../constants'
+import { router } from 'expo-router'
 
 const profile = () => {
   return (
@@ -47,6 +48,7 @@ const profile = () => {
           >
             <Text className="font-psemibold text-lg">Your Address</Text>
             <TouchableOpacity
+              onPress={() => {router.push("/settings/update_address")}}
               className="p-1"
             >
               <Image
@@ -98,6 +100,7 @@ const profile = () => {
           >
             <Text className="font-psemibold text-lg">Contact Info</Text>
             <TouchableOpacity
+              onPress={() => {router.push("/settings/update_phone_number")}}
               className="p-1"
             >
               <Image
