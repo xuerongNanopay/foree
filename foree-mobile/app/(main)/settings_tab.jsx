@@ -189,7 +189,7 @@ const ContactSupportModal = ({
       <View className="px-2">
         <Text className="px-2 font-light text-slate-600">You can get in touch with us through below platforms. Our Team will reach out to you as soon as it would be possible</Text>
         <View
-          className="mt-6 py-4 px-4 rounded-2xl bg-white"
+          className="mt-6 py-4 px-4 rounded-2xl bg-white shadow-lg"
         >
           <Text className="text-slate-400 font-pregular">Customer Support</Text>
           <View
@@ -228,7 +228,7 @@ const ContactSupportModal = ({
           </View>
         </View>
         <View
-          className="mt-6 py-4 px-4 rounded-2xl bg-white"
+          className="mt-6 py-4 px-4 rounded-2xl bg-white shadow-lg"
         >
           <Text className="text-slate-400 font-pregular">Social Media</Text>
           <View
