@@ -22,6 +22,8 @@ const FormField = ({
   keyboardType='default', 
   editable=true,
   errorMessage,
+  multiline=false,
+  numberOfLines=1,
   ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false)
@@ -48,6 +50,8 @@ const FormField = ({
           secureTextEntry={(title === 'Password'||isPassword) && !showPassword}
           keyboardType={keyboardType} 
           editable={editable}
+          multiline={multiline}
+          numberOfLines={numberOfLines}
         />
 
         {(title === 'Password'||isPassword) && (

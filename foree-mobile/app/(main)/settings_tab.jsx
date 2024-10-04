@@ -18,7 +18,7 @@ const ProfileTab = () => {
             <TouchableOpacity
               onPress={() => {
                 Alert.alert("Logout", "Are you sure?", [
-                  {text: 'Confirm', onPress: () => {router.replace("/login")}},
+                  {text: 'Continue', onPress: () => {router.replace("/login")}},
                   {text: 'Cancel', onPress: () => {}},
                 ])
               }}
@@ -97,6 +97,20 @@ const ProfileTab = () => {
                 className="flex flex-row items-center justify-between py-2"
               >
                 <Text className="font-semibold text-lg text-slate-500">Invitation</Text>
+                <Image
+                  source={icons.rightArrowDark}
+                  className="h-[14px] w-[14px]"
+                  resizeMode='contain'
+                  tintColor={"#adb5bd"}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  router.push("/settings/close_account")
+                }}
+                className="flex flex-row items-center justify-between py-2"
+              >
+                <Text className="font-semibold text-lg text-slate-500">Close My Account</Text>
                 <Image
                   source={icons.rightArrowDark}
                   className="h-[14px] w-[14px]"

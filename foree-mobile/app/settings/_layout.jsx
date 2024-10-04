@@ -57,6 +57,21 @@ const SettingLayout = () => {
         }} title="Back" color="#004d40"/>
       }}
     />
+    <Stack.Screen
+      name="close_account"
+      options={{
+        headerShown: true,
+        title:"Close Account",
+        headerTintColor:"#004d40",
+        headerLeft: () => <Button onPress={() => {
+          if ( router.canGoBack() ) {
+            router.back()
+          } else {
+            router.replace("/settings_tab")
+          }
+        }} title="Back" color="#004d40"/>
+      }}
+    />
   </Stack>
   )
 }
