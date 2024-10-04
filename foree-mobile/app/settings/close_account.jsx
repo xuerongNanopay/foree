@@ -9,7 +9,7 @@ const CloseAccount = () => {
       <View className="w-full mt-4 px-2">
         <Text className="text font-pbold text-center m-3">Close My Foree Remittance Account</Text>
         <Text className="text-center text-sm text-slate-600">
-          Clost your Foree Remittance account will permanently revoke access to your account. As a regulated financial entity, we are required by law to maintain some personal data associated with your transactions.
+          Close your Foree Remittance account will permanently revoke access to your account. As a regulated financial entity, we are required by law to maintain some personal data associated with your transactions.
         </Text>
         <Text className="mt-1 text-center text-sm text-slate-600">To see how we treat your data, please refer to our Privacy Policy</Text>
         <Text className="mt-2 mb-4 font-psemibold text-center text-red-600">You can not undo this action.</Text>
