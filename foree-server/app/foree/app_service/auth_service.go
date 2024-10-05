@@ -736,6 +736,51 @@ func (a *AuthService) GetUser(ctx context.Context, req transport.SessionReq) (*U
 	return NewUserDTO(session), nil
 }
 
+func (a *AuthService) GetUserDetail(ctx context.Context, req transport.SessionReq) (any, transport.HError) {
+	session, sErr := a.VerifySession(ctx, req.SessionId)
+	if sErr != nil {
+		var userId int64
+		if session != nil {
+			userId = session.UserId
+		}
+		// Normal error when the token expired
+		foree_logger.Logger.Info("UpdateUserAndInteracAccAddress_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		return nil, sErr
+	}
+
+	return nil, nil
+}
+
+func (a *AuthService) UpdateUserAndDefaultInteracAccPhoneNumber(ctx context.Context, req transport.SessionReq) (any, transport.HError) {
+	session, sErr := a.VerifySession(ctx, req.SessionId)
+	if sErr != nil {
+		var userId int64
+		if session != nil {
+			userId = session.UserId
+		}
+		// Normal error when the token expired
+		foree_logger.Logger.Info("UpdateUserAndDefaultInteracAccPhoneNumber_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		return nil, sErr
+	}
+
+	return nil, nil
+}
+
+func (a *AuthService) UpdateUserAndDefaultInteracAccAddress(ctx context.Context, req transport.SessionReq) (any, transport.HError) {
+	session, sErr := a.VerifySession(ctx, req.SessionId)
+	if sErr != nil {
+		var userId int64
+		if session != nil {
+			userId = session.UserId
+		}
+		// Normal error when the token expired
+		foree_logger.Logger.Info("UpdateUserAndDefaultInteracAccAddress_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		return nil, sErr
+	}
+
+	return nil, nil
+}
+
 func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) (*auth.Session, transport.HError) {
 	session, sErr := a.VerifySession(ctx, req.SessionId)
 	if sErr != nil {
