@@ -201,3 +201,23 @@ type UserDTO struct {
 	LastName    string                 `json:"lastName,omitempty"`
 	AvatarUrl   string                 `json:"avatarUrl,omitempty"`
 }
+
+type UserDetailDTO struct {
+	ID          int64           `json:"id"`
+	Status      auth.UserStatus `json:"status"`
+	FirstName   string          `json:"firstName"`
+	MiddleName  string          `json:"middleName"`
+	LastName    string          `json:"lastName"`
+	Age         int             `json:"age"`
+	Dob         *time.Time      `json:"dob"`
+	Address1    string          `json:"address1"`
+	Address2    string          `json:"address2"`
+	City        string          `json:"city"`
+	Province    string          `json:"province"`
+	Country     string          `json:"country"`
+	PostalCode  string          `json:"postalCode"`
+	PhoneNumber string          `json:"phoneNumber"`
+	Email       string          `json:"email"`
+	AvatarUrl   string          `json:"avatarUrl"`
+	CreatedAt   *time.Time      `json:"createdAt"`
+}
