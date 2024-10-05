@@ -44,35 +44,39 @@ const UpdatePasswd = () => {
 
   return (
     <SafeAreaView className="h-full">
-      <View className="w-full mt-4 px-2">
-        <Text className="text-lg font-pbold text-center m-4">Update Your Password</Text>
-        <Text className="font-pregular text-center m-4">
-          Please provide new password for login.
-        </Text>
-        <FormField
-          title="Old Password"
-          value={form.oldPassword}
-          isPassword={true}
-          handleChangeText={(e) => setForm({
-            ...form,
-            oldPassword:e
-          })}
-          errorMessage={errors['oldPassword']}
-          containerStyles="mt-7"
-        />
-        <FormField
-          title="New Password"
-          value={form.newPassword}
-          isPassword={true}
-          handleChangeText={(e) => setForm({
-            ...form,
-            newPassword:e
-          })}
-          errorMessage={errors['newPassword']}
-          containerStyles="mt-7"
-        />
+      <View className="h-full mt-4 px-2 flex">
+        <View className="flex-1"> 
+          <Text className="text-lg font-pbold text-center m-4">Update Your Password</Text>
+          <Text className="font-pregular text-center m-4">
+            Please provide new password for login.
+          </Text>
+          <FormField
+            title="Old Password"
+            titleStyles="text-slate-600"
+            value={form.oldPassword}
+            isPassword={true}
+            handleChangeText={(e) => setForm({
+              ...form,
+              oldPassword:e
+            })}
+            errorMessage={errors['oldPassword']}
+            containerStyles="mt-7"
+          />
+          <FormField
+            title="New Password"
+            titleStyles="text-slate-600"
+            value={form.newPassword}
+            isPassword={true}
+            handleChangeText={(e) => setForm({
+              ...form,
+              newPassword:e
+            })}
+            errorMessage={errors['newPassword']}
+            containerStyles="mt-7"
+          />
+        </View>
         <TouchableOpacity
-          className="mt-8 py-2 border-2 border-[#005a32] bg-[#c7e9c0] rounded-xl"
+          className="mb-10 py-2 border-2 border-[#005a32] bg-[#c7e9c0] rounded-xl"
           onPress={() => {
             Alert.alert("Change password", "Are you sure?", [
               {text: 'Continue', onPress: () => {console.log("TODO: close account")}},

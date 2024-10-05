@@ -131,7 +131,6 @@ const ProfileTab = () => {
               </View>
               <TouchableOpacity
                 onPress={() => {
-                  console.log("aaa")
                   setShowContactSupport(true)
                 }}
                 className="flex flex-row items-center justify-between py-2"

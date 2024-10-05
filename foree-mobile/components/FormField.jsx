@@ -10,7 +10,8 @@ const variants = {
 }
 
 const FormField = ({
-  title, 
+  title,
+  titleStyles="", 
   value,
   isPassword=false,
   placeholder, 
@@ -31,7 +32,7 @@ const FormField = ({
 
   return (
     <View className={`space-y-2 ${containerStyles}`}>
-      { !!title ? (<Text className="test-base test-gray-100 font-pmedium">{title}</Text>) : null }
+      { !!title ? (<Text className={`test-base test-gray-100 font-pmedium ${titleStyles}`}>{title}</Text>) : null }
       <View 
         className={`
           w-full h-12 px-4 bg-slate-100 ${variants[variant] ?? variants.bordered}

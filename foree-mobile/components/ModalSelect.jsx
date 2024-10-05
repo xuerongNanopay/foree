@@ -19,6 +19,7 @@ const SelectCountryItem =(country) => (
 // the real value for the form may different compare with value that show in UI.
 const ModalSelect = ({
   title,
+  titleStyles="", 
   modalTitle,
   value,
   multiChoice=false,
@@ -57,7 +58,7 @@ const ModalSelect = ({
     <View>
       {/* <TouchableComponent>ModalSelect</TouchableComponent> */}
       <View className={`space-y-2 ${containerStyles}`}>
-        { !!title ? (<Text className="test-base test-gray-100 font-pmedium">{title}</Text>) : null }
+        { !!title ? (<Text className={`test-base test-gray-100 font-pmedium ${titleStyles}`}>{title}</Text>) : null }
         <View
           className={`
             h-12 ${variants[variant] ?? variants.bordered}
