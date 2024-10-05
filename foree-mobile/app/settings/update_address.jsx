@@ -48,7 +48,7 @@ const UpdateAddress = () => {
 
   return (
     <SafeAreaView classname="h-full">
-      <View className="h-full bg-slate-100 pt-2 px-3 border flex">
+      <View className="h-full bg-slate-100 pt-2 px-3 flex">
         <View className="flex-1">
           <FieldItem title="Address Line 1" value={form.address1}
             errorMessage={errors['address1']}
