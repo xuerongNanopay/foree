@@ -36,4 +36,6 @@ func (c *AuthRouter) RegisterRouter(router *mux.Router) {
 	router.HandleFunc("/forget_password_update", simplePostWrapper(c.authService.ForgetPasswordUpdate)).Methods("POST")
 	// Get user
 	router.HandleFunc("/user", simpleGetWrapper(c.authService.GetUser)).Methods("GET")
+	// Update passwd
+	router.HandleFunc("/change_password", simplePostWrapper(c.authService.ChangePasswd)).Methods("POST")
 }
