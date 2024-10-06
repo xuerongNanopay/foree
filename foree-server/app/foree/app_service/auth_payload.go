@@ -215,6 +215,28 @@ func (q UpdateAddress) Validate() *transport.BadRequestError {
 	return nil
 }
 
+type UpdatePhoneNumber struct {
+	PhoneNumber string `json:"phoneNumber" validate:"required"`
+}
+
+func (q UpdatePhoneNumber) Validate() *transport.BadRequestError {
+	ret := validateStruct(q, "Invalid update phoneNumber request")
+
+	country := constant.Countires["CA"]
+
+	// Phone number
+	ok, _ := regexp.MatchString(country.PhoneRegex, q.PhoneNumber)
+	if !ok {
+		ret.AddDetails("phoneNumber", fmt.Sprintf("invalid phone number `%v`", q.PhoneNumber))
+	}
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
+
+	return nil
+}
+
 // --------------- Response ------------------
 func NewUserDTO(session *auth.Session) *UserDTO {
 	ret := &UserDTO{
