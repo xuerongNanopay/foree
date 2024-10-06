@@ -751,7 +751,7 @@ func (a *AuthService) GetUserDetail(ctx context.Context, req transport.SessionRe
 	return nil, nil
 }
 
-func (a *AuthService) UpdateUserAndDefaultInteracAccPhoneNumber(ctx context.Context, req transport.SessionReq) (any, transport.HError) {
+func (a *AuthService) UpdateUserPhoneNumber(ctx context.Context, req UpdatePhoneNumberReq) (any, transport.HError) {
 	session, sErr := a.VerifySession(ctx, req.SessionId)
 	if sErr != nil {
 		var userId int64
@@ -759,14 +759,35 @@ func (a *AuthService) UpdateUserAndDefaultInteracAccPhoneNumber(ctx context.Cont
 			userId = session.UserId
 		}
 		// Normal error when the token expired
-		foree_logger.Logger.Info("UpdateUserAndDefaultInteracAccPhoneNumber_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		foree_logger.Logger.Info("UpdateUserPhoneNumber_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
 		return nil, sErr
 	}
 
+	user, err := a.userRepo.GetUniqueUserById(session.UserId)
+	if err != nil {
+		foree_logger.Logger.Error("UpdateUserPhoneNumber_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+
+	}
+
+	if user == nil {
+		foree_logger.Logger.Error("UpdateUserPhoneNumber_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "emailPasswordId", session.EmailPasswd.ID, "cause", "user no found.")
+		return nil, transport.NewInteralServerError("user no found with id `%v`", session.UserId)
+	}
+
+	newUser := *user
+	newUser.PhoneNumber = req.PhoneNumber
+
+	err = a.userRepo.UpdateUserById(ctx, newUser)
+	if err != nil {
+		foree_logger.Logger.Error("UpdateUserPhoneNumber_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+	foree_logger.Logger.Info("UpdateUserPhoneNumber_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId")
 	return nil, nil
 }
 
-func (a *AuthService) UpdateUserAndDefaultInteracAccAddress(ctx context.Context, req transport.SessionReq) (any, transport.HError) {
+func (a *AuthService) UpdateUserAddress(ctx context.Context, req UpdateAddressReq) (any, transport.HError) {
 	session, sErr := a.VerifySession(ctx, req.SessionId)
 	if sErr != nil {
 		var userId int64
@@ -774,14 +795,40 @@ func (a *AuthService) UpdateUserAndDefaultInteracAccAddress(ctx context.Context,
 			userId = session.UserId
 		}
 		// Normal error when the token expired
-		foree_logger.Logger.Info("UpdateUserAndDefaultInteracAccAddress_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		foree_logger.Logger.Info("UpdateUserAddress_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
 		return nil, sErr
 	}
 
+	user, err := a.userRepo.GetUniqueUserById(session.UserId)
+	if err != nil {
+		foree_logger.Logger.Error("UpdateUserAddress_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+
+	}
+
+	if user == nil {
+		foree_logger.Logger.Error("UpdateUserAddress_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "emailPasswordId", session.EmailPasswd.ID, "cause", "user no found.")
+		return nil, transport.NewInteralServerError("user no found with id `%v`", session.UserId)
+	}
+
+	newUser := *user
+	newUser.Address1 = req.Address1
+	newUser.Address2 = req.Address2
+	newUser.City = req.City
+	newUser.Province = req.Province
+	newUser.Country = req.Country
+	newUser.PostalCode = req.PostalCode
+
+	err = a.userRepo.UpdateUserById(ctx, newUser)
+	if err != nil {
+		foree_logger.Logger.Error("UpdateUserAddress_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+	foree_logger.Logger.Info("UpdateUserAddress_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId")
 	return nil, nil
 }
 
-func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) (*auth.Session, transport.HError) {
+func (a *AuthService) UpdatePasswd(ctx context.Context, req UpdatePasswdReq) (*auth.Session, transport.HError) {
 	session, sErr := a.VerifySession(ctx, req.SessionId)
 	if sErr != nil {
 		var userId int64
@@ -789,31 +836,31 @@ func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) (*a
 			userId = session.UserId
 		}
 		// Normal error when the token expired
-		foree_logger.Logger.Info("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		foree_logger.Logger.Info("UpdatePasswd_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
 		return nil, sErr
 	}
 
 	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdById(session.EmailPasswd.ID)
 
 	if err != nil {
-		foree_logger.Logger.Error("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		foree_logger.Logger.Error("UpdatePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if ep == nil {
-		foree_logger.Logger.Error("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "emailPasswordId", session.EmailPasswd.ID, "cause", err.Error())
+		foree_logger.Logger.Error("UpdatePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "emailPasswordId", session.EmailPasswd.ID, "cause", "emailPassword no found")
 		return nil, transport.NewInteralServerError("emailPassword no found with id `%v`", session.EmailPasswd.ID)
 	}
 
 	ok := auth.ComparePasswords(req.OldPasswd, []byte(ep.Passwd))
 	if !ok {
-		foree_logger.Logger.Warn("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", "invalid old, password")
+		foree_logger.Logger.Warn("UpdatePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", "invalid old, password")
 		return nil, transport.NewFormError("Invalid change passwd request", "oldPasswd", "Invalid old password")
 	}
 
 	hashed, err := auth.HashPassword(req.NewPasswd)
 	if err != nil {
-		foree_logger.Logger.Error("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		foree_logger.Logger.Error("UpdatePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
 	newEp := *session.EmailPasswd
@@ -821,10 +868,10 @@ func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) (*a
 
 	err = a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEp)
 	if err != nil {
-		foree_logger.Logger.Error("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
+		foree_logger.Logger.Error("UpdatePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
-	foree_logger.Logger.Info("ChangePasswd_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId")
+	foree_logger.Logger.Info("UpdatePasswd_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId")
 	return nil, nil
 }
 

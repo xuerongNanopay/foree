@@ -25,13 +25,13 @@ func (q SignUpReq) Validate() *transport.BadRequestError {
 	return nil
 }
 
-type ChangePasswdReq struct {
+type UpdatePasswdReq struct {
 	transport.SessionReq
 	OldPasswd string `json:"oldPasswd" validate:"required,min=8,max=16"`
 	NewPasswd string `json:"newPasswd" validate:"required,min=8,max=16"`
 }
 
-func (q ChangePasswdReq) Validate() *transport.BadRequestError {
+func (q UpdatePasswdReq) Validate() *transport.BadRequestError {
 	if ret := validateStruct(q, "Invalid change passwd request"); len(ret.Details) > 0 {
 		return ret
 	}
@@ -171,7 +171,8 @@ func (q ForgetPasswordUpdateReq) Validate() *transport.BadRequestError {
 	return nil
 }
 
-type UpdateAddress struct {
+type UpdateAddressReq struct {
+	transport.SessionReq
 	Address1   string `json:"address1" validate:"required"`
 	Address2   string `json:"address2"`
 	City       string `json:"city" validate:"required"`
@@ -180,7 +181,7 @@ type UpdateAddress struct {
 	PostalCode string `json:"postalCode" validate:"required"`
 }
 
-func (q UpdateAddress) Validate() *transport.BadRequestError {
+func (q UpdateAddressReq) Validate() *transport.BadRequestError {
 	ret := validateStruct(q, "Invalid update address request")
 
 	// Country
@@ -215,11 +216,12 @@ func (q UpdateAddress) Validate() *transport.BadRequestError {
 	return nil
 }
 
-type UpdatePhoneNumber struct {
+type UpdatePhoneNumberReq struct {
+	transport.SessionReq
 	PhoneNumber string `json:"phoneNumber" validate:"required"`
 }
 
-func (q UpdatePhoneNumber) Validate() *transport.BadRequestError {
+func (q UpdatePhoneNumberReq) Validate() *transport.BadRequestError {
 	ret := validateStruct(q, "Invalid update phoneNumber request")
 
 	country := constant.Countires["CA"]
