@@ -290,7 +290,7 @@ type UserDetailDTO struct {
 	CreatedAt   int64           `json:"createdAt"`
 }
 
-func NewUserDetailDTO(u auth.User) *UserDetailDTO {
+func NewUserDetailDTO(u *auth.User) *UserDetailDTO {
 	ret := &UserDetailDTO{
 		ID:          u.ID,
 		Status:      u.Status,

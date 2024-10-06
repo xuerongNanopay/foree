@@ -744,11 +744,23 @@ func (a *AuthService) GetUserDetail(ctx context.Context, req transport.SessionRe
 			userId = session.UserId
 		}
 		// Normal error when the token expired
-		foree_logger.Logger.Info("UpdateUserAndInteracAccAddress_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		foree_logger.Logger.Info("GetUserDetail_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
 		return nil, sErr
 	}
 
-	return nil, nil
+	user, err := a.userRepo.GetUniqueUserById(session.UserId)
+	if err != nil {
+		foree_logger.Logger.Error("GetUserDetail_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+
+	}
+
+	if user == nil {
+		foree_logger.Logger.Error("GetUserDetail_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "emailPasswordId", session.EmailPasswd.ID, "cause", "user no found.")
+		return nil, transport.NewInteralServerError("user no found with id `%v`", session.UserId)
+	}
+
+	return NewUserDetailDTO(user), nil
 }
 
 func (a *AuthService) UpdateUserPhoneNumber(ctx context.Context, req UpdatePhoneNumberReq) (any, transport.HError) {
