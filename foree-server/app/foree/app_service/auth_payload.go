@@ -171,6 +171,50 @@ func (q ForgetPasswordUpdateReq) Validate() *transport.BadRequestError {
 	return nil
 }
 
+type UpdateAddress struct {
+	Address1   string `json:"address1" validate:"required"`
+	Address2   string `json:"address2"`
+	City       string `json:"city" validate:"required"`
+	Province   string `json:"province" validate:"required"`
+	Country    string `json:"country" validate:"required"`
+	PostalCode string `json:"postalCode" validate:"required"`
+}
+
+func (q UpdateAddress) Validate() *transport.BadRequestError {
+	ret := validateStruct(q, "Invalid update address request")
+
+	// Country
+	if q.Country != "CA" {
+		ret.AddDetails("country", fmt.Sprintf("invalid country `%v`", q.Country))
+	}
+
+	// Province
+	_, ok := constant.Regions["CA"][q.Province]
+	if !ok {
+		ret.AddDetails("province", fmt.Sprintf("invalid province `%v`", q.Province))
+	}
+
+	country := constant.Countires[q.Country]
+
+	// Postal code
+	ok, _ = regexp.MatchString(country.PostalCodeRegex, q.PostalCode)
+	if !ok {
+		ret.AddDetails("postalCode", fmt.Sprintf("invalid postal code `%v`", q.PostalCode))
+	}
+
+	// Phone number
+	// ok, _ = regexp.MatchString(country.PhoneRegex, q.PhoneNumber)
+	// if !ok {
+	// 	ret.AddDetails("phoneNumber", fmt.Sprintf("invalid phone number `%v`", q.PhoneNumber))
+	// }
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
+
+	return nil
+}
+
 // --------------- Response ------------------
 func NewUserDTO(session *auth.Session) *UserDTO {
 	ret := &UserDTO{
