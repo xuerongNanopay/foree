@@ -793,7 +793,25 @@ func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) (*a
 		return nil, sErr
 	}
 
-	hashed, err := auth.HashPassword(req.Password)
+	ep, err := a.emailPasswordRepo.GetUniqueEmailPasswdById(session.EmailPasswd.ID)
+
+	if err != nil {
+		foree_logger.Logger.Error("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	if ep == nil {
+		foree_logger.Logger.Error("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "emailPasswordId", session.EmailPasswd.ID, "cause", err.Error())
+		return nil, transport.NewInteralServerError("emailPassword no found with id `%v`", session.EmailPasswd.ID)
+	}
+
+	ok := auth.ComparePasswords(req.OldPasswd, []byte(ep.Passwd))
+	if !ok {
+		foree_logger.Logger.Warn("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", "invalid old, password")
+		return nil, transport.NewFormError("Invalid change passwd request", "oldPasswd", "Invalid old password")
+	}
+
+	hashed, err := auth.HashPassword(req.NewPasswd)
 	if err != nil {
 		foree_logger.Logger.Error("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)

@@ -27,12 +27,12 @@ func (q SignUpReq) Validate() *transport.BadRequestError {
 
 type ChangePasswdReq struct {
 	transport.SessionReq
-	OldPassword string `json:"oldPassword" validate:"required,min=8,max=16"`
-	Password    string `json:"password" validate:"required,min=8,max=16"`
+	OldPasswd string `json:"oldPasswd" validate:"required,min=8,max=16"`
+	NewPasswd string `json:"newPasswd" validate:"required,min=8,max=16"`
 }
 
 func (q ChangePasswdReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid change password request"); len(ret.Details) > 0 {
+	if ret := validateStruct(q, "Invalid change passwd request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -219,5 +219,30 @@ type UserDetailDTO struct {
 	PhoneNumber string          `json:"phoneNumber"`
 	Email       string          `json:"email"`
 	AvatarUrl   string          `json:"avatarUrl"`
-	CreatedAt   *time.Time      `json:"createdAt"`
+	CreatedAt   int64           `json:"createdAt"`
+}
+
+func NewUserDetailDTO(u auth.User) *UserDetailDTO {
+	ret := &UserDetailDTO{
+		ID:          u.ID,
+		Status:      u.Status,
+		FirstName:   u.FirstName,
+		MiddleName:  u.MiddleName,
+		LastName:    u.LastName,
+		Age:         u.Age,
+		Dob:         u.Dob,
+		Address1:    u.Address1,
+		Address2:    u.Address2,
+		City:        u.City,
+		Province:    u.Province,
+		Country:     u.Country,
+		PostalCode:  u.PostalCode,
+		PhoneNumber: u.PhoneNumber,
+		Email:       u.Email,
+		AvatarUrl:   u.AvatarUrl,
+	}
+	if u.CreatedAt != nil {
+		ret.CreatedAt = u.CreatedAt.UnixMilli()
+	}
+	return ret
 }
