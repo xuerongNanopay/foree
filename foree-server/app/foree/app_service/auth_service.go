@@ -816,10 +816,10 @@ func (a *AuthService) ChangePasswd(ctx context.Context, req ChangePasswdReq) (*a
 		foree_logger.Logger.Error("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
-	ep := *session.EmailPasswd
-	ep.Passwd = hashed
+	newEp := *session.EmailPasswd
+	newEp.Passwd = hashed
 
-	err = a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, ep)
+	err = a.emailPasswordRepo.UpdateEmailPasswdByEmail(ctx, newEp)
 	if err != nil {
 		foree_logger.Logger.Error("ChangePasswd_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
