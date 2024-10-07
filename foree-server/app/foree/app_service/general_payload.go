@@ -5,5 +5,5 @@ type CustomerSupport struct {
 	SupportPhoneNumber string `json:"supportPhoneNumber"`
 	Instagram          string `json:"instagram"`
 	Twitter            string `json:"twitter"`
-	Facebook           string `json:"fackbook"`
+	Facebook           string `json:"facebook"`
 }
