@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"time"
 
-	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/constant"
 )
 
@@ -61,45 +60,16 @@ const (
 )
 
 type IDMTx struct {
-	ID                    int64
-	Status                TxStatus
-	IDMReference          string           `json:"idmReference"`
-	IDMResult             string           `json:"idmResult"`
-	Ip                    string           `json:"ip"`
-	UserAgent             string           `json:"userAgent"`
-	BillingFirstName      string           `json:"billingFirstName"`
-	BillingMiddleName     string           `json:"billingMiddleName"`
-	BillingLastName       string           `json:"billingLastName"`
-	BillingStreet         string           `json:"billingStreet"`
-	BillingCity           string           `json:"billingCity"`
-	BillingState          string           `json:"billingState"`
-	BillingPostalCode     string           `json:"billingPostalCode"`
-	BillingCountry        string           `json:"billingCountry"`
-	RemitterOccupation    string           `json:"remitterOccupation"`
-	PhoneNumber           string           `json:"phoneNumber"`
-	UserEmail             string           `json:"userEmail"`
-	Dob                   string           `json:"dob"`
-	Nationality           string           `json:"nationality"`
-	SrcDigitalAccNOHash   string           `json:"srcDigitalAccNOHash"`
-	ShippingFirstName     string           `json:"shippingFirstName"`
-	ShippingMiddleName    string           `json:"shippingMiddleName"`
-	ShippingLastName      string           `json:"shippingLastName"`
-	IsCashPickup          bool             `json:"isCashPickup"`
-	ParentTxId            int64            `json:"parentTxId"`
-	DestDigitalAccNOHash  string           `json:"destDigitalAccNOHash"`
-	BeneBankName          string           `json:"beneBankName"`
-	DestPhoneNumber       string           `json:"destPhoneNumber"`
-	RelationshipWithOwner string           `json:"relationshipWithOwner"`
-	PurposeOfTransfer     string           `json:"purposeOfTransfer"`
-	OwnerId               int64            `json:"ownerId"`
-	Amount                types.AmountData `json:"amount"`
-	PayoutAmount          types.AmountData `json:"payoutAmount"`
-	TransactionIdentifier string           `json:"transactionIdentifier"`
-	TransactionRefId      string           `json:"transactionRefId"`
-	SrcAccountIdentifier  string           `json:"srcAccountIdentifier"`
-	DestAccountIdentifier string           `json:"destAccountIdentifier"`
-	CreatedAt             *time.Time       `json:"createdAt"`
-	UpdatedAt             *time.Time       `json:"updatedAt"`
+	ID           int64
+	Status       TxStatus
+	Ip           string    `json:"ip"`
+	UserAgent    string    `json:"userAgent"`
+	IDMReference string    `json:"idmReference"`
+	IDMResult    string    `json:"idmResult"`
+	ParentTxId   int64     `json:"parentTxId"`
+	OwnerId      int64     `json:"ownerId"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
 // Large object.
