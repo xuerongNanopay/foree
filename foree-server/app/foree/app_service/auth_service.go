@@ -829,7 +829,7 @@ func (a *AuthService) UpdateUserAddress(ctx context.Context, req UpdateAddressRe
 		foree_logger.Logger.Error("UpdateUserAddress_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
-	foree_logger.Logger.Info("UpdateUserAddress_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId")
+	foree_logger.Logger.Info("UpdateUserAddress_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "emailPasswordId", session.EmailPasswd.ID)
 	return nil, nil
 }
 
