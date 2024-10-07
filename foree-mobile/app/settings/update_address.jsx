@@ -1,11 +1,12 @@
-import { View, Text, SafeAreaView, TouchableOpacity } from 'react-native'
-import React, { useCallback, useState } from 'react'
+import { View, Text, SafeAreaView, TouchableOpacity, Alert } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
 import ModalSelect from '../../components/ModalSelect'
 import Regions from '../../constants/region'
 import Countries from '../../constants/country'
 import FormField from '../../components/FormField'
-import { useFocusEffect } from 'expo-router'
-import { authService } from '../../service'
+import { router, useFocusEffect } from 'expo-router'
+import { authPayload, authService } from '../../service'
+import string_util from '../../util/string_util'
 
 const FieldItem = ({
   title,
@@ -37,6 +38,7 @@ const SelectProvinceItem = (province) => (
 
 const UpdateAddress = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isError, setIsError] = useState(true)
   const [errors, setErrors] = useState({})
   const [form, setForm] = useState({
     address1: '',
@@ -76,6 +78,44 @@ const UpdateAddress = () => {
       controller.abort()
     }
   }, []))
+
+  useEffect(() => {
+    async function validate() {
+      try {
+        await authPayload.UpdateAddressScheme.validate(form, {abortEarly: false})
+        setErrors({})
+        setIsError(false)
+      } catch (err) {
+        let e = {}
+        for ( let i of err.inner ) {
+          e[i.path] =  e[i.path] ?? i.errors[0]
+        }
+        setIsError(true)
+        setErrors(e)
+      }
+    }
+    validate()
+  }, [form])
+
+  const submit = async () => {
+    setIsSubmitting(true)
+    try {
+      const resp = await authService.updateAddress(string_util.trimStringInObject(form))
+      if ( resp.status / 100 !== 2 ) {
+        console.warn("update address", resp.status, resp.data)
+        return
+      }
+      if ( router.canGoBack ) {
+        router.back()
+      } else {
+        router.replace("/personal_settings")
+      }
+    } catch (err) {
+      console.error("update address", err)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <SafeAreaView classname="h-full">
@@ -143,9 +183,10 @@ const UpdateAddress = () => {
         </View>
         <TouchableOpacity
           className="mb-6 py-2 border-2 border-[#005a32] bg-[#c7e9c0] rounded-xl"
+          disabled={isSubmitting||isError}
           onPress={() => {
             Alert.alert("Update Address", "Are you sure?", [
-              {text: 'Continue', onPress: () => {console.log("TODO: update address")}},
+              {text: 'Continue', onPress: () => {submit()}},
               {text: 'Cancel', onPress: () => {}},
             ])
           }}

@@ -53,6 +53,15 @@ const OnboardingScheme = object({
   identificationValue: fieldScheme.String(),
 })
 
+const UpdateAddressScheme = object({
+  address1: fieldScheme.String(),
+  address2: fieldScheme.String({required: false}),
+  city: fieldScheme.String(),
+  province: fieldScheme.ProvinceISOScheme(),
+  country: fieldScheme.CountryISOScheme(),
+  postalCode: fieldScheme.PostalCodeScheme({countryCode:"CA"}),
+})
+
 export default {
   SignUpScheme,
   VerifyEmailScheme,
@@ -61,5 +70,6 @@ export default {
   ForgetPasswdScheme,
   ForgetPasswordVerifycheme,
   ForgetPasswdUpdateScheme,
-  OnboardingScheme
+  OnboardingScheme,
+  UpdateAddressScheme
 }

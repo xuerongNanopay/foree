@@ -18,7 +18,6 @@ const profile = () => {
           console.error("get userDetail", resp.status, resp.data)
           router.replace("/settings_tab")
         } else {
-          console.log(resp.data.data)
           setUserDetail(resp.data.data)
         }
       } catch (e) {
