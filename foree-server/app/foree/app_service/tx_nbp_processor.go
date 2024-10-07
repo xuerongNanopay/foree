@@ -12,6 +12,7 @@ import (
 	foree_constant "xue.io/go-pay/app/foree/constant"
 	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/transaction"
+	"xue.io/go-pay/auth"
 	"xue.io/go-pay/partner/nbp"
 	string_util "xue.io/go-pay/util/string"
 )
@@ -389,9 +390,9 @@ func (p *NBPTxProcessor) buildLoadRemittanceRequest(fTx transaction.ForeeTx) (*n
 		PurposeRemittance:               fTx.TransactionPurpose,
 		RemitterName:                    fTx.CI.CashInAcc.GetLegalName(),
 		RemitterEmail:                   fTx.CI.CashInAcc.Email,
-		RemitterContact:                 fTx.CI.CashInAcc.PhoneNumber,
+		RemitterContact:                 fTx.Owner.PhoneNumber,
 		RemitterDOB:                     (*nbp.NBPDate)(fTx.Owner.Dob),
-		RemitterAddress:                 generateLoadRemittanceFromInteracAccount(fTx.CI.CashInAcc),
+		RemitterAddress:                 generateLoadRemittanceFromInteracAccount(fTx.Owner),
 		RemitterIdType:                  mapNBPRemitterIdType(identification.Type),
 		RemitterId:                      identification.Value,
 		RemitterPOB:                     userExtra.Pob,
@@ -436,11 +437,11 @@ func mapNBPRemitterIdType(idType foree_auth.IdentificationType) nbp.RemitterIdTy
 	}
 }
 
-func generateLoadRemittanceFromInteracAccount(acc *account.InteracAccount) string {
-	if acc.Address2 == "" {
-		return fmt.Sprintf("%s,%s,%s,%s,%s", acc.Address1, acc.City, acc.Province, acc.PostalCode, acc.Country)
+func generateLoadRemittanceFromInteracAccount(user *auth.User) string {
+	if user.Address2 == "" {
+		return fmt.Sprintf("%s,%s,%s,%s,%s", user.Address1, user.City, user.Province, user.PostalCode, user.Country)
 	}
-	return fmt.Sprintf("%s,%s,%s,%s,%s,%s", acc.Address1, acc.Address2, acc.City, acc.Province, acc.PostalCode, acc.Country)
+	return fmt.Sprintf("%s,%s,%s,%s,%s,%s", user.Address1, user.Address2, user.City, user.Province, user.PostalCode, user.Country)
 }
 
 func generateLoadRemittanceFromContactAccount(acc *account.ContactAccount) string {

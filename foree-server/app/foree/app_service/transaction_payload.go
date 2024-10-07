@@ -334,18 +334,11 @@ func NewTxSummaryDetailDTO(tx *transaction.TxSummary) *TxSummaryDetailDTO {
 
 func NewSumInteracAccountDTO(acc *account.InteracAccount) *SumInteracAccountDTO {
 	return &SumInteracAccountDTO{
-		ID:          acc.ID,
-		FirstName:   acc.FirstName,
-		MiddleName:  acc.MiddleName,
-		LastName:    acc.LastName,
-		Address1:    acc.Address1,
-		Address2:    acc.Address2,
-		City:        acc.City,
-		Province:    acc.Province,
-		Country:     acc.Country,
-		PostalCode:  acc.PostalCode,
-		PhoneNumber: acc.PhoneNumber,
-		Email:       acc.Email,
+		ID:         acc.ID,
+		FirstName:  acc.FirstName,
+		MiddleName: acc.MiddleName,
+		LastName:   acc.LastName,
+		Email:      acc.Email,
 	}
 }
 
