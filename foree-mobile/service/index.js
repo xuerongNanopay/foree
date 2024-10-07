@@ -9,6 +9,7 @@ import accountPayload from './account_payload'
 import { Alert } from 'react-native'
 import { router } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import GeneralService from './general_service'
 
 const SessionIdKey = "SESSION_ID"
 // Config axios
@@ -176,6 +177,7 @@ const hasLocalSession = async () => {
 const authService = new AuthService(localLogout, httpFormClient, httpClient)
 const transactionService = new TransactionService(httpFormClient, httpClient)
 const accountService = new AccountService(httpFormClient, httpClient)
+const generalService = new GeneralService(httpClient)
 
 export {
   authService,
@@ -184,5 +186,6 @@ export {
   accountService,
   hasLocalSession,
   transactionService,
-  transactionpayload
+  transactionpayload,
+  generalService
 }
