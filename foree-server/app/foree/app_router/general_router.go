@@ -17,7 +17,7 @@ func NewGeneralRouter() *GeneralRouter {
 
 func (c *GeneralRouter) RegisterRouter(router *mux.Router) {
 	// Customer Supports
-	router.HandleFunc("/customer_support", simplePostWrapper(cusomterSupport)).Methods("GET")
+	router.HandleFunc("/customer_support", simpleGetWrapper(cusomterSupport)).Methods("GET")
 }
 
 func cusomterSupport(ctx context.Context, req transport.SessionReq) (*foree_service.CustomerSupport, transport.HError) {
