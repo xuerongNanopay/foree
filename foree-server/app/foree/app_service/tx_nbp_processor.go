@@ -137,7 +137,7 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 		foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
 		return
 	}
-	req, err := p.buildLoadRemittanceRequest(*fTx)
+	req, err := p.buildLoadRemittanceRequest(fTx)
 	if err != nil {
 		foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
 		return
@@ -358,7 +358,7 @@ func (p *NBPTxProcessor) sendPaymentWithMode(r nbp.LoadRemittanceRequest, mode n
 	}
 }
 
-func (p *NBPTxProcessor) buildLoadRemittanceRequest(fTx transaction.ForeeTx) (*nbp.LoadRemittanceRequest, error) {
+func (p *NBPTxProcessor) buildLoadRemittanceRequest(fTx *transaction.ForeeTx) (*nbp.LoadRemittanceRequest, error) {
 	userExtra, err := p.userExtraRepo.GetUniqueUserExtraByOwnerId(fTx.OwnerId)
 	if err != nil {
 		return nil, err
