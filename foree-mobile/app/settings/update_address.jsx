@@ -1,9 +1,11 @@
 import { View, Text, SafeAreaView, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import ModalSelect from '../../components/ModalSelect'
 import Regions from '../../constants/region'
 import Countries from '../../constants/country'
 import FormField from '../../components/FormField'
+import { useFocusEffect } from 'expo-router'
+import { authService } from '../../service'
 
 const FieldItem = ({
   title,
@@ -41,10 +43,39 @@ const UpdateAddress = () => {
     address2: '',
     city: '',
     province: '',
-    country: 'CA',
+    country: '',
     postalCode: ''
   })
 
+  useFocusEffect(useCallback(() => {
+    const controller = new AbortController()
+    const getUserDetail = async() => {
+      try {
+        const resp = await authService.getUserDetail({signal: controller.signal})
+        if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
+          console.error("get userDetail", resp.status, resp.data)
+          router.replace("/personal_settings")
+        } else {
+          const userDetail = resp.data.data
+          setForm({
+            address1: userDetail.address1,
+            address2: userDetail.address2,
+            city: userDetail.city,
+            province: userDetail.province,
+            country: userDetail.country,
+            postalCode: userDetail.postalCode,
+          })
+        }
+      } catch (e) {
+        console.error("get userDetail", e, e.response, e.response?.status, e.response?.data)
+        router.replace("/personal_settings")
+      }
+    }
+    getUserDetail()
+    return () => {
+      controller.abort()
+    }
+  }, []))
 
   return (
     <SafeAreaView classname="h-full">
@@ -85,7 +116,7 @@ const UpdateAddress = () => {
             showExtractor="name"
             valueExtractor="isoCode"
             listView={SelectProvinceItem}
-            list={Object.values(Regions[form.country])}
+            list={Object.values(Regions[form.country] ?? [])}
             onPress={(o) => {
               setForm((form) => ({
                 ...form,
