@@ -173,7 +173,7 @@ const hasLocalSession = async () => {
   }
 }
 
-const authService = new AuthService(localLogout, httpFormClient)
+const authService = new AuthService(localLogout, httpFormClient, httpClient)
 const transactionService = new TransactionService(httpFormClient, httpClient)
 const accountService = new AccountService(httpFormClient, httpClient)
 

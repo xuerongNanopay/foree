@@ -39,7 +39,7 @@ const ForgetPasswordVerify = () => {
   const submit = async () => {
     setIsSubmitting(true)
     try {
-      const resp = await authService.forgetPasswordVerify(string_util.trimStringInObject(form))
+      const resp = await authService.forgetPasswdVerify(string_util.trimStringInObject(form))
       if ( resp.status / 100 !== 2 ) {
         console.info("forget_password_verify", resp.status, resp.data)
         return

@@ -1,9 +1,11 @@
 class AuthService {
   #localLogout
+  #httpClient
   #httpFormClient
-  constructor(localLogout, httpFormClient) {
+  constructor(localLogout, httpFormClient, httpClient) {
     this.#localLogout = localLogout
     this.#httpFormClient = httpFormClient
+    this.#httpClient = httpClient
   }
 
   async login(req, {signal}={signal}) {
@@ -22,16 +24,16 @@ class AuthService {
     return await this.#httpFormClient.get("/resend_code", {signal})
   }
 
-  async forgetPassword(req, {signal}={signal}) {
-    return await this.#httpFormClient.post("/forget_password", req, {signal})
+  async forgetPasswd(req, {signal}={signal}) {
+    return await this.#httpFormClient.post("/forget_passwd", req, {signal})
   }
 
-  async forgetPasswordVerify(req, {signal}={signal}) {
-    return await this.#httpFormClient.post("/forget_password_verify", req, {signal})
+  async forgetPasswdVerify(req, {signal}={signal}) {
+    return await this.#httpFormClient.post("/forget_passwd_verify", req, {signal})
   }
 
-  async forgetPasswordUpdate(req, {signal}={signal}) {
-    return await this.#httpFormClient.post("/forget_password_update", req, {signal})
+  async forgetPasswdUpdate(req, {signal}={signal}) {
+    return await this.#httpFormClient.post("/forget_passwd_update", req, {signal})
   }
 
   async onboard(req, {signal}={signal}) {
@@ -43,7 +45,23 @@ class AuthService {
   }
 
   async getUser({signal}={signal}) {
-    return await this.#httpFormClient.get("/user", {signal})
+    return await this.#httpClient.get("/user", {signal})
+  }
+
+  async getUserDetail({signal}={signal}) {
+    return await this.#httpClient.get("/user_detail", {signal})
+  }
+
+  async updatePasswd(req, {signal}={signal}) {
+    return await this.#httpFormClient.post("/update_passwd", req, {signal})
+  }
+
+  async updateAddress(req, {signal}={signal}) {
+    return await this.#httpFormClient.post("/update_address", req, {signal})
+  }
+
+  async updatePhone(req, {signal}={signal}) {
+    return await this.#httpFormClient.post("/update_phone", req, {signal})
   }
 
   async logout({signal}={signal}) {
