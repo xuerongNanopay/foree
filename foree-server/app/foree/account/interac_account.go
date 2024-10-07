@@ -24,21 +24,21 @@ const (
 	`
 	sQLInteracAccountGetUniqueById = `
 		SELECT 
-			a.id, a.status, a.first_name, a.middle_name, a.last_name,
+			a.id, a.status, a.first_name, a.middle_name, a.last_name, a.email,
 			a.owner_id, a.latest_activity_at, a.created_at, a.updated_at
 		FROM interac_accounts a
 		where a.id = ?
 	`
 	sQLInteracAccountGetUniqueActiveByOwnerAndId = `
 		SELECT 
-			a.id, a.status, a.first_name, a.middle_name, a.last_name,
+			a.id, a.status, a.first_name, a.middle_name, a.last_name, a.email,
 			a.owner_id, a.latest_activity_at, a.created_at, a.updated_at
 		FROM interac_accounts a
 		where a.owner_id = ? AND a.id = ? AND a.status = 'ACTIVE'
 	`
 	sQLInteracAccountGetUniqueActiveForUPdateByOwnerAndId = `
 		SELECT 
-			a.id, a.status, a.first_name, a.middle_name, a.last_name,
+			a.id, a.status, a.first_name, a.middle_name, a.last_name, a.email,
 			a.owner_id, a.latest_activity_at, a.created_at, a.updated_at
 		FROM interac_accounts a
 		where a.owner_id = ? AND a.id = ? AND a.status = 'ACTIVE'
@@ -46,7 +46,7 @@ const (
 	`
 	sQLInteracAccountGetAllActiveByOwnerId = `
 		SELECT 
-			a.id, a.status, a.first_name, a.middle_name, a.last_name,
+			a.id, a.status, a.first_name, a.middle_name, a.last_name, a.email,
 			a.owner_id, a.latest_activity_at, a.created_at, a.updated_at
 		FROM interac_accounts a
 		where a.owner_id = ? AND a.status = 'ACTIVE'
