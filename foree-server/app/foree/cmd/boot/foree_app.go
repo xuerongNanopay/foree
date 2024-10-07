@@ -73,6 +73,7 @@ type ForeeApp struct {
 	authRouter             *foree_router.AuthRouter
 	transactionRouter      *foree_router.TransactionRouter
 	sysRouter              *sys_router.SystemRouter
+	generateRouter         *foree_router.GeneralRouter
 }
 
 func (app *ForeeApp) Boot(envFilePath string) error {
@@ -232,6 +233,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.accountRouter = foree_router.NewAccountRouter(app.authService, app.accountService)
 	app.authRouter = foree_router.NewAuthRouter(app.authService)
 	app.transactionRouter = foree_router.NewTransactionRouter(app.authService, app.transactionService)
+	app.generateRouter = foree_router.NewGeneralRouter()
 
 	router := mux.NewRouter()
 	subrouter := router.PathPrefix("/app/v1").Subrouter()
@@ -239,6 +241,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.accountRouter.RegisterRouter(subrouter)
 	app.authRouter.RegisterRouter(subrouter)
 	app.transactionRouter.RegisterRouter(subrouter)
+	app.generateRouter.RegisterRouter(subrouter)
 
 	sysSubrouter := router.PathPrefix("/sys/v1").Subrouter()
 	app.sysRouter = sys_router.NewSystemRouter(app.db)
