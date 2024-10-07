@@ -62,8 +62,8 @@ type NBPCOTx struct {
 	CashOutAcc   *account.ContactAccount `json:"CashOutAcc"`
 	ParentTxId   int64                   `json:"parentTxId"`
 	OwnerId      int64                   `json:"OwnerId"`
-	CreatedAt    time.Time               `json:"createdAt"`
-	UpdatedAt    time.Time               `json:"updatedAt"`
+	CreatedAt    *time.Time              `json:"createdAt"`
+	UpdatedAt    *time.Time              `json:"updatedAt"`
 }
 
 func NewNBPCOTxRepo(db *sql.DB) *NBPCOTxRepo {
