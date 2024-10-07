@@ -113,7 +113,6 @@ type QueryTransactionReq struct {
 
 func (q QueryTransactionReq) Validate() *transport.BadRequestError {
 	ret := validateStruct(q, "Invalid query transaction request")
-	fmt.Println(q)
 	// Check status
 	_, ok := foree_constant.AllowTransactionsStatus[q.Status]
 	if !ok && q.Status != "" && q.Status != "All" {

@@ -144,7 +144,6 @@ func (p *NBPTxProcessor) loadRemittance(parentTxId int64) {
 	}
 
 	mode, err := mapNBPMode(fTx.COUT.CashOutAcc)
-	fmt.Println("ddd", mode)
 	if err != nil {
 		foree_logger.Logger.Error("NBPTxProcessor--loadRemittance_FAIL", "parentTxId", parentTxId, "cause", err.Error())
 		return
