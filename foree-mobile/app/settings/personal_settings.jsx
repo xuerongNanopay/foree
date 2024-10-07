@@ -3,9 +3,11 @@ import React, { useCallback, useState } from 'react'
 import { icons } from '../../constants'
 import { router, useFocusEffect } from 'expo-router'
 import { authService } from '../../service'
+import Countries from '../../constants/country'
+import Regions from '../../constants/region'
 
 const profile = () => {
-  const [ userDetail, setUserDetail ] = useState({})
+  const [ userDetail, setUserDetail ] = useState(null)
 
   useFocusEffect(useCallback(() => {
     const controller = new AbortController()
@@ -30,6 +32,7 @@ const profile = () => {
     }
   }, []))
 
+  if ( !userDetail ) return<></>
   return (
     <SafeAreaView className="h-full bg-slate-200">
       <ScrollView
@@ -51,18 +54,18 @@ const profile = () => {
           <View className="mt-3 px-4">
             <View>
               <Text className="font-light text-xs text-slate-600">First Name</Text>
-              <Text className="font-pregular text-lg text-slate-800">Addfdsa dasfd</Text>
+              <Text className="font-pregular text-lg text-slate-800">{userDetail.firstName}</Text>
             </View>
             {
-              1==1 ? <></> :
+              !userDetail.middleName ? <></> :
               <View className="mt-1">
                 <Text className="font-light text-xs text-slate-600">Middle Name</Text>
-                <Text className="font-pregular text-lg text-slate-800">Addfdsa dasfd</Text>
+                <Text className="font-pregular text-lg text-slate-800">{userDetail.middleName}</Text>
               </View>
             }
             <View className="mt-1">
               <Text className="font-light text-xs text-slate-600">Last Name</Text>
-              <Text className="font-pregular text-lg text-slate-800">Addfdsa dasfd</Text>
+              <Text className="font-pregular text-lg text-slate-800">{userDetail.lastName}</Text>
             </View>
           </View>
         </View>
@@ -80,40 +83,40 @@ const profile = () => {
               <Image
                 source={icons.composeFull}
                 className="w-[20px] h-[20px]"
-                tintColor={"#475569"}
+                tintColor={"#41ab5d"}
               />
             </TouchableOpacity>
           </View>
           <View className="mt-3 px-4">
             <View>
               <Text className="font-light text-xs text-slate-600">Address Line 1</Text>
-              <Text className="font-pregular text-lg text-slate-800">56 Colonsay Rd</Text>
+              <Text className="font-pregular text-lg text-slate-800">{userDetail.address1}</Text>
             </View>
             {
-              1 === 1 ? <></> :
+              !userDetail.address2 ? <></> :
               <View className="mt-1">
                 <Text className="font-light text-xs text-slate-600">Address Line 2</Text>
-                <Text className="font-pregular text-lg text-slate-800"></Text>
+                <Text className="font-pregular text-lg text-slate-800">{userDetail.address2}</Text>
               </View>
             }
             <View className="mt-1 flex flex-row">
               <View className="flex-1">
                 <Text className="font-light text-xs text-slate-600">City</Text>
-                <Text className="font-pregular text-lg text-slate-800">Thornhill</Text>
+                <Text className="font-pregular text-lg text-slate-800">{userDetail.city}</Text>
               </View>
               <View className="mr-12">
                 <Text className="font-light text-xs text-slate-600">Province</Text>
-                <Text className="font-pregular text-lg text-slate-800">ON</Text>
+                <Text className="font-pregular text-lg text-slate-800">{Regions[userDetail.country]?.[userDetail.province]?.code}</Text>
               </View>
             </View>
             <View className="mt-1 flex flex-row">
               <View className="flex-1">
                 <Text className="font-light text-xs text-slate-600">Postal Code</Text>
-                <Text className="font-pregular text-lg text-slate-800">L3T 3E8</Text>
+                <Text className="font-pregular text-lg text-slate-800">{userDetail.postalCode}</Text>
               </View>
               <View className="mr-12">
                 <Text className="font-light text-xs text-slate-600">Country</Text>
-                <Text className="font-pregular text-lg text-slate-800">CA</Text>
+                <Text className="font-pregular text-lg text-slate-800">{Countries[userDetail.country]?.name}</Text>
               </View>
             </View>
           </View>
@@ -132,14 +135,14 @@ const profile = () => {
               <Image
                 source={icons.composeFull}
                 className="w-[20px] h-[20px]"
-                tintColor={"#475569"}
+                tintColor={"#41ab5d"}
               />
             </TouchableOpacity>
           </View>
           <View className="mt-3 px-4">
             <View>
               <Text className="font-light text-xs text-slate-600">Phone Number</Text>
-              <Text className="font-pregular text-lg text-slate-800">3065022222</Text>
+              <Text className="font-pregular text-lg text-slate-800">{userDetail.phoneNumber}</Text>
             </View>
           </View>
         </View>
