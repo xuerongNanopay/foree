@@ -239,11 +239,12 @@ const TransactionCreate = () => {
   const RewardListItem = useCallback((reward) => {
     if ( !reward ) return <></>
     return (
-      <View className="border-2 border-slate-500 rounded-lg py-2 mt-2 flex flex-row items-center">
+      <View className="border-[1px] border-slate-500 rounded-lg py-2 mt-2 flex flex-row items-center">
         <Image 
           source={!form.rewardIds.find(x => x === reward.id) ? icons.checkboxUncheckDark : icons.checkboxCheckDark}
           resizeMode='contain'
           className="w-[30px] h-[30px] mx-2"
+          tintColor={!form.rewardIds.find(x => x === reward.id) ? "#94a3b8" : "#005a32"}
         />
         <View>
           <Text className="font-semibold text-slate-500">{reward.description}</Text>
