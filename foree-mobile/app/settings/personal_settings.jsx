@@ -100,21 +100,21 @@ const profile = () => {
               </View>
             }
             <View className="mt-1 flex flex-row">
-              <View className="flex-1">
+              <View className="w-52">
                 <Text className="font-light text-xs text-slate-600">City</Text>
                 <Text className="font-pregular text-lg text-slate-800">{userDetail.city}</Text>
               </View>
-              <View className="mr-12">
+              <View className="">
                 <Text className="font-light text-xs text-slate-600">Province</Text>
                 <Text className="font-pregular text-lg text-slate-800">{Regions[userDetail.country]?.[userDetail.province]?.code}</Text>
               </View>
             </View>
             <View className="mt-1 flex flex-row">
-              <View className="flex-1">
+              <View className="w-52">
                 <Text className="font-light text-xs text-slate-600">Postal Code</Text>
                 <Text className="font-pregular text-lg text-slate-800">{userDetail.postalCode}</Text>
               </View>
-              <View className="mr-12">
+              <View className="">
                 <Text className="font-light text-xs text-slate-600">Country</Text>
                 <Text className="font-pregular text-lg text-slate-800">{Countries[userDetail.country]?.name}</Text>
               </View>
