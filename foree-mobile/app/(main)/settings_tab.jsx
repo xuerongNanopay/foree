@@ -1,12 +1,11 @@
 import { Alert, Image, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useCallback, useEffect, useState } from 'react'
-import { Link, router, useFocusEffect } from 'expo-router'
+import React, { useEffect, useState } from 'react'
+import { Link, router } from 'expo-router'
 import { icons } from '../../constants'
-import { generalService } from '../../service'
+import { authService, generalService } from '../../service'
 
 const ProfileTab = () => {
   const [showContactSupport, setShowContactSupport] = useState(false)
-  
 
   return (
     <SafeAreaView

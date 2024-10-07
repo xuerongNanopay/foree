@@ -1,9 +1,35 @@
 import { View, Text, SafeAreaView, ScrollView, Image, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import { icons } from '../../constants'
-import { router } from 'expo-router'
+import { router, useFocusEffect } from 'expo-router'
+import { authService } from '../../service'
 
 const profile = () => {
+  const [ userDetail, setUserDetail ] = useState({})
+
+  useFocusEffect(useCallback(() => {
+    const controller = new AbortController()
+    const getUserDetail = async() => {
+      try {
+        const resp = await authService.getUserDetail({signal: controller.signal})
+        if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
+          console.error("get userDetail", resp.status, resp.data)
+          router.replace("/settings_tab")
+        } else {
+          console.log(resp.data.data)
+          setUserDetail(resp.data.data)
+        }
+      } catch (e) {
+        console.error("get userDetail", e, e.response, e.response?.status, e.response?.data)
+        router.replace("/settings_tab")
+      }
+    }
+    getUserDetail()
+    return () => {
+      controller.abort()
+    }
+  }, []))
+
   return (
     <SafeAreaView className="h-full bg-slate-200">
       <ScrollView
