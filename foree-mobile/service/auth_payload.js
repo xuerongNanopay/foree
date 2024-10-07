@@ -62,6 +62,10 @@ const UpdateAddressScheme = object({
   postalCode: fieldScheme.PostalCodeScheme({countryCode:"CA"}),
 })
 
+const UpdatePhoneNumberScheme = object({
+  phoneNumber: fieldScheme.PhoneNumber({countryCode:"CA"}),
+})
+
 export default {
   SignUpScheme,
   VerifyEmailScheme,
@@ -71,5 +75,6 @@ export default {
   ForgetPasswordVerifycheme,
   ForgetPasswdUpdateScheme,
   OnboardingScheme,
-  UpdateAddressScheme
+  UpdateAddressScheme,
+  UpdatePhoneNumberScheme
 }
