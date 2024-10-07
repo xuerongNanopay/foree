@@ -1,10 +1,12 @@
 import { Alert, Image, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
-import { Link, router } from 'expo-router'
+import React, { useCallback, useEffect, useState } from 'react'
+import { Link, router, useFocusEffect } from 'expo-router'
 import { icons } from '../../constants'
+import { generalService } from '../../service'
 
 const ProfileTab = () => {
   const [showContactSupport, setShowContactSupport] = useState(false)
+  
 
   return (
     <SafeAreaView
@@ -180,7 +182,32 @@ const ProfileTab = () => {
 const ContactSupportModal = ({
   visible=false,
   closeModal=_=>{}
-}) => (
+}) => {
+
+  const [customerSupport, setCustomerSupport] = useState({})
+  useEffect(() => {
+    const controller = new AbortController()
+    const getCustomerSupport = async() => {
+      try {
+        console.log("customer support run")
+        const resp = await generalService.cusomterSupport({signal: controller.signal})
+        if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
+          console.error("customer support", resp.status, resp.data)
+        } else {
+          console.log(resp.data.data)
+          setCustomerSupport(resp.data.data)
+        }
+      } catch (e) {
+        console.error("customer support", e, e.response, e.response?.status, e.response?.data)
+      }
+    }
+    getCustomerSupport()
+    return () => {
+      controller.abort()
+    }
+  }, [])
+
+  return (
   <Modal
     visible={visible}
     animationType='fade'
@@ -205,96 +232,112 @@ const ContactSupportModal = ({
           className="mt-6 py-4 px-4 rounded-2xl bg-white shadow-lg"
         >
           <Text className="text-slate-400 font-pregular">Customer Support</Text>
-          <View
-            className="mt-4 flex flex-row items-center"
-          >
+          {
+            !customerSupport.supportPhoneNumber ? <></> :          
             <View
-              className="p-2 bg-slate-200 rounded-full mr-2"
+              className="mt-4 flex flex-row items-center"
             >
-              <Image
-                source={icons.phoneOutline}
-                className="w-[14px] h-[14px]"
-                tintColor={"#475569"}
-              />
+              <View
+                className="p-2 bg-slate-200 rounded-full mr-2"
+              >
+                <Image
+                  source={icons.phoneOutline}
+                  className="w-[14px] h-[14px]"
+                  tintColor={"#475569"}
+                />
+              </View>
+              <View>
+                <Text className="font-light text-xs text-slate-400">Customer Number</Text>
+                <Text className="font-pregular text-lg text-slate-800">{customerSupport.supportPhoneNumber}</Text>
+              </View>
             </View>
-            <View>
-              <Text className="font-light text-xs text-slate-400">Customer Number</Text>
-              <Text className="font-pregular text-lg text-slate-800">+1(555)123-4567</Text>
-            </View>
-          </View>
-          <View
-            className="mt-4 flex flex-row items-center"
-          >
+          }
+          {
+            !customerSupport.supportEmail ? <></>:
             <View
-              className="p-2 bg-slate-200 rounded-full mr-2"
+              className="mt-4 flex flex-row items-center"
             >
-              <Image
-                source={icons.mailOutline}
-                className="w-[14px] h-[14px]"
-                tintColor={"#475569"}
-              />
+              <View
+                className="p-2 bg-slate-200 rounded-full mr-2"
+              >
+                <Image
+                  source={icons.mailOutline}
+                  className="w-[14px] h-[14px]"
+                  tintColor={"#475569"}
+                />
+              </View>
+              <View>
+                <Text className="font-light text-xs text-slate-400">Email Address</Text>
+                <Text className="font-pregular text-lg text-slate-800">{customerSupport.supportEmail}</Text>
+              </View>
             </View>
-            <View>
-              <Text className="font-light text-xs text-slate-400">Email Address</Text>
-              <Text className="font-pregular text-lg text-slate-800">help@xxxxxx.com</Text>
-            </View>
-          </View>
+          }
         </View>
         <View
           className="mt-6 py-4 px-4 rounded-2xl bg-white shadow-lg"
         >
           <Text className="text-slate-400 font-pregular">Social Media</Text>
-          <View
-            className="mt-4 flex flex-row items-center"
-          >
+          {
+            !customerSupport.instagram ? <></> :
             <View
-              className="bg-slate-200 rounded-full mr-2"
+              className="mt-4 flex flex-row items-center"
             >
-              <Image
-                source={icons.instagramColor}
-                className="w-[30px] h-[30px]"
-              />
+              <View
+                className="bg-slate-200 rounded-full mr-2"
+              >
+                <Image
+                  source={icons.instagramColor}
+                  className="w-[30px] h-[30px]"
+                />
+              </View>
+              <View>
+                <Text className="font-light text-xs text-slate-400">Instagram</Text>
+                <Text className="font-pregular text-lg text-slate-800">{customerSupport.instagram}</Text>
+              </View>
             </View>
-            <View>
-              <Text className="font-light text-xs text-slate-400">Instagram</Text>
-              <Text className="font-pregular text-lg text-slate-800">@aaaaaaa</Text>
-            </View>
-          </View>
-          <View
-            className="mt-4 flex flex-row items-center"
-          >
+          }
+          {
+            !customerSupport.twitter ? <></> :
             <View
-              className="bg-slate-200 rounded-full mr-2"
+              className="mt-4 flex flex-row items-center"
             >
-              <Image
-                source={icons.twitterColor}
-                className="w-[30px] h-[30px]"
-              />
+              <View
+                className="bg-slate-200 rounded-full mr-2"
+              >
+                <Image
+                  source={icons.twitterColor}
+                  className="w-[30px] h-[30px]"
+                />
+              </View>
+              <View>
+                <Text className="font-light text-xs text-slate-400">Twitter</Text>
+                <Text className="font-pregular text-lg text-slate-800">{customerSupport.twitter}</Text>
+              </View>
             </View>
-            <View>
-              <Text className="font-light text-xs text-slate-400">Twitter</Text>
-              <Text className="font-pregular text-lg text-slate-800">@aaaaaaaa</Text>
-            </View>
-          </View>
-          <View
-            className="mt-4 flex flex-row items-center"
-          >
+          }
+          {
+            !customerSupport.facebook ? <></> :
             <View
-              className="bg-slate-200 rounded-full mr-2"
+              className="mt-4 flex flex-row items-center"
             >
-              <Image
-                source={icons.facebookColor}
-                className="w-[30px] h-[30px]"
-              />
+              <View
+                className="bg-slate-200 rounded-full mr-2"
+              >
+                <Image
+                  source={icons.facebookColor}
+                  className="w-[30px] h-[30px]"
+                />
+              </View>
+              <View>
+                <Text className="font-light text-xs text-slate-400">Facebook</Text>
+                <Text className="font-pregular text-lg text-slate-800">{customerSupport.facebook}</Text>
+              </View>
             </View>
-            <View>
-              <Text className="font-light text-xs text-slate-400">Facebook</Text>
-              <Text className="font-pregular text-lg text-slate-800">@aaaaaaaa</Text>
-            </View>
-          </View>
+          }
         </View>
       </View>
     </SafeAreaView>
   </Modal>
-)
+  )
+}
 export default ProfileTab
