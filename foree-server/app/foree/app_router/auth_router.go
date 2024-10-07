@@ -29,17 +29,17 @@ func (c *AuthRouter) RegisterRouter(router *mux.Router) {
 	// Onboard
 	router.HandleFunc("/onboard", simplePostWrapper(c.authService.CreateUser)).Methods("POST")
 	// Forget password
-	router.HandleFunc("/forget_password", simplePostWrapper(c.authService.ForgetPassword)).Methods("POST")
+	router.HandleFunc("/forget_passwd", simplePostWrapper(c.authService.ForgetPasswd)).Methods("POST")
 	// Forget password verify
-	router.HandleFunc("/forget_password_verify", simplePostWrapper(c.authService.ForgetPasswordVerify)).Methods("POST")
+	router.HandleFunc("/forget_passwd_verify", simplePostWrapper(c.authService.ForgetPasswdVerify)).Methods("POST")
 	// Forget password update
-	router.HandleFunc("/forget_password_update", simplePostWrapper(c.authService.ForgetPasswordUpdate)).Methods("POST")
+	router.HandleFunc("/forget_passwd_update", simplePostWrapper(c.authService.ForgetPasswdUpdate)).Methods("POST")
 	// Get user
 	router.HandleFunc("/user", simpleGetWrapper(c.authService.GetUser)).Methods("GET")
 	// Get user
 	router.HandleFunc("/user_detail", simpleGetWrapper(c.authService.GetUserDetail)).Methods("GET")
 	// Update passwd
-	router.HandleFunc("/update_password", simplePostWrapper(c.authService.UpdatePasswd)).Methods("POST")
+	router.HandleFunc("/update_passwd", simplePostWrapper(c.authService.UpdatePasswd)).Methods("POST")
 	// Update address
 	router.HandleFunc("/update_address", simplePostWrapper(c.authService.UpdateUserAddress)).Methods("POST")
 	// Update phone
