@@ -29,13 +29,13 @@ const (
 )
 
 type UserGroup struct {
-	ID                    int64     `json:"id"`
-	RoleGroup             string    `json:"roleGroup"`
-	TransactionLimitGroup string    `json:"transactionLimitGroup"`
-	FeeGroup              string    `json:"feeGroup"`
-	OwnerId               int64     `json:"ownerId"`
-	CreatedAt             time.Time `json:"createdAt"`
-	UpdatedAt             time.Time `json:"updatedAt"`
+	ID                    int64      `json:"id"`
+	RoleGroup             string     `json:"roleGroup"`
+	TransactionLimitGroup string     `json:"transactionLimitGroup"`
+	FeeGroup              string     `json:"feeGroup"`
+	OwnerId               int64      `json:"ownerId"`
+	CreatedAt             *time.Time `json:"createdAt"`
+	UpdatedAt             *time.Time `json:"updatedAt"`
 }
 
 func NewUserGroupRepo(db *sql.DB) *UserGroupRepo {
