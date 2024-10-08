@@ -182,7 +182,7 @@ const UpdateAddress = () => {
           />
         </View>
         <TouchableOpacity
-          className={`mb-6 py-2 border-2 border-[#005a32] bg-[#c7e9c0] rounded-xl ${isSubmitting||isError ? 'opacity-50' : ''}`}
+          className={`mb-6 py-2 border-2 border-[#005a32] bg-[#c7e9c0] rounded-xl ${isSubmitting||isError34e ? 'opacity-50' : ''}`}
           disabled={isSubmitting||isError}
           onPress={() => {
             Alert.alert("Update Address", "Are you sure?", [
