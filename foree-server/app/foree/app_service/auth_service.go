@@ -788,7 +788,7 @@ func (a *AuthService) UpdateUserPhoneNumber(ctx context.Context, req UpdatePhone
 		foree_logger.Logger.Error("UpdateUserPhoneNumber_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 	}
-	foree_logger.Logger.Info("UpdateUserPhoneNumber_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId")
+	foree_logger.Logger.Info("UpdateUserPhoneNumber_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId)
 	return nil, nil
 }
 
