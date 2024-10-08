@@ -19,6 +19,18 @@ CREATE TABLE IF NOT EXISTS users(
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS user_setting(
+    `id` SERIAL PRIMARY KEY,
+    `is_in_app_notification_enable` BOOL DEFAULT TRUE,
+    `is_push_notification_enable` BOOL DEFAULT TRUE,
+    `is_email_notifications_enable` BOOL DEFAULT TRUE,
+    `owner_id` BIGINT UNSIGNED NOT NULL UNIQUE,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
+
 CREATE TABLE IF NOT EXISTS user_group(
     `id` SERIAL PRIMARY KEY,
     `role_group`  VARCHAR(128) NOT NULL,
@@ -38,7 +50,7 @@ CREATE TABLE IF NOT EXISTS user_extra(
     `nationality` VARCHAR(2) DEFAULT '',
     `occupation_category` VARCHAR(64) DEFAULT '',
     `occupation_name` VARCHAR(128) DEFAULT '',
-    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `owner_id` BIGINT UNSIGNED NOT NULL UNIQUE,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -425,5 +437,29 @@ CREATE TABLE IF NOT EXISTS promotion(
 
 CREATE INDEX idx_tab_email_passwd_col_email ON email_passwd(email);
 CREATE INDEX idx_tab_user_extra_col_owner_id ON user_extra(owner_id);
+CREATE INDEX idx_tab_user_setting_col_owner_id ON user_setting(owner_id);
 CREATE INDEX idx_tab_user_group_col_owner_id ON user_group(owner_id);
 CREATE INDEX idx_tab_user_identifications_col_owner_id ON user_identifications(owner_id);
+CREATE INDEX idx_tab_contact_accounts_col_latest_activity_at ON contact_accounts(latest_activity_at);
+CREATE INDEX idx_tab_contact_accounts_col_latest_owner_id ON contact_accounts(owner_id);
+CREATE INDEX idx_tab_interac_accounts_col_latest_owner_id ON interac_accounts(owner_id);
+CREATE INDEX idx_tab_daily_tx_limit_col_reference ON daily_tx_limit(reference);
+CREATE INDEX idx_tab_fees_col_name ON fees(name);
+CREATE INDEX idx_tab_fees_col_fee_group ON fees(fee_group);
+CREATE INDEX idx_tab_fee_joint_col_parent_tx_id ON fee_joint(parent_tx_id);
+CREATE INDEX idx_tab_promotion_col_name ON promotion(name);
+CREATE INDEX idx_tab_referral_col_referrer_id ON referral(referrer_id);
+CREATE INDEX idx_tab_referral_col_referee_id ON referral(referee_id);
+CREATE INDEX idx_tab_referral_col_referral_code ON referral(referral_code);
+CREATE INDEX idx_tab_rewards_col_owner_id ON rewards(owner_id);
+CREATE INDEX idx_promotion_col_name ON promotion(name);
+CREATE INDEX idx_interac_ci_tx_col_parent_tx_id ON interac_ci_tx(parent_tx_id);
+CREATE INDEX idx_interac_ci_tx_col_scotia_payment_id ON interac_ci_tx(scotia_payment_id);
+CREATE INDEX idx_idm_tx_col_parent_tx_id ON idm_tx(parent_tx_id);
+CREATE INDEX idx_tab_nbp_co_tx_col_parent_tx_id ON nbp_co_tx(parent_tx_id);
+CREATE INDEX idx_tab_nbp_co_tx_col_nbp_reference ON nbp_co_tx(nbp_reference);
+CREATE INDEX idx_tab_foree_refund_tx_col_parent_tx_id ON foree_refund_tx(parent_tx_id);
+CREATE INDEX idx_tab_tx_summary_col_parent_tx_id ON tx_summary(parent_tx_id);
+CREATE INDEX idx_tab_tx_summary_col_owner_id ON tx_summary(owner_id);
+CREATE INDEX idx_tab_tx_summary_col_created_at ON tx_summary(created_at);
+CREATE INDEX idx_tab_rewards_col_applied_transaction_id ON rewards(applied_transaction_id);

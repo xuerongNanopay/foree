@@ -33,6 +33,7 @@ func NewAuthService(
 	interacAccountRepo *account.InteracAccountRepo,
 	userGroupRepo *auth.UserGroupRepo,
 	userExtraRepo *foree_auth.UserExtraRepo,
+	userSettingRepo *auth.UserSettingRepo,
 	referralRepo *referral.ReferralRepo,
 	promotionService *PromotionService,
 ) *AuthService {
