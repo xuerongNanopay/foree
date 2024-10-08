@@ -23,7 +23,7 @@ const (
 		SELECT
 			u.id, u.is_in_app_notification_enable, u.is_push_notification_enable, u.is_email_notifications_enable,
 			u.owner_id, u.created_at, u.updated_at
-		FROM user_group as u
+		FROM user_setting as u
 		WHERE u.owner_id = ?
 	`
 )
