@@ -80,7 +80,7 @@ func (repo *UserSettingRepo) InsertUserSetting(ctx context.Context, us UserSetti
 	return id, nil
 }
 
-func (repo *UserGroupRepo) UpdateUserSettingByOwnerId(ctx context.Context, us UserSetting) error {
+func (repo *UserSettingRepo) UpdateUserSettingByOwnerId(ctx context.Context, us UserSetting) error {
 	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
 
 	var err error
@@ -107,4 +107,46 @@ func (repo *UserGroupRepo) UpdateUserSettingByOwnerId(ctx context.Context, us Us
 		return err
 	}
 	return nil
+}
+
+func (repo *UserSettingRepo) GetUniqueUserSettingByOwnerId(ownerId int64) (*UserSetting, error) {
+	rows, err := repo.db.Query(sQLUserSettingUniqueByOwnerId, ownerId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var u *UserSetting
+
+	for rows.Next() {
+		u, err = scanRowUserSetting(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if u == nil || u.ID == 0 {
+		return nil, nil
+	}
+
+	return u, nil
+}
+
+func scanRowUserSetting(rows *sql.Rows) (*UserSetting, error) {
+	u := new(UserSetting)
+	err := rows.Scan(
+		&u.ID,
+		&u.IsInAppNotificationEnable,
+		&u.IsPushNotificationEnable,
+		&u.IsEmailNotificationsEnable,
+		&u.OwnerId,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }
