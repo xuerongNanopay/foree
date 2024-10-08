@@ -79,3 +79,32 @@ func (repo *UserSettingRepo) InsertUserSetting(ctx context.Context, us UserSetti
 	}
 	return id, nil
 }
+
+func (repo *UserGroupRepo) UpdateUserSettingByOwnerId(ctx context.Context, us UserSetting) error {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+
+	if ok {
+		_, err = dTx.Exec(
+			sQLUserSettingUpdate,
+			us.IsInAppNotificationEnable,
+			us.IsPushNotificationEnable,
+			us.IsEmailNotificationsEnable,
+			us.OwnerId,
+		)
+	} else {
+		_, err = repo.db.Exec(
+			sQLUserSettingUpdate,
+			us.IsInAppNotificationEnable,
+			us.IsPushNotificationEnable,
+			us.IsEmailNotificationsEnable,
+			us.OwnerId,
+		)
+	}
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
