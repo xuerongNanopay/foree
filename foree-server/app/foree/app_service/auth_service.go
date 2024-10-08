@@ -47,6 +47,7 @@ func NewAuthService(
 		interacAccountRepo:     interacAccountRepo,
 		userGroupRepo:          userGroupRepo,
 		userExtraRepo:          userExtraRepo,
+		userSettingRepo:        userSettingRepo,
 		referralRepo:           referralRepo,
 		promotionService:       promotionService,
 	}
@@ -62,6 +63,7 @@ type AuthService struct {
 	interacAccountRepo     *account.InteracAccountRepo
 	userGroupRepo          *auth.UserGroupRepo
 	userExtraRepo          *foree_auth.UserExtraRepo
+	userSettingRepo        *auth.UserSettingRepo
 	referralRepo           *referral.ReferralRepo
 	promotionService       *PromotionService
 }
@@ -464,6 +466,7 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 
 	go a.promotionService.rewardOnboard(newUser)
 	go a.promotionService.initialReferralReward(newUser)
+	go a.createUserSetting(newUser.ID)
 
 	return NewUserDTO(updateSession), nil
 }
@@ -755,6 +758,69 @@ func (a *AuthService) GetUserDetail(ctx context.Context, req transport.SessionRe
 	}
 
 	return NewUserDetailDTO(user), nil
+}
+
+func (a *AuthService) createUserSetting(ownerId int64) {
+	_, err := a.userSettingRepo.InsertUserSetting(context.TODO(), auth.UserSetting{
+		IsInAppNotificationEnable:  true,
+		IsPushNotificationEnable:   true,
+		IsEmailNotificationsEnable: true,
+		OwnerId:                    ownerId,
+	})
+
+	if err != nil {
+		foree_logger.Logger.Error("createUserSettingl_FAIL", "userId", ownerId)
+	}
+
+}
+
+func (a *AuthService) GetUserSetting(ctx context.Context, req transport.SessionReq) (*UserSettingDTO, transport.HError) {
+	session, sErr := a.VerifySession(ctx, req.SessionId)
+	if sErr != nil {
+		var userId int64
+		if session != nil {
+			userId = session.UserId
+		}
+		// Normal error when the token expired
+		foree_logger.Logger.Info("GetUserSetting_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		return nil, sErr
+	}
+
+	us, err := a.userSettingRepo.GetUniqueUserSettingByOwnerId(session.UserId)
+	if err != nil {
+		foree_logger.Logger.Error("GetUserDetail_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+
+	}
+
+	if us != nil {
+		return NewUserSettingDTO(us), nil
+	}
+
+	// Create one.
+	_, err = a.userSettingRepo.InsertUserSetting(context.TODO(), auth.UserSetting{
+		IsInAppNotificationEnable:  true,
+		IsPushNotificationEnable:   true,
+		IsEmailNotificationsEnable: true,
+		OwnerId:                    session.UserId,
+	})
+
+	if err != nil {
+		foree_logger.Logger.Error("createUserSettingl_FAIL", "userId", session.UserId)
+	}
+
+	us, err = a.userSettingRepo.GetUniqueUserSettingByOwnerId(session.UserId)
+	if err != nil {
+		foree_logger.Logger.Error("GetUserDetail_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+
+	}
+
+	if us == nil {
+		foree_logger.Logger.Error("GetUserDetail_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", "userSetting no found")
+		return nil, transport.NewInteralServerError("userSetting no found")
+	}
+	return NewUserSettingDTO(us), nil
 }
 
 func (a *AuthService) UpdateUserPhoneNumber(ctx context.Context, req UpdatePhoneNumberReq) (any, transport.HError) {

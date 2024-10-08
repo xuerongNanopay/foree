@@ -32,6 +32,7 @@ type ForeeApp struct {
 	userRepo               *auth.UserRepo
 	userGroupRepo          *auth.UserGroupRepo
 	sessionRepo            *auth.SessionRepo
+	userSettingRepo        *auth.UserSettingRepo
 	emailPasswdRepo        *auth.EmailPasswdRepo
 	rolePermissionRepo     *auth.RolePermissionRepo
 	contactAccountRepo     *account.ContactAccountRepo
@@ -108,6 +109,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	// Initial Repos
 	app.userRepo = auth.NewUserRepo(db)
 	app.userGroupRepo = auth.NewUserGroupRepo(db)
+	app.userSettingRepo = auth.NewUserSettingRepo(db)
 	app.sessionRepo = auth.NewDefaultSessionRepo(db)
 	app.emailPasswdRepo = auth.NewEmailPasswdRepo(db)
 	app.rolePermissionRepo = auth.NewRolePermission(db)
@@ -196,6 +198,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.interacAccountRepo,
 		app.userGroupRepo,
 		app.userExtraRepo,
+		app.userSettingRepo,
 		app.referralRepo,
 		app.promotionService,
 	)

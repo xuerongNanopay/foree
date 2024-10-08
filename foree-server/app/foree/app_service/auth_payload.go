@@ -239,6 +239,23 @@ func (q UpdatePhoneNumberReq) Validate() *transport.BadRequestError {
 	return nil
 }
 
+type UpdateUserSetting struct {
+	transport.SessionReq
+	IsInAppNotificationEnable  bool `json:"isInAppNotificationEnable"`
+	IsPushNotificationEnable   bool `json:"isPushNotificationEnable"`
+	IsEmailNotificationsEnable bool `json:"isEmailNotificationsEnable"`
+}
+
+func (q UpdateUserSetting) Validate() *transport.BadRequestError {
+	ret := validateStruct(q, "Invalid update userSetting request")
+
+	if len(ret.Details) > 0 {
+		return ret
+	}
+
+	return nil
+}
+
 // --------------- Response ------------------
 func NewUserDTO(session *auth.Session) *UserDTO {
 	ret := &UserDTO{
@@ -313,4 +330,20 @@ func NewUserDetailDTO(u *auth.User) *UserDetailDTO {
 		ret.CreatedAt = u.CreatedAt.UnixMilli()
 	}
 	return ret
+}
+
+type UserSettingDTO struct {
+	IsInAppNotificationEnable  bool  `json:"isInAppNotificationEnable"`
+	IsPushNotificationEnable   bool  `json:"isPushNotificationEnable"`
+	IsEmailNotificationsEnable bool  `json:"isEmailNotificationsEnable"`
+	OwnerId                    int64 `json:"ownerId"`
+}
+
+func NewUserSettingDTO(us *auth.UserSetting) *UserSettingDTO {
+	return &UserSettingDTO{
+		IsInAppNotificationEnable:  us.IsInAppNotificationEnable,
+		IsPushNotificationEnable:   us.IsPushNotificationEnable,
+		IsEmailNotificationsEnable: us.IsEmailNotificationsEnable,
+		OwnerId:                    us.OwnerId,
+	}
 }
