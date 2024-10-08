@@ -788,7 +788,7 @@ func (a *AuthService) GetUserSetting(ctx context.Context, req transport.SessionR
 
 	us, err := a.userSettingRepo.GetUniqueUserSettingByOwnerId(session.UserId)
 	if err != nil {
-		foree_logger.Logger.Error("GetUserDetail_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		foree_logger.Logger.Error("GetUserSetting_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 
 	}
@@ -806,21 +806,58 @@ func (a *AuthService) GetUserSetting(ctx context.Context, req transport.SessionR
 	})
 
 	if err != nil {
-		foree_logger.Logger.Error("createUserSettingl_FAIL", "userId", session.UserId)
+		foree_logger.Logger.Error("GetUserSetting_FAIL", "userId", session.UserId)
 	}
 
 	us, err = a.userSettingRepo.GetUniqueUserSettingByOwnerId(session.UserId)
 	if err != nil {
-		foree_logger.Logger.Error("GetUserDetail_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		foree_logger.Logger.Error("GetUserSetting_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
 		return nil, transport.WrapInteralServerError(err)
 
 	}
 
 	if us == nil {
-		foree_logger.Logger.Error("GetUserDetail_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", "userSetting no found")
+		foree_logger.Logger.Error("GetUserSetting_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", "userSetting no found")
 		return nil, transport.NewInteralServerError("userSetting no found")
 	}
 	return NewUserSettingDTO(us), nil
+}
+
+func (a *AuthService) UpdateUserSetting(ctx context.Context, req UpdateUserSetting) (any, transport.HError) {
+	session, sErr := a.VerifySession(ctx, req.SessionId)
+	if sErr != nil {
+		var userId int64
+		if session != nil {
+			userId = session.UserId
+		}
+		// Normal error when the token expired
+		foree_logger.Logger.Info("UpdateUserSetting_FAIL", "ip", loadRealIp(ctx), "userId", userId, "sessionId", req.SessionId, "cause", sErr.Error())
+		return nil, sErr
+	}
+
+	us, err := a.userSettingRepo.GetUniqueUserSettingByOwnerId(session.UserId)
+	if err != nil {
+		foree_logger.Logger.Error("UpdateUserSetting", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	if us == nil {
+		foree_logger.Logger.Error("UpdateUserSetting", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", "useSetting no found")
+		return nil, transport.NewInteralServerError("userSetting no found")
+	}
+
+	err = a.userSettingRepo.UpdateUserSettingByOwnerId(ctx, auth.UserSetting{
+		IsInAppNotificationEnable:  req.IsInAppNotificationEnable,
+		IsPushNotificationEnable:   req.IsPushNotificationEnable,
+		IsEmailNotificationsEnable: req.IsEmailNotificationsEnable,
+		OwnerId:                    session.UserId,
+	})
+
+	if err != nil {
+		foree_logger.Logger.Error("UpdateUserSetting", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
+	}
+	return nil, nil
 }
 
 func (a *AuthService) UpdateUserPhoneNumber(ctx context.Context, req UpdatePhoneNumberReq) (any, transport.HError) {
