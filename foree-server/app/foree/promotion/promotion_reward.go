@@ -20,6 +20,13 @@ const (
 		FROM promotion_reward_joint p
 		WHERE p.promotion_id = ? AND p.promotion_version = ?
 	`
+	sQLPromotionRewardJointGetUniqueByPromotionIdAndPromotionVersionAndOwnerId = `
+		SELECT
+			p.id, p.promotion_id, p.promotion_version, p.reward_id,
+			p.owner_id, p.created_at, p.updated_at
+		FROM FROM promotion_reward_joint p
+		WHERE p.promotion_id = ? AND p.promotion_version = ? AND OwnerId = ?
+	`
 )
 
 type PromotionRewardJoint struct {
@@ -27,6 +34,7 @@ type PromotionRewardJoint struct {
 	PromotionId      int64      `json:"promotionId"`
 	PromotionVersion int64      `json:"promotionVersion"`
 	RewardId         int64      `json:"rewardId"`
+	OwnerId          int64      `json:"ownerId"`
 	CreatedAt        *time.Time `json:"createdAt"`
 	UpdatedAt        *time.Time `json:"updatedAt"`
 }
@@ -76,4 +84,46 @@ func (repo *PromotionRewardJointRepo) CountPromotionRewardJointByPromotionIdAndP
 		return 0, err
 	}
 	return count, nil
+}
+
+func (repo *PromotionRewardJointRepo) GetUniqueTxSummaryByOwnerAndId(ctx context.Context, promotionId int64, promotionVersion int, ownerId int64) (*PromotionRewardJoint, error) {
+	rows, err := repo.db.Query(sQLPromotionRewardJointGetUniqueByPromotionIdAndPromotionVersionAndOwnerId, promotionId, promotionVersion, ownerId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *PromotionRewardJoint
+
+	for rows.Next() {
+		f, err = scanRowIntoPromotionRewardJoint(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f == nil || f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func scanRowIntoPromotionRewardJoint(rows *sql.Rows) (*PromotionRewardJoint, error) {
+	prj := new(PromotionRewardJoint)
+	err := rows.Scan(
+		&prj.ID,
+		&prj.PromotionId,
+		&prj.PromotionVersion,
+		&prj.RewardId,
+		&prj.OwnerId,
+		&prj.CreatedAt,
+		&prj.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return prj, nil
 }
