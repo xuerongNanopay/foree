@@ -34,6 +34,10 @@ const UpdatePhoneNumber = () => {
   const [form, setForm] = useState({
     phoneNumber: ''
   })
+  const [oldPhoneNumber, setOldPhoneNumber] = useState({
+    phoneNumber: ''
+  })
+
 
   useFocusEffect(useCallback(() => {
     const controller = new AbortController()
@@ -46,6 +50,9 @@ const UpdatePhoneNumber = () => {
         } else {
           const userDetail = resp.data.data
           setForm({
+            phoneNumber: userDetail.phoneNumber,
+          })
+          setOldPhoneNumber({
             phoneNumber: userDetail.phoneNumber,
           })
         }
@@ -114,10 +121,18 @@ const UpdatePhoneNumber = () => {
         <TouchableOpacity
           className={`mb-6 py-2 border-2 border-[#005a32] bg-[#c7e9c0] rounded-xl ${isSubmitting||isError ? 'opacity-50' : ''}`}
           onPress={() => {
-            Alert.alert("Update Phone Number", "Are you sure?", [
-              {text: 'Continue', onPress: () => {submit()}},
-              {text: 'Cancel', onPress: () => {}},
-            ])
+            if (
+              form.address1 === oldPhoneNumber.address1
+            ) {
+              Alert.alert("No Change", "There is no change." [
+                {text: 'OK', onPress: () => {}}
+              ])
+            } else {
+              Alert.alert("Update Phone Number", "Are you sure?", [
+                {text: 'Continue', onPress: () => {submit()}},
+                {text: 'Cancel', onPress: () => {}},
+              ])
+            }
           }}
         >
           <Text className="font-pbold text-lg text-[#005a32] text-center">Update</Text>

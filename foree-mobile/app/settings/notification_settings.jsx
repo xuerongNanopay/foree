@@ -1,6 +1,7 @@
 import { View, Text, SafeAreaView, Switch } from 'react-native'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { authService } from '../../service';
+import { useFocusEffect } from 'expo-router';
 
 const NotificationSettings = () => {
   const [form, setForm] = useState({
