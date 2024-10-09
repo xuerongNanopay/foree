@@ -52,6 +52,10 @@ class AuthService {
     return await this.#httpClient.get("/user_detail", {signal})
   }
 
+  async getUserSetting({signal}={signal}) {
+    return await this.#httpClient.get("/user_setting", {signal})
+  }
+
   async updatePasswd(req, {signal}={signal}) {
     return await this.#httpFormClient.post("/update_passwd", req, {signal})
   }
@@ -62,6 +66,10 @@ class AuthService {
 
   async updatePhone(req, {signal}={signal}) {
     return await this.#httpFormClient.post("/update_phone", req, {signal})
+  }
+
+  async updateUserSetting(req, {signal}={signal}) {
+    return await this.#httpFormClient.post("/update_user_setting", req, {signal})
   }
 
   async logout({signal}={signal}) {
