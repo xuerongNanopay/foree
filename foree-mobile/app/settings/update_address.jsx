@@ -101,18 +101,7 @@ const UpdateAddress = () => {
       try {
         await authPayload.UpdateAddressScheme.validate(form, {abortEarly: false})
         setErrors({})
-        if (
-          form.address1 === oldAddress.address1 &&
-          form.address2 === oldAddress.address2 &&
-          form.city === oldAddress.city &&
-          form.province === oldAddress.province &&
-          form.country === oldAddress.country &&
-          form.postalCode === oldAddress.postalCode
-        ) {
-          setIsError(true)
-        } else {
-          setIsError(false)
-        }
+        setIsError(false)
       } catch (err) {
         let e = {}
         for ( let i of err.inner ) {
@@ -213,10 +202,23 @@ const UpdateAddress = () => {
           className={`mb-6 py-2 border-2 border-[#005a32] bg-[#c7e9c0] rounded-xl ${isSubmitting||isError ? 'opacity-50' : ''}`}
           disabled={isSubmitting||isError}
           onPress={() => {
-            Alert.alert("Update Address", "Are you sure?", [
-              {text: 'Continue', onPress: () => {submit()}},
-              {text: 'Cancel', onPress: () => {}},
-            ])
+            if (
+              form.address1 === oldAddress.address1 &&
+              form.address2 === oldAddress.address2 &&
+              form.city === oldAddress.city &&
+              form.province === oldAddress.province &&
+              form.country === oldAddress.country &&
+              form.postalCode === oldAddress.postalCode
+            ) {
+              Alert.alert("No Change", "There is no change." [
+                {text: 'OK', onPress: () => {}}
+              ])
+            } else {
+              Alert.alert("Update Address", "Are you sure?", [
+                {text: 'Continue', onPress: () => {submit()}},
+                {text: 'Cancel', onPress: () => {}},
+              ])
+            }
           }}
         >
           <Text className="font-pbold text-lg text-[#005a32] text-center">Update</Text>
