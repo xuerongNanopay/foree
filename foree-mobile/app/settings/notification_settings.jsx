@@ -1,5 +1,5 @@
 import { View, Text, SafeAreaView, Switch } from 'react-native'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { authService } from '../../service';
 import { useFocusEffect } from 'expo-router';
 
@@ -24,7 +24,6 @@ const NotificationSettings = () => {
           router.replace("/personal_settings")
         } else {
           const userSetting = resp.data.data
-          console.log('vvvvvv', userSetting)
           setForm({
             isInAppNotificationEnable: userSetting.isInAppNotificationEnable,
             isPushNotificationEnable: userSetting.isPushNotificationEnable,
@@ -42,6 +41,10 @@ const NotificationSettings = () => {
     }
   }, []))
 
+  useEffect(() => {
+    console.log(form)
+  }, [form])
+
   return (
     <SafeAreaView className="h-full">
       <View
@@ -52,8 +55,13 @@ const NotificationSettings = () => {
           <Switch
             trackColor={{false: '#cbd5e1', true: '#005a32'}}
             ios_backgroundColor="#cbd5e1"
-            onValueChange={toggleSwitch}
-            value={isEnabled}
+            onValueChange={(v) => {
+              setForm((form) => ({
+                ...form,
+                isInAppNotificationEnable: v,
+              }))
+            }}
+            value={!!form.isInAppNotificationEnable}
           />
         </View>
         <View className="mt-4 flex flex-row justify-between items-center">
@@ -61,8 +69,13 @@ const NotificationSettings = () => {
           <Switch
             trackColor={{false: '#cbd5e1', true: '#005a32'}}
             ios_backgroundColor="#cbd5e1"
-            onValueChange={toggleSwitch}
-            value={isEnabled}
+            onValueChange={(v) => {
+              setForm((form) => ({
+                ...form,
+                isPushNotificationEnable: v,
+              }))
+            }}
+            value={!!form.isPushNotificationEnable}
           />
         </View>
         <View className="mt-4 flex flex-row justify-between items-center">
@@ -70,8 +83,13 @@ const NotificationSettings = () => {
           <Switch
             trackColor={{false: '#cbd5e1', true: '#005a32'}}
             ios_backgroundColor="#cbd5e1"
-            onValueChange={toggleSwitch}
-            value={isEnabled}
+            onValueChange={(v) => {
+              setForm((form) => ({
+                ...form,
+                isEmailNotificationsEnable: v,
+              }))
+            }}
+            value={!!form.isEmailNotificationsEnable}
           />
         </View>
       </View>
