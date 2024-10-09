@@ -424,7 +424,10 @@ CREATE TABLE IF NOT EXISTS tx_summary(
 );
 
 CREATE TABLE IF NOT EXISTS promotion(
-    `name` VARCHAR(128) NOT NULL PRIMARY KEY,
+    `id` SERIAL PRIMARY KEY,
+    `name` VARCHAR(128) NOT NULL UNIQUE,
+    `version` INTEGER DEFAULT 1,
+    `quantity` INTEGER DEFAULT 100,
     `description` VARCHAR(256) DEFAULT '',
     `amount` DECIMAL(11, 2) NOT NULL,
     `currency` CHAR(3) NOT NULL,
@@ -452,10 +455,9 @@ CREATE INDEX idx_tab_referral_col_referrer_id ON referral(referrer_id);
 CREATE INDEX idx_tab_referral_col_referee_id ON referral(referee_id);
 CREATE INDEX idx_tab_referral_col_referral_code ON referral(referral_code);
 CREATE INDEX idx_tab_rewards_col_owner_id ON rewards(owner_id);
-CREATE INDEX idx_promotion_col_name ON promotion(name);
-CREATE INDEX idx_interac_ci_tx_col_parent_tx_id ON interac_ci_tx(parent_tx_id);
-CREATE INDEX idx_interac_ci_tx_col_scotia_payment_id ON interac_ci_tx(scotia_payment_id);
-CREATE INDEX idx_idm_tx_col_parent_tx_id ON idm_tx(parent_tx_id);
+CREATE INDEX idx_tab_interac_ci_tx_col_parent_tx_id ON interac_ci_tx(parent_tx_id);
+CREATE INDEX idx_tab_interac_ci_tx_col_scotia_payment_id ON interac_ci_tx(scotia_payment_id);
+CREATE INDEX idx_tab_idm_tx_col_parent_tx_id ON idm_tx(parent_tx_id);
 CREATE INDEX idx_tab_nbp_co_tx_col_parent_tx_id ON nbp_co_tx(parent_tx_id);
 CREATE INDEX idx_tab_nbp_co_tx_col_nbp_reference ON nbp_co_tx(nbp_reference);
 CREATE INDEX idx_tab_foree_refund_tx_col_parent_tx_id ON foree_refund_tx(parent_tx_id);

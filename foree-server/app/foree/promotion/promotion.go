@@ -20,10 +20,13 @@ const (
 
 // Control the life cycle of promotion.
 type Promotion struct {
+	ID          int64            `json:"id"`
 	Name        string           `json:"name"`
 	Description string           `json:"description"`
 	Amt         types.AmountData `json:"Amt"`
 	IsEnable    bool             `json:"isEnable"`
+	Quantity    int              `json:"quantity"`
+	Version     int              `json:"version"`
 	StartTime   *time.Time       `json:"startTime"`
 	EndTime     *time.Time       `json:"endTime"`
 	CreatedAt   *time.Time       `json:"createdAt"`
