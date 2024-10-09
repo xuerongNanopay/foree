@@ -62,7 +62,7 @@ func (repo *UserSettingRepo) InsertUserSetting(ctx context.Context, us UserSetti
 		)
 	} else {
 		result, err = repo.db.Exec(
-			sQLUserGroupInsert,
+			sQLUserSettingInsert,
 			us.IsInAppNotificationEnable,
 			us.IsPushNotificationEnable,
 			us.IsEmailNotificationsEnable,

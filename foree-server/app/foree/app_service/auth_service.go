@@ -806,7 +806,8 @@ func (a *AuthService) GetUserSetting(ctx context.Context, req transport.SessionR
 	})
 
 	if err != nil {
-		foree_logger.Logger.Error("GetUserSetting_FAIL", "userId", session.UserId)
+		foree_logger.Logger.Error("GetUserSetting_FAIL", "userId", session.UserId, "cause", err.Error())
+		return nil, transport.WrapInteralServerError(err)
 	}
 
 	us, err = a.userSettingRepo.GetUniqueUserSettingByOwnerId(session.UserId)
