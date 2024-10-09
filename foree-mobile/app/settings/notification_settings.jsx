@@ -1,7 +1,7 @@
 import { View, Text, SafeAreaView, Switch } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { authService } from '../../service';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 
 const NotificationSettings = () => {
   const [form, setForm] = useState({
@@ -9,10 +9,6 @@ const NotificationSettings = () => {
     isPushNotificationEnable: true,
     isEmailNotificationsEnable: true,
   })
-
-
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
   useFocusEffect(useCallback(() => {
     const controller = new AbortController()
@@ -42,7 +38,22 @@ const NotificationSettings = () => {
   }, []))
 
   useEffect(() => {
-    console.log(form)
+    const updateUserNotification = async() => {
+      try {
+        const resp = await authService.updateUserSetting(form)
+        if ( resp.status / 100 !== 2 ) {
+          console.warn("update notification", resp.status, resp.data)
+          if ( router.canGoBack ) {
+            router.back()
+          } else {
+            router.replace("/personal_settings")
+          }
+        }
+      } catch (err) {
+        console.error("update notification", err)
+      }
+    }
+    updateUserNotification()
   }, [form])
 
   return (
