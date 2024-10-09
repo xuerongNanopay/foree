@@ -44,7 +44,7 @@ type ForeeApp struct {
 	txLimitRepo            *transaction.TxLimitRepo
 	feeRepo                *transaction.FeeRepo
 	feeJointRepo           *transaction.FeeJointRepo
-	rewardRepo             *transaction.RewardRepo
+	rewardRepo             *promotion.RewardRepo
 	rateRepo               *transaction.RateRepo
 	idmTxRepo              *transaction.IdmTxRepo
 	idmRepo                *transaction.IDMComplianceRepo
@@ -122,7 +122,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.feeRepo = transaction.NewFeeRepo(db)
 	app.feeJointRepo = transaction.NewFeeJointRepo(db)
 	app.rateRepo = transaction.NewRateRepo(db)
-	app.rewardRepo = transaction.NewRewardRepo(db)
+	app.rewardRepo = promotion.NewRewardRepo(db)
 	app.idmTxRepo = transaction.NewIdmTxRepo(db)
 	app.idmRepo = transaction.NewIDMComplianceRepo(db)
 	app.foreeTxRepo = transaction.NewForeeTxRepo(db)

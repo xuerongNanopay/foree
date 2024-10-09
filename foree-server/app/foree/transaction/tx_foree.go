@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"xue.io/go-pay/app/foree/account"
+	"xue.io/go-pay/app/foree/promotion"
 	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
@@ -118,7 +119,7 @@ type ForeeTx struct {
 	FeeJointIds   []int64                 `json:"feeJointIds,omitempty"`
 	FeeJoints     []*FeeJoint             `json:"feesJoints,omitempty"`
 	RewardIds     []int64                 `json:"rewardIds,omitempty"`
-	Rewards       []*Reward               `json:"rewards,omitempty"`
+	Rewards       []*promotion.Reward     `json:"rewards,omitempty"`
 	CI            *InteracCITx            `json:"ci,omitempty"`
 	IDM           *IDMTx                  `json:"idm,omitempty"`
 	COUT          *NBPCOTx                `json:"cout,omitempty"`

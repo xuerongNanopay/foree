@@ -5,6 +5,7 @@ import (
 
 	"xue.io/go-pay/app/foree/account"
 	foree_constant "xue.io/go-pay/app/foree/constant"
+	"xue.io/go-pay/app/foree/promotion"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/server/transport"
@@ -162,7 +163,7 @@ type RewardDTO struct {
 	ExpireAt    int64        `json:"expireAt,omitempty"`
 }
 
-func NewRewardDTO(r *transaction.Reward) *RewardDTO {
+func NewRewardDTO(r *promotion.Reward) *RewardDTO {
 	d := &RewardDTO{
 		ID:          r.ID,
 		Type:        r.Type,

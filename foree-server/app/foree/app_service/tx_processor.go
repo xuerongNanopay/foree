@@ -8,6 +8,7 @@ import (
 
 	"xue.io/go-pay/app/foree/account"
 	foree_logger "xue.io/go-pay/app/foree/logger"
+	"xue.io/go-pay/app/foree/promotion"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
@@ -29,7 +30,7 @@ func NewTxProcessor(
 	txSummaryRepo *transaction.TxSummaryRepo,
 	foreeTxRepo *transaction.ForeeTxRepo,
 	interacRefundTxRepo *transaction.ForeeRefundTxRepo,
-	rewardRepo *transaction.RewardRepo,
+	rewardRepo *promotion.RewardRepo,
 	dailyTxLimiteRepo *transaction.DailyTxLimitRepo,
 	userRepo *auth.UserRepo,
 	contactAccountRepo *account.ContactAccountRepo,
@@ -74,7 +75,7 @@ type TxProcessor struct {
 	foreeTxRepo         *transaction.ForeeTxRepo
 	foreeRefundRepo     *transaction.ForeeRefundTxRepo
 	interacRefundTxRepo *transaction.ForeeRefundTxRepo
-	rewardRepo          *transaction.RewardRepo
+	rewardRepo          *promotion.RewardRepo
 	dailyTxLimiteRepo   *transaction.DailyTxLimitRepo
 	userRepo            *auth.UserRepo
 	contactAccountRepo  *account.ContactAccountRepo

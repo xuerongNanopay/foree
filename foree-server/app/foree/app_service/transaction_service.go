@@ -9,6 +9,7 @@ import (
 	"xue.io/go-pay/app/foree/account"
 	foree_constant "xue.io/go-pay/app/foree/constant"
 	foree_logger "xue.io/go-pay/app/foree/logger"
+	"xue.io/go-pay/app/foree/promotion"
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/auth"
@@ -25,7 +26,7 @@ func NewTransactionService(
 	foreeTxRepo *transaction.ForeeTxRepo,
 	txSummaryRepo *transaction.TxSummaryRepo,
 	txQuoteRepo *transaction.TxQuoteRepo,
-	rewardRepo *transaction.RewardRepo,
+	rewardRepo *promotion.RewardRepo,
 	contactAccountRepo *account.ContactAccountRepo,
 	interacAccountRepo *account.InteracAccountRepo,
 	feeJointRepo *transaction.FeeJointRepo,
@@ -63,7 +64,7 @@ type TransactionService struct {
 	foreeTxRepo        *transaction.ForeeTxRepo
 	txSummaryRepo      *transaction.TxSummaryRepo
 	txQuoteRepo        *transaction.TxQuoteRepo
-	rewardRepo         *transaction.RewardRepo
+	rewardRepo         *promotion.RewardRepo
 	contactAccountRepo *account.ContactAccountRepo
 	interacAccountRepo *account.InteracAccountRepo
 	feeJointRepo       *transaction.FeeJointRepo
@@ -239,7 +240,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	// Get reward
-	var rewards = make([]*transaction.Reward, 0)
+	var rewards = make([]*promotion.Reward, 0)
 
 	if len(req.RewardIds) > 0 {
 		rs, err := t.rewardRepo.GetAllRewardByOwnerIdAndIds(ctx, session.UserId, req.RewardIds)
@@ -254,7 +255,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		}
 
 		for _, reward := range rs {
-			if reward.Status != transaction.RewardStatusActive {
+			if reward.Status != promotion.RewardStatusActive {
 				foree_logger.Logger.Warn("QuoteTx_FAIL",
 					"ip", loadRealIp(ctx),
 					"userId", session.UserId,
@@ -395,7 +396,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 
 	if len(rewards) > 0 {
 		rIds := make([]int64, len(rewards))
-		rs := make([]*transaction.Reward, len(rewards))
+		rs := make([]*promotion.Reward, len(rewards))
 		tRewardAmt := types.AmountData{}
 
 		for i, reward := range rewards {
@@ -536,7 +537,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 				return
 			}
 			for _, reward := range rewards {
-				if reward.Status != transaction.RewardStatusActive {
+				if reward.Status != promotion.RewardStatusActive {
 					foree_logger.Logger.Warn("CreateTx_FAIL",
 						"ip", loadRealIp(ctx),
 						"userId", session.UserId,
@@ -698,7 +699,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		if len(foreeTx.Rewards) == 1 {
 			r := foreeTx.Rewards[1]
 			r.AppliedTransactionId = foreeTxID
-			r.Status = transaction.RewardStatusPending
+			r.Status = promotion.RewardStatusPending
 			err := t.rewardRepo.UpdateRewardTxById(ctx, *r)
 			if err != nil {
 				foree_logger.Logger.Error("CreateTx_FAIL",
