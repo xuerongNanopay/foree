@@ -2,6 +2,7 @@ import { View, Text, SafeAreaView, Alert, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
+import { authPayload } from '../../service'
 
 const UpdatePasswd = () => {
   const [errors, setErrors] = useState({})
@@ -15,7 +16,7 @@ const UpdatePasswd = () => {
   useEffect(() => {
     async function validate() {
       try {
-        // await authPayload.ForgetPasswdUpdateScheme.validate(form, {abortEarly: false})
+        await authPayload.ChangePasswdScheme.validate(form, {abortEarly: false})
         setIsError(false)
         setErrors({})
       } catch (err) {
@@ -76,7 +77,8 @@ const UpdatePasswd = () => {
           />
         </View>
         <TouchableOpacity
-          className="mb-10 py-2 border-2 border-[#005a32] bg-[#c7e9c0] rounded-xl"
+          className={`mb-6 py-2 border-2 border-[#005a32] bg-[#c7e9c0] rounded-xl ${isSubmitting||isError ? 'opacity-50' : ''}`}
+          disabled={isSubmitting||isError}
           onPress={() => {
             Alert.alert("Change password", "Are you sure?", [
               {text: 'Continue', onPress: () => {console.log("TODO: close account")}},

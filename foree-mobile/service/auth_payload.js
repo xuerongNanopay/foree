@@ -11,8 +11,8 @@ const VerifyEmailScheme = object({
 })
 
 const ChangePasswdScheme = object({
-  oldPassword: string().required(),
-  password: fieldScheme.PasswordScheme(),
+  oldPassword: string().required("required"),
+  newPassword: fieldScheme.PasswordScheme(),
 })
 
 const LoginScheme = object({
