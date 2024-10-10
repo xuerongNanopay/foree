@@ -27,54 +27,55 @@ import (
 )
 
 type ForeeApp struct {
-	envFilePath            string
-	db                     *sql.DB
-	userRepo               *auth.UserRepo
-	userGroupRepo          *auth.UserGroupRepo
-	sessionRepo            *auth.SessionRepo
-	userSettingRepo        *auth.UserSettingRepo
-	emailPasswdRepo        *auth.EmailPasswdRepo
-	rolePermissionRepo     *auth.RolePermissionRepo
-	contactAccountRepo     *account.ContactAccountRepo
-	interacAccountRepo     *account.InteracAccountRepo
-	userExtraRepo          *foree_auth.UserExtraRepo
-	userIdnetificationRepo *foree_auth.UserIdentificationRepo
-	referralRepo           *referral.ReferralRepo
-	dailyTxLimitRepo       *transaction.DailyTxLimitRepo
-	txLimitRepo            *transaction.TxLimitRepo
-	feeRepo                *transaction.FeeRepo
-	feeJointRepo           *transaction.FeeJointRepo
-	rewardRepo             *promotion.RewardRepo
-	rateRepo               *transaction.RateRepo
-	idmTxRepo              *transaction.IdmTxRepo
-	idmRepo                *transaction.IDMComplianceRepo
-	foreeTxRepo            *transaction.ForeeTxRepo
-	txHistoryRepo          *transaction.TxHistoryRepo
-	interacCITxRepo        *transaction.InteracCITxRepo
-	interacRefundTxRepo    *transaction.ForeeRefundTxRepo
-	nbpCOTxRepo            *transaction.NBPCOTxRepo
-	txQuoteRepo            *transaction.TxQuoteRepo
-	txSummaryRepo          *transaction.TxSummaryRepo
-	promotionRepo          *promotion.PromotionRepo
-	authService            *foree_service.AuthService
-	accountService         *foree_service.AccountService
-	feeService             *foree_service.FeeService
-	rateService            *foree_service.RateService
-	txLimitService         *foree_service.TxLimitService
-	transactionService     *foree_service.TransactionService
-	promotionService       *foree_service.PromotionService
-	scotiaClient           scotia.ScotiaClient
-	idmClient              idm.IDMClient
-	nbpClient              nbp.NBPClient
-	txProcessor            *foree_service.TxProcessor
-	interacTxProcessor     *foree_service.InteracTxProcessor
-	idmTxProcessor         *foree_service.IDMTxProcessor
-	nbpTxProcessor         *foree_service.NBPTxProcessor
-	accountRouter          *foree_router.AccountRouter
-	authRouter             *foree_router.AuthRouter
-	transactionRouter      *foree_router.TransactionRouter
-	sysRouter              *sys_router.SystemRouter
-	generateRouter         *foree_router.GeneralRouter
+	envFilePath              string
+	db                       *sql.DB
+	userRepo                 *auth.UserRepo
+	userGroupRepo            *auth.UserGroupRepo
+	sessionRepo              *auth.SessionRepo
+	userSettingRepo          *auth.UserSettingRepo
+	emailPasswdRepo          *auth.EmailPasswdRepo
+	rolePermissionRepo       *auth.RolePermissionRepo
+	contactAccountRepo       *account.ContactAccountRepo
+	interacAccountRepo       *account.InteracAccountRepo
+	userExtraRepo            *foree_auth.UserExtraRepo
+	userIdnetificationRepo   *foree_auth.UserIdentificationRepo
+	referralRepo             *referral.ReferralRepo
+	dailyTxLimitRepo         *transaction.DailyTxLimitRepo
+	txLimitRepo              *transaction.TxLimitRepo
+	feeRepo                  *transaction.FeeRepo
+	feeJointRepo             *transaction.FeeJointRepo
+	rewardRepo               *promotion.RewardRepo
+	rateRepo                 *transaction.RateRepo
+	idmTxRepo                *transaction.IdmTxRepo
+	idmRepo                  *transaction.IDMComplianceRepo
+	foreeTxRepo              *transaction.ForeeTxRepo
+	txHistoryRepo            *transaction.TxHistoryRepo
+	interacCITxRepo          *transaction.InteracCITxRepo
+	interacRefundTxRepo      *transaction.ForeeRefundTxRepo
+	nbpCOTxRepo              *transaction.NBPCOTxRepo
+	txQuoteRepo              *transaction.TxQuoteRepo
+	txSummaryRepo            *transaction.TxSummaryRepo
+	promotionRepo            *promotion.PromotionRepo
+	authService              *foree_service.AuthService
+	accountService           *foree_service.AccountService
+	feeService               *foree_service.FeeService
+	rateService              *foree_service.RateService
+	txLimitService           *foree_service.TxLimitService
+	transactionService       *foree_service.TransactionService
+	promotionService         *foree_service.PromotionService
+	promotionRewardJointRepo *promotion.PromotionRewardJointRepo
+	scotiaClient             scotia.ScotiaClient
+	idmClient                idm.IDMClient
+	nbpClient                nbp.NBPClient
+	txProcessor              *foree_service.TxProcessor
+	interacTxProcessor       *foree_service.InteracTxProcessor
+	idmTxProcessor           *foree_service.IDMTxProcessor
+	nbpTxProcessor           *foree_service.NBPTxProcessor
+	accountRouter            *foree_router.AccountRouter
+	authRouter               *foree_router.AuthRouter
+	transactionRouter        *foree_router.TransactionRouter
+	sysRouter                *sys_router.SystemRouter
+	generateRouter           *foree_router.GeneralRouter
 }
 
 func (app *ForeeApp) Boot(envFilePath string) error {
@@ -133,6 +134,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.txQuoteRepo = transaction.NewTxQuoteRepo(5, 2048)
 	app.txSummaryRepo = transaction.NewTxSummaryRepo(db)
 	app.promotionRepo = promotion.NewPromotionRepo(db)
+	app.promotionRewardJointRepo = promotion.NewPromotionRewardJointRepo(db)
 	app.txLimitRepo = transaction.NewTxLimitRepo(db)
 
 	//Initial vendors
@@ -186,7 +188,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.txProcessor.SetIDMTxProcessor(app.idmTxProcessor)
 	app.txProcessor.SetNBPTxProcessor(app.nbpTxProcessor)
 
-	app.promotionService = foree_service.NewPromotionService(app.promotionRepo, app.rewardRepo, app.referralRepo)
+	app.promotionService = foree_service.NewPromotionService(app.promotionRepo, app.rewardRepo, app.referralRepo, app.promotionRewardJointRepo)
 
 	//Initial service
 	app.authService = foree_service.NewAuthService(

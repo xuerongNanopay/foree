@@ -25,11 +25,13 @@ func NewPromotionService(
 	promotionRepo *promotion.PromotionRepo,
 	rewardRepo *promotion.RewardRepo,
 	referralRepo *referral.ReferralRepo,
+	promotionRewardJointRepo *promotion.PromotionRewardJointRepo,
 ) *PromotionService {
 	promotionService := &PromotionService{
 		rewardRepo:                  rewardRepo,
 		promotionRepo:               promotionRepo,
 		referralRepo:                referralRepo,
+		promotionRewardJointRepo:    promotionRewardJointRepo,
 		promotionCacheInsertChan:    make(chan string, 1),
 		promotionCacheUpdateChan:    make(chan string, 1),
 		promotionCacheRefreshTicker: time.NewTicker(promotionCacheRefreshInterval),
