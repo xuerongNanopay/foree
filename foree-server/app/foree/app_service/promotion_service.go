@@ -2,6 +2,7 @@ package foree_service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"sync"
 	"time"
@@ -10,24 +11,26 @@ import (
 	"xue.io/go-pay/app/foree/promotion"
 	"xue.io/go-pay/app/foree/referral"
 	"xue.io/go-pay/auth"
+	"xue.io/go-pay/constant"
 )
 
 const (
 	PromotionOnboard  = "ONBOARD_PROMOTION"
-	PromotionReferrer = "REFERRER_PROMOTION"
-	PromotionReferee  = "REFEREE_PROMOTION"
+	PromotionReferral = "REFERRAL_PROMOTION"
 )
 
 const promotionCacheExpiry time.Duration = 2 * time.Minute
 const promotionCacheRefreshInterval time.Duration = 1 * time.Minute
 
 func NewPromotionService(
+	db *sql.DB,
 	promotionRepo *promotion.PromotionRepo,
 	rewardRepo *promotion.RewardRepo,
 	referralRepo *referral.ReferralRepo,
 	promotionRewardJointRepo *promotion.PromotionRewardJointRepo,
 ) *PromotionService {
 	promotionService := &PromotionService{
+		db:                          db,
 		rewardRepo:                  rewardRepo,
 		promotionRepo:               promotionRepo,
 		referralRepo:                referralRepo,
@@ -41,7 +44,7 @@ func NewPromotionService(
 }
 
 type PromotionService struct {
-	*referral.ReferralRepo
+	db                          *sql.DB
 	promotionRepo               *promotion.PromotionRepo
 	rewardRepo                  *promotion.RewardRepo
 	referralRepo                *referral.ReferralRepo
@@ -160,7 +163,7 @@ func (p *PromotionService) rewardOnboard(registerUser auth.User) {
 		return
 	}
 	if prj != nil {
-		foree_logger.Logger.Debug("Reward_Onboard_FAIL", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "user already got the promotion")
+		foree_logger.Logger.Warn("Reward_Onboard_FAIL", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "user already got the promotion")
 		return
 	}
 
@@ -174,22 +177,83 @@ func (p *PromotionService) rewardOnboard(registerUser auth.User) {
 		ExpireAt:    &expiry,
 	}
 
-	rewardId, err := p.rewardRepo.InsertReward(context.TODO(), reward)
+	ctx := context.TODO()
+	dTx, err := p.db.Begin()
 	if err != nil {
 		foree_logger.Logger.Error("Reward_Onboard_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		dTx.Rollback()
+		return
 	}
-	foree_logger.Logger.Info("Reward_Onboard_SUCCESS", "userId", registerUser.ID, "rewardId", rewardId)
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+
+	rewardId, err := p.rewardRepo.InsertReward(ctx, reward)
+	if err != nil {
+		dTx.Rollback()
+		foree_logger.Logger.Error("Reward_Onboard_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
 
 	// Update join.
-	_, err = p.promotionRewardJointRepo.InsertPromotionRewardJoint(context.TODO(), promotion.PromotionRewardJoint{
+	_, err = p.promotionRewardJointRepo.InsertPromotionRewardJoint(ctx, promotion.PromotionRewardJoint{
 		PromotionId:      promo.ID,
 		PromotionVersion: promo.Version,
 		RewardId:         rewardId,
 		OwnerId:          registerUser.ID,
 	})
 	if err != nil {
+		dTx.Rollback()
 		foree_logger.Logger.Error("Reward_Onboard_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		return
 	}
+
+	if err = dTx.Commit(); err != nil {
+		foree_logger.Logger.Error("Reward_Onboard_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
+
+	foree_logger.Logger.Info("Reward_Onboard_SUCCESS", "userId", registerUser.ID, "rewardId", rewardId)
+}
+
+func (p *PromotionService) rewardReferral(registerUser auth.User) {
+	referral, err := p.referralRepo.GetUniqueReferralByRefereeId(registerUser.ID)
+	if err != nil {
+		foree_logger.Logger.Error("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
+	if referral == nil {
+		foree_logger.Logger.Debug("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", "do not have referrer")
+		return
+	}
+
+	promo, err := p.getPromotion(PromotionReferral)
+
+	if err != nil {
+		foree_logger.Logger.Error("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
+
+	if promo == nil {
+		foree_logger.Logger.Warn("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferral, "cause", "promotion no found")
+		return
+	}
+
+	if !promo.IsValid() {
+		foree_logger.Logger.Debug("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferral, "cause", "promotion is invalid")
+		return
+	}
+
+	prj, err := p.promotionRewardJointRepo.GetUniquePromotionRewardJointByPromotionIdAndReferrerIdAndRefereeId(promo.ID, referral.ID, registerUser.ID)
+
+	if err != nil {
+		foree_logger.Logger.Error("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
+
+	if prj != nil {
+		foree_logger.Logger.Warn("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "user already got the promotion")
+		return
+	}
+
 }
 
 func (p *PromotionService) initialReferralReward(registerUser auth.User) {

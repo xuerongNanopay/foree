@@ -188,7 +188,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.txProcessor.SetIDMTxProcessor(app.idmTxProcessor)
 	app.txProcessor.SetNBPTxProcessor(app.nbpTxProcessor)
 
-	app.promotionService = foree_service.NewPromotionService(app.promotionRepo, app.rewardRepo, app.referralRepo, app.promotionRewardJointRepo)
+	app.promotionService = foree_service.NewPromotionService(app.db, app.promotionRepo, app.rewardRepo, app.referralRepo, app.promotionRewardJointRepo)
 
 	//Initial service
 	app.authService = foree_service.NewAuthService(
