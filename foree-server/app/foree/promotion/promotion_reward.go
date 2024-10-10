@@ -20,19 +20,19 @@ const (
 		FROM promotion_reward_joint p
 		WHERE p.promotion_id = ? AND p.promotion_version = ?
 	`
-	sQLPromotionRewardJointGetUniqueByPromotionIdAndPromotionVersionAndOwnerId = `
+	sQLPromotionRewardJointGetUniqueByPromotionIdAndOwnerId = `
 		SELECT
 			p.id, p.promotion_id, p.promotion_version, p.reward_id,
 			p.owner_id, p.created_at, p.updated_at
 		FROM FROM promotion_reward_joint p
-		WHERE p.promotion_id = ? AND p.promotion_version = ? AND OwnerId = ?
+		WHERE p.promotion_id = ? AND OwnerId = ?
 	`
 )
 
 type PromotionRewardJoint struct {
 	ID               int64      `json:"id"`
 	PromotionId      int64      `json:"promotionId"`
-	PromotionVersion int64      `json:"promotionVersion"`
+	PromotionVersion int        `json:"promotionVersion"`
 	RewardId         int64      `json:"rewardId"`
 	OwnerId          int64      `json:"ownerId"`
 	CreatedAt        *time.Time `json:"createdAt"`
@@ -86,8 +86,8 @@ func (repo *PromotionRewardJointRepo) CountPromotionRewardJointByPromotionIdAndP
 	return count, nil
 }
 
-func (repo *PromotionRewardJointRepo) GetUniqueTxSummaryByOwnerAndId(ctx context.Context, promotionId int64, promotionVersion int, ownerId int64) (*PromotionRewardJoint, error) {
-	rows, err := repo.db.Query(sQLPromotionRewardJointGetUniqueByPromotionIdAndPromotionVersionAndOwnerId, promotionId, promotionVersion, ownerId)
+func (repo *PromotionRewardJointRepo) GetUniquePromotionRewardJointByPromotionIdAndOwnerId(promotionId int64, ownerId int64) (*PromotionRewardJoint, error) {
+	rows, err := repo.db.Query(sQLPromotionRewardJointGetUniqueByPromotionIdAndOwnerId, promotionId, ownerId)
 
 	if err != nil {
 		return nil, err

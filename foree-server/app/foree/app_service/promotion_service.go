@@ -15,8 +15,8 @@ import (
 const PromotionOnboard = "ONBOARD_PROMOTION"
 const PromotionReferral = "REFERRAL_PROMOTION"
 
-const promotionCacheExpiry time.Duration = 4 * time.Minute
-const promotionCacheRefreshInterval time.Duration = 2 * time.Minute
+const promotionCacheExpiry time.Duration = 2 * time.Minute
+const promotionCacheRefreshInterval time.Duration = 1 * time.Minute
 
 func NewPromotionService(
 	promotionRepo *promotion.PromotionRepo,
@@ -31,7 +31,7 @@ func NewPromotionService(
 		promotionCacheUpdateChan:    make(chan string, 1),
 		promotionCacheRefreshTicker: time.NewTicker(promotionCacheRefreshInterval),
 	}
-	go promotionService.start()
+	go promotionService.startPromotionCacher()
 	return promotionService
 }
 
@@ -40,14 +40,14 @@ type PromotionService struct {
 	promotionRepo               *promotion.PromotionRepo
 	rewardRepo                  *promotion.RewardRepo
 	referralRepo                *referral.ReferralRepo
-	promotionRewardRepo         *promotion.PromotionRewardJointRepo
+	promotionRewardJointRepo    *promotion.PromotionRewardJointRepo
 	cache                       sync.Map
 	promotionCacheInsertChan    chan string
 	promotionCacheUpdateChan    chan string
 	promotionCacheRefreshTicker *time.Ticker
 }
 
-func (p *PromotionService) start() {
+func (p *PromotionService) startPromotionCacher() {
 	for {
 		select {
 		case promotionName := <-p.promotionCacheInsertChan:
@@ -132,7 +132,6 @@ func (p *PromotionService) getPromotion(promotionName string) (*promotion.Promot
 }
 
 func (p *PromotionService) rewardOnboard(registerUser auth.User) {
-
 	promo, err := p.getPromotion(PromotionOnboard)
 
 	if err != nil {
@@ -149,6 +148,17 @@ func (p *PromotionService) rewardOnboard(registerUser auth.User) {
 		foree_logger.Logger.Debug("Reward_Onboard_FAIL", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "promotion is invalid")
 		return
 	}
+
+	prj, err := p.promotionRewardJointRepo.GetUniquePromotionRewardJointByPromotionIdAndOwnerId(promo.ID, registerUser.ID)
+	if err != nil {
+		foree_logger.Logger.Error("Reward_Onboard_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
+	if prj != nil {
+		foree_logger.Logger.Debug("Reward_Onboard_FAIL", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "user already got the promotion")
+		return
+	}
+
 	expiry := time.Now().Add(time.Hour * 24 * 180)
 	reward := promotion.Reward{
 		Type:        promotion.RewardTypeOnboard,
@@ -165,6 +175,16 @@ func (p *PromotionService) rewardOnboard(registerUser auth.User) {
 	}
 	foree_logger.Logger.Info("Reward_Onboard_SUCCESS", "userId", registerUser.ID, "rewardId", rewardId)
 
+	// Update join.
+	_, err = p.promotionRewardJointRepo.InsertPromotionRewardJoint(context.TODO(), promotion.PromotionRewardJoint{
+		PromotionId:      promo.ID,
+		PromotionVersion: promo.Version,
+		RewardId:         rewardId,
+		OwnerId:          registerUser.ID,
+	})
+	if err != nil {
+		foree_logger.Logger.Error("Reward_Onboard_FAIL", "userId", registerUser.ID, "cause", err.Error())
+	}
 }
 
 func (p *PromotionService) initialReferralReward(registerUser auth.User) {
