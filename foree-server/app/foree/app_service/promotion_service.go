@@ -13,7 +13,7 @@ import (
 )
 
 const PromotionOnboard = "ONBOARD_PROMOTION"
-const PromotionReferral = "REFERRAL_PROMOTION"
+const PromotionReferrer = "REFERRER_PROMOTION"
 
 const promotionCacheExpiry time.Duration = 2 * time.Minute
 const promotionCacheRefreshInterval time.Duration = 1 * time.Minute
@@ -198,7 +198,7 @@ func (p *PromotionService) initialReferralReward(registerUser auth.User) {
 		return
 	}
 
-	promo, err := p.getPromotion(PromotionReferral)
+	promo, err := p.getPromotion(PromotionReferrer)
 
 	if err != nil {
 		foree_logger.Logger.Error("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
@@ -206,12 +206,12 @@ func (p *PromotionService) initialReferralReward(registerUser auth.User) {
 	}
 
 	if promo == nil {
-		foree_logger.Logger.Warn("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferral, "cause", "promotion no found")
+		foree_logger.Logger.Warn("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferrer, "cause", "promotion no found")
 		return
 	}
 
 	if !promo.IsValid() {
-		foree_logger.Logger.Debug("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferral, "cause", "promotion is invalid")
+		foree_logger.Logger.Debug("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferrer, "cause", "promotion is invalid")
 		return
 	}
 

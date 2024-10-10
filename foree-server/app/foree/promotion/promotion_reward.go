@@ -22,10 +22,17 @@ const (
 	`
 	sQLPromotionRewardJointGetUniqueByPromotionIdAndOwnerId = `
 		SELECT
-			p.id, p.promotion_id, p.promotion_version, p.reward_id,
+			p.id, p.promotion_id, p.promotion_version, p.reward_id, p.referrer_id, p.referee_id
 			p.owner_id, p.created_at, p.updated_at
 		FROM FROM promotion_reward_joint p
-		WHERE p.promotion_id = ? AND OwnerId = ?
+		WHERE p.promotion_id = ? AND p.owner_id = ?
+	`
+	sQLPromotionRewardJointGetUniqueByPromotionIdAndReferrerIdAndRefereeId = `
+		SELECT
+			p.id, p.promotion_id, p.promotion_version, p.reward_id, p.referrer_id, p.referee_id
+			p.owner_id, p.created_at, p.updated_at
+		FROM FROM promotion_reward_joint p
+		WHERE p.promotion_id = ? AND p.referrer_id = ? AND p.referee_id = ?
 	`
 )
 
@@ -34,6 +41,8 @@ type PromotionRewardJoint struct {
 	PromotionId      int64      `json:"promotionId"`
 	PromotionVersion int        `json:"promotionVersion"`
 	RewardId         int64      `json:"rewardId"`
+	ReferrerId       int64      `json:"referrerId"`
+	RefereeId        int64      `json:"refereeId"`
 	OwnerId          int64      `json:"ownerId"`
 	CreatedAt        *time.Time `json:"createdAt"`
 	UpdatedAt        *time.Time `json:"updatedAt"`
@@ -117,6 +126,8 @@ func scanRowIntoPromotionRewardJoint(rows *sql.Rows) (*PromotionRewardJoint, err
 		&prj.PromotionId,
 		&prj.PromotionVersion,
 		&prj.RewardId,
+		&prj.ReferrerId,
+		&prj.RefereeId,
 		&prj.OwnerId,
 		&prj.CreatedAt,
 		&prj.UpdatedAt,

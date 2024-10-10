@@ -361,6 +361,7 @@ CREATE TABLE IF NOT EXISTS foree_refund_tx(
 CREATE TABLE IF NOT EXISTS nbp_co_tx(
     `id` SERIAL PRIMARY KEY,
     `status` VARCHAR(64) NOT NULL,
+    `mode` VARCHAR(64) DEFAULT '',
     `amount` DECIMAL(11, 2) NOT NULL,
     `currency` CHAR(3) NOT NULL,
     `nbp_reference` VARCHAR(128) DEFAULT '',
@@ -442,6 +443,8 @@ CREATE TABLE IF NOT EXISTS promotion_reward_joint(
     `promotion_id` BIGINT UNSIGNED NOT NULL,
     `promotion_version` INTEGER,
     `reward_id` BIGINT UNSIGNED NOT NULL,
+    `referrer_id` BIGINT UNSIGNED DEFAULT 0,
+    `referee_id` BIGINT UNSIGNED DEFAULT 0,
     `owner_id` BIGINT UNSIGNED NOT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
