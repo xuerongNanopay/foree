@@ -16,7 +16,8 @@ import (
 
 const (
 	PromotionOnboard  = "ONBOARD_PROMOTION"
-	PromotionReferral = "REFERRAL_PROMOTION"
+	PromotionReferrer = "REFERRER_PROMOTION"
+	PromotionReferee  = "REFEREE_PROMOTION"
 )
 
 const promotionCacheExpiry time.Duration = 2 * time.Minute
@@ -214,93 +215,92 @@ func (p *PromotionService) rewardOnboard(registerUser auth.User) {
 	foree_logger.Logger.Info("Reward_Onboard_SUCCESS", "userId", registerUser.ID, "rewardId", rewardId)
 }
 
-func (p *PromotionService) rewardReferral(registerUser auth.User) {
+func (p *PromotionService) rewardReferrer(registerUser auth.User) {
 	referral, err := p.referralRepo.GetUniqueReferralByRefereeId(registerUser.ID)
 	if err != nil {
-		foree_logger.Logger.Error("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		foree_logger.Logger.Error("Referrer_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
 		return
 	}
 	if referral == nil {
-		foree_logger.Logger.Debug("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", "do not have referrer")
-		return
-	}
-
-	promo, err := p.getPromotion(PromotionReferral)
-
-	if err != nil {
-		foree_logger.Logger.Error("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
-		return
-	}
-
-	if promo == nil {
-		foree_logger.Logger.Warn("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferral, "cause", "promotion no found")
-		return
-	}
-
-	if !promo.IsValid() {
-		foree_logger.Logger.Debug("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferral, "cause", "promotion is invalid")
-		return
-	}
-
-	prj, err := p.promotionRewardJointRepo.GetUniquePromotionRewardJointByPromotionIdAndReferrerIdAndRefereeId(promo.ID, referral.ID, registerUser.ID)
-
-	if err != nil {
-		foree_logger.Logger.Error("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
-		return
-	}
-
-	if prj != nil {
-		foree_logger.Logger.Warn("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "user already got the promotion")
-		return
-	}
-
-}
-
-func (p *PromotionService) initialReferralReward(registerUser auth.User) {
-	referral, err := p.referralRepo.GetUniqueReferralByRefereeId(registerUser.ID)
-	if err != nil {
-		foree_logger.Logger.Error("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
-		return
-	}
-	if referral == nil {
-		foree_logger.Logger.Debug("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", "do not have referrer")
+		foree_logger.Logger.Debug("Referrer_Reward_FAIL", "userId", registerUser.ID, "cause", "do not have referrer")
 		return
 	}
 
 	promo, err := p.getPromotion(PromotionReferrer)
 
 	if err != nil {
-		foree_logger.Logger.Error("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		foree_logger.Logger.Error("Referrer_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
 		return
 	}
 
 	if promo == nil {
-		foree_logger.Logger.Warn("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferrer, "cause", "promotion no found")
+		foree_logger.Logger.Warn("Referrer_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferrer, "cause", "promotion no found")
 		return
 	}
 
 	if !promo.IsValid() {
-		foree_logger.Logger.Debug("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferrer, "cause", "promotion is invalid")
+		foree_logger.Logger.Debug("Referrer_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionReferrer, "cause", "promotion is invalid")
 		return
 	}
 
-	generateReferralRewardDescription := func(refereeId int64) string {
-		return fmt.Sprintf("Referral accepted by %v", refereeId)
+	prj, err := p.promotionRewardJointRepo.GetUniquePromotionRewardJointByPromotionIdAndReferrerIdAndRefereeId(promo.ID, referral.ID, registerUser.ID)
+
+	if err != nil {
+		foree_logger.Logger.Error("Referrer_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
+
+	if prj != nil {
+		foree_logger.Logger.Warn("Referrer_Reward_FAIL", "userId", registerUser.ID, "promotionName", PromotionOnboard, "cause", "user already got the promotion")
+		return
 	}
 
 	expiry := time.Now().Add(time.Hour * 24 * 180)
 	reward := promotion.Reward{
-		Type:        promotion.RewardTypeReferal,
-		Status:      promotion.RewardStatusInitial,
-		Description: generateReferralRewardDescription(registerUser.ID),
+		Type:        promotion.RewardTypeReferrer,
+		Status:      promotion.RewardStatusActive,
+		Description: fmt.Sprintf("Referrer reward from %v %v", registerUser.FirstName, registerUser.LastName),
 		Amt:         promo.Amt,
 		OwnerId:     referral.ReferrerId,
 		ExpireAt:    &expiry,
 	}
 
-	rewardId, err := p.rewardRepo.InsertReward(context.TODO(), reward)
+	ctx := context.TODO()
+	dTx, err := p.db.Begin()
 	if err != nil {
-		foree_logger.Logger.Error("Initial_Referral_Reward_FAIL", "userId", registerUser.ID, "cause", "referrerId", referral.ID, err.Error())
+		foree_logger.Logger.Error("Referrer_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		dTx.Rollback()
+		return
 	}
-	foree_logger.Logger.Info("Initial_Referral_Reward_SUCCESS", "userId", registerUser.ID, "referrerId", referral.ID, "rewardId", rewardId)
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dTx)
+
+	rewardId, err := p.rewardRepo.InsertReward(ctx, reward)
+	if err != nil {
+		dTx.Rollback()
+		foree_logger.Logger.Error("Referrer_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
+
+	// Update join.
+	_, err = p.promotionRewardJointRepo.InsertPromotionRewardJoint(ctx, promotion.PromotionRewardJoint{
+		PromotionId:      promo.ID,
+		PromotionVersion: promo.Version,
+		RewardId:         rewardId,
+		ReferrerId:       referral.ReferrerId,
+		RefereeId:        referral.RefereeId,
+		OwnerId:          referral.ReferrerId,
+	})
+	if err != nil {
+		dTx.Rollback()
+		foree_logger.Logger.Error("Referrer_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
+
+	if err = dTx.Commit(); err != nil {
+		foree_logger.Logger.Error("Referrer_Reward_FAIL", "userId", registerUser.ID, "cause", err.Error())
+		return
+	}
+
+	foree_logger.Logger.Info("Referrer_Reward_SUCCESS", "userId", registerUser.ID, "rewardId", rewardId)
+
 }

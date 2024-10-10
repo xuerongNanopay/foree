@@ -62,7 +62,8 @@ type RewardType string
 
 const (
 	RewardTypeOnboard   string = "ONBOARD_REWARD"
-	RewardTypeReferal   string = "REFERAL_REWARD"
+	RewardTypeReferrer  string = "REFERRER_REWARD"
+	RewardTypeReferee   string = "REFEREE_REWARD"
 	RewardTypeTx        string = "TX_REWARD"
 	RewardTypePromoCode string = "PROMO_CODE_REWARD"
 )
