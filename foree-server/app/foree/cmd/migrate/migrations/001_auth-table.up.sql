@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS user_extra(
     `nationality` VARCHAR(2) DEFAULT '',
     `occupation_category` VARCHAR(64) DEFAULT '',
     `occupation_name` VARCHAR(128) DEFAULT '',
-    `owner_id` BIGINT UNSIGNED NOT NULL UNIQUE,
+    `owner_id` BIGINT UNSIGNED NOT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -155,17 +155,6 @@ CREATE TABLE IF NOT EXISTS interac_accounts(
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
 
-CREATE TABLE IF NOT EXISTS tx_limit(
-    `name` VARCHAR(128) NOT NULL UNIQUE,
-    `limit_group` VARCHAR(64) NOT NULL UNIQUE,
-    `min_amount` DECIMAL(10, 2) NOT NULL,
-    `min_currency` CHAR(3) NOT NULL,
-    `max_amount` DECIMAL(10, 2) NOT NULL,
-    `max_currency` CHAR(3) NOT NULL,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
 CREATE TABLE IF NOT EXISTS daily_tx_limit(
     `id` SERIAL PRIMARY KEY,
     `reference` VARCHAR(64) NOT NULL,
@@ -178,6 +167,17 @@ CREATE TABLE IF NOT EXISTS daily_tx_limit(
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (owner_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS tx_limit(
+    `name` VARCHAR(128) NOT NULL UNIQUE,
+    `limit_group` VARCHAR(64) NOT NULL UNIQUE,
+    `min_amount` DECIMAL(10, 2) NOT NULL,
+    `min_currency` CHAR(3) NOT NULL,
+    `max_amount` DECIMAL(10, 2) NOT NULL,
+    `max_currency` CHAR(3) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS fees(
@@ -218,22 +218,6 @@ CREATE TABLE IF NOT EXISTS rate(
     `dest_currency` CHAR(3) NOT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS rewards(
-    `id` SERIAL PRIMARY KEY,
-    `status` VARCHAR(32) NOT NULL,
-    `type` VARCHAR(32) NOT NULL,
-    `description` VARCHAR(256) DEFAULT '',
-    `amount` DECIMAL(7, 2) NOT NULL,
-    `currency` CHAR(3) NOT NULL,
-    `applied_transaction_id` BIGINT UNSIGNED DEFAULT 0,
-    `owner_id` BIGINT UNSIGNED NOT NULL,
-    `expire_at` DATETIME,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (owner_id) REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS user_extra(
@@ -339,7 +323,7 @@ CREATE TABLE IF NOT EXISTS idm_compliance(
     FOREIGN KEY (parent_tx_id) REFERENCES foree_tx(id)
 );
 
-CREATE TABLE IF NOT EXISTS interac_ci_tx(
+CREATE TABLE IF NOT EXISTS interact_ci_tx(
     `id` SERIAL PRIMARY KEY,
     `status` VARCHAR(64) NOT NULL,
     `cash_in_acc_id` BIGINT UNSIGNED NOT NULL,
@@ -377,7 +361,6 @@ CREATE TABLE IF NOT EXISTS foree_refund_tx(
 CREATE TABLE IF NOT EXISTS nbp_co_tx(
     `id` SERIAL PRIMARY KEY,
     `status` VARCHAR(64) NOT NULL,
-    `mode` VARCHAR(64) DEFAULT '',
     `amount` DECIMAL(11, 2) NOT NULL,
     `currency` CHAR(3) NOT NULL,
     `nbp_reference` VARCHAR(128) DEFAULT '',
@@ -426,8 +409,8 @@ CREATE TABLE IF NOT EXISTS tx_summary(
 CREATE TABLE IF NOT EXISTS promotion(
     `id` SERIAL PRIMARY KEY,
     `name` VARCHAR(128) NOT NULL UNIQUE,
-    `version` INTEGER DEFAULT 1,
-    `quantity` INTEGER DEFAULT 100,
+    `version` INTEGER DEFAULT 0,
+    `quantity` INTEGER,
     `description` VARCHAR(256) DEFAULT '',
     `amount` DECIMAL(11, 2) NOT NULL,
     `currency` CHAR(3) NOT NULL,
@@ -436,6 +419,36 @@ CREATE TABLE IF NOT EXISTS promotion(
     `end_time` DATETIME,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS rewards(
+    `id` SERIAL PRIMARY KEY,
+    `status` VARCHAR(32) NOT NULL,
+    `type` VARCHAR(32) NOT NULL,
+    `description` VARCHAR(256) DEFAULT '',
+    `amount` DECIMAL(7, 2) NOT NULL,
+    `currency` CHAR(3) NOT NULL,
+    `applied_transaction_id` BIGINT UNSIGNED DEFAULT 0,
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `expire_at` DATETIME,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS promotion_reward_joint(
+    `id` SERIAL PRIMARY KEY,
+    `promotion_id` BIGINT UNSIGNED NOT NULL,
+    `promotion_version` INTEGER,
+    `reward_id` BIGINT UNSIGNED NOT NULL,
+    `owner_id` BIGINT UNSIGNED NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(id),
+    FOREIGN KEY (promotion_id) REFERENCES promotion(id),
+    FOREIGN KEY (reward_id) REFERENCES rewards(id)
 );
 
 CREATE INDEX idx_tab_email_passwd_col_email ON email_passwd(email);
