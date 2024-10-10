@@ -12,8 +12,11 @@ import (
 	"xue.io/go-pay/auth"
 )
 
-const PromotionOnboard = "ONBOARD_PROMOTION"
-const PromotionReferrer = "REFERRER_PROMOTION"
+const (
+	PromotionOnboard  = "ONBOARD_PROMOTION"
+	PromotionReferrer = "REFERRER_PROMOTION"
+	PromotionReferee  = "REFEREE_PROMOTION"
+)
 
 const promotionCacheExpiry time.Duration = 2 * time.Minute
 const promotionCacheRefreshInterval time.Duration = 1 * time.Minute

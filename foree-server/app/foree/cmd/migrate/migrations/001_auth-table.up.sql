@@ -481,3 +481,5 @@ CREATE INDEX idx_tab_tx_summary_col_parent_tx_id ON tx_summary(parent_tx_id);
 CREATE INDEX idx_tab_tx_summary_col_owner_id ON tx_summary(owner_id);
 CREATE INDEX idx_tab_tx_summary_col_created_at ON tx_summary(created_at);
 CREATE INDEX idx_tab_rewards_col_applied_transaction_id ON rewards(applied_transaction_id);
+CREATE INDEX idx_tab_promotion_reward_joint_col_promotion_id_and_owner_id ON promotion_reward_joint(promotion_id, owner_id);
+CREATE INDEX idx_tab_prj_col_promotion_id_and_referrer_id_and_referee_id ON promotion_reward_joint(promotion_id, referrer_id, referee_id);

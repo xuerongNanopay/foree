@@ -11,15 +11,15 @@ import (
 const (
 	sQLPromotionRewardJointInsert = `
 		INSERT INTO promotion_reward_joint(	 
-			promotion_id, promotion_version, reward_id
-		) VALUES (?,?,?)
+			promotion_id, promotion_version, reward_id, referrer_id, referee_id
+		) VALUES (?,?,?,?,?)
 	`
-	sQLPromotionRewardJointCountByPromotionIdAndPromotionVersion = `
-		SELECT
-			COUNT(*)
-		FROM promotion_reward_joint p
-		WHERE p.promotion_id = ? AND p.promotion_version = ?
-	`
+	// sQLPromotionRewardJointCountByPromotionIdAndPromotionVersion = `
+	// 	SELECT
+	// 		COUNT(*)
+	// 	FROM promotion_reward_joint p
+	// 	WHERE p.promotion_id = ? AND p.promotion_version = ?
+	// `
 	sQLPromotionRewardJointGetUniqueByPromotionIdAndOwnerId = `
 		SELECT
 			p.id, p.promotion_id, p.promotion_version, p.reward_id, p.referrer_id, p.referee_id
@@ -87,16 +87,40 @@ func (repo *PromotionRewardJointRepo) InsertPromotionRewardJoint(ctx context.Con
 	return id, nil
 }
 
-func (repo *PromotionRewardJointRepo) CountPromotionRewardJointByPromotionIdAndPromotionVersion(ctx context.Context, pi int64, pv int) (int, error) {
-	var count int
-	if err := repo.db.QueryRow(sQLPromotionRewardJointCountByPromotionIdAndPromotionVersion, pi, pv).Scan(&count); err != nil {
-		return 0, err
-	}
-	return count, nil
-}
+// func (repo *PromotionRewardJointRepo) CountPromotionRewardJointByPromotionIdAndPromotionVersion(ctx context.Context, pi int64, pv int) (int, error) {
+// 	var count int
+// 	if err := repo.db.QueryRow(sQLPromotionRewardJointCountByPromotionIdAndPromotionVersion, pi, pv).Scan(&count); err != nil {
+// 		return 0, err
+// 	}
+// 	return count, nil
+// }
 
 func (repo *PromotionRewardJointRepo) GetUniquePromotionRewardJointByPromotionIdAndOwnerId(promotionId int64, ownerId int64) (*PromotionRewardJoint, error) {
 	rows, err := repo.db.Query(sQLPromotionRewardJointGetUniqueByPromotionIdAndOwnerId, promotionId, ownerId)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *PromotionRewardJoint
+
+	for rows.Next() {
+		f, err = scanRowIntoPromotionRewardJoint(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f == nil || f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func (repo *PromotionRewardJointRepo) GetUniquePromotionRewardJointByPromotionIdAndReferrerIdAndRefereeId(promotionId int64, referrerId, referreeId int64) (*PromotionRewardJoint, error) {
+	rows, err := repo.db.Query(sQLPromotionRewardJointGetUniqueByPromotionIdAndReferrerIdAndRefereeId, promotionId, referrerId, referreeId)
 
 	if err != nil {
 		return nil, err
