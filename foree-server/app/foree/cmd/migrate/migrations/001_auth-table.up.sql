@@ -74,11 +74,8 @@ CREATE TABLE IF NOT EXISTS user_identifications(
 
 CREATE TABLE IF NOT EXISTS referral(
     `id` SERIAL PRIMARY KEY,
-    `referral_type` VARCHAR(32) DEFAULT '',
-    `referral_value` VARCHAR(256) DEFAULT '',
-    `referral_code` VARCHAR(256) DEFAULT '',
     `referrer_id` BIGINT UNSIGNED NOT NULL,
-    `referee_id` BIGINT UNSIGNED,
+    `referee_id` BIGINT UNSIGNED NOT NULL UNIQUE,
     `accept_at` DATETIME,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -471,7 +468,6 @@ CREATE INDEX idx_tab_fee_joint_col_parent_tx_id ON fee_joint(parent_tx_id);
 CREATE INDEX idx_tab_promotion_col_name ON promotion(name);
 CREATE INDEX idx_tab_referral_col_referrer_id ON referral(referrer_id);
 CREATE INDEX idx_tab_referral_col_referee_id ON referral(referee_id);
-CREATE INDEX idx_tab_referral_col_referral_code ON referral(referral_code);
 CREATE INDEX idx_tab_rewards_col_owner_id ON rewards(owner_id);
 CREATE INDEX idx_tab_interac_ci_tx_col_parent_tx_id ON interac_ci_tx(parent_tx_id);
 CREATE INDEX idx_tab_interac_ci_tx_col_scotia_payment_id ON interac_ci_tx(scotia_payment_id);
