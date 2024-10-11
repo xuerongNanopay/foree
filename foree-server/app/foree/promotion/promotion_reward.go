@@ -24,14 +24,14 @@ const (
 		SELECT
 			p.id, p.promotion_id, p.promotion_version, p.reward_id, p.referrer_id, p.referee_id
 			p.owner_id, p.created_at, p.updated_at
-		FROM FROM promotion_reward_joint p
+		FROM promotion_reward_joint as p
 		WHERE p.promotion_id = ? AND p.owner_id = ?
 	`
 	sQLPromotionRewardJointGetUniqueByPromotionIdAndReferrerIdAndRefereeId = `
 		SELECT
 			p.id, p.promotion_id, p.promotion_version, p.reward_id, p.referrer_id, p.referee_id
 			p.owner_id, p.created_at, p.updated_at
-		FROM FROM promotion_reward_joint p
+		FROM promotion_reward_joint as p
 		WHERE p.promotion_id = ? AND p.referrer_id = ? AND p.referee_id = ?
 	`
 )
