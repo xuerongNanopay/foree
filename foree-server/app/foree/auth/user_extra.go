@@ -6,15 +6,16 @@ import (
 	"time"
 
 	"xue.io/go-pay/constant"
+	uuid_util "xue.io/go-pay/util/uuid"
 )
 
 const (
 	sQLUserExtraInsert = `
 		INSERT INTO user_extra
 		(
-			pob, cor, nationality, occupation_category, 
+			user_reference, pob, cor, nationality, occupation_category, 
 			occupation_name, owner_id
-		) VALUES(?,?,?,?,?,?)
+		) VALUES(?,?,?,?,?,?,?)
 	`
 	sQLUserExtraUpdate = `
 		UPDATE user_extra SET
@@ -24,15 +25,23 @@ const (
 	`
 	sQLUserExtraGetUniqueByOwnerId = `
 		SELECT
-			u.id, u.pob, u.cor, u.nationality, u.occupation_category,
+			u.id, u.user_reference, u.pob, u.cor, u.nationality, u.occupation_category,
 			u.occupation_name, u.owner_id, u.created_at, u.updated_at
 		FROM user_extra as u
 		WHERE u.owner_id = ?
+	`
+	sQLUserExtraGetUniqueByUserReference = `
+		SELECT
+			u.id, u.user_reference, u.pob, u.cor, u.nationality, u.occupation_category,
+			u.occupation_name, u.owner_id, u.created_at, u.updated_at
+		FROM user_extra as u
+		WHERE u.user_reference = ?
 	`
 )
 
 type UserExtra struct {
 	ID                 int64     `json:"id"`
+	UserReference      string    `json:"userReference"`
 	Pob                string    `json:"pob"`
 	Cor                string    `json:"cor"`
 	Nationality        string    `json:"nationality"`
@@ -57,9 +66,15 @@ func (repo *UserExtraRepo) InsertUserExtra(ctx context.Context, ue UserExtra) (i
 	var err error
 	var result sql.Result
 
+	userReference := ue.UserReference
+	if userReference == "" {
+		userReference = uuid_util.UUID()
+	}
+
 	if ok {
 		result, err = dTx.Exec(
 			sQLUserExtraInsert,
+			userReference,
 			ue.Pob,
 			ue.Cor,
 			ue.Nationality,
@@ -70,6 +85,7 @@ func (repo *UserExtraRepo) InsertUserExtra(ctx context.Context, ue UserExtra) (i
 	} else {
 		result, err = repo.db.Exec(
 			sQLUserExtraInsert,
+			userReference,
 			ue.Pob,
 			ue.Cor,
 			ue.Nationality,
@@ -113,7 +129,31 @@ func (repo *UserExtraRepo) GetUniqueUserExtraByOwnerId(ownerId int64) (*UserExtr
 	return u, nil
 }
 
-func (repo *UserExtraRepo) UpdateUserExtrayOwnerId(ctx context.Context, ue UserExtra) error {
+func (repo *UserExtraRepo) GetUniqueUserExtraByUserReference(userReference string) (*UserExtra, error) {
+	rows, err := repo.db.Query(sQLUserExtraGetUniqueByUserReference, userReference)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var u *UserExtra
+
+	for rows.Next() {
+		u, err = scanRowIntoUserExtra(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if u == nil || u.ID == 0 {
+		return nil, nil
+	}
+
+	return u, nil
+}
+
+func (repo *UserExtraRepo) UpdateUserExtraByOwnerId(ctx context.Context, ue UserExtra) error {
 	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
 
 	var err error
@@ -150,6 +190,7 @@ func scanRowIntoUserExtra(rows *sql.Rows) (*UserExtra, error) {
 	u := new(UserExtra)
 	err := rows.Scan(
 		&u.ID,
+		&u.UserReference,
 		&u.Pob,
 		&u.Cor,
 		&u.Nationality,

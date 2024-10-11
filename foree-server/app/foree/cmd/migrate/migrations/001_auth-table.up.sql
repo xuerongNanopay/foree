@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS user_group(
 
 CREATE TABLE IF NOT EXISTS user_extra(
     `id` SERIAL PRIMARY KEY,
+    `user_reference` VARCHAR(64) NOT NULL UNIQUE,
     `pob` VARCHAR(2) DEFAULT '',
     `cor` VARCHAR(2) DEFAULT '',
     `nationality` VARCHAR(2) DEFAULT '',
