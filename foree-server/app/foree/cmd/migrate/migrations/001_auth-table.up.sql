@@ -424,6 +424,7 @@ CREATE TABLE IF NOT EXISTS promotion(
 
 CREATE TABLE IF NOT EXISTS rewards(
     `id` SERIAL PRIMARY KEY,
+    `reference` VARCHAR(64) NOT NULL UNIQUE,
     `status` VARCHAR(32) NOT NULL,
     `type` VARCHAR(32) NOT NULL,
     `description` VARCHAR(256) DEFAULT '',

@@ -9,15 +9,16 @@ import (
 
 	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/constant"
+	uuid_util "xue.io/go-pay/util/uuid"
 )
 
 const (
 	sQLRewardInsert = `
 		INSERT INTO rewards
 		(
-			type, description, amount, currency,
+			reference, type, description, amount, currency,
 			status, owner_id, expire_at
-		) VALUES(?,?,?,?,?,?,?)
+		) VALUES(?,?,?,?,?,?,?,?)
 	`
 	sQLRewardUpdateById = `
 		UPDATE rewards SET
@@ -26,15 +27,23 @@ const (
 	`
 	sQLRewardGetUniqueById = `
 		SELECT
-			r.id, r.type, r.description, r.amount, r.currency,
+			r.id, r.reference, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
 			r.expire_at, r.created_at, r.updated_at
 		FROM rewards as r
 		Where r.id = ?
 	`
+	sQLRewardAllByOwnerIdAndReferences = `
+		SELECT
+			r.id, r.reference, r.type, r.description, r.amount, r.currency,
+			r.status, r.owner_id, r.applied_transaction_id,
+			r.expire_at, r.created_at, r.updated_at
+		FROM rewards as r
+		Where r.owner_id = ? AND r.reference in (?%v)
+	`
 	sQLRewardAllByOwnerIdAndIds = `
 		SELECT
-			r.id, r.type, r.description, r.amount, r.currency,
+			r.id, r.reference, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
 			r.expire_at, r.created_at, r.updated_at
 		FROM rewards as r
@@ -42,7 +51,7 @@ const (
 	`
 	sQLRewardGetAllByAppliedTransactionId = `
 		SELECT
-			r.id, r.type, r.description, r.amount, r.currency,
+			r.id, r.reference, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
 			r.expire_at, r.created_at, r.updated_at
 		FROM rewards as r
@@ -50,7 +59,7 @@ const (
 	`
 	sQLRewardGetAllActiveByOwnerId = `
 		SELECT
-			r.id, r.type, r.description, r.amount, r.currency,
+			r.id, r.reference, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
 			r.expire_at, r.created_at, r.updated_at
 		FROM rewards as r
@@ -80,6 +89,7 @@ const (
 
 type Reward struct {
 	ID                   int64            `json:"id"`
+	Reference            string           `json:"reference"`
 	Type                 string           `json:"type"`
 	Description          string           `json:"description"`
 	Amt                  types.AmountData `json:"amt"`
@@ -108,6 +118,7 @@ func (repo *RewardRepo) InsertReward(ctx context.Context, reward Reward) (int64,
 	if ok {
 		result, err = dTx.Exec(
 			sQLRewardInsert,
+			uuid_util.UUID(),
 			reward.Type,
 			reward.Description,
 			reward.Amt.Amount,
@@ -119,6 +130,7 @@ func (repo *RewardRepo) InsertReward(ctx context.Context, reward Reward) (int64,
 	} else {
 		result, err = repo.db.Exec(
 			sQLRewardInsert,
+			uuid_util.UUID(),
 			reward.Type,
 			reward.Description,
 			reward.Amt.Amount,
@@ -208,6 +220,36 @@ func (repo *RewardRepo) GetAllRewardByOwnerIdAndIds(ctx context.Context, ownerId
 	return rewards, nil
 }
 
+func (repo *RewardRepo) GetAllRewardByOwnerIdAndReferences(ctx context.Context, ownerId int64, references []string) ([]*Reward, error) {
+	args := make([]interface{}, len(references)+1)
+	args[0] = ownerId
+	for i, ref := range references {
+		args[i+1] = ref
+	}
+
+	rows, err := repo.db.Query(fmt.Sprintf(sQLRewardAllByOwnerIdAndReferences, strings.Repeat(",?", len(references)-1)), args...)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	rewards := make([]*Reward, 0)
+	for rows.Next() {
+		p, err := scanRowIntoReward(rows)
+		if err != nil {
+			return nil, err
+		}
+		rewards = append(rewards, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return rewards, nil
+}
+
 func (repo *RewardRepo) GetAllRewardByAppliedTransactionId(ctx context.Context, appliedTransactionId int64) ([]*Reward, error) {
 	rows, err := repo.db.Query(sQLRewardGetAllByAppliedTransactionId, appliedTransactionId)
 
@@ -260,6 +302,7 @@ func scanRowIntoReward(rows *sql.Rows) (*Reward, error) {
 	u := new(Reward)
 	err := rows.Scan(
 		&u.ID,
+		&u.Reference,
 		&u.Type,
 		&u.Description,
 		&u.Amt.Amount,
