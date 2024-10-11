@@ -188,12 +188,10 @@ const ContactSupportModal = ({
     const controller = new AbortController()
     const getCustomerSupport = async() => {
       try {
-        console.log("customer support run")
         const resp = await generalService.cusomterSupport({signal: controller.signal})
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("customer support", resp.status, resp.data)
         } else {
-          console.log(resp.data.data)
           setCustomerSupport(resp.data.data)
         }
       } catch (e) {
