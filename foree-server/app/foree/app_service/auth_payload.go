@@ -6,6 +6,7 @@ import (
 	"time"
 
 	fAuth "xue.io/go-pay/app/foree/auth"
+	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
@@ -345,5 +346,25 @@ func NewUserSettingDTO(us *auth.UserSetting) *UserSettingDTO {
 		IsPushNotificationEnable:   us.IsPushNotificationEnable,
 		IsEmailNotificationsEnable: us.IsEmailNotificationsEnable,
 		OwnerId:                    us.OwnerId,
+	}
+}
+
+type UserExtraDTO struct {
+	UserReference      string `json:"userReference,omitempty"`
+	Pob                string `json:"pob,omitempty"`
+	Cor                string `json:"cor,omitempty"`
+	Nationality        string `json:"nationality,omitempty"`
+	OccupationCategory string `json:"occupationCategory,omitempty"`
+	OccupationName     string `json:"occupationName,omitempty"`
+}
+
+func NewUserExtraDTO(ue *foree_auth.UserExtra) *UserExtraDTO {
+	return &UserExtraDTO{
+		UserReference:      ue.UserReference,
+		Pob:                ue.Pob,
+		Cor:                ue.Cor,
+		Nationality:        ue.Nationality,
+		OccupationCategory: ue.OccupationCategory,
+		OccupationName:     ue.OccupationName,
 	}
 }

@@ -40,6 +40,8 @@ func (c *AuthRouter) RegisterRouter(router *mux.Router) {
 	router.HandleFunc("/user_detail", simpleGetWrapper(c.authService.GetUserDetail)).Methods("GET")
 	// Get user setting
 	router.HandleFunc("/user_setting", simpleGetWrapper(c.authService.GetUserSetting)).Methods("GET")
+	// Get user extra
+	router.HandleFunc("/user_extra", simpleGetWrapper(c.authService.GetUserExtra)).Methods("GET")
 	// Update passwd
 	router.HandleFunc("/update_passwd", simplePostWrapper(c.authService.UpdatePasswd)).Methods("POST")
 	// Update address
