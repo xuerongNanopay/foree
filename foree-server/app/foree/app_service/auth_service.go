@@ -1024,35 +1024,34 @@ func (a *AuthService) VerifySession(ctx context.Context, sessionId string) (*aut
 }
 
 func (a *AuthService) linkReferer(registerUser auth.User, req SignUpReq) {
-	if req.ReferralCode == "" {
+	if req.ReferrerReference == "" {
 		return
 	}
 
-	referral, err := a.referralRepo.GetUniqueReferralByReferralCode(req.ReferralCode)
+	referrer, err := a.userExtraRepo.GetUniqueUserExtraByUserReference(req.ReferrerReference)
+
 	if err != nil {
-		foree_logger.Logger.Error("Link_Referer_FAIL", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", err.Error())
+		foree_logger.Logger.Error("Link_Referer_FAIL", "userId", registerUser.ID, "referrerReference", req.ReferrerReference, "cause", err.Error())
 		return
 	}
-	if referral == nil {
-		foree_logger.Logger.Warn("Link_Referer_FAIL", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", "unknown ReferralCode")
-		return
-	}
-	if referral.RefereeId != 0 {
-		foree_logger.Logger.Warn("Link_Referer_FAIL", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", "unknown ReferralCode")
+	if referrer == nil {
+		foree_logger.Logger.Warn("Link_Referer_FAIL", "userId", registerUser.ID, "referrerReference", req.ReferrerReference, "cause", "unknown referrerReference")
 		return
 	}
 
-	newReferral := *referral
-	newReferral.RefereeId = registerUser.ID
 	now := time.Now()
-	newReferral.AcceptAt = &now
+	referral := referral.Referral{
+		ReferrerId: referrer.ID,
+		RefereeId:  registerUser.ID,
+		AcceptAt:   &now,
+	}
 
-	err = a.referralRepo.UpdateReferralByReferralCode(newReferral)
+	referralId, err := a.referralRepo.InsertReferral(referral)
 	if err != nil {
-		foree_logger.Logger.Error("Link_Referer_FAIL", "userId", registerUser.ID, "ReferralCode", req.ReferralCode, "cause", err.Error())
+		foree_logger.Logger.Error("Link_Referer_FAIL", "userId", registerUser.ID, "referrerReference", req.ReferrerReference, "cause", err.Error())
 		return
 	}
-	foree_logger.Logger.Info("Link_Referer_SUCCESS", "userId", registerUser.ID, "ReferrerId", referral.ReferrerId)
+	foree_logger.Logger.Info("Link_Referer_SUCCESS", "userId", registerUser.ID, "referrerReference", req.ReferrerReference, "referrerId", referralId)
 }
 
 func verifySession(session *auth.Session) transport.HError {

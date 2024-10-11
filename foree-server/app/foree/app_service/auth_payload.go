@@ -13,9 +13,9 @@ import (
 )
 
 type SignUpReq struct {
-	Email        string `json:"email" validate:"required,email"`
-	Password     string `json:"password" validate:"required"`
-	ReferralCode string `json:"referralCode"`
+	Email             string `json:"email" validate:"required,email"`
+	Password          string `json:"password" validate:"required"`
+	ReferrerReference string `json:"referrerReference"`
 }
 
 func (q SignUpReq) Validate() *transport.BadRequestError {

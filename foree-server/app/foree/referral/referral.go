@@ -76,19 +76,6 @@ func (repo *ReferralRepo) InsertReferral(r Referral) (int64, error) {
 	return id, nil
 }
 
-// func (repo *ReferralRepo) UpdateReferralByReferralCode(r Referral) error {
-// 	_, err := repo.db.Exec(
-// 		sQLReferralUpdateByReferralCode,
-// 		r.RefereeId,
-// 		r.AcceptAt,
-// 		r.ID,
-// 	)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-
 func (repo *ReferralRepo) GetUniqueReferralByReferralCode(referralCode string) (*Referral, error) {
 	rows, err := repo.db.Query(sQLReferralGetUniqueByReferralCode, referralCode)
 
