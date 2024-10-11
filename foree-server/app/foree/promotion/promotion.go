@@ -11,7 +11,7 @@ import (
 const (
 	sQLPromotionGetUniqueByName = `
 		SELECT
-			g.name, g.description, g.amount, g.currency,
+			g.id, g.name, g.description, g.amount, g.currency,
 			g.is_enable, g.start_time, g.end_time, g.created_at, g.updated_at
 		FROM promotion as g
 		Where g.name = ?
@@ -94,6 +94,7 @@ func (repo *PromotionRepo) GetUniquePromotionByName(ctx context.Context, name st
 func scanRowIntoPromotion(rows *sql.Rows) (*Promotion, error) {
 	p := new(Promotion)
 	err := rows.Scan(
+		&p.ID,
 		&p.Name,
 		&p.Description,
 		&p.Amt.Amount,

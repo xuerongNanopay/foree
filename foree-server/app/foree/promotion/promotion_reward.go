@@ -3,6 +3,7 @@ package promotion
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"xue.io/go-pay/constant"
@@ -11,8 +12,8 @@ import (
 const (
 	sQLPromotionRewardJointInsert = `
 		INSERT INTO promotion_reward_joint(	 
-			promotion_id, promotion_version, reward_id, referrer_id, referee_id
-		) VALUES (?,?,?,?,?)
+			promotion_id, promotion_version, reward_id, referrer_id, referee_id, owner_id
+		) VALUES (?,?,?,?,?,?)
 	`
 	// sQLPromotionRewardJointCountByPromotionIdAndPromotionVersion = `
 	// 	SELECT
@@ -58,7 +59,7 @@ type PromotionRewardJointRepo struct {
 
 func (repo *PromotionRewardJointRepo) InsertPromotionRewardJoint(ctx context.Context, j PromotionRewardJoint) (int64, error) {
 	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
-
+	fmt.Println("vvvv", j.PromotionId)
 	var err error
 	var result sql.Result
 	if ok {
@@ -67,6 +68,9 @@ func (repo *PromotionRewardJointRepo) InsertPromotionRewardJoint(ctx context.Con
 			j.PromotionId,
 			j.PromotionVersion,
 			j.RewardId,
+			j.ReferrerId,
+			j.RefereeId,
+			j.OwnerId,
 		)
 	} else {
 		result, err = repo.db.Exec(
@@ -74,6 +78,9 @@ func (repo *PromotionRewardJointRepo) InsertPromotionRewardJoint(ctx context.Con
 			j.PromotionId,
 			j.PromotionVersion,
 			j.RewardId,
+			j.ReferrerId,
+			j.RefereeId,
+			j.OwnerId,
 		)
 	}
 
