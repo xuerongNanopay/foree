@@ -321,7 +321,7 @@ CREATE TABLE IF NOT EXISTS idm_compliance(
     FOREIGN KEY (parent_tx_id) REFERENCES foree_tx(id)
 );
 
-CREATE TABLE IF NOT EXISTS interact_ci_tx(
+CREATE TABLE IF NOT EXISTS interac_ci_tx(
     `id` SERIAL PRIMARY KEY,
     `status` VARCHAR(64) NOT NULL,
     `cash_in_acc_id` BIGINT UNSIGNED NOT NULL,
@@ -481,3 +481,10 @@ CREATE INDEX idx_tab_tx_summary_col_created_at ON tx_summary(created_at);
 CREATE INDEX idx_tab_rewards_col_applied_transaction_id ON rewards(applied_transaction_id);
 CREATE INDEX idx_tab_promotion_reward_joint_col_promotion_id_and_owner_id ON promotion_reward_joint(promotion_id, owner_id);
 CREATE INDEX idx_tab_prj_col_promotion_id_and_referrer_id_and_referee_id ON promotion_reward_joint(promotion_id, referrer_id, referee_id);
+
+INSERT INTO role_permission(role_name, permission, is_enable) value ('FOREE_PERSONAL', 'foree::contact::write', true);
+INSERT INTO role_permission(role_name, permission, is_enable) value ('FOREE_PERSONAL', 'foree::contact::read', true);
+INSERT INTO role_permission(role_name, permission, is_enable) value ('FOREE_PERSONAL', 'foree::transaction::write', true);
+INSERT INTO tx_limit(name, limit_group, min_amount, min_currency, max_amount, max_currency) value('FOREE_TRANSACTION_PERSONAL_LIMIT_1K', 'TRANSACTION_PERSONAL_LIMIT_1K', 20.00, 'CAD', 1000.00, 'CAD');
+INSERT INTO fees(name, description, fee_group, type, `condition`, condition_amount, condition_currency, ratio, is_apply_in_condition_amount_only) value('FOREE_UNDER_100_FEE', 'Fee apply when amount is less than $100CAD.', 'FOREE_PERSONAL_FEE', 'FIX_COST', 'LTE', 100.00, 'CAD', 5, FALSE);
+INSERT INTO promotion(name, amount, currency, quantity, is_enable, end_time) value('ONBOARD_PROMOTION', 20.00, 'CAD', 400,TRUE, '2100-01-01');
