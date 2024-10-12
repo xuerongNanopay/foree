@@ -56,6 +56,10 @@ class AuthService {
     return await this.#httpClient.get("/user_setting", {signal})
   }
 
+  async getUserExtra({signal}={signal}) {
+    return await this.#httpClient.get("/user_extra", {signal})
+  }
+
   async updatePasswd(req, {signal}={signal}) {
     return await this.#httpFormClient.post("/update_passwd", req, {signal})
   }

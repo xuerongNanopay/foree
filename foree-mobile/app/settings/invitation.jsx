@@ -1,15 +1,37 @@
 import { View, Text, SafeAreaView, TouchableOpacity, Share } from 'react-native'
-import React from 'react'
+import React, { useCallback, useState } from 'react'
+import { useFocusEffect } from 'expo-router'
+import { authService } from '../../service'
 
 const Invitation = () => {
+  const [userReference, setUserReference] = useState('')
+  const [host, setHost] = useState('http://localhost')
+  useFocusEffect(useCallback(() => {
+    const controller = new AbortController()
+    const getUserExtra = async() => {
+      try {
+        const resp = await authService.getUserExtra({signal: controller.signal})
+        if ( resp.status / 100 != 2 && !resp?.data?.data ) {
+          console.error("get userExtra", resp.status, resp.data)
+          return
+        }
+        const userExtra = resp.data.data
+        setUserReference(userExtra.userReference)
+        console.log(userExtra)
+      } catch (e) {
+        console.error("get userDetail", e, e.response, e.response?.status, e.response?.data)
+      }
+    }
+    getUserExtra()
+  }, []))
+
   const onShare = async() => {
     console.log("TODO: share")
     try {
       const result = await Share.share({
         message:
-          `Here's a link to try Foree Remittance, the fastest way to send money to Pakistan!\n${'url'}`,
+          `Here's a link to try Foree Remittance, the fastest way to send money to Pakistan!\n${host}${userReference}`,
       });
-      console.log(result)
     } catch (e) {
       console.error("invitation share", e)
     }
