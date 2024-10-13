@@ -768,7 +768,7 @@ func (a *AuthService) createUserSetting(ownerId int64) {
 	})
 
 	if err != nil {
-		foree_logger.Logger.Error("createUserSettingl_FAIL", "userId", ownerId)
+		foree_logger.Logger.Error("createUserSetting_FAIL", "userId", ownerId, "cause", err.Error())
 	}
 
 }
