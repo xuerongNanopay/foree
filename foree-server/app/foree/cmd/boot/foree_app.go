@@ -100,7 +100,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		Passwd:               cfg.MysqlDBPasswd,
 		AllowNativePasswords: true,
 		ParseTime:            true,
-	}, 40, 20)
+	}, 1, -1)
 
 	if err != nil {
 		return err
