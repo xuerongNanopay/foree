@@ -8,15 +8,30 @@ import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 import { authPayload, authService } from '../../service'
 import string_util from '../../util/string_util'
+import * as Linking from 'expo-linking';
 
 const SignUp = () => {
   const [errors, setErrors] = useState({})
   const [isError, setIsError] = useState(true);
+  const url = Linking.useURL();
 
   const [form, setForm] = useState({
     email: '',
     password: '',
   })
+
+  useEffect(() => {
+    if (url) {
+      const { hostname, path, queryParams } = Linking.parse(url);
+      console.log(queryParams)
+      if ( !!queryParams.referrerReference ) {
+        setForm((form)=>({
+          ...form,
+          referrerReference: queryParams.referrerReference
+        }))
+      }
+    }
+  }, [url])
 
   useEffect(() => {
     async function validate() {

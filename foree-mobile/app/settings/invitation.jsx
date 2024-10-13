@@ -5,7 +5,7 @@ import { authService } from '../../service'
 
 const Invitation = () => {
   const [userReference, setUserReference] = useState('')
-  const [host, setHost] = useState('http://localhost')
+  const [linkScheme, setLinkScheme] = useState('exp://127.0.0.1:8081/--/sign_up')
   useFocusEffect(useCallback(() => {
     const controller = new AbortController()
     const getUserExtra = async() => {
@@ -26,11 +26,12 @@ const Invitation = () => {
   }, []))
 
   const onShare = async() => {
-    console.log("TODO: share")
     try {
+      const invitationLink = `${linkScheme}?referrerReference=${userReference}`
+      console.log(invitationLink)
       const result = await Share.share({
         message:
-          `Here's a link to try Foree Remittance, the fastest way to send money to Pakistan!\n${host}${userReference}`,
+          `Here's a link to try Foree Remittance, the fastest way to send money to Pakistan!\n${invitationLink}`,
       });
     } catch (e) {
       console.error("invitation share", e)
