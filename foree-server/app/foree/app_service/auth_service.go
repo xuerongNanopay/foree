@@ -402,6 +402,25 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 	}
 
 	_, er := a.userExtraRepo.InsertUserExtra(ctx, userExtra)
+
+	// Create default Interac Account for the user.
+	now := time.Now()
+	acc := account.InteracAccount{
+		FirstName:        req.FirstName,
+		MiddleName:       req.MiddleName,
+		LastName:         req.LastName,
+		Email:            session.EmailPasswd.Email,
+		OwnerId:          session.UserId,
+		Status:           account.AccountStatusActive,
+		LatestActivityAt: &now,
+	}
+	_, aErr := a.interacAccountRepo.InsertInteracAccount(ctx, acc)
+	if aErr != nil {
+		dTx.Rollback()
+		foree_logger.Logger.Error("Default_Interac_Account_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", aErr.Error())
+		return nil, transport.WrapInteralServerError(aErr)
+	}
+
 	if er != nil {
 		dTx.Rollback()
 		foree_logger.Logger.Error("CreateUser_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", er.Error())
@@ -445,24 +464,6 @@ func (a *AuthService) CreateUser(ctx context.Context, req CreateUserReq) (*UserD
 		foree_logger.Logger.Error("CreateUser_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", sessionErr.Error())
 		return nil, transport.WrapInteralServerError(sessionErr)
 	}
-
-	go func() {
-		// Create default Interac Account for the user.
-		now := time.Now()
-		acc := account.InteracAccount{
-			FirstName:        newUser.FirstName,
-			MiddleName:       newUser.MiddleName,
-			LastName:         newUser.LastName,
-			Email:            newUser.Email,
-			OwnerId:          newUser.ID,
-			Status:           account.AccountStatusActive,
-			LatestActivityAt: &now,
-		}
-		_, derr := a.interacAccountRepo.InsertInteracAccount(context.TODO(), acc)
-		if derr != nil {
-			foree_logger.Logger.Error("Default_Interac_Account_FAIL", "ip", loadRealIp(ctx), "userId", session.UserId, "cause", derr.Error())
-		}
-	}()
 
 	go a.promotionService.rewardOnboard(newUser)
 	go a.createUserSetting(newUser.ID)
