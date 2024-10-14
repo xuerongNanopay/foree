@@ -210,7 +210,17 @@ func (repo *InteracAccountRepo) GetUniqueActiveInteracAccountForUpdateByOwnerAnd
 }
 
 func (repo *InteracAccountRepo) GetUniqueInteracAccountById(ctx context.Context, id int64) (*InteracAccount, error) {
-	rows, err := repo.db.Query(sQLInteracAccountGetUniqueById, id)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		fmt.Println("aaaaa")
+		rows, err = dTx.Query(sQLInteracAccountGetUniqueById, id)
+	} else {
+		rows, err = repo.db.Query(sQLInteracAccountGetUniqueById, id)
+	}
 
 	if err != nil {
 		return nil, err

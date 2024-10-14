@@ -150,7 +150,8 @@ func (p *TxProcessor) createFullTx(fTx transaction.ForeeTx) (*transaction.ForeeT
 		ciTx = ci
 	}
 	wg.Add(1)
-	go createCI()
+	// go createCI()
+	createCI()
 
 	// Create IDM
 	var idmTx *transaction.IDMTx
@@ -176,7 +177,8 @@ func (p *TxProcessor) createFullTx(fTx transaction.ForeeTx) (*transaction.ForeeT
 		idmTx = idm
 	}
 	wg.Add(1)
-	go createIDM()
+	// go createIDM()
+	createIDM()
 
 	// Create Cout
 	var coutTx *transaction.NBPCOTx
@@ -222,7 +224,8 @@ func (p *TxProcessor) createFullTx(fTx transaction.ForeeTx) (*transaction.ForeeT
 	}
 
 	wg.Add(1)
-	go createCout()
+	// go createCout()
+	createCout()
 
 	wg.Wait()
 	if ciErr != nil {

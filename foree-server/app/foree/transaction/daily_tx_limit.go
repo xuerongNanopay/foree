@@ -110,7 +110,16 @@ func (repo *DailyTxLimitRepo) UpdateDailyTxLimitById(ctx context.Context, tx Dai
 }
 
 func (repo *DailyTxLimitRepo) GetUniqueDailyTxLimitByReference(ctx context.Context, reference string) (*DailyTxLimit, error) {
-	rows, err := repo.db.Query(sQLDailyTxLimitGetUniqueByReference, reference)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		rows, err = dTx.Query(sQLDailyTxLimitGetUniqueByReference, reference)
+	} else {
+		rows, err = repo.db.Query(sQLDailyTxLimitGetUniqueByReference, reference)
+	}
 
 	if err != nil {
 		return nil, err

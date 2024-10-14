@@ -553,7 +553,8 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		}
 	}
 	wg.Add(1)
-	go rewardChecker()
+	// go rewardChecker()
+	rewardChecker()
 
 	// Recheck and update limit
 	var limitErr transport.HError
@@ -601,7 +602,8 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	}
 
 	wg.Add(1)
-	go limitChecker()
+	// go limitChecker()
+	limitChecker()
 
 	// Create foree transaction.
 	var foreeTxErr transport.HError
@@ -623,7 +625,8 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	}
 
 	wg.Add(1)
-	go createForeeTx()
+	// go createForeeTx()
+	createForeeTx()
 
 	wg.Wait()
 	if limitErr != nil {
@@ -665,7 +668,8 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		foreeTx.Summary.ID = sumId
 	}
 	wg.Add(1)
-	go createSummaryTx()
+	// go createSummaryTx()
+	createSummaryTx()
 
 	//TODO: update to patch insert.
 	// Create feeJoint
@@ -690,7 +694,8 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 		}
 	}
 	wg.Add(1)
-	go createFeeJoint()
+	// go createFeeJoint()
+	createFeeJoint()
 
 	// Update reward
 	var rewardError transport.HError
@@ -715,7 +720,8 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	}
 
 	wg.Add(1)
-	go updateReward()
+	//go updateReward()
+	updateReward()
 
 	wg.Wait()
 	if txSummaryErr != nil {
@@ -740,7 +746,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 
 	foree_logger.Logger.Info("CreateTx_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "foreeTxId", foreeTxID)
 
-	return t.GetTxSummary(ctx, GetTransactionReq{
+	return t.GetTxSummary(context.TODO(), GetTransactionReq{
 		SessionReq:    req.SessionReq,
 		TransactionId: sumId,
 	})
@@ -847,7 +853,7 @@ func (t *TransactionService) GetTxSummary(ctx context.Context, req GetTransactio
 		defer wg.Done()
 		interacAcc, err = t.interacAccountRepo.GetUniqueInteracAccountById(ctx, summaryTx.SrcAccId)
 		if err != nil {
-			foree_logger.Logger.Warn("GetTxSummary",
+			foree_logger.Logger.Error("GetTxSummary",
 				"sumTxId", req.TransactionId,
 				"msg", "load interacAccount failed",
 				"cause", err.Error(),
@@ -862,7 +868,7 @@ func (t *TransactionService) GetTxSummary(ctx context.Context, req GetTransactio
 		defer wg.Done()
 		contactAcc, err = t.contactAccountRepo.GetUniqueContactAccountById(ctx, summaryTx.DestAccId)
 		if err != nil {
-			foree_logger.Logger.Warn("GetTxSummary",
+			foree_logger.Logger.Error("GetTxSummary",
 				"sumTxId", req.TransactionId,
 				"msg", "load contactAccount failed",
 				"cause", err.Error(),

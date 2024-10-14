@@ -213,7 +213,16 @@ func (repo *InteracCITxRepo) GetUniqueInteracCITxByScotiaPaymentId(ctx context.C
 }
 
 func (repo *InteracCITxRepo) GetUniqueInteracCITxById(ctx context.Context, id int64) (*InteracCITx, error) {
-	rows, err := repo.db.Query(sQLInteracCITxGetUniqueById, id)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		rows, err = dTx.Query(sQLInteracCITxGetUniqueById, id)
+	} else {
+		rows, err = repo.db.Query(sQLInteracCITxGetUniqueById, id)
+	}
 
 	if err != nil {
 		return nil, err

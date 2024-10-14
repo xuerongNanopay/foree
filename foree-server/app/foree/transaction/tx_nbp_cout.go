@@ -134,7 +134,16 @@ func (repo *NBPCOTxRepo) UpdateNBPCOTxById(ctx context.Context, tx NBPCOTx) erro
 }
 
 func (repo *NBPCOTxRepo) GetUniqueNBPCOTxById(ctx context.Context, id int64) (*NBPCOTx, error) {
-	rows, err := repo.db.Query(sQLNBPCOTxGetUniqueById, id)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		rows, err = dTx.Query(sQLNBPCOTxGetUniqueById, id)
+	} else {
+		rows, err = repo.db.Query(sQLNBPCOTxGetUniqueById, id)
+	}
 
 	if err != nil {
 		return nil, err

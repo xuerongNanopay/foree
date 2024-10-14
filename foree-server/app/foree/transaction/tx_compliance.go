@@ -149,7 +149,16 @@ func (repo *IdmTxRepo) UpdateIDMTxById(ctx context.Context, tx IDMTx) error {
 }
 
 func (repo *IdmTxRepo) GetUniqueIDMTxById(ctx context.Context, id int64) (*IDMTx, error) {
-	rows, err := repo.db.Query(sQLIDMTxGetUniqueById, id)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		rows, err = dTx.Query(sQLIDMTxGetUniqueById, id)
+	} else {
+		rows, err = repo.db.Query(sQLIDMTxGetUniqueById, id)
+	}
 
 	if err != nil {
 		return nil, err

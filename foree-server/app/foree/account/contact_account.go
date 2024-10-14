@@ -231,7 +231,17 @@ func (repo *ContactAccountRepo) RefreshContactLatestActivityAtAndOwner(ctx conte
 }
 
 func (repo *ContactAccountRepo) GetUniqueContactAccountById(ctx context.Context, id int64) (*ContactAccount, error) {
-	rows, err := repo.db.Query(sQLContactAccountGetUniqueById, id)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		fmt.Println("aaaaa")
+		rows, err = dTx.Query(sQLContactAccountGetUniqueById, id)
+	} else {
+		rows, err = repo.db.Query(sQLContactAccountGetUniqueById, id)
+	}
 
 	if err != nil {
 		return nil, err
