@@ -422,7 +422,7 @@ CREATE TABLE IF NOT EXISTS promotion(
 
 CREATE TABLE IF NOT EXISTS rewards(
     `id` SERIAL PRIMARY KEY,
-    `reference` VARCHAR(64) NOT NULL UNIQUE,
+    `s_id` VARCHAR(64) NOT NULL UNIQUE,
     `status` VARCHAR(32) NOT NULL,
     `type` VARCHAR(32) NOT NULL,
     `description` VARCHAR(256) DEFAULT '',
@@ -469,6 +469,7 @@ CREATE INDEX idx_tab_promotion_col_name ON promotion(name);
 CREATE INDEX idx_tab_referral_col_referrer_id ON referral(referrer_id);
 CREATE INDEX idx_tab_referral_col_referee_id ON referral(referee_id);
 CREATE INDEX idx_tab_rewards_col_owner_id ON rewards(owner_id);
+CREATE INDEX idx_tab_rewards_col_sid ON rewards(s_id);
 CREATE INDEX idx_tab_interac_ci_tx_col_parent_tx_id ON interac_ci_tx(parent_tx_id);
 CREATE INDEX idx_tab_interac_ci_tx_col_scotia_payment_id ON interac_ci_tx(scotia_payment_id);
 CREATE INDEX idx_tab_idm_tx_col_parent_tx_id ON idm_tx(parent_tx_id);
