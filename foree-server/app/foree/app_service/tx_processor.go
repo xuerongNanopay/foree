@@ -505,6 +505,8 @@ func (p *TxProcessor) next(fTxId int64) {
 			)
 			return
 		}
+		//TODO: close up rewards.
+		go p.updateRewardsToComplete(fTx.ID)
 		fTx.Stage = transaction.TxStageSuccess
 	case transaction.TxStageRefunding:
 		refundTx, err := p.foreeRefundRepo.GetUniqueForeeRefundTxByParentTxId(ctx, fTxId)
@@ -528,7 +530,7 @@ func (p *TxProcessor) next(fTxId int64) {
 		return
 	}
 
-	if fTx.Stage != transaction.TxStageSuccess {
+	if fTx.Stage != transaction.TxStageSuccess && fTx.Stage != transaction.TxStageCancel {
 		p.ProcessRootTx(fTxId)
 	} else {
 		foree_logger.Logger.Info("TxProcessor", "foreeTxId", fTxId, "msg", "transaction terminate")
@@ -639,6 +641,10 @@ COMMIT:
 		return
 	}
 	go p.updateSummaryTx(fTxId)
+}
+
+func (p *TxProcessor) updateRewardsToComplete(fTxId int64) {
+
 }
 
 func (p *TxProcessor) closeRemainingTx(ctx context.Context, fTxId int64) error {
