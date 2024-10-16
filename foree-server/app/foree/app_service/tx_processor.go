@@ -381,6 +381,10 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 	return foreeTx, nil
 }
 
+func (p *TxProcessor) Cancel(fTxId int64) (bool, error) {
+	return nil
+}
+
 // Stage: Begin/"" -> CI -> IDM -> COUT -> End
 //
 // Stage: Begin/"" -> CI -> IDM -> COUT -> Rollback -> End

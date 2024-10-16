@@ -946,6 +946,51 @@ func (t *TransactionService) CountSummaryTxs(ctx context.Context, req QueryTrans
 	}, nil
 }
 
+func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTransactionReq) (*TxSummaryDTO, transport.HError) {
+	session, sErr := t.authService.GetSession(ctx, req.SessionId)
+	if session == nil {
+		foree_logger.Logger.Info("CancelTransaction_FAIL",
+			"sessionId", req.SessionId,
+			"ip", loadRealIp(ctx),
+			"cause", "session no found",
+		)
+		return nil, sErr
+	}
+	sumTx, err := t.txSummaryRepo.GetUniqueTxSummaryByOwnerAndId(ctx, session.UserId, req.TransactionId)
+	if err != nil {
+		foree_logger.Logger.Error("CancelTransaction_FAIL",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"transactionId", req.TransactionId,
+			"cause", err.Error(),
+		)
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	if sumTx == nil {
+		return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction no found")
+	}
+
+	isCancelSuccess, err := t.txProcessor.Cancel(sumTx.ParentTxId)
+	if err != nil {
+		foree_logger.Logger.Error("CancelTransaction_FAIL",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"transactionId", req.TransactionId,
+			"cause", err.Error(),
+		)
+		return nil, transport.WrapInteralServerError(err)
+	}
+
+	if isCancelSuccess {
+		return nil, nil
+	}
+
+	return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
+}
+
 // Check transaction status, see if is able to cancel.
 // func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTransactionReq) (*TxCancelDTO, transport.HError) {
 // 	session, sErr := t.authService.GetSession(ctx, req.SessionId)
