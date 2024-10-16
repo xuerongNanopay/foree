@@ -167,7 +167,16 @@ func (repo *RewardRepo) UpdateRewardTxById(ctx context.Context, reward Reward) e
 }
 
 func (repo *RewardRepo) GetUniqueRewardById(ctx context.Context, id int64) (*Reward, error) {
-	rows, err := repo.db.Query(sQLRewardGetUniqueById, id)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		rows, err = dTx.Query(sQLRewardGetUniqueById, id)
+	} else {
+		rows, err = repo.db.Query(sQLRewardGetUniqueById, id)
+	}
 
 	if err != nil {
 		return nil, err
@@ -191,13 +200,23 @@ func (repo *RewardRepo) GetUniqueRewardById(ctx context.Context, id int64) (*Rew
 }
 
 func (repo *RewardRepo) GetAllRewardByOwnerIdAndIds(ctx context.Context, ownerId int64, ids []int64) ([]*Reward, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
 	args := make([]interface{}, len(ids)+1)
 	args[0] = ownerId
 	for i, id := range ids {
 		args[i+1] = id
 	}
 
-	rows, err := repo.db.Query(fmt.Sprintf(sQLRewardAllByOwnerIdAndIds, strings.Repeat(",?", len(ids)-1)), args...)
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		rows, err = dTx.Query(fmt.Sprintf(sQLRewardAllByOwnerIdAndIds, strings.Repeat(",?", len(ids)-1)), args...)
+
+	} else {
+		rows, err = repo.db.Query(fmt.Sprintf(sQLRewardAllByOwnerIdAndIds, strings.Repeat(",?", len(ids)-1)), args...)
+	}
 
 	if err != nil {
 		return nil, err
@@ -220,14 +239,24 @@ func (repo *RewardRepo) GetAllRewardByOwnerIdAndIds(ctx context.Context, ownerId
 	return rewards, nil
 }
 
-func (repo *RewardRepo) GetAllRewardByOwnerIdAndSids(ctx context.Context, ownerId int64, references []string) ([]*Reward, error) {
-	args := make([]interface{}, len(references)+1)
+func (repo *RewardRepo) GetAllRewardByOwnerIdAndSids(ctx context.Context, ownerId int64, sids []string) ([]*Reward, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	args := make([]interface{}, len(sids)+1)
 	args[0] = ownerId
-	for i, ref := range references {
+	for i, ref := range sids {
 		args[i+1] = ref
 	}
 
-	rows, err := repo.db.Query(fmt.Sprintf(sQLRewardAllByOwnerIdAndSids, strings.Repeat(",?", len(references)-1)), args...)
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		rows, err = dTx.Query(fmt.Sprintf(sQLRewardAllByOwnerIdAndSids, strings.Repeat(",?", len(sids)-1)), args...)
+
+	} else {
+		rows, err = repo.db.Query(fmt.Sprintf(sQLRewardAllByOwnerIdAndSids, strings.Repeat(",?", len(sids)-1)), args...)
+	}
 
 	if err != nil {
 		return nil, err
