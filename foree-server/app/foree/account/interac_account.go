@@ -216,7 +216,6 @@ func (repo *InteracAccountRepo) GetUniqueInteracAccountById(ctx context.Context,
 	var err error
 
 	if ok {
-		fmt.Println("aaaaa")
 		rows, err = dTx.Query(sQLInteracAccountGetUniqueById, id)
 	} else {
 		rows, err = repo.db.Query(sQLInteracAccountGetUniqueById, id)

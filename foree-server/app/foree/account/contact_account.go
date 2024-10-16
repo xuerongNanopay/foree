@@ -237,7 +237,6 @@ func (repo *ContactAccountRepo) GetUniqueContactAccountById(ctx context.Context,
 	var err error
 
 	if ok {
-		fmt.Println("aaaaa")
 		rows, err = dTx.Query(sQLContactAccountGetUniqueById, id)
 	} else {
 		rows, err = repo.db.Query(sQLContactAccountGetUniqueById, id)
