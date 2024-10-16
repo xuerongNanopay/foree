@@ -282,17 +282,6 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 		}
 	}
 
-	feeJoints, err := t.feeService.applyFee(session.UserGroup.FeeGroup, types.AmountData{Amount: types.Amount(req.SrcAmount), Currency: req.SrcCurrency})
-	if err != nil {
-		foree_logger.Logger.Error("QuoteTx_FAIL",
-			"ip", loadRealIp(ctx),
-			"userId", session.UserId,
-			"sessionId", req.SessionId,
-			"cause", err.Error(),
-		)
-		return nil, transport.WrapInteralServerError(err)
-	}
-
 	txLimit, err := t.txLimitService.getTxLimit(ctx, session.UserGroup.TransactionLimitGroup)
 	if err != nil {
 		foree_logger.Logger.Error("QuoteTx_FAIL",
@@ -347,6 +336,17 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 
 	for _, reward := range rewards {
 		totalAmt.Amount -= reward.Amt.Amount
+	}
+
+	feeJoints, err := t.feeService.applyFee(session.UserGroup.FeeGroup, totalAmt)
+	if err != nil {
+		foree_logger.Logger.Error("QuoteTx_FAIL",
+			"ip", loadRealIp(ctx),
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"cause", err.Error(),
+		)
+		return nil, transport.WrapInteralServerError(err)
 	}
 
 	if totalAmt.Amount < txLimit.MinAmt.Amount {
@@ -687,11 +687,10 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	// Update reward
 	var rewardError transport.HError
 	updateReward := func() {
-		if len(foreeTx.Rewards) == 1 {
-			r := foreeTx.Rewards[1]
-			r.AppliedTransactionId = foreeTxID
-			r.Status = promotion.RewardStatusPending
-			err := t.rewardRepo.UpdateRewardTxById(ctx, *r)
+		for _, reward := range foreeTx.Rewards {
+			reward.AppliedTransactionId = foreeTxID
+			reward.Status = promotion.RewardStatusPending
+			err := t.rewardRepo.UpdateRewardTxById(ctx, *reward)
 			if err != nil {
 				foree_logger.Logger.Error("CreateTx_FAIL",
 					"ip", loadRealIp(ctx),
@@ -701,6 +700,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 					"cause", err.Error(),
 				)
 				rewardError = transport.WrapInteralServerError(err)
+				return
 			}
 		}
 	}
