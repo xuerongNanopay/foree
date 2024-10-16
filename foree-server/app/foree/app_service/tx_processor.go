@@ -644,7 +644,22 @@ COMMIT:
 }
 
 func (p *TxProcessor) updateRewardsToComplete(fTxId int64) {
+	rewards, err := p.rewardRepo.GetAllRewardByAppliedTransactionId(context.TODO(), fTxId)
+	if err != nil {
+		foree_logger.Logger.Error("TxProcessor--updateRewardsToComplete_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+	}
 
+	for _, r := range rewards {
+		r.Status = promotion.RewardStatusRedeemed
+		err := p.rewardRepo.UpdateRewardTxById(context.TODO(), *r)
+		if err != nil {
+			foree_logger.Logger.Error("TxProcessor--updateRewardsToComplete_FAIL",
+				"foreeTxId", fTxId,
+				"rewardId", r.ID,
+				"cause", err.Error(),
+			)
+		}
+	}
 }
 
 func (p *TxProcessor) closeRemainingTx(ctx context.Context, fTxId int64) error {
