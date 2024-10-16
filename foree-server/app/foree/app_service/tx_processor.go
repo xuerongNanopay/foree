@@ -84,6 +84,10 @@ type TxProcessor struct {
 	nbpTxProcessor      *NBPTxProcessor
 }
 
+func (p *TxProcessor) reloadTransactions() {
+
+}
+
 func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
 	foreeTx, err := p.createFullTx(tx)
 	if err != nil {

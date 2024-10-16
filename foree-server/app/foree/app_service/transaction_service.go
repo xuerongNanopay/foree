@@ -240,10 +240,10 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	}
 
 	// Get reward
-	var rewards = make([]*promotion.Reward, 0)
-
-	if len(req.RewardIds) > 0 {
-		rs, err := t.rewardRepo.GetAllRewardByOwnerIdAndIds(ctx, session.UserId, req.RewardIds)
+	rewards := make([]*promotion.Reward, 0)
+	rewardIds := make([]int64, 0)
+	if len(req.RewardSids) > 0 {
+		rs, err := t.rewardRepo.GetAllRewardByOwnerIdAndSids(ctx, session.UserId, req.RewardSids)
 		if err != nil {
 			foree_logger.Logger.Error("QuoteTx_FAIL",
 				"ip", loadRealIp(ctx),
@@ -278,6 +278,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 				continue
 			}
 			rewards = append(rewards, reward)
+			rewardIds = append(rewardIds, reward.ID)
 		}
 	}
 
@@ -407,7 +408,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 				Currency: reward.Amt.Currency,
 			}
 		}
-		foreeTx.RewardIds = req.RewardIds
+		foreeTx.RewardIds = rewardIds
 		foreeTx.Rewards = rs
 		foreeTx.TotalRewardAmt = tRewardAmt
 	}

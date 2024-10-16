@@ -32,14 +32,14 @@ func (q FreeQuoteReq) Validate() *transport.BadRequestError {
 
 type QuoteTransactionReq struct {
 	transport.SessionReq
-	CinAccId           int64   `json:"cinAccId" validate:"gt=0"`
-	CoutAccId          int64   `json:"coutAccId" validate:"gt=0"`
-	SrcAmount          float64 `json:"srcAmount" validate:"gt=0"`
-	SrcCurrency        string  `json:"srcCurrency" validate:"eq=CAD"`
-	DestCurrency       string  `json:"destCurrency" validate:"eq=PKR"`
-	RewardIds          []int64 `json:"rewardIds"`
-	PromoCode          string  `json:"promoCode"`
-	TransactionPurpose string  `json:"transactionPurpose" validate:"required"`
+	CinAccId           int64    `json:"cinAccId" validate:"gt=0"`
+	CoutAccId          int64    `json:"coutAccId" validate:"gt=0"`
+	SrcAmount          float64  `json:"srcAmount" validate:"gt=0"`
+	SrcCurrency        string   `json:"srcCurrency" validate:"eq=CAD"`
+	DestCurrency       string   `json:"destCurrency" validate:"eq=PKR"`
+	RewardSids         []string `json:"rewardSids"`
+	PromoCode          string   `json:"promoCode"`
+	TransactionPurpose string   `json:"transactionPurpose" validate:"required"`
 }
 
 func (q QuoteTransactionReq) Validate() *transport.BadRequestError {
@@ -49,13 +49,13 @@ func (q QuoteTransactionReq) Validate() *transport.BadRequestError {
 	// if q.PromoCode != "" && len(q.RewardIds) > 0 {
 	// 	ret.AddDetails("promoCode", "cannot apply promocode and reward together")
 	// }
-	if len(q.RewardIds) > 4 {
-		ret.AddDetails("RewardIds", "maximum 4 promotions")
+	if len(q.RewardSids) > 4 {
+		ret.AddDetails("rewardSids", "maximum 4 rewards")
 	}
 
-	for _, v := range q.RewardIds {
-		if v <= 0 {
-			ret.AddDetails("RewardIds", "invalid rewards")
+	for _, v := range q.RewardSids {
+		if v == "" {
+			ret.AddDetails("rewardSids", "invalid rewards")
 			break
 		}
 	}
@@ -155,7 +155,7 @@ func (q GetRateReq) Validate() *transport.BadRequestError {
 
 // ----------   Response --------------
 type RewardDTO struct {
-	ID          int64        `json:"id"`
+	SID         string       `json:"sId"`
 	Type        string       `json:"type"`
 	Description string       `json:"description"`
 	Amount      types.Amount `json:"amount"`
@@ -165,7 +165,7 @@ type RewardDTO struct {
 
 func NewRewardDTO(r *promotion.Reward) *RewardDTO {
 	d := &RewardDTO{
-		ID:          r.ID,
+		SID:         r.SID,
 		Type:        r.Type,
 		Description: r.Description,
 		Amount:      r.Amt.Amount,
