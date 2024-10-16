@@ -23,6 +23,7 @@ const SignUp = () => {
   useEffect(() => {
     if (url) {
       const { hostname, path, queryParams } = Linking.parse(url);
+      console.log(url)
       console.log(queryParams)
       if ( !!queryParams.referrerReference ) {
         setForm((form)=>({
@@ -56,6 +57,7 @@ const SignUp = () => {
   const submit = async () => {
     setIsSubmitting(true)
     try {
+      console.log(form)
       const resp = await authService.signUp(string_util.trimStringInObject(form))
       if ( resp.status / 100 !== 2 ) {
         console.log("sign_up", resp.status, resp.data)

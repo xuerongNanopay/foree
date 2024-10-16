@@ -31,7 +31,7 @@ const TransactionCreate = () => {
     destAmount: 0.0,
     srcCurrency: 'CAD',
     destCurrency: 'PKR',
-    rewardIds: [],
+    rewardSids: [],
     transactionPurpose: ''
   })
   const [quote, setQuote] = useState(null)
@@ -39,7 +39,7 @@ const TransactionCreate = () => {
   const [rewards, setRewards] = useState([])
 
   const quoteTransactionScheme = useMemo(() => {
-    min = rewards.filter(x => form.rewardIds.includes(x.id)).reduce((total, cur) => total+cur.amount, 20)
+    min = rewards.filter(x => form.rewardSids.includes(x.id)).reduce((total, cur) => total+cur.amount, 20)
     const sourceAmoutScheme = !!dailyLimit ? 
       number().required("required").min(min, `Minimum ${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(min)} CAD`).max(dailyLimit.maxAmount-dailyLimit.usedAmount, `Maximum $${(dailyLimit.maxAmount-dailyLimit.usedAmount).toFixed(2)} CAD`) :
       number().required("required").min(min, `Minimum ${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(min)} CAD`).max(1000, "Maximum $1000.00 CAD")
@@ -48,9 +48,9 @@ const TransactionCreate = () => {
       coutAccId: number().integer().required("required").min(1, "required"),
       srcAmount: sourceAmoutScheme,
       transactionPurpose: string().required("required"),
-      rewardIds: array().of(number().integer().min(0)).max(MaxPromotion, "maxmium 4 promotions")
+      rewardSids: array().of(string()).max(MaxPromotion, "maxmium 4 promotions")
     })
-  }, [dailyLimit, form.rewardIds])
+  }, [dailyLimit, form.rewardSids])
 
   useEffect(() => {
     async function validate() {
@@ -241,10 +241,10 @@ const TransactionCreate = () => {
     return (
       <View className="border-[1px] border-slate-500 rounded-lg py-2 mt-2 flex flex-row items-center">
         <Image 
-          source={!form.rewardIds.find(x => x === reward.id) ? icons.checkboxUncheckDark : icons.checkboxCheckDark}
+          source={!form.rewardSids.find(x => x === reward.id) ? icons.checkboxUncheckDark : icons.checkboxCheckDark}
           resizeMode='contain'
           className="w-[30px] h-[30px] mx-2"
-          tintColor={!form.rewardIds.find(x => x === reward.id) ? "#94a3b8" : "#005a32"}
+          tintColor={!form.rewardSids.find(x => x === reward.id) ? "#94a3b8" : "#005a32"}
         />
         <View>
           <Text className="font-semibold text-slate-500">{reward.description}</Text>
@@ -252,7 +252,7 @@ const TransactionCreate = () => {
         </View>
       </View>
     )
-  }, [form.rewardIds])
+  }, [form.rewardSids])
 
   const TransactionCreateTitle = useCallback(() => {
     return (
@@ -364,15 +364,15 @@ const TransactionCreate = () => {
         !!rewards && rewards.length > 0 ?
           <ModalSelect
           title="Apply Promotion"
-          modalTitle={`apply promotions(${form.rewardIds.length}/${MaxPromotion})`}
+          modalTitle={`apply promotions(${form.rewardSids.length}/${MaxPromotion})`}
           containerStyles="mt-2"
-          errorMessage={errors['rewardIds']}
+          errorMessage={errors['rewardSids']}
           multiChoice={true}
           value={() => {
             let totalReward = 0
             let totalRewardCurrency = ''
-            form.rewardIds.forEach((id) => {
-              let reward = rewards.find(r => r.id === id)
+            form.rewardSids.forEach((sId) => {
+              let reward = rewards.find(r => r.sId === sId)
               if ( !!reward ) {
                 totalReward += reward.amount
                 totalRewardCurrency = reward.currency
@@ -381,8 +381,8 @@ const TransactionCreate = () => {
             if ( totalReward === 0 ) return ''
             return new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(totalReward) + (!!totalRewardCurrency ? ` ${totalRewardCurrency}` : '')
           }}
-          keyExtractor="id"
-          valueExtractor="id"
+          keyExtractor="sId"
+          valueExtractor="sId"
           list={rewards}
           listView={RewardListItem}
           uselistSeperator={false}
@@ -390,16 +390,16 @@ const TransactionCreate = () => {
           inputStyles="text-right"
           onPress={(w) => {
             setForm((form) => {
-              if (!!form.rewardIds.find(x => x === w)) {
+              if (!!form.rewardSids.find(x => x === w)) {
                 return {
                   ...form,
-                  rewardIds: [...form.rewardIds.filter(x => x !== w)]
+                  rewardSids: [...form.rewardSids.filter(x => x !== w)]
                 }
               } else {
-                if ( form.rewardIds.length >= MaxPromotion ) return form
+                if ( form.rewardSids.length >= MaxPromotion ) return form
                 return {
                   ...form,
-                  rewardIds: [...form.rewardIds, w]
+                  rewardSids: [...form.rewardSids, w]
                 }
               }
             })
@@ -419,7 +419,7 @@ const TransactionCreate = () => {
     form.destAmount, 
     form.cinAccId, 
     form.coutAccId,
-    form.rewardIds,
+    form.rewardSids,
     errors['srcAmount'],
     errors['cinAccId'],
     errors['coutAccId']
