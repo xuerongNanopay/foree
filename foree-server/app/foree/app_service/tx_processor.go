@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"sync"
 
 	"xue.io/go-pay/app/foree/account"
 	foree_logger "xue.io/go-pay/app/foree/logger"
@@ -107,7 +106,6 @@ func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
 
 // Create CI, COUT, IDM for ForeeTx
 func (p *TxProcessor) createFullTx(fTx transaction.ForeeTx) (*transaction.ForeeTx, error) {
-	wg := sync.WaitGroup{}
 	dTx, err := p.db.Begin()
 	if err != nil {
 		dTx.Rollback()
@@ -129,7 +127,6 @@ func (p *TxProcessor) createFullTx(fTx transaction.ForeeTx) (*transaction.ForeeT
 	var ciTx *transaction.InteracCITx
 	var ciErr error
 	createCI := func() {
-		defer wg.Done()
 		ciId, err := p.interacTxRepo.InsertInteracCITx(ctx, transaction.InteracCITx{
 			Status:      transaction.TxStatusInitial,
 			CashInAccId: fTx.CinAccId,
@@ -149,15 +146,12 @@ func (p *TxProcessor) createFullTx(fTx transaction.ForeeTx) (*transaction.ForeeT
 		}
 		ciTx = ci
 	}
-	wg.Add(1)
-	// go createCI()
 	createCI()
 
 	// Create IDM
 	var idmTx *transaction.IDMTx
 	var idmErr error
 	createIDM := func() {
-		defer wg.Done()
 		idmId, err := p.idmTxRepo.InsertIDMTx(ctx, transaction.IDMTx{
 			Status:     transaction.TxStatusInitial,
 			Ip:         fTx.Ip,
@@ -176,15 +170,12 @@ func (p *TxProcessor) createFullTx(fTx transaction.ForeeTx) (*transaction.ForeeT
 		}
 		idmTx = idm
 	}
-	wg.Add(1)
-	// go createIDM()
 	createIDM()
 
 	// Create Cout
 	var coutTx *transaction.NBPCOTx
 	var coutErr error
 	createCout := func() {
-		defer wg.Done()
 		coutAcc, err := p.contactAccountRepo.GetUniqueContactAccountById(ctx, fTx.CoutAccId)
 		if err != nil {
 			coutErr = err
@@ -223,11 +214,8 @@ func (p *TxProcessor) createFullTx(fTx transaction.ForeeTx) (*transaction.ForeeT
 		coutTx = cout
 	}
 
-	wg.Add(1)
-	// go createCout()
 	createCout()
 
-	wg.Wait()
 	if ciErr != nil {
 		dTx.Rollback()
 		foree_logger.Logger.Error("CreateFullTx_FAIL",
