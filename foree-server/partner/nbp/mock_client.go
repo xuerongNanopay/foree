@@ -3,6 +3,7 @@ package nbp
 import (
 	"fmt"
 	"net/http"
+	"sync"
 )
 
 func NewMockNBPClient() NBPClient {
@@ -14,7 +15,8 @@ func NewMockNBPClient() NBPClient {
 }
 
 type NBPClientMock struct {
-	config NBPConfig
+	config                NBPConfig
+	cancelledTransactions sync.Map
 }
 
 func (s *NBPClientMock) GetConfigs() NBPConfig {
@@ -101,15 +103,23 @@ func (*NBPClientMock) LoadRemittanceThirdParty(r LoadRemittanceRequest) (*LoadRe
 	}, nil
 }
 
-func (*NBPClientMock) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error) {
+func (m *NBPClientMock) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*TransactionStatusByIdsResponse, error) {
 	var txStatuses []TransactionStatus
 	ids := []string(r.Ids)
 
 	for i := 0; i < len(ids); i++ {
-		txStatuses = append(txStatuses, TransactionStatus{
-			GlobalId: ids[i],
-			Status:   TxStatusPaid,
-		})
+		_, ok := m.cancelledTransactions.LoadAndDelete(ids[i])
+		if ok {
+			txStatuses = append(txStatuses, TransactionStatus{
+				GlobalId: ids[i],
+				Status:   TxStatusCancelled,
+			})
+		} else {
+			txStatuses = append(txStatuses, TransactionStatus{
+				GlobalId: ids[i],
+				Status:   TxStatusPaid,
+			})
+		}
 	}
 
 	return &TransactionStatusByIdsResponse{
@@ -125,7 +135,8 @@ func (*NBPClientMock) TransactionStatusByIds(r TransactionStatusByIdsRequest) (*
 func (*NBPClientMock) TransactionStatusByDate(r TransactionStatusByDateRequest) (*TransactionStatusByDateResponse, error) {
 	return nil, fmt.Errorf("TransactionStatusByDate is not implemented for mock client")
 }
-func (*NBPClientMock) CancelTransaction(r CancelTransactionRequest) (*CancelTransactionResponse, error) {
+func (m *NBPClientMock) CancelTransaction(r CancelTransactionRequest) (*CancelTransactionResponse, error) {
+	m.cancelledTransactions.Store(r.GlobalId, true)
 	return &CancelTransactionResponse{
 		ResponseCommon: ResponseCommon{
 			StatusCode:      200,

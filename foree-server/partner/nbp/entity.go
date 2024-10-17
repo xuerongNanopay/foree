@@ -7,12 +7,12 @@ import (
 )
 
 const (
-	TxStatusRejecteded   = "REJECTED"
-	TxStatusError        = "ERROR"
-	TxStatusPaid         = "PAID"
-	TxStatusCancelledled = "CANCELLED"
-	TxStatusInProcess    = "IN_PROCESS"
-	TxStatusPending      = "PENDING"
+	TxStatusRejecteded = "REJECTED"
+	TxStatusError      = "ERROR"
+	TxStatusPaid       = "PAID"
+	TxStatusCancelled  = "CANCELLED"
+	TxStatusInProcess  = "IN_PROCESS"
+	TxStatusPending    = "PENDING"
 )
 
 const (
