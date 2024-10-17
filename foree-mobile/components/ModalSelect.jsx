@@ -113,15 +113,18 @@ const ModalSelect = ({
                   className="font-psemibold text-xl text-slate-600"
                 >{modalTitle}</Text>
               </View>
-              <TouchableOpacity
-                onPress={() => {
-                  setVisible(false)
-                  setShowList(list)
-                }}
-                className="border-[1px] border-[#005a32] px-2 py-1 rounded-full"
-              >
-                <Text className="font-semibold text-[#005a32]">Done</Text>
-              </TouchableOpacity>
+              {
+                !multiChoice ? <></>:
+                <TouchableOpacity
+                  onPress={() => {
+                    setVisible(false)
+                    setShowList(list)
+                  }}
+                  className="border-[1px] border-[#005a32] px-2 py-1 rounded-full"
+                >
+                  <Text className="font-semibold text-[#005a32]">Done</Text>
+                </TouchableOpacity>
+              }
             </View>
             <View>
               {
