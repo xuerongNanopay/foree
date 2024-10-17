@@ -21,7 +21,6 @@ const TransactionDetail = () => {
           console.error("get transaction detail", resp.status, resp.data)
           router.replace('/transaction')
         } else {
-          console.log(resp.data.data)
           setSumTx(resp.data.data)
         }
       } catch (e) {
@@ -36,11 +35,16 @@ const TransactionDetail = () => {
     const cancelTransaction_ = async() => {
       try {
         setIsSubmitting(true)
-        const resp = await transactionService.cancelTransaction(transactionId)
+        const resp = await transactionService.cancelTransaction(transactionId*1)
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("cancel transaction", resp.status, resp.data)
+          Alert.alert("Fail", "fail to cancel the transaction", [
+            {text: 'OK', onPress: () => {getTransactionDetail()}}
+          ])
         } else {
-          getTransactionDetail()
+          Alert.alert("Success", "success to cancel the transaction", [
+            {text: 'OK', onPress: () => {getTransactionDetail()}}
+          ])
         }
       } catch (e) {
         console.error('cancelTransaction', e)
@@ -125,12 +129,16 @@ const TransactionDetail = () => {
                   <Text className="font-psemibold text-slate-600">{sumTx.rate}</Text>
                 </View>
                 <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
+                  <Text className="text-slate-500">Exchange Amount</Text>
+                  <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.srcAmount, sumTx.srcCurrency)}</Text>
+                </View>
+                <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
                   <Text className="text-slate-500">Fees</Text>
                   <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.feeAmount, sumTx.feeCurrency)}</Text>
                 </View>
                 <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
                   <Text className="text-slate-500">Rewards</Text>
-                  <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.rewardAmount, sumTx.rewardCurrency)}</Text>
+                  <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.rewardAmount, sumTx.rewardCurrency, true)}</Text>
                 </View>
                 <View className="mt-3 pb-2 flex-row justify-between items-center border-b-[1px] border-slate-300">
                   <Text className="text-slate-500">Total Amount</Text>
@@ -142,10 +150,8 @@ const TransactionDetail = () => {
                     disabled={isSubmitting}
                     onPress={() => {
                       Alert.alert("Warming", "Are you sure to cancel the transaction?", [
-                        {text: 'Cancel', onPress: () => {}},
-                        {text: 'Continue', onPress: () => {
-                          cancelTransaction()
-                        }},
+                        {text: 'Yes', onPress: () => {cancelTransaction()}},
+                        {text: 'No', onPress: () => {}},
                       ])
                     }}
                     className = "mt-3 p-2 w-24 border border-red-800 rounded-lg flex"

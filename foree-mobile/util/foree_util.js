@@ -19,6 +19,6 @@ export const formatContactMethod = ({transferMethod, bankName, accountNoOrIBAN},
   return `${!!bankName ? bankName.slice(0, max) + (bankName.length > max ? "..." : "") : ""}(${!!accountNoOrIBAN ? accountNoOrIBAN.slice(0, max) + (accountNoOrIBAN.length > max ? "..." : "") : ""})`
 }
 
-export const currencyFormatter = (amount, currency) => {
-  return `$${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(amount)}${!!currency ? ` ${currency}` : ''}`
+export const currencyFormatter = (amount, currency, isNegative=false) => {
+  return `${isNegative?"-":""}$${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(amount)}${!!currency ? ` ${currency}` : ''}`
 }
