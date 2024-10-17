@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, Image, Alert } from 'react-native'
 import * as Linking from 'expo-linking';
 import { useLocalSearchParams } from 'expo-router'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { transactionService } from '../../service'
 import { SummaryTxStatuses, TxSummaryStatusAwaitPayment, TxSummaryStatusCancelled, TxSummaryStatusCompleted, TxSummaryStatusInitial, TxSummaryStatusInProgress, TxSummaryStatusPickup, TxSummaryStatusRefunding } from '../../constants/summary_tx'
 import { currencyFormatter, formatContactMethod, formatName } from '../../util/foree_util';
@@ -11,16 +11,17 @@ import { icons } from '../../constants';
 const TransactionDetail = () => {
   const { transactionId } = useLocalSearchParams()
   const [sumTx, setSumTx] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  useEffect(() => {
-    const controller = new AbortController()
-    const getTransactionDetail = async () => {
+  const getTransactionDetail = useCallback((signal) => {
+    const getTransactionDetail_ = async() => {
       try {
-        const resp = await transactionService.getTransaction(transactionId, {signal: controller.signal})
+        const resp = await transactionService.getTransaction(transactionId, {signal})
         if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
           console.error("get transaction detail", resp.status, resp.data)
           router.replace('/transaction')
         } else {
+          console.log(resp.data.data)
           setSumTx(resp.data.data)
         }
       } catch (e) {
@@ -28,7 +29,31 @@ const TransactionDetail = () => {
         router.replace('/transaction')
       }
     }
-    getTransactionDetail()
+    getTransactionDetail_()
+  }, [transactionId])
+
+  const cancelTransaction = useCallback(() => {
+    const cancelTransaction_ = async() => {
+      try {
+        setIsSubmitting(true)
+        const resp = await transactionService.cancelTransaction(transactionId)
+        if ( resp.status / 100 !== 2 &&  !resp?.data?.data) {
+          console.error("cancel transaction", resp.status, resp.data)
+        } else {
+          getTransactionDetail()
+        }
+      } catch (e) {
+        console.error('cancelTransaction', e)
+      } finally {
+        setIsSubmitting(false)
+      }
+    }
+    cancelTransaction_()
+  }, [transactionId])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    getTransactionDetail(controller.signal)
     return () => {
       controller.abort()
     }
@@ -112,13 +137,14 @@ const TransactionDetail = () => {
                   <Text className="font-psemibold text-slate-600">{currencyFormatter(sumTx.totalAmount, sumTx.totalCurrency)}</Text>
                 </View>
                 {
-                  1 !== 1 ? <></> :
+                  !sumTx.isCancelAllowed ? <></> :
                   <TouchableOpacity
+                    disabled={isSubmitting}
                     onPress={() => {
                       Alert.alert("Warming", "Are you sure to cancel the transaction?", [
                         {text: 'Cancel', onPress: () => {}},
                         {text: 'Continue', onPress: () => {
-                          console.log("TODO: cancel")
+                          cancelTransaction()
                         }},
                       ])
                     }}
