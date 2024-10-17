@@ -404,21 +404,36 @@ func (p *InteracTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transact
 }
 
 // TODO: call scotial cancel api
-func (p *InteracTxProcessor) Cancel(parentTxId int64) (bool, error) {
+func (p *InteracTxProcessor) cancel(parentTxId int64) (bool, error) {
 	ctx := context.TODO()
 	interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, parentTxId)
 	if err != nil {
+		foree_logger.Logger.Error("InteracTxProcessor--cancel", "foreeTxId", parentTxId, "cause", err.Error())
 		return false, err
 	}
 	if interacTx == nil {
+		foree_logger.Logger.Error("InteracTxProcessor--cancel", "foreeTxId", parentTxId, "cause", "interacCITx not found")
 		return false, fmt.Errorf("InteracCITx no found with parentTxId `%v`", parentTxId)
 	}
 	if interacTx.Status != transaction.TxStatusSent {
 		return false, fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSent, interacTx.Status)
 	}
 
-	//TODO: call scotial cancel api
-	//TODO: if error return.
+	resp, err := p.scotiaClient.CancelPayment(scotia.CancelPaymentRequest{
+		PaymentId:  interacTx.ScotiaPaymentId,
+		EndToEndId: interacTx.EndToEndId,
+	})
+
+	if err != nil {
+		foree_logger.Logger.Error("InteracTxProcessor--cancel", "foreeTxId", parentTxId, "cause", err.Error())
+		return false, err
+	}
+
+	if resp.StatusCode/100 != 2 {
+		foree_logger.Logger.Warn("InteracTxProcessor--cancel", "foreeTxId", parentTxId, "httpStatus", resp.StatusCode, "resp", resp.RawResponse, "cause", "scotia cancel api failed")
+		return false, fmt.Errorf("scotia cancel call failed")
+	}
+
 	interacTx.Status = transaction.TxStatusCancelled
 	err = p.interacTxRepo.UpdateInteracCITxById(context.TODO(), *interacTx)
 	if err != nil {
