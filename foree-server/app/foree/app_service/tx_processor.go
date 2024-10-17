@@ -824,11 +824,11 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 	if sumTx.Status != newSumTx.Status || newSumTx.IsCancelAllowed != sumTx.IsCancelAllowed {
 		err = p.txSummaryRepo.UpdateTxSummaryById(ctx, newSumTx)
 		if err != nil {
-			foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+			foree_logger.Logger.Error("TxProcessor--updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 			return
 		}
 
-		foree_logger.Logger.Debug("tx_processor-updateSummaryTx_Success", "oldSummaryStatus", sumTx.Status, "newSummaryStatus", newSumTx.Status)
+		foree_logger.Logger.Debug("TxProcessor--updateSummaryTx_Success", "oldSummaryStatus", sumTx.Status, "newSummaryStatus", newSumTx.Status)
 	}
 }
 
@@ -868,6 +868,6 @@ func (p *TxProcessor) revertRewardAndTxLimit(ctx context.Context, fTx transactio
 	if err := p.dailyTxLimiteRepo.UpdateDailyTxLimitById(ctx, *dailyLimit); err != nil {
 		return err
 	}
-	foree_logger.Logger.Info("Refund Transaction limit", "foreeTxId", fTx.ID, "refundAmout", fTx.SrcAmt.Amount)
+	foree_logger.Logger.Info("TxProcessor--revertRewardAndTxLimit_Success", "foreeTxId", fTx.ID, "refundAmout", fTx.SrcAmt.Amount)
 	return nil
 }
