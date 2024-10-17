@@ -47,6 +47,17 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		),
 	).Methods("POST")
 
+	// Transaction Cancel
+	router.HandleFunc(
+		"/cancel_transaction",
+		sessionPostWrapper(
+			"CreateTx",
+			foree_service.PermissionForeeTxWrite,
+			c.authService,
+			c.transactionService.CancelTransaction,
+		),
+	).Methods("POST")
+
 	// Transaction limit
 	router.HandleFunc(
 		"/transaction_limit",
