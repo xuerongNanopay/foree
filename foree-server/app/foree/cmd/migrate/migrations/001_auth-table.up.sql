@@ -344,7 +344,6 @@ CREATE TABLE IF NOT EXISTS interac_ci_tx(
 CREATE TABLE IF NOT EXISTS foree_refund_tx(
     `id` SERIAL PRIMARY KEY,
     `status` VARCHAR(64) NOT NULL,
-    `refund_interac_acc_id` BIGINT UNSIGNED NOT NULL,
     `refund_amount` DECIMAL(11, 2) NOT NULL,
     `refund_currency` CHAR(3) NOT NULL,
     `parent_tx_id` BIGINT UNSIGNED NOT NULL,

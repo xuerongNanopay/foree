@@ -317,7 +317,6 @@ func (p *NBPTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.
 	return true, nil
 }
 
-// TODO: call scotial cancel api
 func (p *NBPTxProcessor) cancel(parentTxId int64) (bool, error) {
 	ctx := context.TODO()
 	nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, parentTxId)
@@ -348,16 +347,14 @@ func (p *NBPTxProcessor) cancel(parentTxId int64) (bool, error) {
 		foree_logger.Logger.Warn("NBPTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "nbpTxId", nbpTx.ID, "httpStatus", resp.StatusCode, "resp", resp.RawResponse, "cause", "scotia cancel api failed")
 		return false, nil
 	}
-	//TODO: call scotial cancel api
-	//TODO: if error return.
 
-	// nbpTx.Status = transaction.TxStatusCancelled
-	// err = p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), *nbpTx)
-	// if err != nil {
-	// 	return false, err
-	// }
-	// p.waits.Delete(nbpTx.NBPReference)
-	// go p.txProcessor.rollback(nbpTx.ParentTxId)
+	nbpTx.Status = transaction.TxStatusCancelled
+	err = p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), *nbpTx)
+	if err != nil {
+		return false, err
+	}
+	p.waits.Delete(nbpTx.NBPReference)
+	go p.txProcessor.rollback(nbpTx.ParentTxId)
 
 	foree_logger.Logger.Info("NBPTxProcessor--cancel_SUCCESS", "foreeTxId", parentTxId, "nbpTxId", nbpTx.ID)
 	return true, nil
