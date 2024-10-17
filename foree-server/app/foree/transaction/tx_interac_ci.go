@@ -156,7 +156,16 @@ func (repo *InteracCITxRepo) UpdateInteracCITxById(ctx context.Context, tx Inter
 }
 
 func (repo *InteracCITxRepo) GetUniqueInteracCITxByParentTxId(ctx context.Context, parentTxId int64) (*InteracCITx, error) {
-	rows, err := repo.db.Query(sQLInteracCITxGetUniqueByParentTxId, parentTxId)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var rows *sql.Rows
+
+	if ok {
+		rows, err = dTx.Query(sQLInteracCITxGetUniqueByParentTxId, parentTxId)
+	} else {
+		rows, err = repo.db.Query(sQLInteracCITxGetUniqueByParentTxId, parentTxId)
+	}
 
 	if err != nil {
 		return nil, err

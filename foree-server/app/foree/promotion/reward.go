@@ -280,7 +280,17 @@ func (repo *RewardRepo) GetAllRewardByOwnerIdAndSids(ctx context.Context, ownerI
 }
 
 func (repo *RewardRepo) GetAllRewardByAppliedTransactionId(ctx context.Context, appliedTransactionId int64) ([]*Reward, error) {
-	rows, err := repo.db.Query(sQLRewardGetAllByAppliedTransactionId, appliedTransactionId)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		rows, err = dTx.Query(sQLRewardGetAllByAppliedTransactionId, appliedTransactionId)
+
+	} else {
+		rows, err = repo.db.Query(sQLRewardGetAllByAppliedTransactionId, appliedTransactionId)
+	}
 
 	if err != nil {
 		return nil, err
@@ -304,7 +314,17 @@ func (repo *RewardRepo) GetAllRewardByAppliedTransactionId(ctx context.Context, 
 }
 
 func (repo *RewardRepo) GetAllActiveRewardByOwnerId(ctx context.Context, ownerId int64) ([]*Reward, error) {
-	rows, err := repo.db.Query(sQLRewardGetAllActiveByOwnerId, ownerId)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		rows, err = dTx.Query(sQLRewardGetAllActiveByOwnerId, ownerId)
+
+	} else {
+		rows, err = repo.db.Query(sQLRewardGetAllActiveByOwnerId, ownerId)
+	}
 
 	if err != nil {
 		return nil, err

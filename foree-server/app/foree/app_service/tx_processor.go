@@ -566,9 +566,18 @@ func (p *TxProcessor) next(fTxId int64) {
 // Close remaining
 func (p *TxProcessor) rollback(fTxId int64) {
 	ctx := context.TODO()
-	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
+	dbTx, err := p.db.Begin()
 	if err != nil {
 		foree_logger.Logger.Error("tx_processor-rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		dbTx.Rollback()
+		return
+	}
+	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dbTx)
+
+	fTx, err := p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTxId)
+	if err != nil {
+		foree_logger.Logger.Error("tx_processor-rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		dbTx.Rollback()
 		return
 	}
 	if fTx == nil {
@@ -576,6 +585,7 @@ func (p *TxProcessor) rollback(fTxId int64) {
 			"foreeTxId", fTxId,
 			"cause", "unknown ForeeTx",
 		)
+		dbTx.Rollback()
 		return
 	}
 
@@ -585,16 +595,9 @@ func (p *TxProcessor) rollback(fTxId int64) {
 			"curStage", fTx.Stage,
 			"cause", "transaction is in stage that can't rollback",
 		)
-		return
-	}
-
-	dbTx, err := p.db.Begin()
-	if err != nil {
-		foree_logger.Logger.Error("tx_processor-rollback_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		dbTx.Rollback()
 		return
 	}
-	ctx = context.WithValue(ctx, constant.CKdatabaseTransaction, dbTx)
 
 	//Close remaining transaction.
 	err = p.closeRemainingTx(ctx, fTxId)
@@ -826,10 +829,14 @@ func (p *TxProcessor) revertRewardAndTxLimit(ctx context.Context, fTx transactio
 		return err
 	}
 
-	//TODO: check the reward type for non_refundable rewards.
 	for _, reward := range rewards {
 		r := *reward
-		r.Status = nbp.AccStatusActive
+
+		if r.Type == promotion.RewardTypePromoCode {
+			r.Status = promotion.RewardStatusDelete
+		} else {
+			r.Status = promotion.RewardStatusActive
+		}
 		r.AppliedTransactionId = 0
 		if err := p.rewardRepo.UpdateRewardTxById(ctx, r); err != nil {
 			return err

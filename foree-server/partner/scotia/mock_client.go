@@ -1,5 +1,7 @@
 package scotia
 
+import "sync"
+
 func NewMockScotiaClient() ScotiaClient {
 	return &ScotiaClientMock{
 		config: ScotiaConfig{
@@ -9,7 +11,8 @@ func NewMockScotiaClient() ScotiaClient {
 }
 
 type ScotiaClientMock struct {
-	config ScotiaConfig
+	config                ScotiaConfig
+	cancelledTransactions sync.Map
 }
 
 func (s *ScotiaClientMock) RequestPayment(req RequestPaymentRequest) (*RequestPaymentResponse, error) {
@@ -24,6 +27,17 @@ func (s *ScotiaClientMock) RequestPayment(req RequestPaymentRequest) (*RequestPa
 	}, nil
 }
 func (s *ScotiaClientMock) PaymentDetail(req PaymentDetailRequest) (*PaymentDetailResponse, error) {
+	_, ok := s.cancelledTransactions.LoadAndDelete(req.PaymentId)
+	if ok {
+		return &PaymentDetailResponse{
+			ResponseCommon: ResponseCommon{
+				StatusCode: 200,
+			},
+			PaymentDetail: PaymentDetailData{
+				RequestForPaymentStatus: "CANCELLED",
+			},
+		}, nil
+	}
 	return &PaymentDetailResponse{
 		ResponseCommon: ResponseCommon{
 			StatusCode: 200,
@@ -46,6 +60,7 @@ func (s *ScotiaClientMock) PaymentStatus(req PaymentStatusRequest) (*PaymentStat
 	}, nil
 }
 func (s *ScotiaClientMock) CancelPayment(req CancelPaymentRequest) (*CancelPaymentResponse, error) {
+	s.cancelledTransactions.Store(req.PaymentId, true)
 	return &CancelPaymentResponse{
 		ResponseCommon: ResponseCommon{
 			StatusCode: 200,

@@ -182,7 +182,16 @@ func (repo *IdmTxRepo) GetUniqueIDMTxById(ctx context.Context, id int64) (*IDMTx
 }
 
 func (repo *IdmTxRepo) GetUniqueIDMTxByParentTxId(ctx context.Context, parentTxId int64) (*IDMTx, error) {
-	rows, err := repo.db.Query(sQLIDMTxGetUniqueByParentTxId, parentTxId)
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		rows, err = dTx.Query(sQLIDMTxGetUniqueByParentTxId, parentTxId)
+	} else {
+		rows, err = repo.db.Query(sQLIDMTxGetUniqueByParentTxId, parentTxId)
+	}
 
 	if err != nil {
 		return nil, err
