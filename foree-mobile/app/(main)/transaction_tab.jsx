@@ -234,12 +234,12 @@ const transactionStatuses = [
     textColor: "text-slate-800",
     selectBgColor: "bg-slate-200",
   },
-  { 
-    id:"Initial",
-    borderColor: "border-purple-800",
-    textColor: "text-purple-800",
-    selectBgColor: "bg-purple-200",
-  },
+  // { 
+  //   id:"Initial",
+  //   borderColor: "border-purple-800",
+  //   textColor: "text-purple-800",
+  //   selectBgColor: "bg-purple-200",
+  // },
   { 
     id:"Await Payment",
     borderColor: "border-yellow-800",
