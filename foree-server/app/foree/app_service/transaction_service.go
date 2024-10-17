@@ -985,9 +985,18 @@ func (t *TransactionService) CancelTransaction(ctx context.Context, req CancelTr
 	}
 
 	if isCancelSuccess {
+		foree_logger.Logger.Info("CancelTransaction_SUCCESS",
+			"userId", session.UserId,
+			"sessionId", req.SessionId,
+			"transactionId", req.TransactionId,
+		)
 		return nil, nil
 	}
-
+	foree_logger.Logger.Warn("CancelTransaction_FAIL",
+		"userId", session.UserId,
+		"sessionId", req.SessionId,
+		"transactionId", req.TransactionId,
+	)
 	return nil, transport.NewFormError("Invalid transaction cancel request", "transactionId", "transaction can not cancel")
 }
 
