@@ -241,10 +241,10 @@ const TransactionCreate = () => {
     return (
       <View className="border-[1px] border-slate-500 rounded-lg py-2 mt-2 flex flex-row items-center">
         <Image 
-          source={!form.rewardSids.find(x => x === reward.id) ? icons.checkboxUncheckDark : icons.checkboxCheckDark}
+          source={!form.rewardSids.find(x => x === reward.sId) ? icons.checkboxUncheckDark : icons.checkboxCheckDark}
           resizeMode='contain'
           className="w-[30px] h-[30px] mx-2"
-          tintColor={!form.rewardSids.find(x => x === reward.id) ? "#94a3b8" : "#005a32"}
+          tintColor={!form.rewardSids.find(x => x === reward.sId) ? "#94a3b8" : "#005a32"}
         />
         <View>
           <Text className="font-semibold text-slate-500">{reward.description}</Text>
