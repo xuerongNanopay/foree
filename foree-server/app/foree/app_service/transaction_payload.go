@@ -221,23 +221,23 @@ type TxSummarieCountDTO struct {
 }
 
 type TxSummaryDTO struct {
-	ID              int64                       `json:"id,omitempty"`
-	Summary         string                      `json:"summary,omitempty"`
-	Type            string                      `json:"type,omitempty"`
-	Status          transaction.TxSummaryStatus `json:"status,omitempty"`
-	Rate            string                      `json:"rate,omitempty"`
-	NBPReference    string                      `json:"nbpReference,omitempty"`
-	PaymentUrl      string                      `json:"paymentUrl,omitempty"`
+	ID              int64                       `json:"id"`
+	Summary         string                      `json:"summary"`
+	Type            string                      `json:"type"`
+	Status          transaction.TxSummaryStatus `json:"status"`
+	Rate            string                      `json:"rate"`
+	NBPReference    string                      `json:"nbpReference"`
+	PaymentUrl      string                      `json:"paymentUrl"`
 	SrcAccSummary   string                      `json:"srcAccSummary"`
 	SrcAmount       types.Amount                `json:"srcAmount"`
 	SrcCurrency     string                      `json:"srcCurrency"`
 	DestAccSummary  string                      `json:"destAccSummary"`
 	DestAmount      types.Amount                `json:"destAmount"`
 	DestCurrency    string                      `json:"destCurrency"`
-	TotalAmount     types.Amount                `json:"totalAmount,omitempty"`
-	TotalCurrency   string                      `json:"totalCurrency,omitempty"`
-	IsCancelAllowed bool                        `json:"isCancelAllowed,omitempty"`
-	CreateAt        int64                       `json:"createAt,omitempty"`
+	TotalAmount     types.Amount                `json:"totalAmount"`
+	TotalCurrency   string                      `json:"totalCurrency"`
+	IsCancelAllowed bool                        `json:"isCancelAllowed"`
+	CreateAt        int64                       `json:"createAt"`
 }
 
 func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
@@ -268,13 +268,13 @@ func NewTxSummaryDTO(tx *transaction.TxSummary) *TxSummaryDTO {
 }
 
 type TxSummaryDetailDTO struct {
-	ID              int64                       `json:"id,omitempty"`
-	Summary         string                      `json:"summary,omitempty"`
-	Type            string                      `json:"type,omitempty"`
-	Status          transaction.TxSummaryStatus `json:"status,omitempty"`
-	Rate            string                      `json:"rate,omitempty"`
-	PaymentUrl      string                      `json:"paymentUrl,omitempty"`
-	NBPReference    string                      `json:"nbpReference,omitempty"`
+	ID              int64                       `json:"id"`
+	Summary         string                      `json:"summary"`
+	Type            string                      `json:"type"`
+	Status          transaction.TxSummaryStatus `json:"status"`
+	Rate            string                      `json:"rate"`
+	PaymentUrl      string                      `json:"paymentUrl"`
+	NBPReference    string                      `json:"nbpReference"`
 	SrcAccSummary   string                      `json:"srcAccSummary"`
 	SrcAmount       types.Amount                `json:"srcAmount"`
 	SrcCurrency     string                      `json:"srcCurrency"`
@@ -288,9 +288,9 @@ type TxSummaryDetailDTO struct {
 	RewardAmount    types.Amount                `json:"rewardAmount"`
 	RewardCurrency  string                      `json:"rewardCurrency"`
 	IsCancelAllowed bool                        `json:"isCancelAllowed"`
-	CreateAt        int64                       `json:"createAt,omitempty"`
-	SrcAccount      *SumInteracAccountDTO       `json:"srcAccount,omitempty"`
-	DestAccount     *SumContactAccountDTO       `json:"destAccount,omitempty"`
+	CreateAt        int64                       `json:"createAt"`
+	SrcAccount      *SumInteracAccountDTO       `json:"srcAccount"`
+	DestAccount     *SumContactAccountDTO       `json:"destAccount"`
 }
 
 func NewTxSummaryDetailDTO(tx *transaction.TxSummary) *TxSummaryDetailDTO {
