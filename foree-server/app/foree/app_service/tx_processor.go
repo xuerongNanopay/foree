@@ -755,16 +755,17 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 		)
 		return
 	}
-	sumTx, err := p.txSummaryRepo.GetUniqueTxSummaryByParentTxId(context.TODO(), fTx.ID)
+	sumTx, err := p.txSummaryRepo.GetUniqueTxSummaryByParentTxId(ctx, fTx.ID)
 	if err != nil {
 		foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
 	newSumTx := *sumTx
+	newSumTx.IsCancelAllowed = false
 	if fTx.Stage == transaction.TxStageBegin {
 		newSumTx.Status = transaction.TxSummaryStatusInitial
 	} else if fTx.Stage == transaction.TxStageInteracCI {
-		interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(context.TODO(), fTx.ID)
+		interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, fTx.ID)
 		if err != nil {
 			foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 			return
@@ -786,9 +787,18 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 			newSumTx.Status = transaction.TxSummaryStatusInProgress
 		}
 	} else if fTx.Stage == transaction.TxStageIDM {
+		idmTx, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, fTx.ID)
+		if err != nil {
+			foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+			return
+		}
+
+		if idmTx.Status == transaction.TxStatusSuspend {
+			newSumTx.IsCancelAllowed = true
+		}
 		newSumTx.Status = transaction.TxSummaryStatusInProgress
 	} else if fTx.Stage == transaction.TxStageNBPCO {
-		nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(context.TODO(), fTx.ID)
+		nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, fTx.ID)
 		if err != nil {
 			foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 			return
@@ -812,7 +822,7 @@ func (p *TxProcessor) updateSummaryTx(fTxId int64) {
 	}
 
 	if sumTx.Status != newSumTx.Status || newSumTx.IsCancelAllowed != sumTx.IsCancelAllowed {
-		err = p.txSummaryRepo.UpdateTxSummaryById(context.TODO(), newSumTx)
+		err = p.txSummaryRepo.UpdateTxSummaryById(ctx, newSumTx)
 		if err != nil {
 			foree_logger.Logger.Error("tx_processor-updateSummaryTx_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 			return
