@@ -114,7 +114,7 @@ func (s *scotiaClientImpl) PaymentStatus(req PaymentStatusRequest) (*PaymentStat
 	derr := json.NewDecoder(bytes.NewBuffer(body)).Decode(ret)
 	if derr != nil {
 		//TODO: Logger error. return token caller should hanlde the Error
-		return ret, nil
+		return nil, derr
 	}
 
 	return ret, nil

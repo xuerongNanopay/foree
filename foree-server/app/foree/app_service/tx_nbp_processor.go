@@ -318,7 +318,7 @@ func (p *NBPTxProcessor) ManualUpdate(parentTxId int64, newTxStatus transaction.
 }
 
 // TODO: call scotial cancel api
-func (p *NBPTxProcessor) Cancel(parentTxId int64) (bool, error) {
+func (p *NBPTxProcessor) cancel(parentTxId int64) (bool, error) {
 	ctx := context.TODO()
 	nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, parentTxId)
 	if err != nil {

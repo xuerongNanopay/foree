@@ -382,7 +382,28 @@ func (p *TxProcessor) loadTx(id int64, isEmptyCheck bool) (*transaction.ForeeTx,
 }
 
 func (p *TxProcessor) Cancel(fTxId int64) (bool, error) {
-	return nil
+	ctx := context.TODO()
+	fTx, err := p.foreeTxRepo.GetUniqueForeeTxById(ctx, fTxId)
+	if err != nil {
+		foree_logger.Logger.Error("TxProcessor--Cancel_FAIL", "foreeTxId", fTxId, "cause", err.Error())
+		return false, err
+	}
+	if fTx.Stage == transaction.TxStageRefunding || fTx.Stage == transaction.TxStageCancel || fTx.Stage == transaction.TxStageSuccess {
+		foree_logger.Logger.Warn("TxProcessor--Cancel_FAIL", "foreeTxId", fTxId, "foreeTxStage", fTx.Stage, "cause", "unsupport transaction stage")
+		return false, nil
+	}
+
+	switch fTx.Stage {
+	case transaction.TxStageInteracCI:
+		return p.interacTxProcessor.cancel(fTx.ID)
+	case transaction.TxStageIDM:
+		return p.idmTxProcessor.cancel(fTx.ID)
+	case transaction.TxStageNBPCO:
+		return p.nbpTxProcessor.cancel(fTx.ID)
+	default:
+		foree_logger.Logger.Debug("TxProcessor--Cancel", "foreeTxId", fTxId, "txStage", fTx.Stage, "cause", "unsupport cancel stage")
+		return false, nil
+	}
 }
 
 // Stage: Begin/"" -> CI -> IDM -> COUT -> End

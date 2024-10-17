@@ -47,6 +47,9 @@ func (s *ScotiaClientMock) PaymentStatus(req PaymentStatusRequest) (*PaymentStat
 }
 func (s *ScotiaClientMock) CancelPayment(req CancelPaymentRequest) (*CancelPaymentResponse, error) {
 	return &CancelPaymentResponse{
+		ResponseCommon: ResponseCommon{
+			StatusCode: 200,
+		},
 		CancelStatus: CancelPaymentData{
 			Status: "SUCCESS",
 		},

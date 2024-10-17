@@ -66,6 +66,32 @@ func (p *IDMTxProcessor) process(parentTxId int64) {
 	}
 }
 
+func (p *IDMTxProcessor) cancel(parentTxId int64) (bool, error) {
+	idmTx, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(context.TODO(), parentTxId)
+	if err != nil {
+		foree_logger.Logger.Error("IDMTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "cause", err.Error())
+		return false, err
+	}
+	if idmTx == nil {
+		foree_logger.Logger.Error("IDMTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "cause", "interacCITx not found")
+		return false, fmt.Errorf("InteracCITx no found with parentTxId `%v`", parentTxId)
+	}
+	if idmTx.Status != transaction.TxStatusSuspend {
+		foree_logger.Logger.Warn("IDMTxProcessor--cancel_FAIL", "idmTxId", idmTx.ID, "idmTxStatus", idmTx.Status, "cause", "unsupport status")
+		return false, fmt.Errorf("expect InteracCITx in `%v`, but got `%v`", transaction.TxStatusSuspend, idmTx.Status)
+	}
+
+	idmTx.Status = transaction.TxStatusCancelled
+	err = p.idmTxRepo.UpdateIDMTxById(context.TODO(), *idmTx)
+	if err != nil {
+		foree_logger.Logger.Error("IDMTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "cause", err.Error())
+		return false, err
+	}
+	go p.txProcessor.rollback(parentTxId)
+	foree_logger.Logger.Info("IDMTxProcessor--cancel_SUCCESS", "foreeTxId", parentTxId, "idmTxId", idmTx.ID)
+	return true, nil
+}
+
 func (p *IDMTxProcessor) idmTransferVeirfy(parentTxId int64) {
 	fTx, err := p.txProcessor.loadTx(parentTxId, true)
 	if err != nil {
