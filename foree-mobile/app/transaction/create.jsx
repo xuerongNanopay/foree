@@ -39,7 +39,7 @@ const TransactionCreate = () => {
   const [rewards, setRewards] = useState([])
 
   const quoteTransactionScheme = useMemo(() => {
-    min = rewards.filter(x => form.rewardSids.includes(x.id)).reduce((total, cur) => total+cur.amount, 20)
+    min = rewards.filter(x => form.rewardSids.includes(x.sId)).reduce((total, cur) => total+cur.amount, 20)
     const sourceAmoutScheme = !!dailyLimit ? 
       number().required("required").min(min, `Minimum ${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(min)} CAD`).max(dailyLimit.maxAmount-dailyLimit.usedAmount, `Maximum $${(dailyLimit.maxAmount-dailyLimit.usedAmount).toFixed(2)} CAD`) :
       number().required("required").min(min, `Minimum ${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(min)} CAD`).max(1000, "Maximum $1000.00 CAD")
@@ -364,7 +364,7 @@ const TransactionCreate = () => {
         !!rewards && rewards.length > 0 ?
           <ModalSelect
           title="Apply Promotion"
-          modalTitle={`apply promotions(${form.rewardSids.length}/${MaxPromotion})`}
+          modalTitle={`apply(${form.rewardSids.length}/${MaxPromotion})`}
           containerStyles="mt-2"
           errorMessage={errors['rewardSids']}
           multiChoice={true}

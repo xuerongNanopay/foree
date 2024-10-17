@@ -96,19 +96,32 @@ const ModalSelect = ({
           <View
             className="flex flex-row items-center border-b-[1px] border-slate-400 pr-4"
           >
-            <View className="flex-1 flex flex-row items-center">
-              <Text
+            <View className="flex-1 flex flex-row items-center justify-between">
+              <View
+                className="flex-1 flex flex-row items-center"
+              >
+                <Text
+                  onPress={() => {
+                    setVisible(false)
+                    setShowList(list)
+                  }}
+                  className="py-2 px-4 text-2xl font-bold text-slate-600"
+                >
+                  &#8592;
+                </Text>
+                <Text
+                  className="font-psemibold text-xl text-slate-600"
+                >{modalTitle}</Text>
+              </View>
+              <TouchableOpacity
                 onPress={() => {
                   setVisible(false)
                   setShowList(list)
                 }}
-                className="py-2 px-4 text-2xl font-bold text-slate-600"
+                className="border-[1px] border-[#005a32] px-2 py-1 rounded-full"
               >
-                &#8592;
-              </Text>
-              <Text
-                className="font-psemibold text-xl text-slate-600"
-              >{modalTitle}</Text>
+                <Text className="font-semibold text-[#005a32]">Done</Text>
+              </TouchableOpacity>
             </View>
             <View>
               {
