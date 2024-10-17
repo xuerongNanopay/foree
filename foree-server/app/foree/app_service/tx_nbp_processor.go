@@ -322,25 +322,44 @@ func (p *NBPTxProcessor) cancel(parentTxId int64) (bool, error) {
 	ctx := context.TODO()
 	nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, parentTxId)
 	if err != nil {
+		foree_logger.Logger.Error("NBPTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "cause", err.Error())
 		return false, err
 	}
 	if nbpTx == nil {
-		return false, fmt.Errorf("nbpTx no found with parentTxId `%v`", parentTxId)
+		foree_logger.Logger.Error("NBPTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "cause", "nbpTx not found")
+		return false, fmt.Errorf("nbpTx not found with parentTxId `%v`", parentTxId)
 	}
 	if nbpTx.Status != transaction.TxStatusSent {
+		foree_logger.Logger.Warn("NBPTxProcessor--cancel_FAIL", "nbpTxId", nbpTx.ID, "nbpTxStatus", nbpTx.Status, "cause", "unsupport status")
 		return false, fmt.Errorf("expect nbpTx in `%v`, but got `%v`", transaction.TxStatusSent, nbpTx.Status)
 	}
 
+	resp, err := p.nbpClient.CancelTransaction(nbp.CancelTransactionRequest{
+		GlobalId:           nbpTx.NBPReference,
+		CancellationReason: "cancel by owner",
+	})
+
+	if err != nil {
+		foree_logger.Logger.Error("NBPTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "nbpTxId", nbpTx.ID, "cause", err.Error())
+		return false, err
+	}
+
+	if resp.StatusCode/100 != 2 {
+		foree_logger.Logger.Warn("NBPTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "nbpTxId", nbpTx.ID, "httpStatus", resp.StatusCode, "resp", resp.RawResponse, "cause", "scotia cancel api failed")
+		return false, nil
+	}
 	//TODO: call scotial cancel api
 	//TODO: if error return.
 
-	nbpTx.Status = transaction.TxStatusCancelled
-	err = p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), *nbpTx)
-	if err != nil {
-		return false, err
-	}
-	p.waits.Delete(nbpTx.NBPReference)
-	go p.txProcessor.rollback(nbpTx.ParentTxId)
+	// nbpTx.Status = transaction.TxStatusCancelled
+	// err = p.nbpTxRepo.UpdateNBPCOTxById(context.TODO(), *nbpTx)
+	// if err != nil {
+	// 	return false, err
+	// }
+	// p.waits.Delete(nbpTx.NBPReference)
+	// go p.txProcessor.rollback(nbpTx.ParentTxId)
+
+	foree_logger.Logger.Info("NBPTxProcessor--cancel_SUCCESS", "foreeTxId", parentTxId, "nbpTxId", nbpTx.ID)
 	return true, nil
 }
 

@@ -425,23 +425,23 @@ func (p *InteracTxProcessor) cancel(parentTxId int64) (bool, error) {
 	})
 
 	if err != nil {
-		foree_logger.Logger.Error("InteracTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "cause", err.Error())
+		foree_logger.Logger.Error("InteracTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "interactTxId", interacTx.ID, "cause", err.Error())
 		return false, err
 	}
 
 	if resp.StatusCode/100 != 2 {
-		foree_logger.Logger.Warn("InteracTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "httpStatus", resp.StatusCode, "resp", resp.RawResponse, "cause", "scotia cancel api failed")
+		foree_logger.Logger.Warn("InteracTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "interactTxId", interacTx.ID, "httpStatus", resp.StatusCode, "resp", resp.RawResponse, "cause", "scotia cancel api failed")
 		return false, nil
 	}
 
-	interacTx.Status = transaction.TxStatusCancelled
-	err = p.interacTxRepo.UpdateInteracCITxById(context.TODO(), *interacTx)
-	if err != nil {
-		foree_logger.Logger.Error("InteracTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "cause", err.Error())
-		return false, err
-	}
-	p.waits.Delete(interacTx.ScotiaPaymentId)
-	go p.txProcessor.rollback(interacTx.ParentTxId)
+	// interacTx.Status = transaction.TxStatusCancelled
+	// err = p.interacTxRepo.UpdateInteracCITxById(context.TODO(), *interacTx)
+	// if err != nil {
+	// 	foree_logger.Logger.Error("InteracTxProcessor--cancel_FAIL", "foreeTxId", parentTxId, "cause", err.Error())
+	// 	return false, err
+	// }
+	// p.waits.Delete(interacTx.ScotiaPaymentId)
+	// go p.txProcessor.rollback(interacTx.ParentTxId)
 	foree_logger.Logger.Info("InteracTxProcessor--cancel_SUCCESS", "foreeTxId", parentTxId, "interactTxId", interacTx.ID)
 	return true, nil
 }
