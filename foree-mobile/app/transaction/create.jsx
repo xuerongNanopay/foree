@@ -7,7 +7,7 @@ import MultiStepForm from '../../components/MultiStepForm'
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import ModalSelect from '../../components/ModalSelect'
 import { ContactTransferCashPickup } from '../../constants/contacts'
-import { formatContactMethod, formatName } from '../../util/foree_util'
+import { currencyFormatter, formatContactMethod, formatName } from '../../util/foree_util'
 import CurrencyInputField from '../../components/CurrencyInputField'
 import Currencies from '../../constants/currency'
 import { TransactionPurposes } from '../../constants/transactions'
@@ -507,20 +507,24 @@ const TransactionCreate = () => {
           <View className="mt-2">
               <Text className="font-semibold mb-2 text-lg">Details</Text>
               <View className="flex flex-row justify-between items-center mb-1">
-                <Text className="font-semibold">Exchange Rate</Text>
+                <Text className="font-semibold text-slate-500">Exchange Rate</Text>
                 <Text className="font-bold" >{txSum.rate}</Text>
               </View>
               <View className="flex flex-row justify-between items-center mb-1">
-                <Text className="font-semibold">Fees</Text>
-                <Text className="font-bold" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(txSum.feeAmount)}{!!txSum.feeCurrency ? ` ${txSum.feeCurrency}` : ''}</Text>
+                  <Text className="font-semibold text-slate-500">Exchange Amount</Text>
+                  <Text className="font-bold">{currencyFormatter(txSum.srcAmount, txSum.srcCurrency)}</Text>
+                </View>
+              <View className="flex flex-row justify-between items-center mb-1">
+                <Text className="font-semibold text-slate-500">Fees</Text>
+                <Text className="font-bold" >{currencyFormatter(txSum.feeAmount, txSum.feeCurrency)}</Text>
               </View>
               <View className="flex flex-row justify-between items-center mb-1">
-                <Text className="font-semibold">Promotions</Text>
-                <Text className="font-bold" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(txSum.rewardAmount)}{!!txSum.rewardCurrency ? ` ${txSum.rewardCurrency}` : ''}</Text>
+                <Text className="font-semibold text-slate-500">Promotions</Text>
+                <Text className="font-bold" >{currencyFormatter(txSum.rewardAmount, txSum.rewardCurrency, true)}</Text>
               </View>
               <View className="flex flex-row justify-between items-center mb-1">
                 <Text className="font-semibold text-green-800">Total Amount</Text>
-                <Text className="font-bold text-green-800" >${new Intl.NumberFormat("en", {minimumFractionDigits: 2}).format(txSum.totalAmount)} {txSum.totalCurrency}</Text>
+                <Text className="font-bold text-green-800" >{currencyFormatter(txSum.totalAmount, txSum.totalCurrency)}</Text>
               </View>
           </View>
         </View>
