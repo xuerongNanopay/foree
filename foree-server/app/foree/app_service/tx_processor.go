@@ -113,7 +113,6 @@ func (p *TxProcessor) createFullTx(fTx transaction.ForeeTx) (*transaction.ForeeT
 	dTx, err := p.db.Begin()
 	if err != nil {
 		dTx.Rollback()
-		//TODO: log err
 		return nil, err
 	}
 
@@ -123,7 +122,6 @@ func (p *TxProcessor) createFullTx(fTx transaction.ForeeTx) (*transaction.ForeeT
 	_, err = p.foreeTxRepo.GetUniqueForeeTxForUpdateById(ctx, fTx.ID)
 	if err != nil {
 		dTx.Rollback()
-		//TODO: log err
 		return nil, err
 	}
 
@@ -450,6 +448,8 @@ func (p *TxProcessor) ProcessRootTx(fTxId int64) {
 	case transaction.TxStageNBPCO:
 		p.nbpTxProcessor.process(fTxId)
 	case transaction.TxStageRefunding:
+		//We don't have special refund processor now.
+		//So, currently refund logic is in next function.
 		p.next(fTxId)
 	case transaction.TxStageSuccess:
 		foree_logger.Logger.Warn("TxProcessor--processRootTx", "foreeTxId", fTx.ID, "cause", "process transaction that is SUCCESS already")
@@ -479,7 +479,8 @@ func (p *TxProcessor) next(fTxId int64) {
 		return
 	}
 
-	switch fTx.Stage {
+	newFTx := *fTx
+	switch newFTx.Stage {
 	case transaction.TxStageInteracCI:
 		interacTx, err := p.interacTxRepo.GetUniqueInteracCITxByParentTxId(ctx, fTxId)
 		if err != nil {
@@ -490,13 +491,13 @@ func (p *TxProcessor) next(fTxId int64) {
 			foree_logger.Logger.Error(
 				"TxProcessor--next_FAIL",
 				"foreeTxId", fTxId,
-				"curState", fTx.Stage,
+				"curState", newFTx.Stage,
 				"interacTxStatus", interacTx.Status,
 				"cause", "interacTx is not COMPLETED",
 			)
 			return
 		}
-		fTx.Stage = transaction.TxStageIDM
+		newFTx.Stage = transaction.TxStageIDM
 	case transaction.TxStageIDM:
 		idmTx, err := p.idmTxRepo.GetUniqueIDMTxByParentTxId(ctx, fTxId)
 		if err != nil {
@@ -507,13 +508,13 @@ func (p *TxProcessor) next(fTxId int64) {
 			foree_logger.Logger.Error(
 				"TxProcessor--next_FAIL",
 				"foreeTxId", fTxId,
-				"curState", fTx.Stage,
+				"curState", newFTx.Stage,
 				"idmTxStatus", idmTx.Status,
 				"cause", "idmTx is not COMPLETED",
 			)
 			return
 		}
-		fTx.Stage = transaction.TxStageNBPCO
+		newFTx.Stage = transaction.TxStageNBPCO
 	case transaction.TxStageNBPCO:
 		nbpTx, err := p.nbpTxRepo.GetUniqueNBPCOTxByParentTxId(ctx, fTxId)
 		if err != nil {
@@ -524,15 +525,14 @@ func (p *TxProcessor) next(fTxId int64) {
 			foree_logger.Logger.Error(
 				"TxProcessor--next_FAIL",
 				"foreeTxId", fTxId,
-				"curState", fTx.Stage,
+				"curState", newFTx.Stage,
 				"nbpTxStatus", nbpTx.Status,
 				"cause", "nbpTx is not COMPLETED",
 			)
 			return
 		}
-		//TODO: close up rewards.
-		go p.updateRewardsToComplete(fTx.ID)
-		fTx.Stage = transaction.TxStageSuccess
+		go p.updateRewardsToComplete(newFTx.ID)
+		newFTx.Stage = transaction.TxStageSuccess
 	case transaction.TxStageRefunding:
 		refundTx, err := p.foreeRefundRepo.GetUniqueForeeRefundTxByParentTxId(ctx, fTxId)
 		if err != nil {
@@ -540,25 +540,31 @@ func (p *TxProcessor) next(fTxId int64) {
 			return
 		}
 		if refundTx.Status == transaction.TxStatusCompleted || refundTx.Status == transaction.TxStatusClosed {
-			fTx.Stage = transaction.TxStageCancel
+			newFTx.Stage = transaction.TxStageCancel
 		}
 	default:
 		foree_logger.Logger.Error("TxProcessor--next_FAIL",
-			"curStage", fTx.Stage,
+			"foreeTxId", fTxId,
+			"foreeTxStage", newFTx.Stage,
+			"cause", "unsupport stage",
 		)
 		return
 	}
 
+	if newFTx.Stage == fTx.Stage {
+		foree_logger.Logger.Warn("TxProcessor--next_FAIL", "foreeTxId", fTxId, "foreeTxStage", fTx.Stage, "cause", "stage no change")
+		return
+	}
 	err = p.foreeTxRepo.UpdateForeeTxById(context.TODO(), *fTx)
 	if err != nil {
 		foree_logger.Logger.Error("TxProcessor--next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
 	}
 
-	if fTx.Stage != transaction.TxStageSuccess && fTx.Stage != transaction.TxStageCancel {
+	if newFTx.Stage != transaction.TxStageSuccess && newFTx.Stage != transaction.TxStageCancel {
 		p.ProcessRootTx(fTxId)
 	} else {
-		foree_logger.Logger.Info("TxProcessor", "foreeTxId", fTxId, "msg", "transaction terminate")
+		foree_logger.Logger.Info("TxProcessor", "foreeTxId", fTxId, "foreeTxStage", newFTx.Stage, "msg", "transaction terminate")
 	}
 }
 
