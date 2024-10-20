@@ -53,7 +53,7 @@ const (
             t.nbp_reference, t.is_cancel_allowed, t.parent_tx_id, t.owner_id, 
             t.created_at, t.updated_at
         FROM tx_summary t
-        where t.owner_id = ? and t.id = ?
+        WHERE t.owner_id = ? and t.id = ?
     `
 	sQLTxSummaryGetUniqueByParentTxId = `
         SELECT 
@@ -67,13 +67,13 @@ const (
             t.nbp_reference, t.is_cancel_allowed, t.parent_tx_id, t.owner_id, 
             t.created_at, t.updated_at
         FROM tx_summary t
-        where t.parent_tx_id = ?
+        WHERE t.parent_tx_id = ?
     `
 	sQLTxSummaryCountByOwnerId = `
 		SELECT
 			COUNT(*) as total_summary_transactions
 		FROM tx_summary t
-		where t.owner_id = ?
+		WHERE t.owner_id = ?
 	`
 	sQLTxSummaryGetAllByOwnerIdWithPagination = `
 	    SELECT
@@ -87,7 +87,7 @@ const (
 	        t.nbp_reference, t.is_cancel_allowed, t.parent_tx_id, t.owner_id,
 	        t.created_at, t.updated_at
 	    FROM tx_summary t
-	    where t.owner_id = ?
+	    WHERE t.owner_id = ?
 	    ORDER BY t.created_at DESC
 	    LIMIT ? OFFSET ?
 	`
@@ -103,7 +103,7 @@ const (
 	        t.nbp_reference, t.is_cancel_allowed, t.parent_tx_id, t.owner_id,
 	        t.created_at, t.updated_at
 	    FROM tx_summary t
-	    where t.owner_id = ? AND t.status = ?
+	    WHERE t.owner_id = ? AND t.status = ?
 	    ORDER BY t.created_at DESC
 	    LIMIT ? OFFSET ?
 	`
@@ -111,7 +111,7 @@ const (
 		SELECT
 			COUNT(*) as total_summary_transactions
 		FROM tx_summary t
-		where t.owner_id = ? AND t.status = ?
+		WHERE t.owner_id = ? AND t.status = ?
 	`
 )
 
