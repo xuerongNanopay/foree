@@ -1,22 +1,15 @@
 package foree_tx_service
 
-import (
-	"database/sql"
-
-	foree_tx_processor "xue.io/go-pay/app/foree/service/tx_processor"
-	"xue.io/go-pay/app/foree/transaction"
-)
-
-type TransactionSuperService struct {
-	db                 *sql.DB
-	foreeTxRepo        *transaction.ForeeTxRepo
-	ciTxRepo           *transaction.InteracCITxRepo
-	interacTxRepo      *transaction.InteracCITxRepo
-	idmTxRepo          *transaction.IdmTxRepo
-	npbTxRepo          *transaction.NBPCOTxRepo
-	interacTxProcessor *foree_tx_processor.InteracTxProcessor
-	txProcessor        *foree_tx_processor.TxProcessor
-}
+// type TransactionSuperService struct {
+// 	db                 *sql.DB
+// 	foreeTxRepo        *transaction.ForeeTxRepo
+// 	ciTxRepo           *transaction.InteracCITxRepo
+// 	interacTxRepo      *transaction.InteracCITxRepo
+// 	idmTxRepo          *transaction.IdmTxRepo
+// 	npbTxRepo          *transaction.NBPCOTxRepo
+// 	interacTxProcessor *foree_tx_processor.InteracTxProcessor
+// 	txProcessor        *foree_tx_processor.TxProcessor
+// }
 
 // func (t *TransactionSuperService) ForceCIStatusUpdate(ctx context.Context, fTxId int64, newStatus transaction.TxStage) (*transaction.ForeeTx, error) {
 // 	if newStatus != transaction.TxStage(transaction.TxStatusRejected) &&

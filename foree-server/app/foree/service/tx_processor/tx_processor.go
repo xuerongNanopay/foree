@@ -35,7 +35,7 @@ func NewTxProcessor(
 	contactAccountRepo *account.ContactAccountRepo,
 	interacAccountRepo *account.InteracAccountRepo,
 ) *TxProcessor {
-	return &TxProcessor{
+	p := &TxProcessor{
 		db:                  db,
 		interacTxRepo:       interacTxRepo,
 		nbpTxRepo:           nbpTxRepo,
@@ -50,6 +50,8 @@ func NewTxProcessor(
 		contactAccountRepo:  contactAccountRepo,
 		interacAccountRepo:  interacAccountRepo,
 	}
+	p.reloadTransactions()
+	return p
 }
 
 func (p *TxProcessor) SetInteracTxProcessor(interacTxProcessor *InteracTxProcessor) {

@@ -92,7 +92,7 @@ func (t *TxLimitService) start() {
 	}
 }
 
-func (t *TxLimitService) getTxLimit(ctx context.Context, limitGroup string) (*transaction.TxLimit, error) {
+func (t *TxLimitService) getTxLimit(_ context.Context, limitGroup string) (*transaction.TxLimit, error) {
 	value, ok := t.cache.Load(limitGroup)
 	if !ok {
 		txLimit, err := t.txLimitRepo.GetUniqueTxLimitByLimitGroup(limitGroup)

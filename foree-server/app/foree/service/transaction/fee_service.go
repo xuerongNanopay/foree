@@ -93,7 +93,7 @@ func (r *FeeService) getFee(feeGroup string) ([]*transaction.Fee, error) {
 		if err != nil {
 			return nil, err
 		}
-		if fees != nil && len(fees) > 0 {
+		if len(fees) > 0 {
 			select {
 			case r.feeCacheInsertChan <- feeGroup:
 			default:
