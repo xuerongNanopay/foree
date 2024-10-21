@@ -551,7 +551,7 @@ func (p *TxProcessor) next(fTxId int64) {
 		foree_logger.Logger.Warn("TxProcessor--next_FAIL", "foreeTxId", fTxId, "foreeTxStage", fTx.Stage, "cause", "stage no change")
 		return
 	}
-	err = p.foreeTxRepo.UpdateForeeTxById(context.TODO(), *fTx)
+	err = p.foreeTxRepo.UpdateForeeTxById(context.TODO(), newFTx)
 	if err != nil {
 		foree_logger.Logger.Error("TxProcessor--next_FAIL", "foreeTxId", fTxId, "cause", err.Error())
 		return
