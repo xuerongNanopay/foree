@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"time"
 
-	fAuth "xue.io/go-pay/app/foree/auth"
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/auth"
@@ -125,7 +124,7 @@ func (q CreateUserReq) Validate() *transport.BadRequestError {
 	}
 
 	// Identification type
-	_, ok = foree_constant.AllowIdentificationTypes[fAuth.IdentificationType(q.IdentificationType)]
+	_, ok = foree_constant.AllowIdentificationTypes[foree_auth.IdentificationType(q.IdentificationType)]
 	if !ok {
 		ret.AddDetails("identificationType", fmt.Sprintf("invalid identificationType `%v`", q.IdentificationType))
 	}
