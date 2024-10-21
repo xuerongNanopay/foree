@@ -4,7 +4,6 @@ import (
 	"github.com/gorilla/mux"
 	foree_account_service "xue.io/go-pay/app/foree/service/account"
 	foree_auth_service "xue.io/go-pay/app/foree/service/auth"
-	foree_tx_service "xue.io/go-pay/app/foree/service/transaction"
 )
 
 // Do I need additional struct this it?
@@ -27,7 +26,7 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 		"/verify_contact_account",
 		sessionPostWrapper(
 			"VerifyContact",
-			foree_tx_service.PermissionContactWrite,
+			"Foree:AcountService:VerifyContact",
 			c.authService,
 			c.accountService.VerifyContact,
 		),
@@ -37,7 +36,7 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 		"/create_contact_account",
 		sessionPostWrapper(
 			"VerifyContact",
-			foree_tx_service.PermissionContactWrite,
+			"Foree:AcountService:CreateContact",
 			c.authService,
 			c.accountService.CreateContact,
 		),
@@ -47,7 +46,7 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 		"/delete_contact_account",
 		sessionPostWrapper(
 			"DeleteContact",
-			foree_tx_service.PermissionContactWrite,
+			"Foree:AcountService:DeleteContact",
 			c.authService,
 			c.accountService.DeleteContact,
 		),
@@ -57,7 +56,7 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 		"/contact_accounts/{ContactId}",
 		sessionGetWrapper(
 			"GetActiveContact",
-			foree_tx_service.PermissionContactRead,
+			"Foree:AcountService:GetActiveContact",
 			c.authService,
 			c.accountService.GetActiveContact,
 		),
@@ -67,7 +66,7 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 		"/contact_accounts",
 		sessionGetWrapper(
 			"GetAllActiveContacts",
-			foree_tx_service.PermissionContactRead,
+			"Foree:AcountService:GetAllActiveContacts",
 			c.authService,
 			c.accountService.GetAllActiveContacts,
 		),
@@ -77,7 +76,7 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 		"/interac_accounts",
 		sessionGetWrapper(
 			"GetAllActiveInteracs",
-			foree_tx_service.PermissionContactRead,
+			"Foree:AcountService:GetAllActiveInteracs",
 			c.authService,
 			c.accountService.GetAllActiveInteracs,
 		),

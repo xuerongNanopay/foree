@@ -96,8 +96,8 @@ func IsPermissionGrand(requiredPermission string, ownedPermission string) bool {
 		return true
 	}
 
-	r := strings.Split(requiredPermission, "::")
-	o := strings.Split(ownedPermission, "::")
+	r := strings.Split(requiredPermission, ":")
+	o := strings.Split(ownedPermission, ":")
 
 	if len(r) != len(o) {
 		return false
