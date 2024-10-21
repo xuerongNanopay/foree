@@ -31,7 +31,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/quote",
 		sessionPostWrapper(
 			"QuoteTx",
-			foree_tx_service.PermissionForeeTxWrite,
+			"Foree:TransactionService:QuoteTx",
 			c.authService,
 			c.transactionService.QuoteTx,
 		),
