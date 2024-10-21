@@ -22,7 +22,7 @@ const (
 			type, description, status, ref_entity, ref_id, owner_id
 		) VALUES(?,?,?,?,?,?)
 	`
-	sQLApprovalUpdate = `
+	sQLApprovalUpdateById = `
 		UPDATE approval SET
 			status = ?, approved_by = ?, rejected_by = ?, reject_reason = ?,
 			approved_at = ?, rejected_at = ?
@@ -129,4 +129,40 @@ func (repo *ApprovalRepo) InsertApproval(ctx context.Context, a Approval) (int64
 		return 0, err
 	}
 	return id, nil
+}
+
+func (repo *ApprovalRepo) UpdateApprovalById(ctx context.Context, a Approval) error {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	if ok {
+		_, err = dTx.ExecContext(
+			ctx,
+			sQLApprovalUpdateById,
+			a.Status,
+			a.ApprovedBy,
+			a.RejectedBy,
+			a.RejectReason,
+			a.ApprovedAt,
+			a.RejectedAt,
+			a.OwnerId,
+		)
+	} else {
+		_, err = repo.db.ExecContext(
+			ctx,
+			sQLApprovalUpdateById,
+			a.Status,
+			a.ApprovedBy,
+			a.RejectedBy,
+			a.RejectReason,
+			a.ApprovedAt,
+			a.RejectedAt,
+			a.OwnerId,
+		)
+	}
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
