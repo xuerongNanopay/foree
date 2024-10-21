@@ -36,7 +36,7 @@ const (
 		FROM approval a
 		WHERE a.id = ?
 	`
-	sQLApprovalGetAllApprovalWithPagination = `
+	sQLApprovalGetAllWithPagination = `
 		SELECT
 			a.id, a.type, a.description, a.status, a.ref_entity, a.ref_id,
 			a.approved_by, a.rejected_by, a.reject_reason, a.approved_at,
@@ -45,7 +45,7 @@ const (
 	    ORDER BY a.created_at DESC
 	    LIMIT ? OFFSET ?
 	`
-	sQLApprovalGetAllApprovalByTypeWithPagination = `
+	sQLApprovalGetAllByTypeWithPagination = `
 		SELECT
 			a.id, a.type, a.description, a.status, a.ref_entity, a.ref_id,
 			a.approved_by, a.rejected_by, a.reject_reason, a.approved_at,
@@ -55,7 +55,7 @@ const (
 	    ORDER BY a.created_at DESC
 	    LIMIT ? OFFSET ?
 	`
-	sQLApprovalGetAllApprovalByTypeAndStatusWithPagination = `
+	sQLApprovalGetAllByTypeAndStatusWithPagination = `
 		SELECT
 			a.id, a.type, a.description, a.status, a.ref_entity, a.ref_id,
 			a.approved_by, a.rejected_by, a.reject_reason, a.approved_at,
@@ -165,4 +165,62 @@ func (repo *ApprovalRepo) UpdateApprovalById(ctx context.Context, a Approval) er
 		return err
 	}
 	return nil
+}
+
+func (repo *ApprovalRepo) GetUniqueApprovalyById(ctx context.Context, id int64) (*Approval, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var err error
+	var rows *sql.Rows
+
+	if ok {
+		rows, err = dTx.Query(sQLApprovalGetUniqueApprovalById, id)
+	} else {
+		rows, err = repo.db.Query(sQLApprovalGetUniqueApprovalById, id)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var f *Approval
+
+	for rows.Next() {
+		f, err = scanRowIntoApproval(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if f == nil || f.ID == 0 {
+		return nil, nil
+	}
+
+	return f, nil
+}
+
+func scanRowIntoApproval(rows *sql.Rows) (*Approval, error) {
+	a := new(Approval)
+	err := rows.Scan(
+		&a.ID,
+		&a.Type,
+		&a.Description,
+		&a.Status,
+		&a.RefEntity,
+		&a.RefId,
+		&a.ApprovedBy,
+		&a.RejectedBy,
+		&a.RejectReason,
+		&a.ApprovedAt,
+		&a.RejectedAt,
+		&a.OwnerId,
+		&a.CreatedAt,
+		&a.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return a, nil
 }
