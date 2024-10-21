@@ -11,6 +11,7 @@ import (
 	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/promotion"
 	"xue.io/go-pay/app/foree/transaction"
+	foree_tx_processor "xue.io/go-pay/app/foree/tx_processor"
 	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
@@ -33,7 +34,7 @@ func NewTransactionService(
 	rateService *RateService,
 	feeService *FeeService,
 	txLimitService *TxLimitService,
-	txProcessor *TxProcessor,
+	txProcessor *foree_tx_processor.TxProcessor,
 	scotiaClient scotia.ScotiaClient,
 	nbpClient nbp.NBPClient,
 ) *TransactionService {
@@ -71,7 +72,7 @@ type TransactionService struct {
 	rateService        *RateService
 	feeService         *FeeService
 	txLimitService     *TxLimitService
-	txProcessor        *TxProcessor
+	txProcessor        *foree_tx_processor.TxProcessor
 	scotiaClient       scotia.ScotiaClient
 	nbpClient          nbp.NBPClient
 }
@@ -715,7 +716,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	}
 
 	// go t.txProcessor.createAndProcessTx(*foreeTx)
-	t.txProcessor.createAndProcessTx(*foreeTx)
+	t.txProcessor.CreateAndProcessTx(*foreeTx)
 
 	foree_logger.Logger.Info("CreateTx_SUCCESS", "ip", loadRealIp(ctx), "userId", session.UserId, "sessionId", req.SessionId, "foreeTxId", foreeTxID)
 

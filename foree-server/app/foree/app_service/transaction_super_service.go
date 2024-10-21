@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"xue.io/go-pay/app/foree/transaction"
+	foree_tx_processor "xue.io/go-pay/app/foree/tx_processor"
 )
 
 type TransactionSuperService struct {
@@ -13,8 +14,8 @@ type TransactionSuperService struct {
 	interacTxRepo      *transaction.InteracCITxRepo
 	idmTxRepo          *transaction.IdmTxRepo
 	npbTxRepo          *transaction.NBPCOTxRepo
-	interacTxProcessor *InteracTxProcessor
-	txProcessor        *TxProcessor
+	interacTxProcessor *foree_tx_processor.InteracTxProcessor
+	txProcessor        *foree_tx_processor.TxProcessor
 }
 
 // func (t *TransactionSuperService) ForceCIStatusUpdate(ctx context.Context, fTxId int64, newStatus transaction.TxStage) (*transaction.ForeeTx, error) {

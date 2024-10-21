@@ -17,6 +17,7 @@ import (
 	"xue.io/go-pay/app/foree/referral"
 	"xue.io/go-pay/app/foree/sys_router"
 	"xue.io/go-pay/app/foree/transaction"
+	foree_tx_processor "xue.io/go-pay/app/foree/tx_processor"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/config"
 	ms "xue.io/go-pay/db/mysql"
@@ -67,10 +68,10 @@ type ForeeApp struct {
 	scotiaClient             scotia.ScotiaClient
 	idmClient                idm.IDMClient
 	nbpClient                nbp.NBPClient
-	txProcessor              *foree_service.TxProcessor
-	interacTxProcessor       *foree_service.InteracTxProcessor
-	idmTxProcessor           *foree_service.IDMTxProcessor
-	nbpTxProcessor           *foree_service.NBPTxProcessor
+	txProcessor              *foree_tx_processor.TxProcessor
+	interacTxProcessor       *foree_tx_processor.InteracTxProcessor
+	idmTxProcessor           *foree_tx_processor.IDMTxProcessor
+	nbpTxProcessor           *foree_tx_processor.NBPTxProcessor
 	accountRouter            *foree_router.AccountRouter
 	authRouter               *foree_router.AuthRouter
 	transactionRouter        *foree_router.TransactionRouter
@@ -143,7 +144,7 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.nbpClient = nbp.NewMockNBPClient()
 
 	//Initial transaction processors
-	app.txProcessor = foree_service.NewTxProcessor(
+	app.txProcessor = foree_tx_processor.NewTxProcessor(
 		app.db,
 		app.interacCITxRepo,
 		app.nbpCOTxRepo,
@@ -158,23 +159,23 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.contactAccountRepo,
 		app.interacAccountRepo,
 	)
-	app.interacTxProcessor = foree_service.NewInteracTxProcessor(
+	app.interacTxProcessor = foree_tx_processor.NewInteracTxProcessor(
 		app.db,
-		foree_service.ScotiaProfile{},
+		foree_tx_processor.ScotiaProfile{},
 		app.scotiaClient,
 		app.interacCITxRepo,
 		app.foreeTxRepo,
 		app.txSummaryRepo,
 		app.txProcessor,
 	)
-	app.idmTxProcessor = foree_service.NewIDMTxProcessor(
+	app.idmTxProcessor = foree_tx_processor.NewIDMTxProcessor(
 		app.db,
 		app.foreeTxRepo,
 		app.idmTxRepo,
 		app.idmClient,
 		app.txProcessor,
 	)
-	app.nbpTxProcessor = foree_service.NewNBPTxProcessor(
+	app.nbpTxProcessor = foree_tx_processor.NewNBPTxProcessor(
 		app.db,
 		app.foreeTxRepo,
 		app.txProcessor,

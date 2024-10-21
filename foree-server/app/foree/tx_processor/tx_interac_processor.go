@@ -1,4 +1,4 @@
-package foree_service
+package foree_tx_processor
 
 import (
 	"context"

@@ -88,7 +88,7 @@ func (p *TxProcessor) reloadTransactions() {
 
 }
 
-func (p *TxProcessor) createAndProcessTx(tx transaction.ForeeTx) {
+func (p *TxProcessor) CreateAndProcessTx(tx transaction.ForeeTx) {
 	foreeTx, err := p.createFullTx(tx)
 	if err != nil {
 		foree_logger.Logger.Error("CreateAndProcessTx_FAIL",
