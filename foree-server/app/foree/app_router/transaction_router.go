@@ -2,15 +2,16 @@ package foree_router
 
 import (
 	"github.com/gorilla/mux"
-	foree_service "xue.io/go-pay/app/foree/app_service"
+	foree_auth_service "xue.io/go-pay/app/foree/service/auth"
+	foree_tx_service "xue.io/go-pay/app/foree/service/transaction"
 )
 
 type TransactionRouter struct {
-	transactionService *foree_service.TransactionService
-	authService        *foree_service.AuthService
+	transactionService *foree_tx_service.TransactionService
+	authService        *foree_auth_service.AuthService
 }
 
-func NewTransactionRouter(authService *foree_service.AuthService, transactionService *foree_service.TransactionService) *TransactionRouter {
+func NewTransactionRouter(authService *foree_auth_service.AuthService, transactionService *foree_tx_service.TransactionService) *TransactionRouter {
 	return &TransactionRouter{
 		authService:        authService,
 		transactionService: transactionService,
@@ -30,7 +31,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/quote",
 		sessionPostWrapper(
 			"QuoteTx",
-			foree_service.PermissionForeeTxWrite,
+			foree_tx_service.PermissionForeeTxWrite,
 			c.authService,
 			c.transactionService.QuoteTx,
 		),
@@ -41,7 +42,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/create_transaction",
 		sessionPostWrapper(
 			"CreateTx",
-			foree_service.PermissionForeeTxWrite,
+			foree_tx_service.PermissionForeeTxWrite,
 			c.authService,
 			c.transactionService.CreateTx,
 		),
@@ -52,7 +53,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/cancel_transaction",
 		sessionPostWrapper(
 			"CreateTx",
-			foree_service.PermissionForeeTxWrite,
+			foree_tx_service.PermissionForeeTxWrite,
 			c.authService,
 			c.transactionService.CancelTransaction,
 		),
@@ -63,7 +64,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/transaction_limit",
 		sessionGetWrapper(
 			"GetDailyTxLimit",
-			foree_service.PermissionForeeTxWrite,
+			foree_tx_service.PermissionForeeTxWrite,
 			c.authService,
 			c.transactionService.GetDailyTxLimit,
 		),
@@ -74,7 +75,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/transaction_reward",
 		sessionGetWrapper(
 			"GetReward",
-			foree_service.PermissionForeeTxWrite,
+			foree_tx_service.PermissionForeeTxWrite,
 			c.authService,
 			c.transactionService.GetReward,
 		),
@@ -85,7 +86,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/transaction/{TransactionId}",
 		sessionGetWrapper(
 			"GetTxSummary",
-			foree_service.PermissionForeeTxSummaryRead,
+			foree_tx_service.PermissionForeeTxSummaryRead,
 			c.authService,
 			c.transactionService.GetTxSummary,
 		),
@@ -95,7 +96,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/transactions",
 		sessionGetWrapper(
 			"QuerySummaryTxs",
-			foree_service.PermissionForeeTxSummaryRead,
+			foree_tx_service.PermissionForeeTxSummaryRead,
 			c.authService,
 			c.transactionService.QuerySummaryTxs,
 		),
@@ -104,7 +105,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/transactions/length",
 		sessionGetWrapper(
 			"CountSummaryTxs",
-			foree_service.PermissionForeeTxSummaryRead,
+			foree_tx_service.PermissionForeeTxSummaryRead,
 			c.authService,
 			c.transactionService.CountSummaryTxs,
 		),

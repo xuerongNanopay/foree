@@ -1,4 +1,4 @@
-package foree_service
+package foree_auth_service
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_constant "xue.io/go-pay/app/foree/constant"
+	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
 	"xue.io/go-pay/server/transport"
@@ -66,23 +67,23 @@ func (q LoginReq) Validate() *transport.BadRequestError {
 
 type CreateUserReq struct {
 	transport.SessionReq
-	FirstName           string    `json:"firstName" validate:"required"`
-	MiddleName          string    `json:"middleName"`
-	LastName            string    `json:"lastName" validate:"required"`
-	Age                 int       `json:"age"`
-	Dob                 ForeeDate `json:"dob"`
-	Pob                 string    `json:"pob" validate:"required"`
-	Nationality         string    `json:"nationality" validate:"required"`
-	Address1            string    `json:"address1" validate:"required"`
-	Address2            string    `json:"address2"`
-	City                string    `json:"city" validate:"required"`
-	Province            string    `json:"province" validate:"required"`
-	Country             string    `json:"country" validate:"required"`
-	PostalCode          string    `json:"postalCode" validate:"required"`
-	PhoneNumber         string    `json:"phoneNumber" validate:"required"`
-	IdentificationType  string    `json:"identificationType" validate:"required"`
-	IdentificationValue string    `json:"identificationValue" validate:"required"`
-	AvatarUrl           string    `json:"avatarUrl"`
+	FirstName           string          `json:"firstName" validate:"required"`
+	MiddleName          string          `json:"middleName"`
+	LastName            string          `json:"lastName" validate:"required"`
+	Age                 int             `json:"age"`
+	Dob                 types.ForeeDate `json:"dob"`
+	Pob                 string          `json:"pob" validate:"required"`
+	Nationality         string          `json:"nationality" validate:"required"`
+	Address1            string          `json:"address1" validate:"required"`
+	Address2            string          `json:"address2"`
+	City                string          `json:"city" validate:"required"`
+	Province            string          `json:"province" validate:"required"`
+	Country             string          `json:"country" validate:"required"`
+	PostalCode          string          `json:"postalCode" validate:"required"`
+	PhoneNumber         string          `json:"phoneNumber" validate:"required"`
+	IdentificationType  string          `json:"identificationType" validate:"required"`
+	IdentificationValue string          `json:"identificationValue" validate:"required"`
+	AvatarUrl           string          `json:"avatarUrl"`
 }
 
 // TODO: trim name, and use allowText

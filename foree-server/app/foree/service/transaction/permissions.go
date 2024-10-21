@@ -1,4 +1,4 @@
-package foree_service
+package foree_tx_service
 
 const (
 	PermissionContactWrite       = "foree::contact::write"

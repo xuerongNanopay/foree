@@ -1,4 +1,4 @@
-package foree_service
+package foree_tx_service
 
 import (
 	"context"
@@ -9,6 +9,11 @@ import (
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/types"
 )
+
+type CacheItem[T any] struct {
+	item      T
+	expiredAt time.Time
+}
 
 const feeCacheExpiry time.Duration = 4 * time.Minute
 const feeCacheRefreshInterval time.Duration = 2 * time.Minute

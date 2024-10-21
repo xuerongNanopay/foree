@@ -1,4 +1,4 @@
-package foree_service
+package foree_promotion_service
 
 import (
 	"context"
@@ -13,6 +13,11 @@ import (
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
 )
+
+type CacheItem[T any] struct {
+	item      T
+	expiredAt time.Time
+}
 
 const (
 	PromotionOnboard  = "ONBOARD_PROMOTION"
@@ -140,7 +145,7 @@ func (p *PromotionService) getPromotion(promotionName string) (*promotion.Promot
 	return &promo, nil
 }
 
-func (p *PromotionService) rewardOnboard(registerUser auth.User) {
+func (p *PromotionService) RewardOnboard(registerUser auth.User) {
 	promo, err := p.getPromotion(PromotionOnboard)
 
 	if err != nil {

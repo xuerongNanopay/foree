@@ -1,13 +1,22 @@
-package foree_service
+package types
 
 import (
+	"fmt"
 	"strings"
 	"time"
-
-	"github.com/go-playground/validator/v10"
 )
 
-var validate = validator.New()
+type Amount float64
+
+func (a Amount) MarshalJSON() ([]byte, error) {
+	s := fmt.Sprintf("%.2f", a)
+	return []byte(s), nil
+}
+
+type AmountData struct {
+	Amount   Amount `json:"amount,omitempty"`
+	Currency string `json:"currency,omitempty"`
+}
 
 type ForeeDate struct {
 	time.Time

@@ -9,15 +9,18 @@ import (
 	"github.com/gorilla/mux"
 	"xue.io/go-pay/app/foree/account"
 	foree_router "xue.io/go-pay/app/foree/app_router"
-	foree_service "xue.io/go-pay/app/foree/app_service"
 	foree_auth "xue.io/go-pay/app/foree/auth"
 	foree_config "xue.io/go-pay/app/foree/cmd/config"
 	foree_logger "xue.io/go-pay/app/foree/logger"
 	"xue.io/go-pay/app/foree/promotion"
 	"xue.io/go-pay/app/foree/referral"
+	foree_account_service "xue.io/go-pay/app/foree/service/account"
+	foree_auth_service "xue.io/go-pay/app/foree/service/auth"
+	foree_promotion_service "xue.io/go-pay/app/foree/service/promotion"
+	foree_tx_service "xue.io/go-pay/app/foree/service/transaction"
+	foree_tx_processor "xue.io/go-pay/app/foree/service/tx_processor"
 	"xue.io/go-pay/app/foree/sys_router"
 	"xue.io/go-pay/app/foree/transaction"
-	foree_tx_processor "xue.io/go-pay/app/foree/tx_processor"
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/config"
 	ms "xue.io/go-pay/db/mysql"
@@ -57,13 +60,13 @@ type ForeeApp struct {
 	txQuoteRepo              *transaction.TxQuoteRepo
 	txSummaryRepo            *transaction.TxSummaryRepo
 	promotionRepo            *promotion.PromotionRepo
-	authService              *foree_service.AuthService
-	accountService           *foree_service.AccountService
-	feeService               *foree_service.FeeService
-	rateService              *foree_service.RateService
-	txLimitService           *foree_service.TxLimitService
-	transactionService       *foree_service.TransactionService
-	promotionService         *foree_service.PromotionService
+	authService              *foree_auth_service.AuthService
+	accountService           *foree_account_service.AccountService
+	feeService               *foree_tx_service.FeeService
+	rateService              *foree_tx_service.RateService
+	txLimitService           *foree_tx_service.TxLimitService
+	transactionService       *foree_tx_service.TransactionService
+	promotionService         *foree_promotion_service.PromotionService
 	promotionRewardJointRepo *promotion.PromotionRewardJointRepo
 	scotiaClient             scotia.ScotiaClient
 	idmClient                idm.IDMClient
@@ -189,10 +192,10 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 	app.txProcessor.SetIDMTxProcessor(app.idmTxProcessor)
 	app.txProcessor.SetNBPTxProcessor(app.nbpTxProcessor)
 
-	app.promotionService = foree_service.NewPromotionService(app.db, app.promotionRepo, app.rewardRepo, app.referralRepo, app.promotionRewardJointRepo)
+	app.promotionService = foree_promotion_service.NewPromotionService(app.db, app.promotionRepo, app.rewardRepo, app.referralRepo, app.promotionRewardJointRepo)
 
 	//Initial service
-	app.authService = foree_service.NewAuthService(
+	app.authService = foree_auth_service.NewAuthService(
 		db, app.sessionRepo,
 		app.userRepo,
 		app.emailPasswdRepo,
@@ -206,17 +209,17 @@ func (app *ForeeApp) Boot(envFilePath string) error {
 		app.promotionService,
 	)
 
-	app.accountService = foree_service.NewAccountService(
+	app.accountService = foree_account_service.NewAccountService(
 		app.authService,
 		app.contactAccountRepo,
 		app.interacAccountRepo,
 	)
 
-	app.rateService = foree_service.NewRateService(app.rateRepo)
-	app.feeService = foree_service.NewFeeService(app.feeRepo)
-	app.txLimitService = foree_service.NewTxLimitService(app.txLimitRepo, app.dailyTxLimitRepo)
+	app.rateService = foree_tx_service.NewRateService(app.rateRepo)
+	app.feeService = foree_tx_service.NewFeeService(app.feeRepo)
+	app.txLimitService = foree_tx_service.NewTxLimitService(app.txLimitRepo, app.dailyTxLimitRepo)
 
-	app.transactionService = foree_service.NewTransactionService(
+	app.transactionService = foree_tx_service.NewTransactionService(
 		db,
 		app.authService,
 		app.userGroupRepo,

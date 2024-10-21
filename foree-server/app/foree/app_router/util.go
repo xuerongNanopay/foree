@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	foree_service "xue.io/go-pay/app/foree/app_service"
 	foree_logger "xue.io/go-pay/app/foree/logger"
+	foree_auth_service "xue.io/go-pay/app/foree/service/auth"
 	"xue.io/go-pay/server/restful_wrapper"
 	"xue.io/go-pay/server/transport"
 	http_util "xue.io/go-pay/util/http"
@@ -16,7 +16,7 @@ import (
 func sessionGetWrapper[P transport.ForeeSessionRequest, Q any](
 	serviceName string,
 	permission string,
-	authService *foree_service.AuthService,
+	authService *foree_auth_service.AuthService,
 	handler func(context.Context, P) (Q, transport.HError),
 ) func(http.ResponseWriter, *http.Request) {
 	validatePayloadAndPermissionBeforeProcess := func(ctx context.Context, r *http.Request, req P) (context.Context, transport.HError) {
@@ -57,7 +57,7 @@ func sessionGetWrapper[P transport.ForeeSessionRequest, Q any](
 func sessionPostWrapper[P transport.ForeeSessionRequest, Q any](
 	serviceName string,
 	permission string,
-	authService *foree_service.AuthService,
+	authService *foree_auth_service.AuthService,
 	handler func(context.Context, P) (Q, transport.HError),
 ) func(http.ResponseWriter, *http.Request) {
 	validatePayloadAndPermissionBeforeProcess := func(ctx context.Context, r *http.Request, req P) (context.Context, transport.HError) {

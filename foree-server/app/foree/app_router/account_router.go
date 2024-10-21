@@ -2,16 +2,18 @@ package foree_router
 
 import (
 	"github.com/gorilla/mux"
-	foree_service "xue.io/go-pay/app/foree/app_service"
+	foree_account_service "xue.io/go-pay/app/foree/service/account"
+	foree_auth_service "xue.io/go-pay/app/foree/service/auth"
+	foree_tx_service "xue.io/go-pay/app/foree/service/transaction"
 )
 
 // Do I need additional struct this it?
 type AccountRouter struct {
-	accountService *foree_service.AccountService
-	authService    *foree_service.AuthService
+	accountService *foree_account_service.AccountService
+	authService    *foree_auth_service.AuthService
 }
 
-func NewAccountRouter(authService *foree_service.AuthService, accountService *foree_service.AccountService) *AccountRouter {
+func NewAccountRouter(authService *foree_auth_service.AuthService, accountService *foree_account_service.AccountService) *AccountRouter {
 	return &AccountRouter{
 		authService:    authService,
 		accountService: accountService,
@@ -25,7 +27,7 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 		"/verify_contact_account",
 		sessionPostWrapper(
 			"VerifyContact",
-			foree_service.PermissionContactWrite,
+			foree_tx_service.PermissionContactWrite,
 			c.authService,
 			c.accountService.VerifyContact,
 		),
@@ -35,7 +37,7 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 		"/create_contact_account",
 		sessionPostWrapper(
 			"VerifyContact",
-			foree_service.PermissionContactWrite,
+			foree_tx_service.PermissionContactWrite,
 			c.authService,
 			c.accountService.CreateContact,
 		),
@@ -45,7 +47,7 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 		"/delete_contact_account",
 		sessionPostWrapper(
 			"DeleteContact",
-			foree_service.PermissionContactWrite,
+			foree_tx_service.PermissionContactWrite,
 			c.authService,
 			c.accountService.DeleteContact,
 		),
@@ -55,7 +57,7 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 		"/contact_accounts/{ContactId}",
 		sessionGetWrapper(
 			"GetActiveContact",
-			foree_service.PermissionContactRead,
+			foree_tx_service.PermissionContactRead,
 			c.authService,
 			c.accountService.GetActiveContact,
 		),
@@ -65,7 +67,7 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 		"/contact_accounts",
 		sessionGetWrapper(
 			"GetAllActiveContacts",
-			foree_service.PermissionContactRead,
+			foree_tx_service.PermissionContactRead,
 			c.authService,
 			c.accountService.GetAllActiveContacts,
 		),
@@ -75,7 +77,7 @@ func (c *AccountRouter) RegisterRouter(router *mux.Router) {
 		"/interac_accounts",
 		sessionGetWrapper(
 			"GetAllActiveInteracs",
-			foree_service.PermissionContactRead,
+			foree_tx_service.PermissionContactRead,
 			c.authService,
 			c.accountService.GetAllActiveInteracs,
 		),

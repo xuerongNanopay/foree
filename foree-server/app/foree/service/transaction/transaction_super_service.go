@@ -1,10 +1,10 @@
-package foree_service
+package foree_tx_service
 
 import (
 	"database/sql"
 
+	foree_tx_processor "xue.io/go-pay/app/foree/service/tx_processor"
 	"xue.io/go-pay/app/foree/transaction"
-	foree_tx_processor "xue.io/go-pay/app/foree/tx_processor"
 )
 
 type TransactionSuperService struct {
