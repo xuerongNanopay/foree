@@ -9,6 +9,8 @@ import (
 	"xue.io/go-pay/server/transport"
 )
 
+var validate = validator.New()
+
 // TODO: testing
 type ForeeDate struct {
 	time.Time
