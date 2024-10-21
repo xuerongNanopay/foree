@@ -42,7 +42,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/create_transaction",
 		sessionPostWrapper(
 			"CreateTx",
-			foree_tx_service.PermissionForeeTxWrite,
+			"Foree:TransactionService:CreateTx",
 			c.authService,
 			c.transactionService.CreateTx,
 		),
@@ -53,7 +53,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/cancel_transaction",
 		sessionPostWrapper(
 			"CreateTx",
-			foree_tx_service.PermissionForeeTxWrite,
+			"Foree:TransactionService:CancelTransaction",
 			c.authService,
 			c.transactionService.CancelTransaction,
 		),
@@ -64,7 +64,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/transaction_limit",
 		sessionGetWrapper(
 			"GetDailyTxLimit",
-			foree_tx_service.PermissionForeeTxWrite,
+			"Foree:TransactionService:GetDailyTxLimit",
 			c.authService,
 			c.transactionService.GetDailyTxLimit,
 		),
@@ -75,7 +75,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/transaction_reward",
 		sessionGetWrapper(
 			"GetReward",
-			foree_tx_service.PermissionForeeTxWrite,
+			"Foree:TransactionService:GetReward",
 			c.authService,
 			c.transactionService.GetReward,
 		),
@@ -86,7 +86,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/transaction/{TransactionId}",
 		sessionGetWrapper(
 			"GetTxSummary",
-			foree_tx_service.PermissionForeeTxSummaryRead,
+			"Foree:TransactionService:GetTxSummary",
 			c.authService,
 			c.transactionService.GetTxSummary,
 		),
@@ -96,7 +96,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/transactions",
 		sessionGetWrapper(
 			"QuerySummaryTxs",
-			foree_tx_service.PermissionForeeTxSummaryRead,
+			"Foree:TransactionService:QuerySummaryTxs",
 			c.authService,
 			c.transactionService.QuerySummaryTxs,
 		),
@@ -105,7 +105,7 @@ func (c *TransactionRouter) RegisterRouter(router *mux.Router) {
 		"/transactions/length",
 		sessionGetWrapper(
 			"CountSummaryTxs",
-			foree_tx_service.PermissionForeeTxSummaryRead,
+			"Foree:TransactionService:CountSummaryTxs",
 			c.authService,
 			c.transactionService.CountSummaryTxs,
 		),
