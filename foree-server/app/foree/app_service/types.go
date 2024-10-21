@@ -1,17 +1,14 @@
 package foree_service
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"xue.io/go-pay/server/transport"
 )
 
 var validate = validator.New()
 
-// TODO: testing
 type ForeeDate struct {
 	time.Time
 }
@@ -30,15 +27,4 @@ func (d *ForeeDate) UnmarshalJSON(b []byte) (err error) {
 	}
 	d.Time, err = time.Parse(time.DateOnly, s)
 	return
-}
-
-func validateStruct(s any, errMsg string) *transport.BadRequestError {
-	ret := transport.NewFormError(errMsg)
-	if err := validate.Struct(s); err != nil {
-		errors := err.(validator.ValidationErrors)
-		for _, e := range errors {
-			ret.AddDetails(e.Field(), fmt.Sprintf("Invalid %s", e.Field()))
-		}
-	}
-	return ret
 }

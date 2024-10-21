@@ -6,6 +6,7 @@ import (
 	"xue.io/go-pay/app/foree/account"
 	foree_constant "xue.io/go-pay/app/foree/constant"
 	"xue.io/go-pay/server/transport"
+	"xue.io/go-pay/validation"
 )
 
 type CreateContactReq struct {
@@ -27,7 +28,7 @@ type CreateContactReq struct {
 }
 
 func (q CreateContactReq) Validate() *transport.BadRequestError {
-	ret := validateStruct(q, "Invalid create contact request")
+	ret := validation.ValidateStruct(q, "Invalid create contact request")
 
 	// Check relationship
 	_, ok := foree_constant.AllowRelationshipToContactTypes[q.RelationshipToContact]
@@ -62,7 +63,7 @@ type DeleteContactReq struct {
 }
 
 func (q DeleteContactReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid delete contact request"); len(ret.Details) > 0 {
+	if ret := validation.ValidateStruct(q, "Invalid delete contact request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -74,7 +75,7 @@ type GetContactReq struct {
 }
 
 func (q GetContactReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid get contact request"); len(ret.Details) > 0 {
+	if ret := validation.ValidateStruct(q, "Invalid get contact request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -87,7 +88,7 @@ type QueryContactReq struct {
 }
 
 func (q QueryContactReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid query contact request"); len(ret.Details) > 0 {
+	if ret := validation.ValidateStruct(q, "Invalid query contact request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil

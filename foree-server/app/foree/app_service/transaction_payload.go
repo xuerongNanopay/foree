@@ -9,6 +9,7 @@ import (
 	"xue.io/go-pay/app/foree/transaction"
 	"xue.io/go-pay/app/foree/types"
 	"xue.io/go-pay/server/transport"
+	"xue.io/go-pay/validation"
 )
 
 type FreeQuoteReq struct {
@@ -18,7 +19,7 @@ type FreeQuoteReq struct {
 }
 
 func (q FreeQuoteReq) Validate() *transport.BadRequestError {
-	ret := validateStruct(q, "Invalid free quote request")
+	ret := validation.ValidateStruct(q, "Invalid free quote request")
 
 	if q.SrcAmount <= 0 {
 		ret.AddDetails("srcAmount", fmt.Sprintf("invalid srcAmount `%v`", q.SrcAmount))
@@ -43,7 +44,7 @@ type QuoteTransactionReq struct {
 }
 
 func (q QuoteTransactionReq) Validate() *transport.BadRequestError {
-	ret := validateStruct(q, "Invalid quote transaction request")
+	ret := validation.ValidateStruct(q, "Invalid quote transaction request")
 
 	//TODO: support promoCode
 	// if q.PromoCode != "" && len(q.RewardIds) > 0 {
@@ -72,7 +73,7 @@ type CreateTransactionReq struct {
 }
 
 func (q CreateTransactionReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid create quote request"); len(ret.Details) > 0 {
+	if ret := validation.ValidateStruct(q, "Invalid create quote request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -84,7 +85,7 @@ type GetTransactionReq struct {
 }
 
 func (q GetTransactionReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid get transaction request"); len(ret.Details) > 0 {
+	if ret := validation.ValidateStruct(q, "Invalid get transaction request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -97,7 +98,7 @@ type GetAllTransactionReq struct {
 }
 
 func (q GetAllTransactionReq) Validate() *transport.BadRequestError {
-	ret := validateStruct(q, "Invalid get transactions request")
+	ret := validation.ValidateStruct(q, "Invalid get transactions request")
 
 	if len(ret.Details) > 0 {
 		return ret
@@ -113,7 +114,7 @@ type QueryTransactionReq struct {
 }
 
 func (q QueryTransactionReq) Validate() *transport.BadRequestError {
-	ret := validateStruct(q, "Invalid query transaction request")
+	ret := validation.ValidateStruct(q, "Invalid query transaction request")
 	// Check status
 	_, ok := foree_constant.AllowTransactionsStatus[q.Status]
 	if !ok && q.Status != "" && q.Status != "All" {
@@ -133,7 +134,7 @@ type CancelTransactionReq struct {
 }
 
 func (q CancelTransactionReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid cancel transaction request"); len(ret.Details) > 0 {
+	if ret := validation.ValidateStruct(q, "Invalid cancel transaction request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -145,7 +146,7 @@ type GetRateReq struct {
 }
 
 func (q GetRateReq) Validate() *transport.BadRequestError {
-	ret := validateStruct(q, "Invalid free quote request")
+	ret := validation.ValidateStruct(q, "Invalid free quote request")
 
 	if len(ret.Details) > 0 {
 		return ret

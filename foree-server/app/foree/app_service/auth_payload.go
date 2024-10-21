@@ -11,6 +11,7 @@ import (
 	"xue.io/go-pay/auth"
 	"xue.io/go-pay/constant"
 	"xue.io/go-pay/server/transport"
+	"xue.io/go-pay/validation"
 )
 
 type SignUpReq struct {
@@ -20,7 +21,7 @@ type SignUpReq struct {
 }
 
 func (q SignUpReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid sign up request"); len(ret.Details) > 0 {
+	if ret := validation.ValidateStruct(q, "Invalid sign up request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -33,7 +34,7 @@ type UpdatePasswdReq struct {
 }
 
 func (q UpdatePasswdReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid change passwd request"); len(ret.Details) > 0 {
+	if ret := validation.ValidateStruct(q, "Invalid change passwd request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -45,7 +46,7 @@ type VerifyEmailReq struct {
 }
 
 func (q VerifyEmailReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid verify email request"); len(ret.Details) > 0 {
+	if ret := validation.ValidateStruct(q, "Invalid verify email request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -58,7 +59,7 @@ type LoginReq struct {
 }
 
 func (q LoginReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid login request"); len(ret.Details) > 0 {
+	if ret := validation.ValidateStruct(q, "Invalid login request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -87,7 +88,7 @@ type CreateUserReq struct {
 
 // TODO: trim name, and use allowText
 func (q CreateUserReq) Validate() *transport.BadRequestError {
-	ret := validateStruct(q, "Invalid user creation request")
+	ret := validation.ValidateStruct(q, "Invalid user creation request")
 
 	// Age
 	age := q.Dob.Time.Unix() / (int64(time.Hour/time.Second) * 24 * 365)
@@ -141,7 +142,7 @@ type ForgetPasswdReq struct {
 }
 
 func (q ForgetPasswdReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid forget password request"); len(ret.Details) > 0 {
+	if ret := validation.ValidateStruct(q, "Invalid forget password request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -153,7 +154,7 @@ type ForgetPasswdVerifyReq struct {
 }
 
 func (q ForgetPasswdVerifyReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid forget password request"); len(ret.Details) > 0 {
+	if ret := validation.ValidateStruct(q, "Invalid forget password request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -166,7 +167,7 @@ type ForgetPasswdUpdateReq struct {
 }
 
 func (q ForgetPasswdUpdateReq) Validate() *transport.BadRequestError {
-	if ret := validateStruct(q, "Invalid new password request"); len(ret.Details) > 0 {
+	if ret := validation.ValidateStruct(q, "Invalid new password request"); len(ret.Details) > 0 {
 		return ret
 	}
 	return nil
@@ -183,7 +184,7 @@ type UpdateAddressReq struct {
 }
 
 func (q UpdateAddressReq) Validate() *transport.BadRequestError {
-	ret := validateStruct(q, "Invalid update address request")
+	ret := validation.ValidateStruct(q, "Invalid update address request")
 
 	// Country
 	if q.Country != "CA" {
@@ -223,7 +224,7 @@ type UpdatePhoneNumberReq struct {
 }
 
 func (q UpdatePhoneNumberReq) Validate() *transport.BadRequestError {
-	ret := validateStruct(q, "Invalid update phoneNumber request")
+	ret := validation.ValidateStruct(q, "Invalid update phoneNumber request")
 
 	country := constant.Countires["CA"]
 
@@ -248,7 +249,7 @@ type UpdateUserSetting struct {
 }
 
 func (q UpdateUserSetting) Validate() *transport.BadRequestError {
-	ret := validateStruct(q, "Invalid update userSetting request")
+	ret := validation.ValidateStruct(q, "Invalid update userSetting request")
 
 	if len(ret.Details) > 0 {
 		return ret
