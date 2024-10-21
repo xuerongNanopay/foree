@@ -200,6 +200,51 @@ func (repo *ApprovalRepo) GetUniqueApprovalyById(ctx context.Context, id int64) 
 	return f, nil
 }
 
+func (repo *ApprovalRepo) getAll(ctx context.Context, query string, args ...any) ([]*Approval, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		rows, err = dTx.Query(query, args)
+	} else {
+		rows, err = repo.db.Query(query, args)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	approvals := make([]*Approval, 0)
+	for rows.Next() {
+		p, err := scanRowIntoApproval(rows)
+		if err != nil {
+			return nil, err
+		}
+		approvals = append(approvals, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return approvals, nil
+}
+
+func (repo *ApprovalRepo) GetAllApprovalWithPagination(ctx context.Context, limit, offset int) ([]*Approval, error) {
+	return repo.getAll(ctx, sQLApprovalGetAllWithPagination, limit, offset)
+}
+
+func (repo *ApprovalRepo) GetAllApprovalByTypeWithPagination(ctx context.Context, approvalType string, limit, offset int) ([]*Approval, error) {
+	return repo.getAll(ctx, sQLApprovalGetAllByTypeWithPagination, approvalType, limit, offset)
+}
+
+func (repo *ApprovalRepo) GetAllApprovalByTypeAndStatusWithPagination(ctx context.Context, approvalType, status string, limit, offset int) ([]*Approval, error) {
+	return repo.getAll(ctx, sQLApprovalGetAllByTypeAndStatusWithPagination, approvalType, status, limit, offset)
+}
+
 func scanRowIntoApproval(rows *sql.Rows) (*Approval, error) {
 	a := new(Approval)
 	err := rows.Scan(
