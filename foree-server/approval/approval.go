@@ -1,6 +1,12 @@
 package approval
 
-import "time"
+import (
+	"context"
+	"database/sql"
+	"time"
+
+	"xue.io/go-pay/constant"
+)
 
 type ApproveStatus string
 
@@ -76,4 +82,51 @@ type Approval struct {
 	OwnerId      int64         `json:"ownerId"`
 	CreatedAt    *time.Time    `json:"createdAt"`
 	UpdatedAt    *time.Time    `json:"updatedAt"`
+}
+
+func NewApprovalRepo(db *sql.DB) *ApprovalRepo {
+	return &ApprovalRepo{db: db}
+}
+
+type ApprovalRepo struct {
+	db *sql.DB
+}
+
+func (repo *ApprovalRepo) InsertApproval(ctx context.Context, a Approval) (int64, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+	var err error
+	var result sql.Result
+
+	if ok {
+		result, err = dTx.ExecContext(
+			ctx,
+			sQLApprovalInsert,
+			a.Type,
+			a.Description,
+			a.Status,
+			a.RefEntity,
+			a.RefId,
+			a.OwnerId,
+		)
+	} else {
+		result, err = repo.db.ExecContext(
+			ctx,
+			sQLApprovalInsert,
+			a.Type,
+			a.Description,
+			a.Status,
+			a.RefEntity,
+			a.RefId,
+			a.OwnerId,
+		)
+	}
+
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
