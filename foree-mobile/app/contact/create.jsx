@@ -61,7 +61,11 @@ const ContactCreate = () => {
         }
         return
       }
-      router.replace((`/contact/${resp.data.data.id}`))
+      if ( router.canGoBack() ) {
+        router.back()
+      } else {
+        router.replace((`/contact/${resp.data.data.id}`))
+      }
     } catch (err) {
       console.error("create contact", err, err.response.data)
       if ( router.canGoBack() ) {
