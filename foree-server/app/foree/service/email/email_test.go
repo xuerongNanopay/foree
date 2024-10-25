@@ -13,7 +13,7 @@ func TestHowHTMLTemplateWorks(t *testing.T) {
 		AppName           string
 		AppLink           string
 		LogoImg           string
-		Outlet            string
+		Outlet            template.HTML
 		SendTo            string
 		SupportAddress    string
 		PrivacyUrl        string
@@ -22,6 +22,13 @@ func TestHowHTMLTemplateWorks(t *testing.T) {
 		TermsAndCondLabel string
 		ContactEmail      string
 		AboutLink         string
+	}
+
+	type ForeeTransactionCancelledTemplateData struct {
+		GreetingName      string
+		TransactionNumber string
+		TermsAndCondLink  string
+		SupportEmail      string
 	}
 
 	t.Run("Demo 1", func(t *testing.T) {
@@ -39,7 +46,7 @@ func TestHowHTMLTemplateWorks(t *testing.T) {
 			AppName:           "Foree",
 			AppLink:           "http://www.foree.net",
 			LogoImg:           "http://www.foree.net/logo",
-			Outlet:            "<h1>AAA</h1>",
+			Outlet:            `<b>World</b>`,
 			SendTo:            "Xuerong",
 			SupportAddress:    "support@foree.net",
 			PrivacyUrl:        "http://www.foree.net/privacy_url",
@@ -50,6 +57,41 @@ func TestHowHTMLTemplateWorks(t *testing.T) {
 			AboutLink:         "http://www.foree.net/anout",
 		}
 		_ = template.Execute(buf, data)
+		fmt.Println(buf.String())
+	})
+
+	t.Run("Test Foree Transaction Cancelled Template", func(t *testing.T) {
+		buf := new(bytes.Buffer)
+		txTpl, _ := template.New("Foree Transaction Cancelled Template").Parse(ForeeTransactionCancelledTemplate)
+
+		txData := ForeeTransactionCancelledTemplateData{
+			GreetingName:      "Xuerong Wu",
+			TransactionNumber: "NP000000000001",
+			TermsAndCondLink:  "http://www.foree.net/terms",
+			SupportEmail:      "support@foree.net",
+		}
+
+		_ = txTpl.Execute(buf, txData)
+		o := buf.String()
+		outlet := template.HTML(o)
+		buf = new(bytes.Buffer)
+		template, _ := template.New("Foree Root Template").Parse(ForeeRootTemplate)
+		data := ForeeRootTemplateData{
+			AppName:           "Foree",
+			AppLink:           "http://www.foree.net",
+			LogoImg:           "http://www.foree.net/logo",
+			SendTo:            "Xuerong",
+			Outlet:            outlet,
+			SupportAddress:    "support@foree.net",
+			PrivacyUrl:        "http://www.foree.net/privacy_url",
+			PrivacyLabel:      "Privancy",
+			TermsAndCondLink:  "http://www.foree.net/terms",
+			TermsAndCondLabel: "Terms And Condition",
+			ContactEmail:      "contact@foree.net",
+			AboutLink:         "http://www.foree.net/anout",
+		}
+		_ = template.Execute(buf, data)
+
 		fmt.Println(buf.String())
 	})
 }
