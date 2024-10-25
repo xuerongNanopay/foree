@@ -31,3 +31,11 @@ func (e *EmailService) compileTemplates() {
 func (e *EmailService) EmailTransactionCancelled(greetingName, transactionNumber string) {
 
 }
+
+func (e *EmailService) Email(templateName string, data any) error {
+	return nil
+}
+
+func (e *EmailService) EmailAsync(templateName string, data any) {
+
+}
