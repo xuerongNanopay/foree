@@ -1,5 +1,7 @@
 package foree_email_service
 
+type EmailTemplate string
+
 type BasicTplCfg struct {
 	AppName           string
 	AppLink           string

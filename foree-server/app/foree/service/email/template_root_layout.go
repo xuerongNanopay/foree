@@ -1,6 +1,6 @@
-package foree_email_template
+package foree_email_service
 
-const RootLayoutTemplate = `
+const RootLayoutTemplate EmailTemplate = `
 <!DOCTYPE html>
 <html>
 <head>
