@@ -48,6 +48,39 @@ const TransactionCreateTemplate = `
 </main>
 `
 
+const TransactionPickupTemplate = `
+<main>
+	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px; line-height: 1.5; margin: 0;">
+	Dear {{.CustomerName}},
+	</p>
+	<br>
+	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px; line-height: 1.5; margin: 0;">
+	This is to confirm that funds against your transaction to {{.ContactName}} in the amount of {{.Amount}} are now available for pick-up by your contact, {{.ContactName}}. Your transaction reference # is "{{.TransactionNumber}}".
+	</p>
+	<br>
+	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px; line-height: 1.5; margin: 0;">
+	Please provide the transaction reference to your contact for any queries and to be provided at the time of cash pick-up from NBP locations.
+	</p>
+	<br>
+	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">To track your transaction:</p>
+	<br>
+	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">1. Sign in to Foree Remittance app</p>
+	<br>
+	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">2. You can have a quick view from the Recent Transactions on the dashboard OR from the menu select, Transactions</p>
+	<br>
+	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">3. You can view the status of your transaction or click on a transaction for details</p>
+	<br>
+	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">Thanks, </p>
+	<br>
+	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">Team Foree Remittance</p>
+	</p> 
+	<br>
+	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">
+	If you think you have received this email in error, please contact us at <a href="mailto:{{.SupportEmail}}" style="text-decoration: none;">{{.SupportEmail}}</a>
+	</p> 
+</main>
+`
+
 const TransactionCancelledTemplate = `
 <main>
 	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">
