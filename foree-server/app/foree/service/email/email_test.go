@@ -40,7 +40,7 @@ func TestHowHTMLTemplateWorks(t *testing.T) {
 
 	t.Run("Test Foree Root Template", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		template, _ := template.New("Foree Root Template").Parse(string(RootLayoutTemplate))
+		template, _ := template.New("Foree Root Template").Parse(string(rootLayoutTemplateHTML))
 
 		data := ForeeRootTemplateData{
 			AppName:           "Foree",
@@ -75,7 +75,7 @@ func TestHowHTMLTemplateWorks(t *testing.T) {
 		o := buf.String()
 		outlet := template.HTML(o)
 		buf = new(bytes.Buffer)
-		template, _ := template.New("Foree Root Template").Parse(string(RootLayoutTemplate))
+		template, _ := template.New("Foree Root Template").Parse(rootLayoutTemplateHTML)
 		data := ForeeRootTemplateData{
 			AppName:           "Foree",
 			AppLink:           "http://www.foree.net",

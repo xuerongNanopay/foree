@@ -1,6 +1,8 @@
 package foree_email_service
 
-const ContactAddTemplate EmailTemplate = `
+var contactAddTemplate = buildTemplate("CONTACT_ADDED", "Foree Remittance - Contact added", ContactAddHTML, rootLayoutTemplateHTML)
+
+const ContactAddHTML = `
 <main>
 	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">Dear {{.CustomerName}}, </p>
 
@@ -12,7 +14,10 @@ const ContactAddTemplate EmailTemplate = `
 	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">If you think you have received this email in error, please contact us at: <a href="mailto:{{.SupportEmail}}" style="text-decoration: none;">{{.SupportEmail}}</a></p>
 </main>
 `
-const ContactRemoveTemplate EmailTemplate = `
+
+var contactRemoveTemplate = buildTemplate("CONTACT_REMOVED", "Foree Remittance - Contact removed", contactRemoveHTML, rootLayoutTemplateHTML)
+
+const contactRemoveHTML = `
 <main>
 	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">Dear {{.CustomerName}}, </p>
 

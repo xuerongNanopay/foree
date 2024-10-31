@@ -1,6 +1,6 @@
 package foree_email_service
 
-const TransactionCreateTemplate EmailTemplate = `
+const TransactionCreateTemplate = `
 <main>
 	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">
 	Dear {{.CustomerName}},
@@ -121,7 +121,9 @@ const TransactionCompletedTemplate = `
   </include>
 `
 
-const TransactionCancelledTemplate = `
+var transactionCancelledTemplate = buildTemplate("TRANSACTION_CANCELLED", "Foree Remittance - Transaction cancelled", transactionCancelledHTML, rootLayoutTemplateHTML)
+
+const transactionCancelledHTML = `
 <main>
 	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">
 		Dear {{.CustomerName}},

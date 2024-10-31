@@ -1,6 +1,8 @@
 package foree_email_service
 
-const EmailVerifyCodeTemplate EmailTemplate = `
+var emailVerifyCodeTemplate = buildTemplate("EMAIL_VERIFY_CODE", "Verify your email to activate your Foree Remittance account", emailVerifyCodeHTML, rootLayoutTemplateHTML)
+
+const emailVerifyCodeHTML = `
 <main>
 	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 24px; font-weight: 900; margin: 40px 0;">Verify your email address</p>
 
