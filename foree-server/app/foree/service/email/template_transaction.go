@@ -1,6 +1,8 @@
 package foree_email_service
 
-const TransactionCreateTemplate = `
+var transactionInitiatedTemplate = buildTemplate("TRANSACTION_INITIATED", "Foree Remittance - New Transaction Initiated", transactionInitiatedHTML, rootLayoutTemplateHTML)
+
+const transactionInitiatedHTML = `
 <main>
 	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">
 	Dear {{.CustomerName}},
@@ -48,7 +50,9 @@ const TransactionCreateTemplate = `
 </main>
 `
 
-const TransactionPickupTemplate = `
+var transactionPickupTemplate = buildTemplate("TRANSACTION_PICKUP", "Foree Remittance - Your cash transaction is available for pick-up", transactionPickupHTML, rootLayoutTemplateHTML)
+
+const transactionPickupHTML = `
 <main>
 	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px; line-height: 1.5; margin: 0;">
 	Dear {{.CustomerName}},
