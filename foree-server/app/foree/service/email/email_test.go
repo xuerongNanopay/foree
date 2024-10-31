@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"html/template"
 	"testing"
+
+	foree_email_template "xue.io/go-pay/app/foree/service/email/template"
 )
 
 func TestHowHTMLTemplateWorks(t *testing.T) {
@@ -40,7 +42,7 @@ func TestHowHTMLTemplateWorks(t *testing.T) {
 
 	t.Run("Test Foree Root Template", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		template, _ := template.New("Foree Root Template").Parse(ForeeRootTemplate)
+		template, _ := template.New("Foree Root Template").Parse(foree_email_template.ForeeRootTemplate)
 
 		data := ForeeRootTemplateData{
 			AppName:           "Foree",
@@ -62,7 +64,7 @@ func TestHowHTMLTemplateWorks(t *testing.T) {
 
 	t.Run("Test Foree Transaction Cancelled Template", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		txTpl, _ := template.New("Foree Transaction Cancelled Template").Parse(ForeeTransactionCancelledTemplate)
+		txTpl, _ := template.New("Foree Transaction Cancelled Template").Parse(foree_email_template.ForeeTransactionCancelledTemplate)
 
 		txData := ForeeTransactionCancelledTemplateData{
 			GreetingName:      "Xuerong Wu",
@@ -75,7 +77,7 @@ func TestHowHTMLTemplateWorks(t *testing.T) {
 		o := buf.String()
 		outlet := template.HTML(o)
 		buf = new(bytes.Buffer)
-		template, _ := template.New("Foree Root Template").Parse(ForeeRootTemplate)
+		template, _ := template.New("Foree Root Template").Parse(foree_email_template.ForeeRootTemplate)
 		data := ForeeRootTemplateData{
 			AppName:           "Foree",
 			AppLink:           "http://www.foree.net",

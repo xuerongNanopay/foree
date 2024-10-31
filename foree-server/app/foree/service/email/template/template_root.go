@@ -1,4 +1,4 @@
-package foree_email_service
+package foree_email_template
 
 const ForeeRootTemplate = `
 <!DOCTYPE html>
