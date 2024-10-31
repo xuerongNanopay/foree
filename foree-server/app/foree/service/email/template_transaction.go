@@ -81,7 +81,9 @@ const TransactionPickupTemplate = `
 </main>
 `
 
-const TransactionCompletedTemplate = `
+var transactionCompletedTemplate = buildTemplate("TRANSACTION_COMPLETED", "Foree Remittance - Transaction completed", transactionCompletedHTML, rootLayoutTemplateHTML)
+
+const transactionCompletedHTML = `
     <include template = 'header'>
     <p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px; line-height: 1.5; margin: 0;">
       Dear {{.CustomerName}},

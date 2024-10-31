@@ -62,7 +62,7 @@ func TestHowHTMLTemplateWorks(t *testing.T) {
 
 	t.Run("Test Foree Transaction Cancelled Template", func(t *testing.T) {
 		buf := new(bytes.Buffer)
-		txTpl, _ := template.New("Foree Transaction Cancelled Template").Parse(TransactionCancelledTemplate)
+		txTpl, _ := template.New("Foree Transaction Cancelled Template").Parse(transactionCancelledHTML)
 
 		txData := ForeeTransactionCancelledTemplateData{
 			GreetingName:      "Xuerong Wu",
