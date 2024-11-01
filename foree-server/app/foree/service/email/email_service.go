@@ -131,6 +131,7 @@ func (e *EmailService) sendWithTemplate(tplName string, data templateData, from,
 }
 
 func (e *EmailService) send(subject, body, from, to string) error {
+	//TODO: use goMail to send email.
 	return nil
 }
 
