@@ -2,8 +2,11 @@ package foree_email_service
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"html/template"
+
+	"gopkg.in/gomail.v2"
 )
 
 //Check this one for attachment: https://gist.github.com/douglasmakey/90753ecf37ac10c25873825097f46300
@@ -41,10 +44,11 @@ type BasicTemplateCfg struct {
 }
 
 type ServiceConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
+	Host               string
+	Port               int
+	Username           string
+	Password           string
+	InsecureSkipVerify bool
 }
 
 const (
@@ -131,7 +135,18 @@ func (e *EmailService) sendWithTemplate(tplName string, data templateData, from,
 }
 
 func (e *EmailService) send(subject, body, from, to string) error {
-	//TODO: use goMail to send email.
+	m := gomail.NewMessage()
+	m.SetHeader("From", from)
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/html", body)
+	d := gomail.NewDialer(e.serviceConfig.Host, e.serviceConfig.Port, e.serviceConfig.Username, e.serviceConfig.Password)
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: e.serviceConfig.InsecureSkipVerify}
+
+	if err := d.DialAndSend(m); err != nil {
+		return err
+	}
+
 	return nil
 }
 
