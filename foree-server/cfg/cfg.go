@@ -10,5 +10,6 @@ type CFG interface {
 }
 
 type SQLConfigure struct {
-	db *sql.DB
+	db      *sql.DB
+	configs map[string]Config[any]
 }
