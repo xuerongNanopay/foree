@@ -1,7 +1,5 @@
 package foree_email_service
 
-var transactionInitiatedTemplate = buildTemplate("TRANSACTION_INITIATED", "Foree Remittance - New Transaction Initiated", transactionInitiatedHTML, rootLayoutTemplateHTML)
-
 const transactionInitiatedHTML = `
 <main>
 	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px;  line-height: 1.5; margin: 0;">
@@ -50,8 +48,6 @@ const transactionInitiatedHTML = `
 </main>
 `
 
-var transactionPickupTemplate = buildTemplate("TRANSACTION_PICKUP", "Foree Remittance - Your cash transaction is available for pick-up", transactionPickupHTML, rootLayoutTemplateHTML)
-
 const transactionPickupHTML = `
 <main>
 	<p style="font-family: /*%FONT1%*/ Roboto, 'Helvetica Neue', Helvetica, Arial, sans-serif;  font-size: 16px; line-height: 1.5; margin: 0;">
@@ -84,8 +80,6 @@ const transactionPickupHTML = `
 	</p> 
 </main>
 `
-
-var transactionCompletedTemplate = buildTemplate("TRANSACTION_COMPLETED", "Foree Remittance - Transaction completed", transactionCompletedHTML, rootLayoutTemplateHTML)
 
 const transactionCompletedHTML = `
     <include template = 'header'>
@@ -126,8 +120,6 @@ const transactionCompletedHTML = `
     </p> 
   </include>
 `
-
-var transactionCancelledTemplate = buildTemplate("TRANSACTION_CANCELLED", "Foree Remittance - Transaction cancelled", transactionCancelledHTML, rootLayoutTemplateHTML)
 
 const transactionCancelledHTML = `
 <main>
