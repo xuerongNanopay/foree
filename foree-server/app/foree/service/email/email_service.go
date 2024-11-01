@@ -1,6 +1,9 @@
 package foree_email_service
 
-import "html/template"
+import (
+	"bytes"
+	"html/template"
+)
 
 type emailTemplate struct {
 	name       string
@@ -47,23 +50,54 @@ func NewEmailService() *EmailService {
 
 type EmailService struct {
 	basicTemplateCfg BasicTemplateCfg
+	serviceConfig    ServiceConfig
 	templates        map[string]emailTemplate
 }
 
-func (e *EmailService) sendEmail(template emailTemplate) {
+func (e *EmailService) sendEmail(name string, data templateData) error {
+	tpl, _ := e.templates[name]
 
-}
+	buf := new(bytes.Buffer)
+	err := tpl.contentTpl.Execute(buf, data)
+	if err != nil {
+		return err
+	}
 
-func (e *EmailService) EmailTransactionCancelled(greetingName, transactionNumber string) {
+	data.Content = template.HTML(buf.String())
+	buf.Reset()
+	err = tpl.layoutTpl.Execute(buf, data)
+	if err != nil {
+		return err
+	}
 
-}
+	emailBody := buf.String()
+	if emailBody == "" {
+		//TODO: send email use goEmail
+	}
 
-func (e *EmailService) Email(templateName string, data any) error {
 	return nil
 }
 
-func (e *EmailService) EmailAsync(templateName string, data any) {
-
+// We can put all template variable into one struct
+type templateData struct {
+	Content           template.HTML
+	AppName           string
+	AppLink           string
+	LogoImg           string
+	SendTo            string
+	SupportAddress    string
+	PrivacyUrl        string
+	PrivacyLabel      string
+	TermsAndCondLink  string
+	TermsAndCondLabel string
+	ContactEmail      string
+	AboutLink         string
+	CustomerName      string
+	TransactionNumber string
+	SupportEmail      string
+	EmailVerifyCode   string
+	ContactName       string
+	Amount            string
 }
 
 func buildTemplate(name, subject, content, layout string) emailTemplate {

@@ -22,10 +22,11 @@ func TestHowHTMLTemplateWorks(t *testing.T) {
 		TermsAndCondLabel string
 		ContactEmail      string
 		AboutLink         string
+		Extra             string
 	}
 
 	type ForeeTransactionCancelledTemplateData struct {
-		GreetingName      string
+		CustomerName      string
 		TransactionNumber string
 		TermsAndCondLink  string
 		SupportEmail      string
@@ -55,6 +56,7 @@ func TestHowHTMLTemplateWorks(t *testing.T) {
 			TermsAndCondLabel: "Terms And Condition",
 			ContactEmail:      "contact@foree.net",
 			AboutLink:         "http://www.foree.net/anout",
+			Extra:             "extraInfo",
 		}
 		_ = template.Execute(buf, data)
 		fmt.Println(buf.String())
@@ -65,7 +67,7 @@ func TestHowHTMLTemplateWorks(t *testing.T) {
 		txTpl, _ := template.New("Foree Transaction Cancelled Template").Parse(transactionCancelledHTML)
 
 		txData := ForeeTransactionCancelledTemplateData{
-			GreetingName:      "Xuerong Wu",
+			CustomerName:      "Xuerong Wu",
 			TransactionNumber: "NP000000000001",
 			TermsAndCondLink:  "http://www.foree.net/terms",
 			SupportEmail:      "support@foree.net",
