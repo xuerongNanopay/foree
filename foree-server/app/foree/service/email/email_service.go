@@ -94,6 +94,7 @@ func (e *EmailService) buildEmailMsg(tplName string, data templateData, from, to
 	data.TermsAndCondLabel = e.basicTemplateCfg.TermsAndCondLabel
 	data.ContactEmail = e.basicTemplateCfg.ContactEmail
 	data.AboutLink = e.basicTemplateCfg.AboutLink
+	data.SupportEmail = e.basicTemplateCfg.SupportEmail
 
 	tpl, ok := e.templates[tplName]
 	if !ok {
@@ -150,11 +151,85 @@ func (e *EmailService) send(subject, body, from, to string) error {
 	return nil
 }
 
-func (e *EmailService) SendEmailVerifyCode(emailVerifyCode, from, to string) error {
+func (e *EmailService) SendEmailVerifyCodeEmail(emailVerifyCode, from, to string) error {
 	data := templateData{
 		EmailVerifyCode: emailVerifyCode,
 	}
 	if err := e.sendWithTemplate(emailVerifyCodeTPLName, data, from, to); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (e *EmailService) SendContactAddedEmail(customerName, contactName, from, to string) error {
+	data := templateData{
+		CustomerName: customerName,
+		ContactName:  contactName,
+	}
+	if err := e.sendWithTemplate(contactAddedKeyTPLName, data, from, to); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (e *EmailService) SendContactRemovedEmail(customerName, contactName, from, to string) error {
+	data := templateData{
+		CustomerName: customerName,
+		ContactName:  contactName,
+	}
+	if err := e.sendWithTemplate(contactRemovedKeyTPLName, data, from, to); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (e *EmailService) SendTransactionInitiatedEmail(customerName, contactName, transactionNumber, amount, from, to string) error {
+	data := templateData{
+		CustomerName:      customerName,
+		ContactName:       contactName,
+		TransactionNumber: transactionNumber,
+		Amount:            amount,
+	}
+	if err := e.sendWithTemplate(transactionInitiatedTPLName, data, from, to); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (e *EmailService) SendTransactionPickupEmail(customerName, contactName, transactionNumber, amount, from, to string) error {
+	data := templateData{
+		CustomerName:      customerName,
+		ContactName:       contactName,
+		TransactionNumber: transactionNumber,
+		Amount:            amount,
+	}
+	if err := e.sendWithTemplate(transactionPickupTPLName, data, from, to); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (e *EmailService) SendTransactionCompletedEmail(customerName, contactName, transactionNumber, amount, from, to string) error {
+	data := templateData{
+		CustomerName:      customerName,
+		ContactName:       contactName,
+		TransactionNumber: transactionNumber,
+		Amount:            amount,
+	}
+	if err := e.sendWithTemplate(transactionCompletedTPLName, data, from, to); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (e *EmailService) SendTransactionCancelledEmail(customerName, contactName, transactionNumber, amount, from, to string) error {
+	data := templateData{
+		CustomerName:      customerName,
+		ContactName:       contactName,
+		TransactionNumber: transactionNumber,
+		Amount:            amount,
+	}
+	if err := e.sendWithTemplate(transactionCancelledTPLName, data, from, to); err != nil {
 		return err
 	}
 	return nil
