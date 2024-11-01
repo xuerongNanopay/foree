@@ -22,8 +22,8 @@ type TxLimit struct {
 	LimitGroup string           `json:"limitGroup"`
 	MinAmt     types.AmountData `json:"minLimit"`
 	MaxAmt     types.AmountData `json:"maxLimit"`
-	CreatedAt  time.Time        `json:"createdAt"`
-	UpdatedAt  time.Time        `json:"updatedAt"`
+	CreatedAt  *time.Time       `json:"createdAt"`
+	UpdatedAt  *time.Time       `json:"updatedAt"`
 }
 
 func NewTxLimitRepo(db *sql.DB) *TxLimitRepo {
