@@ -452,6 +452,14 @@ CREATE TABLE IF NOT EXISTS promotion_reward_joint(
     FOREIGN KEY (reward_id) REFERENCES rewards(id)
 );
 
+CREATE TABLE IF NOT EXISTS configuration(
+    `name` VARCHAR(128) PRIMARY KEY,
+    `raw_value` VARCHAR(256) NOT NULL,
+    `refresh_interval` BIGINT UNSIGNED NOT NULL DEFAULT 300000,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 CREATE INDEX idx_tab_email_passwd_col_email ON email_passwd(email);
 CREATE INDEX idx_tab_user_extra_col_owner_id ON user_extra(owner_id);
 CREATE INDEX idx_tab_user_setting_col_owner_id ON user_setting(owner_id);

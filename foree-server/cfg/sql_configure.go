@@ -12,18 +12,18 @@ import (
 
 // Get configure from mysql server.
 const (
-	sQLConfigureGetUniqueByName = `
+	sQLConfigurationGetUniqueByName = `
 		SELECT
 			c.name, c.raw_value, c.refresh_interval, 
 			r.expire_at, r.created_at, r.updated_at
-		FROM configure as c
+		FROM configuration as c
 		Where c.name = ?
 	`
-	sQLConfigureGetAllByNames = `
+	sQLConfigurationGetAllByNames = `
 		SELECT
 			c.name, c.raw_value, c.refresh_interval, 
 			r.expire_at, r.created_at, r.updated_at
-		FROM configure as c
+		FROM configuration as c
 		Where c.name in (%v)
 	`
 )
@@ -40,7 +40,7 @@ type configurationRepo struct {
 	db *sql.DB
 }
 
-func (repo *configurationRepo) getAllConfigureByNames(ctx context.Context, names ...string) ([]*configuration, error) {
+func (repo *configurationRepo) getAllConfigurationByNames(ctx context.Context, names ...string) ([]*configuration, error) {
 	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
 
 	args := make([]interface{}, len(names))
@@ -54,10 +54,10 @@ func (repo *configurationRepo) getAllConfigureByNames(ctx context.Context, names
 	var err error
 
 	if ok {
-		rows, err = dTx.Query(fmt.Sprintf(sQLConfigureGetAllByNames, strings.Join(p, ",")), args...)
+		rows, err = dTx.Query(fmt.Sprintf(sQLConfigurationGetAllByNames, strings.Join(p, ",")), args...)
 
 	} else {
-		rows, err = repo.db.Query(fmt.Sprintf(sQLConfigureGetAllByNames, strings.Join(p, ",")), args...)
+		rows, err = repo.db.Query(fmt.Sprintf(sQLConfigurationGetAllByNames, strings.Join(p, ",")), args...)
 	}
 
 	if err != nil {
@@ -81,16 +81,16 @@ func (repo *configurationRepo) getAllConfigureByNames(ctx context.Context, names
 	return configures, nil
 }
 
-func (repo *configurationRepo) getUniqueConfigureByName(ctx context.Context, name string) (*configuration, error) {
+func (repo *configurationRepo) getUniqueConfigurationByName(ctx context.Context, name string) (*configuration, error) {
 	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
 
 	var rows *sql.Rows
 	var err error
 
 	if ok {
-		rows, err = dTx.Query(sQLConfigureGetUniqueByName, name)
+		rows, err = dTx.Query(sQLConfigurationGetUniqueByName, name)
 	} else {
-		rows, err = repo.db.Query(sQLConfigureGetUniqueByName, name)
+		rows, err = repo.db.Query(sQLConfigurationGetUniqueByName, name)
 	}
 	if err != nil {
 		return nil, err
