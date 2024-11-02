@@ -246,7 +246,7 @@ func (t *TransactionService) QuoteTx(ctx context.Context, req QuoteTransactionRe
 	rewards := make([]*promotion.Reward, 0)
 	rewardIds := make([]int64, 0)
 	if len(req.RewardSids) > 0 {
-		rs, err := t.rewardRepo.GetAllRewardByOwnerIdAndSids(ctx, session.UserId, req.RewardSids)
+		rs, err := t.rewardRepo.GetAllRewardByOwnerIdAndSids(ctx, session.UserId, req.RewardSids...)
 		if err != nil {
 			foree_logger.Logger.Error("QuoteTx_FAIL",
 				"ip", foree_util.LoadRealIp(ctx),
@@ -525,7 +525,7 @@ func (t *TransactionService) CreateTx(ctx context.Context, req CreateTransaction
 	var rewardErr transport.HError
 	rewardChecker := func() {
 		if len(foreeTx.Rewards) > 0 {
-			rewards, err := t.rewardRepo.GetAllRewardByOwnerIdAndIds(ctx, session.UserId, foreeTx.RewardIds)
+			rewards, err := t.rewardRepo.GetAllRewardByOwnerIdAndIds(ctx, session.UserId, foreeTx.RewardIds...)
 			if err != nil {
 				foree_logger.Logger.Error("CreateTx_FAIL",
 					"ip", foree_util.LoadRealIp(ctx),

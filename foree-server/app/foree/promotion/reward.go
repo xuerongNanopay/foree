@@ -33,21 +33,21 @@ const (
 		FROM rewards as r
 		Where r.id = ?
 	`
-	sQLRewardAllByOwnerIdAndSids = `
+	sQLRewardGetAllByOwnerIdAndSids = `
 		SELECT
 			r.id, r.s_id, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
 			r.expire_at, r.created_at, r.updated_at
 		FROM rewards as r
-		Where r.owner_id = ? AND r.s_id in (?%v)
+		Where r.owner_id = ? AND r.s_id in (%v)
 	`
-	sQLRewardAllByOwnerIdAndIds = `
+	sQLRewardGetAllByOwnerIdAndIds = `
 		SELECT
 			r.id, r.s_id, r.type, r.description, r.amount, r.currency,
 			r.status, r.owner_id, r.applied_transaction_id,
 			r.expire_at, r.created_at, r.updated_at
 		FROM rewards as r
-		Where r.owner_id = ? AND r.id in (?%v)
+		Where r.owner_id = ? AND r.id in (%v)
 	`
 	sQLRewardGetAllByAppliedTransactionId = `
 		SELECT
@@ -199,23 +199,25 @@ func (repo *RewardRepo) GetUniqueRewardById(ctx context.Context, id int64) (*Rew
 	return f, nil
 }
 
-func (repo *RewardRepo) GetAllRewardByOwnerIdAndIds(ctx context.Context, ownerId int64, ids []int64) ([]*Reward, error) {
+func (repo *RewardRepo) GetAllRewardByOwnerIdAndIds(ctx context.Context, ownerId int64, ids ...int64) ([]*Reward, error) {
 	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
 
 	args := make([]interface{}, len(ids)+1)
 	args[0] = ownerId
+	p := make([]string, len(ids))
 	for i, id := range ids {
 		args[i+1] = id
+		p[i] = "?"
 	}
 
 	var rows *sql.Rows
 	var err error
 
 	if ok {
-		rows, err = dTx.Query(fmt.Sprintf(sQLRewardAllByOwnerIdAndIds, strings.Repeat(",?", len(ids)-1)), args...)
+		rows, err = dTx.Query(fmt.Sprintf(sQLRewardGetAllByOwnerIdAndIds, strings.Join(p, ",")), args...)
 
 	} else {
-		rows, err = repo.db.Query(fmt.Sprintf(sQLRewardAllByOwnerIdAndIds, strings.Repeat(",?", len(ids)-1)), args...)
+		rows, err = repo.db.Query(fmt.Sprintf(sQLRewardGetAllByOwnerIdAndIds, strings.Join(p, ",")), args...)
 	}
 
 	if err != nil {
@@ -239,23 +241,25 @@ func (repo *RewardRepo) GetAllRewardByOwnerIdAndIds(ctx context.Context, ownerId
 	return rewards, nil
 }
 
-func (repo *RewardRepo) GetAllRewardByOwnerIdAndSids(ctx context.Context, ownerId int64, sids []string) ([]*Reward, error) {
+func (repo *RewardRepo) GetAllRewardByOwnerIdAndSids(ctx context.Context, ownerId int64, sids ...string) ([]*Reward, error) {
 	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
 
 	args := make([]interface{}, len(sids)+1)
 	args[0] = ownerId
+	p := make([]string, len(sids))
 	for i, ref := range sids {
 		args[i+1] = ref
+		p[i] = "?"
 	}
 
 	var rows *sql.Rows
 	var err error
 
 	if ok {
-		rows, err = dTx.Query(fmt.Sprintf(sQLRewardAllByOwnerIdAndSids, strings.Repeat(",?", len(sids)-1)), args...)
+		rows, err = dTx.Query(fmt.Sprintf(sQLRewardGetAllByOwnerIdAndSids, strings.Join(p, ",")), args...)
 
 	} else {
-		rows, err = repo.db.Query(fmt.Sprintf(sQLRewardAllByOwnerIdAndSids, strings.Repeat(",?", len(sids)-1)), args...)
+		rows, err = repo.db.Query(fmt.Sprintf(sQLRewardGetAllByOwnerIdAndSids, strings.Join(p, ",")), args...)
 	}
 
 	if err != nil {
