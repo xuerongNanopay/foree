@@ -7,18 +7,64 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"xue.io/go-pay/logger"
 )
 
+const refreshInterval = 5 * time.Minute
+
 type SQLCFG struct {
-	mu      sync.Mutex
-	configs sync.Map
-	repo    *configurationRepo
+	mu            sync.Mutex
+	configs       sync.Map
+	refreshTicker *time.Ticker
+	repo          *configurationRepo
+	logger        logger.Logger
 }
 
 type configWrapper struct {
 	config    any
 	rawValue  string
 	expiredAt time.Time
+}
+
+func (c *SQLCFG) startRefresher() {
+	for {
+		select {
+		case <-c.refreshTicker.C:
+			names := make([]string, 0)
+			c.configs.Range(func(k, v interface{}) bool {
+				name := k.(string)
+				cw := v.(configWrapper)
+				if cw.expiredAt.Before(time.Now()) {
+					names = append(names, name)
+				}
+				return true
+			})
+			confs, err := c.repo.getAllConfigurationByNames(context.TODO(), names...)
+			if err != nil {
+				c.logger.Error("SQLCFG_Refresh_FAIL", "cause", err)
+			}
+
+			for _, curConf := range confs {
+				v, ok := c.configs.Load(curConf.Name)
+				if !ok {
+					c.logger.Error("SQLCFG_Refresh_FAIL", "name", curConf.Name, "cause", "configuration not found")
+				}
+				cw := v.(configWrapper)
+				nCw := cw
+				nCw.expiredAt = time.Now().Add(time.Millisecond * time.Duration(curConf.RefreshInterval))
+
+				switch conf := nCw.config.(type) {
+				case StringConfig:
+					//TODO:
+				default:
+					c.logger.Error("SQLCFG_Refresh_FAIL", "dataType", fmt.Sprintf("%T", conf), "cause", "unknown config type")
+					continue
+				}
+				c.configs.Swap(curConf.Name, nCw)
+			}
+		}
+	}
 }
 
 func (c *SQLCFG) loadCfg(name string, converter func(conf *configuration) any) (any, error) {
