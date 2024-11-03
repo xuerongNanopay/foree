@@ -51,13 +51,43 @@ func (c *SQLCFG) startRefresher() {
 					c.logger.Error("SQLCFG_Refresh_FAIL", "name", newConf.Name, "cause", "configuration not found")
 				}
 				cw := v.(configWrapper)
+
+				if cw.rawValue == newConf.RawValue {
+					continue
+				}
+
 				nCw := cw
+				nCw.rawValue = newConf.RawValue
 				nCw.expiredAt = time.Now().Add(time.Millisecond * time.Duration(newConf.RefreshInterval))
 
 				switch curConf := nCw.config.(type) {
 				case StringConfig:
 					curConf.v.Swap(newConf.RawValue)
-				//TODO
+				case IntConfig:
+					i, err := strconv.Atoi(newConf.RawValue)
+					if err != nil {
+						c.logger.Error("SQLCFG_Refresh_FAIL", "cause", err)
+					} else {
+						atomic.StoreInt32(curConf.v, int32(i))
+					}
+				case Int64Config:
+					i, err := strconv.ParseInt(newConf.RawValue, 10, 64)
+					if err != nil {
+						c.logger.Error("SQLCFG_Refresh_FAIL", "cause", err)
+					} else {
+						atomic.StoreInt64(curConf.v, i)
+					}
+				case BoolConfig:
+					i, err := strconv.ParseBool(newConf.RawValue)
+					if err != nil {
+						c.logger.Error("SQLCFG_Refresh_FAIL", "cause", err)
+					} else {
+						if i {
+							atomic.StoreUint32(curConf.v, 1)
+						} else {
+							atomic.StoreUint32(curConf.v, 0)
+						}
+					}
 				default:
 					c.logger.Error("SQLCFG_Refresh_FAIL", "dataType", fmt.Sprintf("%T", curConf), "cause", "unknown config type")
 					continue
