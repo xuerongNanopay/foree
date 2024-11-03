@@ -2,6 +2,7 @@ package cfg
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strconv"
 	"sync"
@@ -12,6 +13,16 @@ import (
 )
 
 const refreshInterval = 5 * time.Minute
+
+func NewSQLCFG(db *sql.DB, logger logger.Logger) *SQLCFG {
+	return &SQLCFG{
+		refreshTicker: time.NewTicker(refreshInterval),
+		logger:        logger,
+		repo: &configurationRepo{
+			db: db,
+		},
+	}
+}
 
 type SQLCFG struct {
 	mu            sync.Mutex
