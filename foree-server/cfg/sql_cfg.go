@@ -16,6 +16,7 @@ const refreshInterval = 5 * time.Minute
 type SQLCFG struct {
 	mu            sync.Mutex
 	configs       sync.Map
+	hardRefresh   chan struct{}
 	refreshTicker *time.Ticker
 	repo          *configurationRepo
 	logger        logger.Logger
@@ -30,71 +31,80 @@ type configWrapper struct {
 func (c *SQLCFG) startRefresher() {
 	for {
 		select {
+		case <-c.hardRefresh:
+			c.refresh()
 		case <-c.refreshTicker.C:
-			names := make([]string, 0)
-			c.configs.Range(func(k, v interface{}) bool {
-				name := k.(string)
-				cw := v.(configWrapper)
-				if cw.expiredAt.Before(time.Now()) {
-					names = append(names, name)
-				}
-				return true
-			})
-			confs, err := c.repo.getAllConfigurationByNames(context.TODO(), names...)
+			c.refresh()
+		}
+	}
+}
+
+func (c *SQLCFG) refresh() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	names := make([]string, 0)
+	c.configs.Range(func(k, v interface{}) bool {
+		name := k.(string)
+		cw := v.(configWrapper)
+		if cw.expiredAt.Before(time.Now()) {
+			names = append(names, name)
+		}
+		return true
+	})
+	confs, err := c.repo.getAllConfigurationByNames(context.TODO(), names...)
+	if err != nil {
+		c.logger.Error("SQLCFG_Refresh_FAIL", "cause", err)
+	}
+
+	for _, newConf := range confs {
+		v, ok := c.configs.Load(newConf.Name)
+		if !ok {
+			c.logger.Error("SQLCFG_Refresh_FAIL", "name", newConf.Name, "cause", "configuration not found")
+		}
+		cw := v.(configWrapper)
+
+		if cw.rawValue == newConf.RawValue {
+			continue
+		}
+
+		nCw := cw
+		nCw.rawValue = newConf.RawValue
+		nCw.expiredAt = time.Now().Add(time.Millisecond * time.Duration(newConf.RefreshInterval))
+
+		switch curConf := nCw.config.(type) {
+		case StringConfig:
+			curConf.v.Swap(newConf.RawValue)
+		case IntConfig:
+			i, err := strconv.Atoi(newConf.RawValue)
 			if err != nil {
 				c.logger.Error("SQLCFG_Refresh_FAIL", "cause", err)
+			} else {
+				atomic.StoreInt32(curConf.v, int32(i))
 			}
-
-			for _, newConf := range confs {
-				v, ok := c.configs.Load(newConf.Name)
-				if !ok {
-					c.logger.Error("SQLCFG_Refresh_FAIL", "name", newConf.Name, "cause", "configuration not found")
-				}
-				cw := v.(configWrapper)
-
-				if cw.rawValue == newConf.RawValue {
-					continue
-				}
-
-				nCw := cw
-				nCw.rawValue = newConf.RawValue
-				nCw.expiredAt = time.Now().Add(time.Millisecond * time.Duration(newConf.RefreshInterval))
-
-				switch curConf := nCw.config.(type) {
-				case StringConfig:
-					curConf.v.Swap(newConf.RawValue)
-				case IntConfig:
-					i, err := strconv.Atoi(newConf.RawValue)
-					if err != nil {
-						c.logger.Error("SQLCFG_Refresh_FAIL", "cause", err)
-					} else {
-						atomic.StoreInt32(curConf.v, int32(i))
-					}
-				case Int64Config:
-					i, err := strconv.ParseInt(newConf.RawValue, 10, 64)
-					if err != nil {
-						c.logger.Error("SQLCFG_Refresh_FAIL", "cause", err)
-					} else {
-						atomic.StoreInt64(curConf.v, i)
-					}
-				case BoolConfig:
-					i, err := strconv.ParseBool(newConf.RawValue)
-					if err != nil {
-						c.logger.Error("SQLCFG_Refresh_FAIL", "cause", err)
-					} else {
-						if i {
-							atomic.StoreUint32(curConf.v, 1)
-						} else {
-							atomic.StoreUint32(curConf.v, 0)
-						}
-					}
-				default:
-					c.logger.Error("SQLCFG_Refresh_FAIL", "dataType", fmt.Sprintf("%T", curConf), "cause", "unknown config type")
-					continue
-				}
-				c.configs.Swap(newConf.Name, nCw)
+		case Int64Config:
+			i, err := strconv.ParseInt(newConf.RawValue, 10, 64)
+			if err != nil {
+				c.logger.Error("SQLCFG_Refresh_FAIL", "cause", err)
+			} else {
+				atomic.StoreInt64(curConf.v, i)
 			}
+		case BoolConfig:
+			i, err := strconv.ParseBool(newConf.RawValue)
+			if err != nil {
+				c.logger.Error("SQLCFG_Refresh_FAIL", "cause", err)
+			} else {
+				if i {
+					atomic.StoreUint32(curConf.v, 1)
+				} else {
+					atomic.StoreUint32(curConf.v, 0)
+				}
+			}
+		default:
+			c.logger.Error("SQLCFG_Refresh_FAIL", "dataType", fmt.Sprintf("%T", curConf), "cause", "unknown config type")
+			continue
 		}
+		c.configs.Swap(newConf.Name, nCw)
 	}
 }
 
@@ -207,4 +217,47 @@ func (c *SQLCFG) LoadBoolCfg(name string) (BoolConfig, error) {
 	}
 
 	return cfg.(BoolConfig), nil
+}
+
+func (c *SQLCFG) Reset(name string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	v, ok := c.configs.Load(name)
+	if !ok {
+		return
+	}
+
+	cw := v.(configWrapper)
+
+	var zero time.Time
+	nCw := cw
+	nCw.expiredAt = zero
+
+	c.configs.Swap(name, nCw)
+	select {
+	case c.hardRefresh <- struct{}{}:
+	default:
+	}
+}
+
+func (c *SQLCFG) ResetAll() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.configs.Range(func(k, v interface{}) bool {
+		name := k.(string)
+		cw := v.(configWrapper)
+
+		var zero time.Time
+		nCw := cw
+		nCw.expiredAt = zero
+
+		c.configs.Swap(name, nCw)
+		return true
+	})
+
+	select {
+	case c.hardRefresh <- struct{}{}:
+	default:
+	}
 }
