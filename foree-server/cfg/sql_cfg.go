@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -69,12 +70,12 @@ func (c *SQLCFG) LoadStringCfg(name string) (StringConfig, error) {
 
 func (c *SQLCFG) LoadIntCfg(name string) (IntConfig, error) {
 	cfg, err := c.loadCfg(name, func(conf *configuration) any {
-		v := new(int)
+		v := new(int32)
 		i, err := strconv.Atoi(conf.RawValue)
 		if err != nil {
 			return err
 		}
-		*v = i
+		atomic.StoreInt32(v, int32(i))
 		return IntConfig{
 			v: v,
 		}
@@ -94,7 +95,7 @@ func (c *SQLCFG) LoadInt64Cfg(name string) (Int64Config, error) {
 		if err != nil {
 			return err
 		}
-		*v = i
+		atomic.StoreInt64(v, i)
 		return Int64Config{
 			v: v,
 		}
@@ -109,12 +110,16 @@ func (c *SQLCFG) LoadInt64Cfg(name string) (Int64Config, error) {
 
 func (c *SQLCFG) LoadBoolCfg(name string) (BoolConfig, error) {
 	cfg, err := c.loadCfg(name, func(conf *configuration) any {
-		v := new(bool)
+		v := new(uint32)
 		i, err := strconv.ParseBool(conf.RawValue)
 		if err != nil {
 			return err
 		}
-		*v = i
+		if i {
+			atomic.StoreUint32(v, 1)
+		} else {
+			atomic.StoreUint32(v, 0)
+		}
 		return BoolConfig{
 			v: v,
 		}
