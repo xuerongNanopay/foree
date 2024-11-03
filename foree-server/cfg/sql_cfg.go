@@ -54,8 +54,8 @@ func (c *SQLCFG) loadCfg(name string, converter func(conf *configuration) any) (
 
 func (c *SQLCFG) LoadStringCfg(name string) (StringConfig, error) {
 	cfg, err := c.loadCfg(name, func(conf *configuration) any {
-		v := new(string)
-		*v = conf.RawValue
+		v := new(atomic.Value)
+		v.Store(conf.RawValue)
 		return StringConfig{
 			v: v,
 		}

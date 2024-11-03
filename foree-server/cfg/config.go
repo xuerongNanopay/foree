@@ -2,20 +2,20 @@ package cfg
 
 import "sync/atomic"
 
-type IntConfig struct {
-	v *int32
-}
-
-func (c *IntConfig) Get() int {
-	return int(atomic.LoadInt32(c.v))
-}
-
 type BoolConfig struct {
 	v *uint32
 }
 
 func (c *BoolConfig) Get() bool {
 	return atomic.LoadUint32(c.v) != 0
+}
+
+type IntConfig struct {
+	v *int32
+}
+
+func (c *IntConfig) Get() int {
+	return int(atomic.LoadInt32(c.v))
 }
 
 type Int64Config struct {
@@ -27,9 +27,9 @@ func (c *Int64Config) Get() int64 {
 }
 
 type StringConfig struct {
-	v *string
+	v *atomic.Value
 }
 
 func (c *StringConfig) Get() string {
-	return *c.v
+	return c.v.Load().(string)
 }
