@@ -26,6 +26,12 @@ const (
 		FROM configuration as c
 		Where c.name in (%v)
 	`
+	sQLConfigurationGetAll = `
+		SELECT
+			c.name, c.raw_value, c.refresh_interval, 
+			r.expire_at, r.created_at, r.updated_at
+		FROM configuration as c
+	`
 )
 
 type configuration struct {
@@ -38,6 +44,40 @@ type configuration struct {
 
 type configurationRepo struct {
 	db *sql.DB
+}
+
+func (repo *configurationRepo) getAllConfiguration(ctx context.Context) ([]*configuration, error) {
+	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+
+	var rows *sql.Rows
+	var err error
+
+	if ok {
+		rows, err = dTx.Query(sQLConfigurationGetAll)
+
+	} else {
+		rows, err = repo.db.Query(sQLConfigurationGetAll)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	configures := make([]*configuration, 0)
+	for rows.Next() {
+		p, err := scanRowIntoConfiguration(rows)
+		if err != nil {
+			return nil, err
+		}
+		configures = append(configures, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return configures, nil
 }
 
 func (repo *configurationRepo) getAllConfigurationByNames(ctx context.Context, names ...string) ([]*configuration, error) {
