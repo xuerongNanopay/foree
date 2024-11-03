@@ -81,7 +81,15 @@ func (c *SQLCFG) refresh() {
 
 		nCw := cw
 		nCw.rawValue = newConf.RawValue
-		nCw.expiredAt = time.Now().Add(time.Millisecond * time.Duration(newConf.RefreshInterval))
+
+		expiry := time.Now()
+		if newConf.RefreshInterval < 0 {
+			expiry = expiry.Add(time.Hour * time.Duration(24*356))
+		} else {
+			expiry = expiry.Add(time.Millisecond * time.Duration(newConf.RefreshInterval))
+		}
+
+		nCw.expiredAt = expiry
 
 		switch curConf := nCw.config.(type) {
 		case StringConfig:
@@ -116,6 +124,7 @@ func (c *SQLCFG) refresh() {
 			continue
 		}
 		c.configs.Swap(newConf.Name, nCw)
+		c.logger.Info("SQLCFG_Refresh_SUCCESS", "configurationName", newConf.Name)
 	}
 }
 
@@ -140,9 +149,16 @@ func (c *SQLCFG) loadCfg(name string, converter func(conf *configuration) any) (
 		return name, fmt.Errorf("configuraion `%v` not found", name)
 	}
 
+	expiry := time.Now()
+	if conf.RefreshInterval < 0 {
+		expiry = expiry.Add(time.Hour * time.Duration(24*356))
+	} else {
+		expiry = expiry.Add(time.Millisecond * time.Duration(conf.RefreshInterval))
+	}
+
 	cw := configWrapper{
 		rawValue:  conf.RawValue,
-		expiredAt: time.Now().Add(time.Millisecond * time.Duration(conf.RefreshInterval)),
+		expiredAt: expiry,
 		config:    converter(conf),
 	}
 
