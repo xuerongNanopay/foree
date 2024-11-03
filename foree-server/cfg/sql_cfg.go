@@ -45,23 +45,24 @@ func (c *SQLCFG) startRefresher() {
 				c.logger.Error("SQLCFG_Refresh_FAIL", "cause", err)
 			}
 
-			for _, curConf := range confs {
-				v, ok := c.configs.Load(curConf.Name)
+			for _, newConf := range confs {
+				v, ok := c.configs.Load(newConf.Name)
 				if !ok {
-					c.logger.Error("SQLCFG_Refresh_FAIL", "name", curConf.Name, "cause", "configuration not found")
+					c.logger.Error("SQLCFG_Refresh_FAIL", "name", newConf.Name, "cause", "configuration not found")
 				}
 				cw := v.(configWrapper)
 				nCw := cw
-				nCw.expiredAt = time.Now().Add(time.Millisecond * time.Duration(curConf.RefreshInterval))
+				nCw.expiredAt = time.Now().Add(time.Millisecond * time.Duration(newConf.RefreshInterval))
 
-				switch conf := nCw.config.(type) {
+				switch curConf := nCw.config.(type) {
 				case StringConfig:
-					//TODO:
+					curConf.v.Swap(newConf.RawValue)
+				//TODO
 				default:
-					c.logger.Error("SQLCFG_Refresh_FAIL", "dataType", fmt.Sprintf("%T", conf), "cause", "unknown config type")
+					c.logger.Error("SQLCFG_Refresh_FAIL", "dataType", fmt.Sprintf("%T", curConf), "cause", "unknown config type")
 					continue
 				}
-				c.configs.Swap(curConf.Name, nCw)
+				c.configs.Swap(newConf.Name, nCw)
 			}
 		}
 	}
