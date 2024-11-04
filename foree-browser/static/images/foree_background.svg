@@ -1,0 +1,8 @@
+<svg viewBox="0 0 848 1024" style="background-color:#F7F7F7; background-size:slice;" preserveAspectRatio="none"  xmlns="http://www.w3.org/2000/svg">
+  <polygon points="215,0 448,0 848,449 848,575
+  	448,1024 215,1024
+    647.12,540 647.12,484"
+  fill="#E4F7F0" />
+  <ellipse cx="505" cy="512" rx="151" ry="81" fill="#F7F7F7" />
+  <polygon points="0,270.66 215,512 0,753.34" fill="#E4F7F0"/>
+</svg>
