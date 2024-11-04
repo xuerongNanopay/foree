@@ -64,6 +64,7 @@
 
     main > .left {
         color: var(--primary-color);
+        padding: 0 1rem;
     }
 
     main > .left > h2 {
@@ -71,8 +72,12 @@
         font-size: clamp(1.4em, 2.5vw, 6em);
     }
 
+    main > .left > ul {
+        list-style-type: none;
+    }
+
     main > .left li {
-        font-size: clamp(0.8em, 2.5vw, 1.4em);
+        font-size: clamp(0.9em, 2.5vw, 1.1em);
         font-weight: 600;
     }
 
@@ -80,7 +85,7 @@
         margin-top: 0.5rem;
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 956px) {
         header {
             padding: 0.2rem 0.5rem;
         }
@@ -88,6 +93,14 @@
             width: 50px;
             height: 50px;
             background-image: url("$lib/assets/images/foree_remittance_small_logo.svg");
+        }
+        main {
+            grid-template-columns: 1fr;
+            grid-template-rows: min-content 1fr;
+            align-items: normal;
+        }
+        main > .right {
+            margin-top: 1rem;
         }
     }
 </style>
