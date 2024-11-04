@@ -4,3 +4,7 @@
     box-sizing: border-box;
     font-family: Arial, sans-serif;
 }
+
+body {
+    overscroll-behavior-y: none;
+}
