@@ -9,5 +9,6 @@
 <style>
     a {
         font-size: xx-large;
+        cursor: pointer;
     }
 </style>
