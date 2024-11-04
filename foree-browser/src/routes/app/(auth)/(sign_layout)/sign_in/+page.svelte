@@ -35,6 +35,9 @@
     }
 
     @media (max-width: 700px) {
+        header {
+            padding: 0.2rem 0.5rem;
+        }
         .logo {
             width: 50px;
             height: 50px;
