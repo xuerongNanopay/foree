@@ -7,6 +7,16 @@
         <a href="/app/sign_up">Sign Up</a>
     </header>
 
+    <main>
+        <div>
+            <h2>
+                Sigh-up & receive $20 to try the faster transfers to PPPPPP
+            </h2>
+        </div>
+        <div>
+
+        </div>
+    </main>
 </div>
 
 <style>
@@ -17,11 +27,11 @@
         padding: 1rem 1rem;
     }
 
-    a {
+    header > a {
         text-decoration: none !important;
         font-size: 1em;
         font-weight: 600;
-        background-color: #1A6B54;
+        background-color: var(--primary-color);
         padding: 0.6rem 0.8rem;
         color: #fff;
         border-radius: 5px;
@@ -32,6 +42,10 @@
         height: 40px;
         background-size: 100% 100%;
         background-image: url("$lib/assets/images/foree_remittance_logo.svg");
+    }
+
+    main {
+
     }
 
     @media (max-width: 700px) {

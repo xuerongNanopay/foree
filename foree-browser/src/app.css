@@ -8,3 +8,7 @@
 body {
     overscroll-behavior-y: none;
 }
+
+:root {
+    --primary-color: #1A6B54;
+}
