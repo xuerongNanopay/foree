@@ -1,7 +1,7 @@
 <script lang="ts">
     import foreeLogo from "$lib/assets/images/foree_remittance_logo.svg"
 </script>
-<div>
+<div class="contain">
     <header class="">
         <div class="logo"></div>
         <a href="/app/sign_up">Sign Up</a>
@@ -18,13 +18,17 @@
                 <li>&#10003; Cash pick-ups from 1500+ branches</li>
             </ul>
         </div>
-        <div>
-
+        <div class="right">
+            <p>adfasdfasd</p>
         </div>
     </main>
 </div>
 
 <style>
+    .contain {
+        flex-direction: column;
+        height: 100vh;
+    }
     header {
         display: flex;
         align-items: center;
@@ -50,7 +54,11 @@
     }
 
     main {
-
+        height: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        justify-items: center;
     }
 
     main > .left {
@@ -59,10 +67,11 @@
 
     main > .left > h2 {
         margin-bottom: 1rem;
+        font-size: clamp(1.4em, 2.5vw, 5.6em);
     }
 
     main > .left li {
-        font-size: 1em;
+        font-size: clamp(0.8em, 2.5vw, 1.4em);
         font-weight: 600;
     }
 
