@@ -1,9 +1,13 @@
 <h1>Welcome to SvelteKit</h1>
-<a href="/admin">Go To Admin</a>
-<a href="/app">Go To App</a>
+<div>
+    <a href="/admin">Go To Admin</a>
+</div>
+<div>
+    <a href="/app">Go To App</a>
+</div>
 
 <style>
     a {
-        display: block;
+        font-size: xx-large;
     }
 </style>
