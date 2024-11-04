@@ -46,39 +46,39 @@ type configurationRepo struct {
 	db *sql.DB
 }
 
-func (repo *configurationRepo) getAllConfiguration(ctx context.Context) ([]*configuration, error) {
-	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
+// func (repo *configurationRepo) getAllConfiguration(ctx context.Context) ([]*configuration, error) {
+// 	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)
 
-	var rows *sql.Rows
-	var err error
+// 	var rows *sql.Rows
+// 	var err error
 
-	if ok {
-		rows, err = dTx.Query(sQLConfigurationGetAll)
+// 	if ok {
+// 		rows, err = dTx.Query(sQLConfigurationGetAll)
 
-	} else {
-		rows, err = repo.db.Query(sQLConfigurationGetAll)
-	}
+// 	} else {
+// 		rows, err = repo.db.Query(sQLConfigurationGetAll)
+// 	}
 
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
 
-	configures := make([]*configuration, 0)
-	for rows.Next() {
-		p, err := scanRowIntoConfiguration(rows)
-		if err != nil {
-			return nil, err
-		}
-		configures = append(configures, p)
-	}
+// 	configures := make([]*configuration, 0)
+// 	for rows.Next() {
+// 		p, err := scanRowIntoConfiguration(rows)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		configures = append(configures, p)
+// 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
+// 	if err := rows.Err(); err != nil {
+// 		return nil, err
+// 	}
 
-	return configures, nil
-}
+// 	return configures, nil
+// }
 
 func (repo *configurationRepo) getAllConfigurationByNames(ctx context.Context, names ...string) ([]*configuration, error) {
 	dTx, ok := ctx.Value(constant.CKdatabaseTransaction).(*sql.Tx)

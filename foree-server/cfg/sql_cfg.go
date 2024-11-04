@@ -15,13 +15,16 @@ import (
 const refreshInterval = 5 * time.Minute
 
 func NewSQLCFG(db *sql.DB, logger logger.Logger) *SQLCFG {
-	return &SQLCFG{
+	ret := &SQLCFG{
 		refreshTicker: time.NewTicker(refreshInterval),
 		logger:        logger,
 		repo: &configurationRepo{
 			db: db,
 		},
 	}
+
+	go ret.startRefresher()
+	return ret
 }
 
 type SQLCFG struct {
