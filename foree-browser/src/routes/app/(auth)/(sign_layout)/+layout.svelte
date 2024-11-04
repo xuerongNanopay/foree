@@ -8,7 +8,7 @@
 
 <style>
     div {
-        min-width: 100vw;
+        height: auto;
         min-height: 100vh;
         background: url("$lib/assets/images/foree_background.svg")
     }
