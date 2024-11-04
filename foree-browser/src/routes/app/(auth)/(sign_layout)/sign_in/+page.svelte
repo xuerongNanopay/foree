@@ -18,8 +18,8 @@
                 <li>&#10003; Cash pick-ups from 1500+ branches</li>
             </ul>
         </div>
-        <div class="right">
-            aaa
+        <div class="sign-in">
+            <h3>Welcome Back</h3>
         </div>
     </main>
 </div>
@@ -77,12 +77,20 @@
     }
 
     main > .left li {
-        font-size: clamp(0.9em, 2.5vw, 1.1em);
+        font-size: clamp(1em, 2.5vw, 1.2em);
         font-weight: 600;
     }
 
     main > .left li + li {
         margin-top: 0.5rem;
+    }
+
+    .sign-in {
+        width: 90%;
+        background-color: #fff;
+        border-radius: 2rem;
+        padding: 2rem 1rem;
+        box-shadow: 0px 5px 5px 2px rgba(0, 0, 0, 0.2);
     }
 
     @media (max-width: 956px) {
@@ -99,8 +107,11 @@
             grid-template-rows: min-content 1fr;
             align-items: normal;
         }
-        main > .right {
+        .sign-in {
             margin-top: 1rem;
+            width: 100%;
+            border-radius: 2rem 2rem 0 0;
+            box-shadow: 0;
         }
     }
 </style>
