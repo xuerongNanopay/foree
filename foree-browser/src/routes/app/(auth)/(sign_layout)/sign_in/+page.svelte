@@ -19,15 +19,16 @@
             </ul>
         </div>
         <div class="right">
-            <p>adfasdfasd</p>
+            aaa
         </div>
     </main>
 </div>
 
 <style>
     .contain {
+        display: flex;
         flex-direction: column;
-        height: 100vh;
+        min-height: 100vh;
     }
     header {
         display: flex;
@@ -54,7 +55,7 @@
     }
 
     main {
-        height: 100%;
+        flex-grow: 1;
         display: grid;
         grid-template-columns: 1fr 1fr;
         align-items: center;
@@ -67,7 +68,7 @@
 
     main > .left > h2 {
         margin-bottom: 1rem;
-        font-size: clamp(1.4em, 2.5vw, 5.6em);
+        font-size: clamp(1.4em, 2.5vw, 6em);
     }
 
     main > .left li {
