@@ -8,10 +8,15 @@
     </header>
 
     <main>
-        <div>
+        <div class="left">
             <h2>
                 Sigh-up & receive $20 to try the faster transfers to PPPPPP
             </h2>
+            <ul>
+                <li>&#10003; $0 fees and best FX rates</li>
+                <li>&#10003; Transfers to 35+ banks</li>
+                <li>&#10003; Cash pick-ups from 1500+ branches</li>
+            </ul>
         </div>
         <div>
 
@@ -46,6 +51,23 @@
 
     main {
 
+    }
+
+    main > .left {
+        color: var(--primary-color);
+    }
+
+    main > .left > h2 {
+        margin-bottom: 1rem;
+    }
+
+    main > .left li {
+        font-size: 1em;
+        font-weight: 600;
+    }
+
+    main > .left li + li {
+        margin-top: 0.5rem;
     }
 
     @media (max-width: 700px) {
