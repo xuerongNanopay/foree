@@ -13,7 +13,7 @@
     })
 
     let errorForm = $state({
-        email: "aaa",
+        email: "required",
         password: "required"
     })
 
