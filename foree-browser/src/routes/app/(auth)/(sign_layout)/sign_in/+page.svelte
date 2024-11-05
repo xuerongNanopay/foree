@@ -5,7 +5,7 @@
     import eyeHideIcon from "$lib/assets/icons/eye_hide.png"
 
     let isHidePassword = $state(true)
-    let canSubmit = $state(false)
+    // let canSubmit = $state(false)
 
     let signInForm = $state({
         email: "",
@@ -17,13 +17,13 @@
         password: "required"
     })
 
-    $effect(() => {
-		if (signInForm.email === "aaa") {
-            canSubmit = true
-        } else {
-            canSubmit = false
-        }
-	})
+    // $effect(() => {
+	// 	if (signInForm.email === "aaa") {
+    //         canSubmit = true
+    //     } else {
+    //         canSubmit = false
+    //     }
+	// })
 
     function toggleEye() {
         isHidePassword = !isHidePassword
@@ -50,10 +50,10 @@
         </div>
         <div class="sign-in">
             <h3>Welcome Back</h3>
-            <form action="POST">
+            <form method="POST" action="?/sign_in">
                 <div class="email">
                     <label for="email">Email</label>
-                    <input bind:value={signInForm.email} type="email" id="email" name="email">
+                    <input bind:value={signInForm.email} type="email" id="email" name="email" required>
                     {#if errorForm.email !== ""}
                         <p class="input-error">{errorForm.email}</p>
                     {/if}
@@ -61,7 +61,7 @@
                 <div class="password">
                     <label for="password">Password</label>
                     <div>
-                        <input bind:value={signInForm.password} type={isHidePassword ? "password" : "text"} id="password" name="password">
+                        <input bind:value={signInForm.password} type={isHidePassword ? "password" : "text"} id="password" name="password" required>
                         <button type="button" onclick={toggleEye}>
                             <img src={isHidePassword ? eyeHideIcon : eyeIcon} alt=""/>
                         </button>
@@ -70,7 +70,7 @@
                         <p class="input-error">{errorForm.password}</p>
                     {/if}
                 </div>
-                <button disabled={!canSubmit}>Sign In</button>
+                <button>Sign In</button>
             </form>
             <a class="forget-password" href="http://www.google.ca">Forget Password?</a>
             <div class="mobile-badge">
