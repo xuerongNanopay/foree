@@ -20,6 +20,17 @@
         </div>
         <div class="sign-in">
             <h3>Welcome Back</h3>
+            <form action="POST">
+                <div class="email">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email">
+                </div>
+                <div class="password">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password">
+                    <a href="http://www.google.ca">Forget Password?</a>
+                </div>
+            </form>
         </div>
     </main>
 </div>
@@ -91,6 +102,44 @@
         border-radius: 2rem;
         padding: 2rem 1rem;
         box-shadow: 0px 5px 5px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .sign-in > form {
+        margin-top: 1rem;
+    }
+    
+    .sign-in form div:not(:first-child) {
+       margin-top: 1.25rem;
+    }
+
+    .sign-in label {
+        display: block;
+        color: var(--slate-500);
+        margin-bottom: 0.25rem;
+    }
+
+    .sign-in input {
+        display: block;
+        width: 100%;
+        border: 1px solid var(--slate-400);
+        color: var(--slate-600);
+        font-size: 1.25em;
+        padding: 0.5rem 0.25rem;
+        border-radius: 0.25rem;
+    }
+
+    .sign-in input:focus { 
+        outline: none !important;
+        border-color: var(--emerald-800);
+        box-shadow: 0 0 5px var(--emerald-800);
+    }
+
+    .sign-in > form .password a {
+        display: inline-block;
+        text-decoration: none !important;
+        color: var( --slate-400);
+        cursor: pointer;
+        margin-top: 0.5rem;
     }
 
     @media (max-width: 956px) {

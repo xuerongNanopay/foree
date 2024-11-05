@@ -10,7 +10,7 @@ body {
 }
 
 :root {
-    --primary-color: rgb(26 107 84);
+    --primary-color: var(--emerald-800);
     --white: rgb(255 255 255);
     --slate-50: rgb(248 250 252);
     --slate-100: rgb(241 245 249);
