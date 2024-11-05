@@ -1,5 +1,6 @@
 <script lang="ts">
-    import foreeLogo from "$lib/assets/images/foree_remittance_logo.svg"
+    import appStoreBadge from "$lib/assets/images/app_store_badge.svg"
+    import playStoreBadge from "$lib/assets/images/play_store_badge.svg"
 </script>
 <div class="contain">
     <header class="">
@@ -32,6 +33,14 @@
                 </div>
                 <button>Sign In</button>
             </form>
+            <div class="mobile-badge">
+                <a href="http://www.google.ca">
+                    <img src={appStoreBadge} alt="App Store"/>
+                </a>
+                <a href="http://www.google.ca">
+                    <img src={playStoreBadge} alt="Play Store"/>
+                </a>                
+            </div>
         </div>
     </main>
 </div>
@@ -158,6 +167,24 @@
         color: white;
         font-size: 1em;
         font-weight: 600;
+    }
+
+    .mobile-badge {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        height: 2rem;
+        margin-top: 1.25rem;
+        width: 100%;
+    }
+
+    .mobile-badge a {
+        display: inline-block;
+        height: 100%;
+    }
+    .mobile-badge img {
+        display: inline-block;
+        height: 100%;
     }
 
     @media (max-width: 956px) {
