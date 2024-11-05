@@ -4,11 +4,26 @@
     import eyeIcon from "$lib/assets/icons/eye.png"
     import eyeHideIcon from "$lib/assets/icons/eye_hide.png"
 
-    let isHidePassword = $state(true);
+    let isHidePassword = $state(true)
+    let canSubmit = $state(false)
+
+    let signInForm = $state({
+        email: "",
+        password: ""
+    })
+
+    $effect(() => {
+		if (signInForm.email === "aaa") {
+            canSubmit = true
+        } else {
+            canSubmit = false
+        }
+	})
 
     function toggleEye() {
         isHidePassword = !isHidePassword
     }
+    $inspect(signInForm)
 
 </script>
 <div class="contain">
@@ -33,19 +48,19 @@
             <form action="POST">
                 <div class="email">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email">
+                    <input bind:value={signInForm.email} type="email" id="email" name="email">
                 </div>
                 <div class="password">
                     <label for="password">Password</label>
                     <div>
-                        <input type={isHidePassword ? "password" : "text"} id="password" name="password">
+                        <input bind:value={signInForm.password} type={isHidePassword ? "password" : "text"} id="password" name="password">
                         <button type="button" onclick={toggleEye}>
                             <img src={isHidePassword ? eyeHideIcon : eyeIcon} alt=""/>
                         </button>
                     </div>
                 </div>
                 <a href="http://www.google.ca">Forget Password?</a>
-                <button>Sign In</button>
+                <button disabled={!canSubmit}>Sign In</button>
             </form>
             <div class="mobile-badge">
                 <a href="http://www.google.ca">
@@ -177,7 +192,6 @@
         transform: translateY(-50%);
         height: 1.5rem;
         width: 1.5rem;
-        cursor: pointer;
         border: 0;
         background-color: white;
     }
@@ -191,7 +205,6 @@
         display: inline-block;
         text-decoration: none !important;
         color: var( --slate-400);
-        cursor: pointer;
         margin-top: 0.5rem;
     }
 
@@ -206,6 +219,10 @@
         color: white;
         font-size: 1em;
         font-weight: 600;
+    }
+
+    .sign-in > form > button:disabled,button[disabled] {
+        opacity: 0.6;
     }
 
     .mobile-badge {

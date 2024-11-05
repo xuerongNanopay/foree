@@ -9,6 +9,10 @@ body {
     overscroll-behavior-y: none;
 }
 
+button, a {
+    cursor: pointer;
+}
+
 :root {
     --primary-color: var(--emerald-800);
     --white: rgb(255 255 255);
