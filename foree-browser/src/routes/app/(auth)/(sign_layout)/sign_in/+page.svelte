@@ -1,6 +1,15 @@
 <script lang="ts">
     import appStoreBadge from "$lib/assets/images/app_store_badge.svg"
     import playStoreBadge from "$lib/assets/images/play_store_badge.svg"
+    import eyeIcon from "$lib/assets/icons/eye.png"
+    import eyeHideIcon from "$lib/assets/icons/eye_hide.png"
+
+    let isHidePassword = $state(true);
+
+    function toggleEye() {
+        isHidePassword = !isHidePassword
+    }
+
 </script>
 <div class="contain">
     <header class="">
@@ -28,9 +37,14 @@
                 </div>
                 <div class="password">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password">
-                    <a href="http://www.google.ca">Forget Password?</a>
+                    <div>
+                        <input type={isHidePassword ? "password" : "text"} id="password" name="password">
+                        <button type="button" onclick={toggleEye}>
+                            <img src={isHidePassword ? eyeHideIcon : eyeIcon} alt=""/>
+                        </button>
+                    </div>
                 </div>
+                <a href="http://www.google.ca">Forget Password?</a>
                 <button>Sign In</button>
             </form>
             <div class="mobile-badge">
@@ -152,7 +166,28 @@
         box-shadow: 0 0 5px var(--emerald-800);
     }
 
-    .sign-in > form .password a {
+    .sign-in > form .password div {
+        position: relative;
+    }
+
+    .sign-in > form .password div button {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 1.5rem;
+        width: 1.5rem;
+        cursor: pointer;
+        border: 0;
+        background-color: white;
+    }
+
+    .sign-in > form .password div button img {
+        height: 100%;
+        width: 100%;
+    }
+
+    .sign-in > form a {
         display: inline-block;
         text-decoration: none !important;
         color: var( --slate-400);
