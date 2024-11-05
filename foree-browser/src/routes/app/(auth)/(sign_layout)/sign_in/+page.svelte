@@ -30,6 +30,7 @@
                     <input type="password" id="password" name="password">
                     <a href="http://www.google.ca">Forget Password?</a>
                 </div>
+                <button>Sign In</button>
             </form>
         </div>
     </main>
@@ -108,7 +109,11 @@
         margin-top: 1rem;
     }
     
-    .sign-in form div:not(:first-child) {
+    /* .sign-in form div:not(:first-child) {
+       margin-top: 1.25rem;
+    } */
+
+    .sign-in form > div:nth-child(2){
        margin-top: 1.25rem;
     }
 
@@ -140,6 +145,19 @@
         color: var( --slate-400);
         cursor: pointer;
         margin-top: 0.5rem;
+    }
+
+    .sign-in > form > button {
+        display: block;
+        width: 100%;
+        margin-top: 1.5rem;
+        background-color: var(--primary-color);
+        border: 0px;
+        padding: 0.75rem 0;
+        border-radius: 0.25rem;
+        color: white;
+        font-size: 1em;
+        font-weight: 600;
     }
 
     @media (max-width: 956px) {
