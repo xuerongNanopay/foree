@@ -41,6 +41,10 @@
                     <img src={playStoreBadge} alt="Play Store"/>
                 </a>                
             </div>
+            <div class="mobile-badge-copyright">
+                <p>Apple and the Apple Logo are trademarks of Apple Inc.</p>
+                <p>Google Play and the Google Play logo are trademarks of Google LLC.</p>
+            </div>
         </div>
     </main>
 </div>
@@ -185,6 +189,13 @@
     .mobile-badge img {
         display: inline-block;
         height: 100%;
+    }
+
+    .mobile-badge-copyright {
+        margin-top: 0.5rem;
+        text-align: center;
+        color: var(--slate-600);
+        font-size: 0.5rem;
     }
 
     @media (max-width: 956px) {
