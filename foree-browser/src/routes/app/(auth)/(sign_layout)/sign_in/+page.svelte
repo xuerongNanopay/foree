@@ -1,21 +1,22 @@
 <script lang="ts">
+    import { enhance } from "$app/forms"
     import appStoreBadge from "$lib/assets/images/app_store_badge.svg"
     import playStoreBadge from "$lib/assets/images/play_store_badge.svg"
     import eyeIcon from "$lib/assets/icons/eye.png"
     import eyeHideIcon from "$lib/assets/icons/eye_hide.png"
 
-    let isHidePassword = $state(true)
-    // let canSubmit = $state(false)
 
-    let signInForm = $state({
+    let { form } = $props()
+
+    let isHidePassword = $state(true)
+    let submitting = $state(false)
+
+    let signInForm: SignUpFormData = $state({
         email: "",
         password: ""
     })
 
-    let errorForm = $state({
-        email: "required",
-        password: "required"
-    })
+    let signInErr: SignUpFormError = $state({})
 
     // $effect(() => {
 	// 	if (signInForm.email === "aaa") {
@@ -28,7 +29,7 @@
     function toggleEye() {
         isHidePassword = !isHidePassword
     }
-    $inspect(signInForm)
+    $inspect(signInErr)
 
 </script>
 <div class="contain">
@@ -50,12 +51,33 @@
         </div>
         <div class="sign-in">
             <h3>Welcome Back</h3>
-            <form method="POST" action="?/sign_in">
+            <form 
+                method="POST" 
+                action="?/sign_in" 
+                use:enhance={
+                    () => {
+                        submitting = true
+                        return async ({update, result}) => {
+                            await update()
+                            submitting = false
+
+                            if (result.type === "failure") {
+                                signInErr = {
+                                    ...result.data
+                                }
+                            } else {
+                                //TODO: bug?
+                                signInErr = {}
+                            }
+                        }
+                    }
+                }
+            >
                 <div class="email">
                     <label for="email">Email</label>
                     <input bind:value={signInForm.email} type="email" id="email" name="email" required>
-                    {#if errorForm.email !== ""}
-                        <p class="input-error">{errorForm.email}</p>
+                    {#if !!signInErr?.email}
+                        <p class="input-error">{signInErr.email}</p>
                     {/if}
                 </div>
                 <div class="password">
@@ -66,11 +88,14 @@
                             <img src={isHidePassword ? eyeHideIcon : eyeIcon} alt=""/>
                         </button>
                     </div>
-                    {#if errorForm.email !== ""}
-                        <p class="input-error">{errorForm.password}</p>
+                    {#if !!signInErr?.password}
+                        <p class="input-error">{signInErr.password}</p>
                     {/if}
                 </div>
-                <button>Sign In</button>
+                <button disabled={submitting}>{submitting? "Submit..." : "Sign In"}</button>
+                {#if !!signInErr?.cause}
+                    <p class="input-error">{signInErr.cause}</p>
+                {/if}
             </form>
             <a class="forget-password" href="http://www.google.ca">Forget Password?</a>
             <div class="mobile-badge">
