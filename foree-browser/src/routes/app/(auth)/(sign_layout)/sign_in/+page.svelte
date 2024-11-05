@@ -12,6 +12,11 @@
         password: ""
     })
 
+    let errorForm = $state({
+        email: "aaa",
+        password: "required"
+    })
+
     $effect(() => {
 		if (signInForm.email === "aaa") {
             canSubmit = true
@@ -49,6 +54,9 @@
                 <div class="email">
                     <label for="email">Email</label>
                     <input bind:value={signInForm.email} type="email" id="email" name="email">
+                    {#if errorForm.email !== ""}
+                        <p class="input-error">{errorForm.email}</p>
+                    {/if}
                 </div>
                 <div class="password">
                     <label for="password">Password</label>
@@ -58,10 +66,13 @@
                             <img src={isHidePassword ? eyeHideIcon : eyeIcon} alt=""/>
                         </button>
                     </div>
+                    {#if errorForm.email !== ""}
+                        <p class="input-error">{errorForm.password}</p>
+                    {/if}
                 </div>
-                <a href="http://www.google.ca">Forget Password?</a>
                 <button disabled={!canSubmit}>Sign In</button>
             </form>
+            <a class="forget-password" href="http://www.google.ca">Forget Password?</a>
             <div class="mobile-badge">
                 <a href="http://www.google.ca">
                     <img src={appStoreBadge} alt="App Store"/>
@@ -201,7 +212,7 @@
         width: 100%;
     }
 
-    .sign-in > form a {
+    .sign-in .forget-password {
         display: inline-block;
         text-decoration: none !important;
         color: var( --slate-400);
@@ -248,6 +259,10 @@
         text-align: center;
         color: var(--slate-600);
         font-size: 0.5rem;
+    }
+
+    .sign-in form .input-error {
+        color: var(--rose-400);
     }
 
     @media (max-width: 956px) {
