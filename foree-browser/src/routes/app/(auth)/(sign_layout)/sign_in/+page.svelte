@@ -135,6 +135,11 @@
         padding: 0.6rem 0.8rem;
         color: #fff;
         border-radius: 5px;
+        transition: transform .25s ease-in-out;
+    }
+
+    header > a:hover {
+        transform: scale(1.05);
     }
 
     .logo {
