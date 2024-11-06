@@ -7,9 +7,9 @@ export const actions = {
 		const email = data.get('email') as string 
 		const password = data.get('password') as string
 
-        const errors = validateSignUpForm({email, password})
+        const errors = validateSignInForm({email, password})
         if (errors != null) {
-            return fail(422, {
+            return fail<SignInFormError>(422, {
                 ...errors,
                 "cause": "TODO: error"
             })
@@ -17,7 +17,7 @@ export const actions = {
 	}
 } satisfies Actions
 
-function validateSignUpForm(data: SignUpFormData): null|Partial<SignUpFormData> {
+function validateSignInForm(data: SignInFormData): null|Partial<SignInFormData> {
     //TODO: real validation
     if (data.email === "aa@qq.com") {
         return {

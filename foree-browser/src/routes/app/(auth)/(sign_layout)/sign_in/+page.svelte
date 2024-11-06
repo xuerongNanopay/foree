@@ -11,12 +11,12 @@
     let isHidePassword = $state(true)
     let submitting = $state(false)
 
-    let signInForm: SignUpFormData = $state({
+    let signInForm: SignInFormData = $state({
         email: "",
         password: ""
     })
 
-    let signInErr: SignUpFormError = $state({})
+    let signInErr: SignInFormError = $state({})
 
     // $effect(() => {
 	// 	if (signInForm.email === "aaa") {
