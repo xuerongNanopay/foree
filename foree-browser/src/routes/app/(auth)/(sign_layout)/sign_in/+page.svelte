@@ -97,7 +97,7 @@
                     <p class="input-error">{signInErr.cause}</p>
                 {/if}
             </form>
-            <a class="forget-password" href="http://www.google.ca">Forget Password?</a>
+            <a class="forget-password" href="forget_password">Forget Password?</a>
             <div class="mobile-badge">
                 <a href="http://www.google.ca">
                     <img src={appStoreBadge} alt="App Store"/>
