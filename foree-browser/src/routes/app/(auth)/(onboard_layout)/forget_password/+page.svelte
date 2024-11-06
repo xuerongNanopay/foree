@@ -7,13 +7,13 @@
     let forgetPasswordErr = $state<ForgetPasswordError>({})
     let dialog: HTMLDialogElement
     $effect(() => {
-		// dialog.showModal()
+		dialog.showModal()
 	})
 </script>
 
 <dialog bind:this={dialog}>
-    <h2>Info</h2>
-    <p>Message</p>
+    <h2>Notice</h2>
+    <p>We will send you email if the account exist.</p>
     <button type="button">OK</button>
 </dialog>
 
@@ -75,8 +75,8 @@
 
             &:focus {
                 outline: none !important;
-                border-color: var(--emerald-800);
-                box-shadow: 0 0 5px var(--emerald-800);
+                border-color: var(--primary-color);
+                box-shadow: 0 0 5px var(--primary-color);
             }
         }
 
@@ -108,16 +108,43 @@
         width: 80%;
         max-width: 400px;
         outline: none;
-        border: 1px solid var(--emerald-800);
+        border: 1px solid var(--primary-color);
         border-radius: 7px;
         padding: 0.75rem 0.5rem;
-    }
 
-    dialog::backdrop {
-        background-color: var(--slate-400);
-        opacity: 0.5;
-    }
+        & h2 {
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--primary-color);
+        }
 
+        & p {
+            color: var(--primary-color);
+            margin: 1rem 0.25rem;
+        }
+
+        & button {
+            display: block;
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            padding: 0.5rem 1rem;
+            color: var(--primary-color);
+            border-radius: 8px;
+            font-size: large;
+            font-weight: 600;
+            width: 6rem;
+            margin: 0 auto;
+            transition: background-color 0.5s ease-in-out;
+
+            &:hover {
+                background-color: var(--emerald-100);
+            }
+        }
+
+        &::backdrop {
+            background-color: var(--slate-400);
+            opacity: 0.5;
+        }
+    }
 
 
 </style>
