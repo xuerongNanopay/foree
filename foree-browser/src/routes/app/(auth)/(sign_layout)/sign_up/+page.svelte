@@ -51,7 +51,6 @@
             <h3>Create an account</h3>
             <form 
                 method="POST" 
-                action="?/sign_in" 
                 use:enhance={
                     () => {
                         submitting = true

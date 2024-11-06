@@ -1,27 +1,43 @@
 <script lang="ts">
-
+    import { enhance } from "$app/forms"
     let submitting = $state(false)
     let forgetPasswordForm = $state<ForgetPasswordData>({
         email: "",
     })
     let forgetPasswordErr = $state<ForgetPasswordError>({})
     let dialog: HTMLDialogElement
-    $effect(() => {
-		dialog.showModal()
-	})
 </script>
 
 <dialog bind:this={dialog}>
     <h2>Notice</h2>
     <p>We will send you email if the account exist.</p>
-    <button type="button">OK</button>
+    <button type="button" onclick={() => dialog.close()}>OK</button>
 </dialog>
 
 <main>
     <h2>Forget Password?</h2>
     <p>Enter email you used to create your account in order to reset your password.</p>
     
-    <form method="POST">
+    <form 
+        method="POST" 
+        action="?/forget_password"
+        use:enhance={
+            () => {
+                submitting = true
+                return async ({update, result}) => {
+                    await update()
+                    submitting = false
+                    if (result.type === "success") {
+                        dialog.showModal()
+                    } else if (result.type === "failure") {
+                        forgetPasswordErr = {
+                            ...result.data
+                        }
+                    }
+                }
+            }
+        }
+    >
         <div>
             <label for="email">Email</label>
             <input bind:value={forgetPasswordForm.email} type="email" id="email" name="email" required>

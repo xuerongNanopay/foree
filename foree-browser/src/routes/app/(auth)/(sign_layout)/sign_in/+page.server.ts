@@ -2,7 +2,7 @@ import type { Actions } from './$types'
 import { fail } from '@sveltejs/kit'
 
 export const actions = {
-	sign_in: async ({request}) => {
+	default: async ({request}) => {
 		const data = await request.formData()
 		const email = data.get('email') as string 
 		const password = data.get('password') as string

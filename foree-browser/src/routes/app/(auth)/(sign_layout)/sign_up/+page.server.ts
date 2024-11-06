@@ -1,7 +1,7 @@
 import type { Actions } from './$types'
 
 export const actions = {
-	sign_up: async () => {
+	default: async () => {
 		// TODO log the user in
 	}
 } satisfies Actions

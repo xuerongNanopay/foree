@@ -50,14 +50,13 @@
             <h3>Welcome Back</h3>
             <form 
                 method="POST" 
-                action="?/sign_in" 
                 use:enhance={
                     () => {
                         submitting = true
                         return async ({update, result}) => {
                             await update()
                             submitting = false
-
+                            console.log(result)
                             if (result.type === "failure") {
                                 signInErr = {
                                     ...result.data

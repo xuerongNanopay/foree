@@ -6,7 +6,7 @@
 <div class="wrapper">
     <header>
         <div class="logo"></div>
-        <form action="">
+        <form method="POST" action="/app/sign_out">
             <button>
                 <img src={xIcon} alt="close"/>
             </button>
