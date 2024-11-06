@@ -19,6 +19,14 @@ type SignUpFormError = {
     [k in (keyof Partial<SignUpFormData> | cause)]?: string;
 }
 
+type VerifyEmailData = {
+    code: string,
+}
+
+type VerifyEmailError = {
+    [k in (keyof Partial<VerifyEmailData> | cause)]?: string;
+}
+
 type ForgetPasswordData = {
     email: string 
 }
