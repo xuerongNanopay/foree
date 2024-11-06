@@ -26,3 +26,13 @@ type ForgetPasswordData = {
 type ForgetPasswordError = {
     [k in (keyof Partial<SignUpFormData> | cause)]?: string;
 }
+
+type RenewPasswordData = {
+    token: string,
+    password: string,
+    rePassword: string,
+}
+
+type RenewPasswordError = {
+    [k in (keyof Partial<RenewPasswordData> | cause)]?: string;
+}

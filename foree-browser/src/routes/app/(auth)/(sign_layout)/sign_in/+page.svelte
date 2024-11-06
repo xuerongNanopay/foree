@@ -15,14 +15,6 @@
 
     let signInErr = $state<SignInFormError>({})
 
-    // $effect(() => {
-	// 	if (signInForm.email === "aaa") {
-    //         canSubmit = true
-    //     } else {
-    //         canSubmit = false
-    //     }
-	// })
-
     function toggleEye() {
         isHidePassword = !isHidePassword
     }
