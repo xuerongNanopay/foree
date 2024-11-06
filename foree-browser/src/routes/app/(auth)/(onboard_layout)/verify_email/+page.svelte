@@ -2,6 +2,12 @@
     import { enhance } from "$app/forms"
     let submitting = $state(false)
     let inputPattern = "[0-9]{6}"
+
+    let forgetPasswordForm = $state<VerifyEmailData>({
+        code: "",
+    })
+    let forgetPasswordErr = $state<VerifyEmailError>({})
+
 </script>
 
 <main>
@@ -28,11 +34,11 @@
         }
     >
         <div>
-            <label for="emailVerifyCode">Verification Code</label>
+            <label for="code">Verification Code</label>
             <input 
                 type="text" 
-                id="emailVerifyCode" 
-                name="emailVerifyCode" 
+                id="code" 
+                name="code" 
                 minlength=6
                 maxlength=6
                 pattern={inputPattern}
@@ -46,6 +52,7 @@
         class="resend-code"
         method="POST"
         action="?/resend_code"
+        use:enhance
     >
         <button>Resend Code</button>
     </form>

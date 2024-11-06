@@ -10,7 +10,7 @@
     let renewPasswordForm = $state<RenewPasswordData>({
         password: "",
         rePassword: "",
-        token: $page.url.searchParams.get('token') ?? ""
+        retrieveCode: $page.url.searchParams.get('retrieveCode') ?? ""
     })
 
     let renewPasswordErr = $state<RenewPasswordError>({})

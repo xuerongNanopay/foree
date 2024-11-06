@@ -12,6 +12,7 @@ type SignInFormError = {
 type SignUpFormData = {
     email: string,
     password: string,
+    referrerReference: string,
     rePassword: string,
 }
 
@@ -36,7 +37,7 @@ type ForgetPasswordError = {
 }
 
 type RenewPasswordData = {
-    token: string,
+    retrieveCode: string,
     password: string,
     rePassword: string,
 }
