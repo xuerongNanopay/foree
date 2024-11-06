@@ -20,7 +20,6 @@
     
     <form 
         method="POST" 
-        action="?/forget_password"
         use:enhance={
             () => {
                 submitting = true
@@ -70,7 +69,9 @@
     }
 
     main > form {
-        margin-top: 2rem;
+        max-width: 500px;
+        width: 100%;
+        margin: 2rem auto;
     }
 
     form {
