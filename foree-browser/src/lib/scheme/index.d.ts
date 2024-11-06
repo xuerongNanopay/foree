@@ -1,10 +1,12 @@
+type cause = "cause"
+
 type SignInFormData = {
     email: string,
     password: string,
 }
 
 type SignInFormError = {
-    [k in (keyof Partial<SignInFormData> | "cause")]?: string;
+    [k in (keyof Partial<SignInFormData> | cause)]?: string;
 }
 
 type SignUpFormData = {
@@ -14,5 +16,13 @@ type SignUpFormData = {
 }
 
 type SignUpFormError = {
-    [k in (keyof Partial<SignUpFormData> | "cause")]?: string;
+    [k in (keyof Partial<SignUpFormData> | cause)]?: string;
+}
+
+type ForgetPasswordData = {
+    email: string 
+}
+
+type ForgetPasswordError = {
+    [k in (keyof Partial<SignUpFormData> | cause)]?: string;
 }

@@ -5,18 +5,15 @@
     import eyeIcon from "$lib/assets/icons/eye.png"
     import eyeHideIcon from "$lib/assets/icons/eye_hide.png"
 
-
-    let { form } = $props()
-
     let isHidePassword = $state(true)
     let submitting = $state(false)
 
-    let signInForm: SignInFormData = $state({
+    let signInForm = $state<SignInFormData>({
         email: "",
         password: ""
     })
 
-    let signInErr: SignInFormError = $state({})
+    let signInErr = $state<SignInFormError>({})
 
     // $effect(() => {
 	// 	if (signInForm.email === "aaa") {
