@@ -34,4 +34,14 @@
         background-size: 100% 100%;
         background-image: url("$lib/assets/images/foree_remittance_logo.svg");
     }
+    @media (max-width: 956px) {
+        header {
+            height: 60px;
+        }
+        header .logo {
+            width: 50px;
+            height: 50px;
+            background-image: url("$lib/assets/images/foree_remittance_small_logo.svg");
+        }
+    }
 </style>
