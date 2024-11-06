@@ -45,17 +45,14 @@
                 use:enhance={
                     () => {
                         submitting = true
+                        signInErr = {}
                         return async ({update, result}) => {
                             await update()
                             submitting = false
-                            console.log(result)
                             if (result.type === "failure") {
                                 signInErr = {
                                     ...result.data
                                 }
-                            } else {
-                                //TODO: bug?
-                                signInErr = {}
                             }
                         }
                     }

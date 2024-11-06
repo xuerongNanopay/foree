@@ -28,10 +28,11 @@
         use:enhance={
             () => {
                 submitting = true
+                renewPasswordErr={}
                 return async ({update, result}) => {
                     await update()
                     submitting = false
-                    if (result.type=== "failure") {
+                    if (result.type === "failure") {
                         renewPasswordErr = {
                             ...result.data
                         }

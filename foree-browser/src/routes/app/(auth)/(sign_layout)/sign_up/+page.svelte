@@ -54,6 +54,7 @@
                 use:enhance={
                     () => {
                         submitting = true
+                        signUpErr = {}
                         return async ({update, result}) => {
                             await update()
                             submitting = false
@@ -62,9 +63,6 @@
                                 signUpErr = {
                                     ...result.data
                                 }
-                            } else {
-                                //TODO: bug?
-                                signUpErr = {}
                             }
                         }
                     }

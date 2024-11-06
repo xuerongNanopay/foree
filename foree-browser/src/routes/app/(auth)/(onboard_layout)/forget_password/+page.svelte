@@ -26,6 +26,7 @@
                 return async ({update, result}) => {
                     await update()
                     submitting = false
+                    forgetPasswordErr={}
                     if (result.type === "success") {
                         dialog.showModal()
                     } else if (result.type === "failure") {
