@@ -11,6 +11,21 @@
     <form
         method="POST"
         action="?/verify_code"
+        use:enhance={
+            () => {
+                submitting = true
+                return async ({update, result}) => {
+                    await update()
+                    submitting = false
+                    if (result.type === "failure") {
+                        //TODO
+                        // forgetPasswordErr = {
+                        //     ...result.data
+                        // }
+                    }
+                }
+            }
+        }
     >
         <div>
             <label for="emailVerifyCode">Verification Code</label>
