@@ -45,3 +45,26 @@ type RenewPasswordData = {
 type RenewPasswordError = {
     [k in (keyof Partial<RenewPasswordData> | cause)]?: string;
 }
+
+type CreateUserData = {
+    firstName: string,
+    middleName?: string,
+    lastName: string,
+    dob: string,
+    pob: string,
+    nationality: string,
+    address1: string,
+    address2?: string,
+    city: string,
+    province: string,
+    country: string,
+    postalCode: string,
+    phoneNumber: string,
+    identificationType: string,
+    identificationValue: string,
+    avatarUrl?: string
+}
+
+type CreateUserError = {
+    [k in (keyof Partial<CreateUserData> | cause)]?: string;
+}
