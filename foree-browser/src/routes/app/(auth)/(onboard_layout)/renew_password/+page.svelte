@@ -25,6 +25,20 @@
     <p>Please enter a new password.</p>
     <form
         method="POST"
+        use:enhance={
+            () => {
+                submitting = true
+                return async ({update, result}) => {
+                    await update()
+                    submitting = false
+                    if (result.type=== "failure") {
+                        renewPasswordErr = {
+                            ...result.data
+                        }
+                    }
+                }
+            }
+        }
     >
         <div class="password">
             <label for="password">Password</label>
@@ -142,6 +156,9 @@
             &:hover {
                 transform: scale(1.01);
             }
+        }
+        .input-error {
+            color: var(--rose-400);
         }
     }
 </style>

@@ -115,6 +115,9 @@
             }
         }
 
+        .input-error {
+            color: var(--rose-400);
+        }
     }
 
 
