@@ -255,6 +255,11 @@
         color: white;
         font-size: 1em;
         font-weight: 600;
+        transition: transform .25s ease-in-out;
+    }
+
+    .sign-in > form > button:hover {
+        transform: scale(1.01);
     }
 
     .sign-in > form > button:disabled,button[disabled] {

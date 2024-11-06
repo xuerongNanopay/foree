@@ -52,7 +52,13 @@
         top: 50%;
         right: 1.25rem;
         translate: 0 -50%;
+        transition: transform .25s ease-in-out;
     }
+
+    header form button img:hover {
+        transform: scale(1.25);
+    }
+
     @media (max-width: 956px) {
         header {
             height: 60px;
@@ -61,6 +67,9 @@
             width: 50px;
             height: 50px;
             background-image: url("$lib/assets/images/foree_remittance_small_logo.svg");
+        }
+        header form button img {
+            right: 1rem;
         }
     }
 </style>
