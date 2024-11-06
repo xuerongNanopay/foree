@@ -1,12 +1,16 @@
 <script lang="ts">
+    import xIcon  from "$lib/assets/icons/x.png"
     const { children } = $props()
 </script>
 
 <div class="wrapper">
     <header>
-        <div class="logo">
-
-        </div>
+        <div class="logo"></div>
+        <form action="">
+            <button>
+                <img src={xIcon} alt="close"/>
+            </button>
+        </form>
     </header>
     <main>
         {@render children()}
@@ -33,6 +37,21 @@
         translate: -50% -50%;
         background-size: 100% 100%;
         background-image: url("$lib/assets/images/foree_remittance_logo.svg");
+    }
+
+    header form button {
+        outline: none;
+        border: none;
+        background: transparent;
+    }
+
+    header form button img {
+        height: 18px;
+        width: 18px;
+        position: absolute;
+        top: 50%;
+        right: 1.25rem;
+        translate: 0 -50%;
     }
     @media (max-width: 956px) {
         header {
