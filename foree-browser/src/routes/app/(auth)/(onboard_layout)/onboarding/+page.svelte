@@ -2,6 +2,21 @@
     import { enhance } from "$app/forms"
     import MultiStepForm from "$lib/components/MultiStepForm.svelte"
 
+    let countries = $state([
+		{
+			isoCode:  "CA",
+			name:  "Canada",
+		},
+		{
+			isoCode:  "PK",
+			name:  "Pakistan",
+		},
+		{
+			isoCode:  "US",
+			name:  "United States of America",
+		}
+	]);
+
     let submitting = $state(false)
     let createUserForm = $state<CreateUserData>({
         firstName: "",
@@ -22,6 +37,7 @@
     })
     let createUserErr = $state<CreateUserError>({})
 
+    $inspect(createUserForm)
 </script>
 
 {#snippet step1()}
@@ -36,7 +52,17 @@
         <div>
             <div class="country">
                 <label for="country">Country</label>
-                <input bind:value={createUserForm.country} type="country" id="country" name="country" required>
+                <!-- <input bind:value={createUserForm.country} type="country" id="country" name="country" required> -->
+                 <select
+                    bind:value={createUserForm.country}
+                    id="country"
+                    name="country"
+                    required
+                 >
+                    {#each countries as country}
+                        <option value={country.isoCode}>{country.name}</option>
+                    {/each}
+                 </select>
                 {#if !!createUserErr?.country}
                     <p class="input-error">{createUserErr.country}</p>
                 {/if}
@@ -70,7 +96,7 @@
             margin-bottom: 0.25rem;
         }
 
-        & input {
+        & input, & select {
             display: block;
             width: 100%;
             border: 1px solid var(--slate-400);
@@ -110,9 +136,14 @@
     }
 
     .step {
-        & > p:first-of-type, & > h2:first-of-type {
+        & > p:first-of-type {
             text-align: center;
             margin: 1.5rem 0;
+        }
+
+        & > h2:first-of-type {
+            text-align: center;
+            margin: 0;
         }
 
         @media (max-width: 400px) {
