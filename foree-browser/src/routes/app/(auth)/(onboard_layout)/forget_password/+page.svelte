@@ -10,7 +10,7 @@
 
 <dialog bind:this={dialog}>
     <h2>Notice</h2>
-    <p>We will send you email if the account exist.</p>
+    <p>We will send you email. Please follow the instruction in the email.</p>
     <button type="button" onclick={() => dialog.close()}>OK</button>
 </dialog>
 
