@@ -33,6 +33,7 @@ form {
         font-size: 1.25em;
         padding: 0.5rem 0.25rem;
         border-radius: 0.25rem;
+        background: transparent;
 
         &:focus {
             outline: none !important;

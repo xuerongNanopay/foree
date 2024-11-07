@@ -101,6 +101,10 @@
         max-width: 900px;
         margin: 3.5rem auto;
         border: 1px solid salmon;
+
+        @media (max-width: 700px) {
+            margin: 2.5rem auto;
+        }
     }
 
     .step {
