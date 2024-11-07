@@ -41,7 +41,32 @@
 </script>
 
 {#snippet step1()}
-    <div>
+    <div class="step">
+        <h2>Let's Get to Know You!</h2>
+        <p>Please enter your full legal name se we can begin setting up your account.</p>
+        <div class="name-fields">
+            <div class="firstname">
+                <label for="firstName">First Name</label>
+                <input bind:value={createUserForm.firstName} type="text" id="firstName" name="firstName" required>
+                {#if !!createUserErr?.firstName}
+                    <p class="input-error">{createUserErr.firstName}</p>
+                {/if}
+            </div>
+            <div class="middleName">
+                <label for="middleName">Middle Name</label>
+                <input bind:value={createUserForm.middleName} type="text" id="middleName" name="middleName" required>
+                {#if !!createUserErr?.middleName}
+                    <p class="input-error">{createUserErr.middleName}</p>
+                {/if}
+            </div>
+            <div class="lastName">
+                <label for="lastName">Last Name</label>
+                <input bind:value={createUserForm.lastName} type="text" id="lastName" name="lastName" required>
+                {#if !!createUserErr?.lastName}
+                    <p class="input-error">{createUserErr.lastName}</p>
+                {/if}
+            </div>
+        </div>
     </div>
 {/snippet}
 
@@ -79,6 +104,43 @@
                 <input bind:value={createUserForm.address2} type="text" id="address2" name="address2">
                 {#if !!createUserErr?.address2}
                     <p class="input-error">{createUserErr.address2}</p>
+                {/if}
+            </div>
+            <div class="city">
+                <label for="city">City</label>
+                <input bind:value={createUserForm.city} type="text" id="city" name="city">
+                {#if !!createUserErr?.city}
+                    <p class="input-error">{createUserErr.city}</p>
+                {/if}
+            </div>
+            <div class="province">
+                <label for="province">province</label>
+                 <select
+                    bind:value={createUserForm.province}
+                    id="province"
+                    name="province"
+                    required
+                 >
+                    {#each countries as province}
+                        <option value={province.isoCode}>{province.name}</option>
+                    {/each}
+                 </select>
+                {#if !!createUserErr?.province}
+                    <p class="input-error">{createUserErr.province}</p>
+                {/if}
+            </div>
+            <div class="postal-code">
+                <label for="postalCode">Postal Code</label>
+                <input bind:value={createUserForm.postalCode} type="text" id="postalCode" name="postalCode">
+                {#if !!createUserErr?.postalCode}
+                    <p class="input-error">{createUserErr.postalCode}</p>
+                {/if}
+            </div>
+            <div class="phone-number">
+                <label for="phoneNumber">Phone Number</label>
+                <input bind:value={createUserForm.phoneNumber} type="text" id="phoneNumber" name="phoneNumber">
+                {#if !!createUserErr?.phoneNumber}
+                    <p class="input-error">{createUserErr.phoneNumber}</p>
                 {/if}
             </div>
         </div>
@@ -125,6 +187,17 @@
         }
     }
 
+    .name-fields{
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(3, 1fr);
+        @media (max-width: 700px) {
+            & {
+                grid-template-columns: 1fr;
+            }
+        }
+    }
+
     .address-fields {
         display: grid;
         grid-template-columns: repeat(12, 1fr);
@@ -142,12 +215,39 @@
             grid-column: 9 / 13;
         }
 
+        .city {
+            grid-column: 1 / 5;
+        }
+
+        .province {
+            grid-column: 5 / 9;
+        }
+
+        .postal-code {
+            grid-column: 9 / 13;
+        }
+
+        .phone-number {
+            grid-column: 1 / span 12;
+        }
+
         @media (max-width: 700px) {
             .address1 {
                 grid-column: 1 / span 12;
             }
 
             .address2 {
+                grid-column: 1 / span 12;
+            }
+            .city {
+                grid-column: 1 / span 12;
+            }
+
+            .province {
+                grid-column: 1 / span 12;
+            }
+
+            .postal-code {
                 grid-column: 1 / span 12;
             }
         }
