@@ -12,7 +12,7 @@ type SignInFormError = {
 type SignUpFormData = {
     email: string,
     password: string,
-    referrerReference: string,
+    referrerReference?: string,
     rePassword: string,
 }
 

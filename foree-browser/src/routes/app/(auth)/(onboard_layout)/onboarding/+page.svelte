@@ -14,7 +14,7 @@
 		{
 			isoCode:  "US",
 			name:  "United States of America",
-		}
+		},
 	]);
 
     let submitting = $state(false)
@@ -49,7 +49,7 @@
     <div class="step">
         <h2>Your Residential Address and Phone Number</h2>
         <p>We require this information to continue setting up your Foree Remittance account.</p>
-        <div>
+        <div class="fields">
             <div class="country">
                 <label for="country">Country</label>
                 <!-- <input bind:value={createUserForm.country} type="country" id="country" name="country" required> -->
@@ -65,6 +65,20 @@
                  </select>
                 {#if !!createUserErr?.country}
                     <p class="input-error">{createUserErr.country}</p>
+                {/if}
+            </div>
+            <div class="address1">
+                <label for="address1">Address</label>
+                <input bind:value={createUserForm.address1} type="text" id="address1" name="address1" required>
+                {#if !!createUserErr?.address1}
+                    <p class="input-error">{createUserErr.address1}</p>
+                {/if}
+            </div>
+            <div class="address2">
+                <label for="address2">Address Line2(Apt,suite,etc.)</label>
+                <input bind:value={createUserForm.address2} type="text" id="address2" name="address2">
+                {#if !!createUserErr?.address2}
+                    <p class="input-error">{createUserErr.address2}</p>
                 {/if}
             </div>
         </div>
@@ -90,6 +104,27 @@
     }
 
     .step {
+        & > p:first-of-type {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        & > h2:first-of-type {
+            text-align: center;
+            margin: 0;
+        }
+
+        @media (max-width: 400px) {
+            & > h2:first-of-type {
+                font-size: 1em;
+            }
+        }
+    }
+
+    .step {
+        overflow: hidden;
+        text-overflow: ellipsis; 
+
         & label {
             display: block;
             color: var(--slate-500);
@@ -135,21 +170,32 @@
         }
     }
 
-    .step {
-        & > p:first-of-type {
-            text-align: center;
-            margin: 1.5rem 0;
+    .fields {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 1rem;
+
+        .country {
+            grid-column: 1 / span 12;
         }
 
-        & > h2:first-of-type {
-            text-align: center;
-            margin: 0;
+        .address1 {
+            grid-column: 1 / span 8;
         }
 
-        @media (max-width: 400px) {
-            & > h2:first-of-type {
-                font-size: 1em;
+        .address2 {
+            grid-column: 9 / 13;
+        }
+
+        @media (max-width: 700px) {
+            .address1 {
+                grid-column: 1 / span 12;
+            }
+
+            .address2 {
+                grid-column: 1 / span 12;
             }
         }
     }
+
 </style>
