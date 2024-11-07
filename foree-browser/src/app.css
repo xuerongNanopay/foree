@@ -52,6 +52,10 @@ form {
         color: white;
         font-size: 1em;
         font-weight: 600;
+
+        &:disabled, &[disabled] {
+            opacity: 0.6;
+        }
     }
 
     .input-error {
