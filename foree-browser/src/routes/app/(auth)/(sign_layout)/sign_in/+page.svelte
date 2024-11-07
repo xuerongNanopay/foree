@@ -234,28 +234,6 @@
         margin-top: 0.5rem;
     }
 
-    .sign-in > form > button {
-        display: block;
-        width: 100%;
-        margin-top: 1.5rem;
-        background-color: var(--primary-color);
-        border: 0px;
-        padding: 0.75rem 0;
-        border-radius: 0.25rem;
-        color: white;
-        font-size: 1em;
-        font-weight: 600;
-        transition: transform .25s ease-in-out;
-    }
-
-    .sign-in > form > button:hover {
-        transform: scale(1.01);
-    }
-
-    .sign-in > form > button:disabled,button[disabled] {
-        opacity: 0.6;
-    }
-
     .mobile-badge {
         display: flex;
         gap: 1rem;
