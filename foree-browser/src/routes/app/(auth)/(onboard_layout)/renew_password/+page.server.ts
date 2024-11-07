@@ -6,12 +6,12 @@ export const actions = {
 		const data = await request.formData()
 		const password = data.get('password') as string 
 		const rePassword = data.get('rePassword') as string
-		const token = data.get('token') as string
+		const retrieveCode = data.get('retrieveCode') as string
 
         const payload: RenewPasswordData = {
             password,
             rePassword,
-            token,
+            retrieveCode,
         }
 
         console.log(password)

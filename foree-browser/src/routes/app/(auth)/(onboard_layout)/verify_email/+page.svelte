@@ -82,54 +82,6 @@
 
     form:first-of-type {
         margin: 2rem auto 0;
-
-        & label {
-            display: block;
-            color: var(--slate-500);
-            margin-bottom: 0.25rem;
-        }
-
-        & input {
-            display: block;
-            width: 100%;
-            border: 1px solid var(--slate-400);
-            color: var(--slate-600);
-            font-size: 1.25em;
-            padding: 0.5rem 0.25rem;
-            border-radius: 0.25rem;
-            text-align: center;
-
-            &:focus {
-                outline: none !important;
-                border-color: var(--primary-color);
-                box-shadow: 0 0 5px var(--primary-color);
-            }
-
-            &::placeholder {
-                font-size: medium;
-                color: var(--slate-400);
-            }
-
-        }
-
-        & button {
-            display: block;
-            width: 100%;
-            margin-top: 1.5rem;
-            background-color: var(--primary-color);
-            border: 0px;
-            padding: 0.75rem 0;
-            border-radius: 0.25rem;
-            color: white;
-            font-size: 1em;
-            font-weight: 600;
-            transition: transform .25s ease-in-out;
-
-            &:hover {
-                transform: scale(1.01);
-            }
-        }
-
     }
 
     .resend-code {
