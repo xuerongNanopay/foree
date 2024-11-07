@@ -121,55 +121,6 @@
         }
     }
 
-    .step {
-        overflow: hidden;
-        text-overflow: ellipsis; 
-
-        & label {
-            display: block;
-            color: var(--slate-500);
-            margin-bottom: 0.25rem;
-        }
-
-        & input, & select {
-            display: block;
-            width: 100%;
-            border: 1px solid var(--slate-400);
-            color: var(--slate-600);
-            font-size: 1.25em;
-            padding: 0.5rem 0.25rem;
-            border-radius: 0.25rem;
-
-            &:focus {
-                outline: none !important;
-                border-color: var(--primary-color);
-                box-shadow: 0 0 5px var(--primary-color);
-            }
-        }
-
-        & button {
-            display: block;
-            width: 100%;
-            margin-top: 1.5rem;
-            background-color: var(--primary-color);
-            border: 0px;
-            padding: 0.75rem 0;
-            border-radius: 0.25rem;
-            color: white;
-            font-size: 1em;
-            font-weight: 600;
-            transition: transform .25s ease-in-out;
-
-            &:hover {
-                transform: scale(1.01);
-            }
-        }
-
-        .input-error {
-            color: var(--rose-400);
-        }
-    }
-
     .fields {
         display: grid;
         grid-template-columns: repeat(12, 1fr);

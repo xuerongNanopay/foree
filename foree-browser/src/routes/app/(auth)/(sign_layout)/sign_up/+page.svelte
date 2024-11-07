@@ -206,27 +206,6 @@
        margin-top: 1.25rem;
     } */
 
-    .sign-up label {
-        display: block;
-        color: var(--slate-500);
-        margin-bottom: 0.25rem;
-    }
-
-    .sign-up input {
-        display: block;
-        width: 100%;
-        border: 1px solid var(--slate-400);
-        color: var(--slate-600);
-        font-size: 1.25em;
-        padding: 0.5rem 0.25rem;
-        border-radius: 0.25rem;
-    }
-
-    .sign-up input:focus { 
-        outline: none !important;
-        border-color: var(--emerald-800);
-        box-shadow: 0 0 5px var(--emerald-800);
-    }
 
     .sign-up > form .password div {
         position: relative;
@@ -248,7 +227,7 @@
         width: 100%;
     }
 
-    .sign-up > form > button {
+    /* .sign-up > form > button {
         display: block;
         width: 100%;
         margin-top: 1.5rem;
@@ -264,7 +243,7 @@
 
     .sign-up > form > button:hover {
         transform: scale(1.01);
-    }
+    } */
 
     .sign-up > form > button:disabled,button[disabled] {
         opacity: 0.6;
