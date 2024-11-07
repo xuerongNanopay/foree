@@ -82,6 +82,10 @@
 
     form:first-of-type {
         margin: 2rem auto 0;
+
+        & > button {
+            margin-top: 1.5rem;
+        }
     }
 
     .resend-code {

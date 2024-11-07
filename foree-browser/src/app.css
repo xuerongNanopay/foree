@@ -49,7 +49,6 @@ form {
     & button[type="submit"], & button:not([type]) {
         display: block;
         width: 100%;
-        margin-top: 1.5rem;
         background-color: var(--primary-color);
         border: 0px;
         padding: 0.75rem 0;

@@ -100,6 +100,11 @@
             margin-top: 1.25rem;
         }
 
+
+        & > button {
+            margin-top: 1.5rem;
+        }
+
         .password div {
             position: relative;
 

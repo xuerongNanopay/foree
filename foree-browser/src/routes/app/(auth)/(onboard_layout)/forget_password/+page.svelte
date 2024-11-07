@@ -73,6 +73,10 @@
         max-width: 500px;
         width: 100%;
         margin: 2rem auto;
+
+        & > button {
+            margin-top: 1.5rem;
+        }
     }
 
     dialog {

@@ -259,8 +259,10 @@
         font-size: 0.5rem;
     }
 
-    .sign-in form .input-error {
-        color: var(--rose-400);
+    .sign-in form {
+        & > button {
+            margin-top: 1.5rem;
+        }
     }
 
     @media (max-width: 956px) {

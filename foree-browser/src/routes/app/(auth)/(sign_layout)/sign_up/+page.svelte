@@ -188,6 +188,10 @@
 
     .sign-up > form {
         margin-top: 1rem;
+
+        & > button {
+            margin-top: 1.5rem;
+        }
     }
     
     .sign-up form > div:not(:first-child) {
