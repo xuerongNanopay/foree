@@ -49,7 +49,7 @@
     <div class="step">
         <h2>Your Residential Address and Phone Number</h2>
         <p>We require this information to continue setting up your Foree Remittance account.</p>
-        <div class="fields">
+        <div class="address-fields">
             <div class="country">
                 <label for="country">Country</label>
                 <!-- <input bind:value={createUserForm.country} type="country" id="country" name="country" required> -->
@@ -125,7 +125,7 @@
         }
     }
 
-    .fields {
+    .address-fields {
         display: grid;
         grid-template-columns: repeat(12, 1fr);
         gap: 1rem;
