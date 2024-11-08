@@ -23,7 +23,6 @@
         () => {
             const stepOffsetWidth = stepsDiv.offsetWidth/steps.length
             stepsDiv.style.marginLeft = (cur*stepOffsetWidth*-1)+"px"
-            console.log((cur*stepOffsetWidth*-1)+"px")
         }
     )
 </script>
