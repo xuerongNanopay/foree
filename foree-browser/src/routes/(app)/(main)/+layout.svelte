@@ -2,4 +2,16 @@
     const { children } = $props()
 </script>
 
-{@render children()}
+<div>
+    <header>
+        
+    </header>
+    <div>
+        <nav></nav>
+        {@render children()}
+    </div>
+</div>
+
+<style>
+    
+</style>
