@@ -34,9 +34,15 @@
             <div>
                 {@render step()}
                 <div class="btns">
-                    <button type="button" onclick={goPrev}>Prev</button>
-                    <button type="button" onclick={goNext}>Next</button>
-                    <button >Submit</button>
+                    {#if cur > 0}
+                        <button class="pre" type="button" onclick={goPrev}>Prev</button>
+                    {/if}
+                    {#if cur < steps.length-1}
+                        <button type="button" onclick={goNext}>Next</button>
+                    {/if}
+                    {#if cur === steps.length-1}
+                        <button >Submit</button>
+                    {/if}
                 </div>
             </div>
         {/each}
@@ -62,6 +68,12 @@
         display: flex;
         gap: 0.5rem;
 
+        @media (max-width: 700px) {
+            & {
+                flex-direction: column;
+            }
+        }
+
         & button[type="button"] {
             display: block;
             width: 100%;
@@ -72,6 +84,12 @@
             color: white;
             font-size: 1em;
             font-weight: 600;
+
+            &.pre {
+                background-color: transparent;
+                color:  var(--primary-color);
+                border: 2px solid  var(--primary-color);
+            }
 
             &:disabled {
                 opacity: 0.6;

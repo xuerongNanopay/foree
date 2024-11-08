@@ -23,9 +23,11 @@
         min-height: 100vh;
     }
     header {
-        position: relative;
+        position: sticky;
+        top: 0px;
         border-bottom: 2px solid var(--emerald-800);
         height: 70px;
+        background: white;
     }
     header .logo {
         /* height: 100%; */
