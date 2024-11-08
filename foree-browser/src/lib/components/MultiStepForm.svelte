@@ -7,17 +7,19 @@
     let { steps }: Props = $props()
 </script>
 
-<form style:width={steps.length*100 + "%"}>
-    {#each steps as step}
-        <div>
-            {@render step()}
-        </div>
-    {/each}
+<form>
+    <div style:width={steps.length*100 + "%"}>
+        {#each steps as step}
+            <div>
+                {@render step()}
+            </div>
+        {/each}
+    </div>
 </form>
 
 
 <style>
-    form {
+    form > div {
         display: flex;
         & > div {
         width: 100%;
