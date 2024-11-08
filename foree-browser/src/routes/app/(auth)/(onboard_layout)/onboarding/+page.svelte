@@ -243,7 +243,10 @@
 {/snippet}
     
 <main>
-    <MultiStepForm steps={[step1, step2, step3]}>
+    <MultiStepForm 
+        steps={[step1, step2, step3]}
+        method="POST"
+    >
     </MultiStepForm>
 </main>
 
