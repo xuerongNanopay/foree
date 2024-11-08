@@ -56,7 +56,7 @@
             </div>
             <div class="middleName">
                 <label for="middleName">Middle Name</label>
-                <input bind:value={createUserForm.middleName} type="text" id="middleName" name="middleName" required>
+                <input bind:value={createUserForm.middleName} type="text" id="middleName" name="middleName">
                 {#if !!createUserErr?.middleName}
                     <p class="input-error">{createUserErr.middleName}</p>
                 {/if}
