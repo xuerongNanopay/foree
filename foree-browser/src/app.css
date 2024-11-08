@@ -38,8 +38,8 @@ form {
             border-color: var(--primary-color);
             box-shadow: 0 0 5px var(--primary-color);
         }
-
-        /* &::placeholder {
+/* 
+        &::placeholder {
             font-size: medium;
             color: var(--slate-400);
         }

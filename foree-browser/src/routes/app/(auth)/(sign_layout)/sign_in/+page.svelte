@@ -185,28 +185,6 @@
        margin-top: 1.25rem;
     }
 
-    .sign-in label {
-        display: block;
-        color: var(--slate-500);
-        margin-bottom: 0.25rem;
-    }
-
-    .sign-in input {
-        display: block;
-        width: 100%;
-        border: 1px solid var(--slate-400);
-        color: var(--slate-600);
-        font-size: 1.25em;
-        padding: 0.5rem 0.25rem;
-        border-radius: 0.25rem;
-    }
-
-    .sign-in input:focus { 
-        outline: none !important;
-        border-color: var(--emerald-800);
-        box-shadow: 0 0 5px var(--emerald-800);
-    }
-
     .sign-in > form .password div {
         position: relative;
     }
