@@ -208,6 +208,35 @@
                     <p class="input-error">{createUserErr.nationality}</p>
                 {/if}
             </div>
+            <div class="identification-type">
+                <label for="identificationType">Identification Document Type</label>
+                <!-- <input bind:value={createUserForm.identificationType} type="identificationType" id="identificationType" name="identificationType" required> -->
+                 <select
+                    bind:value={createUserForm.identificationType}
+                    id="identificationType"
+                    name="identificationType"
+                    required
+                 >
+                    {#each countries as identificationType}
+                        <option value={identificationType.isoCode}>{identificationType.name}</option>
+                    {/each}
+                 </select>
+                {#if !!createUserErr?.identificationType}
+                    <p class="input-error">{createUserErr.identificationType}</p>
+                {/if}
+            </div>
+            <div class="identification-value">
+                <label for="identificationValue">Identification Number</label>
+                <input 
+                    bind:value={createUserForm.identificationValue}
+                    id="identificationValue" 
+                    name="identificationValue"
+                    required
+                >
+                {#if !!createUserErr?.identificationValue}
+                    <p class="input-error">{createUserErr.identificationValue}</p>
+                {/if}
+            </div>
         </div>
     </div>
 {/snippet}
