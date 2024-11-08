@@ -2,6 +2,8 @@
     import { enhance } from "$app/forms"
     import MultiStepForm from "$lib/components/MultiStepForm.svelte"
 
+    const phoneNumberPattern = "[0-9]{3}-[0-9]{2}-[0-9]{3}"
+
     let countries = $state([
 		{
 			isoCode:  "CA",
@@ -138,7 +140,14 @@
             </div>
             <div class="phone-number">
                 <label for="phoneNumber">Phone Number</label>
-                <input bind:value={createUserForm.phoneNumber} type="text" id="phoneNumber" name="phoneNumber">
+                <input 
+                    bind:value={createUserForm.phoneNumber} 
+                    type="text" 
+                    id="phoneNumber" 
+                    name="phoneNumber"
+                    placeholder="000-000-0000"
+                    pattern={phoneNumberPattern}
+                >
                 {#if !!createUserErr?.phoneNumber}
                     <p class="input-error">{createUserErr.phoneNumber}</p>
                 {/if}
