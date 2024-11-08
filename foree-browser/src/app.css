@@ -45,6 +45,10 @@ form {
             font-size: medium;
             color: var(--slate-400);
         }
+
+        &:not(:valid) {
+            border: 1px solid var(--rose-400);
+        }
     }
 
     /* input type=date show differently in safari */
