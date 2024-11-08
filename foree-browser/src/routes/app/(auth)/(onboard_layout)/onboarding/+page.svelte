@@ -191,6 +191,23 @@
                     <p class="input-error">{createUserErr.country}</p>
                 {/if}
             </div>
+            <div class="nationality">
+                <label for="nationality">Nationality</label>
+                <!-- <input bind:value={createUserForm.nationality} type="nationality" id="nationality" name="nationality" required> -->
+                 <select
+                    bind:value={createUserForm.nationality}
+                    id="nationality"
+                    name="nationality"
+                    required
+                 >
+                    {#each countries as nationality}
+                        <option value={nationality.isoCode}>{nationality.name}</option>
+                    {/each}
+                 </select>
+                {#if !!createUserErr?.nationality}
+                    <p class="input-error">{createUserErr.nationality}</p>
+                {/if}
+            </div>
         </div>
     </div>
 {/snippet}
