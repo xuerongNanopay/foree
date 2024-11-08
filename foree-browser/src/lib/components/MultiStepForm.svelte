@@ -50,7 +50,7 @@
 
         & > div:first-child {
             display: flex;
-            transition: margin-left 400ms ease-in-out;
+            transition: margin-left 200ms ease-in-out;
             & > div {
                 width: 100%;
             } 

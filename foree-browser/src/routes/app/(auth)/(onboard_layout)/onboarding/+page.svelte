@@ -2,7 +2,7 @@
     import { enhance } from "$app/forms"
     import MultiStepForm from "$lib/components/MultiStepForm.svelte"
 
-    const phoneNumberPattern = "[0-9]{3}-[0-9]{2}-[0-9]{3}"
+    const phoneNumberPattern = "[0-9]{3}-[0-9]{3}-[0-9]{4}"
 
     let countries = $state([
 		{
@@ -110,7 +110,7 @@
             </div>
             <div class="city">
                 <label for="city">City</label>
-                <input bind:value={createUserForm.city} type="text" id="city" name="city">
+                <input bind:value={createUserForm.city} type="text" id="city" name="city" required>
                 {#if !!createUserErr?.city}
                     <p class="input-error">{createUserErr.city}</p>
                 {/if}
@@ -133,7 +133,7 @@
             </div>
             <div class="postal-code">
                 <label for="postalCode">Postal Code</label>
-                <input bind:value={createUserForm.postalCode} type="text" id="postalCode" name="postalCode">
+                <input bind:value={createUserForm.postalCode} type="text" id="postalCode" name="postalCode" required>
                 {#if !!createUserErr?.postalCode}
                     <p class="input-error">{createUserErr.postalCode}</p>
                 {/if}
@@ -147,6 +147,7 @@
                     name="phoneNumber"
                     placeholder="000-000-0000"
                     pattern={phoneNumberPattern}
+                    required
                 >
                 {#if !!createUserErr?.phoneNumber}
                     <p class="input-error">{createUserErr.phoneNumber}</p>
@@ -251,7 +252,6 @@
         width: 95%;
         max-width: 900px;
         margin: 3.5rem auto;
-        border: 1px solid salmon;
 
         @media (max-width: 700px) {
             margin: 2.5rem auto;
