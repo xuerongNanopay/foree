@@ -24,7 +24,7 @@
 <div class="contain">
     <header class="">
         <div class="logo"></div>
-        <a href="/app/sign_up">Sign Up</a>
+        <a href="sign_up">Sign Up</a>
     </header>
 
     <main>
