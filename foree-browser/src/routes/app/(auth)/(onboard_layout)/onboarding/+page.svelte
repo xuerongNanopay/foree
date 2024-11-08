@@ -157,7 +157,41 @@
 {/snippet}
 
 {#snippet step3()}
-    <div>
+    <div class="step">
+        <h2>Personal Details</h2>
+        <p>Almost done! Infomation below is requested by XXXXXX Bank of XXXXXXX, our Foree Remittance payout partner, in order to process your transfers under Pkakistani regulatory guidelines</p>
+        <div class="personal-fields">
+            <div class="dob">
+                <label for="dob">Date of Birth</label>
+                <input 
+                    bind:value={createUserForm.dob}
+                    type="date" 
+                    id="dob" 
+                    name="dob"
+                    required
+                >
+                {#if !!createUserErr?.dob}
+                    <p class="input-error">{createUserErr.dob}</p>
+                {/if}
+            </div>
+            <div class="pob">
+                <label for="country">Place of Birth</label>
+                <!-- <input bind:value={createUserForm.country} type="country" id="country" name="country" required> -->
+                 <select
+                    bind:value={createUserForm.pob}
+                    id="country"
+                    name="country"
+                    required
+                 >
+                    {#each countries as country}
+                        <option value={country.isoCode}>{country.name}</option>
+                    {/each}
+                 </select>
+                {#if !!createUserErr?.country}
+                    <p class="input-error">{createUserErr.country}</p>
+                {/if}
+            </div>
+        </div>
     </div>
 {/snippet}
     
@@ -262,4 +296,8 @@
         }
     }
 
+    .personal-fields {
+        display: grid;
+        gap: 1rem;
+    }
 </style>

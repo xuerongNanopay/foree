@@ -47,6 +47,20 @@ form {
         }
     }
 
+    /* input type=date show differently in safari */
+    & input::-webkit-datetime-edit {
+        line-height: 1;
+        padding: 0;
+        margin-bottom: -2px;
+    }
+
+    /* Select show differently in safari */
+    & select {
+        -moz-appearance: none;
+        -webkit-appearance: none; 
+        appearance: none;
+    }
+
     & button[type="submit"], & button:not([type]) {
         display: block;
         width: 100%;
