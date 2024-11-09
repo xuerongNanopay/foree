@@ -4,7 +4,7 @@
 
 
 <nav class="header">
-    Header
+    Nulla ullamco labore sunt sunt officia in eu aliquip tempor consequat elit eiusmod Lorem officia.
 </nav>
 
 <div id="foree-main">
@@ -58,14 +58,13 @@
             flex-direction: column; */
 
             .nav-container {
-                background: red;
+                background: var(--foree-bg-2);
                 display: none;
 
 
                 @media (min-width: 832px) {
                     width: var(--sidebar-width);
                     height: calc(100vh - var(--foree-nav-height) - var(--foree-banner-height));
-                    border: 1px solid rebeccapurple;
                     position: fixed;
                     left: 0px;
                     top: var(--foree-nav-height);
@@ -76,6 +75,11 @@
 
             .page-container {
                 padding: var(--foree-page-padding-top) var(--foree-page-padding-side) var(--foree-page-padding-bottom);
+                /* min-width: 0px !important; */
+
+                @media (min-width: 832px) {
+                    padding-left: calc(var(--sidebar-width) + var(--foree-page-padding-side));
+                }
             }
         }
     }
