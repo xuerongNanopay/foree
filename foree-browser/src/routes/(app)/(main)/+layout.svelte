@@ -95,7 +95,15 @@
                 /* min-width: 0px !important; */
 
                 @media (min-width: 832px) {
-                    padding-left: calc(var(--sidebar-width) + var(--foree-page-padding-side));
+                    & {
+                        padding-left: calc(var(--sidebar-width) + var(--foree-page-padding-side));
+                    }
+                }
+
+                @media (min-width: 1536px) {
+                    & {
+                        --foree-page-padding-side: 6rem;
+                    }
                 }
             }
         }
