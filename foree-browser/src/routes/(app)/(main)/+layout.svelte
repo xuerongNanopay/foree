@@ -4,8 +4,7 @@
 
 
 <nav class="header">
-    Nulla ullamco labore sunt sunt officia in eu aliquip tempor consequat elit eiusmod Lorem officia.
-    <p>aaaa</p>
+    <a class="home-link" href="dashboard" title="Homepage" aria-label="Homepage"></a>
 </nav>
 
 <div id="foree-main">
@@ -29,6 +28,8 @@
         position:fixed;
         top:0;
         background-color: var(--foree-bg-1);
+        display: grid;
+        grid-template-columns: auto 1fr;
 
         &::after {
             content: "";
@@ -52,6 +53,12 @@
                 bottom: unset;
             }
         }
+    }
+
+    .header .home-link {
+        background-size: 100% 100%;
+        background-image: url("$lib/assets/images/foree_remittance_logo.svg");
+        width: 7.5rem;
     }
 
     #foree-main {
