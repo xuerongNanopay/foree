@@ -5,6 +5,7 @@
 
 <nav class="header">
     Nulla ullamco labore sunt sunt officia in eu aliquip tempor consequat elit eiusmod Lorem officia.
+    <p>aaaa</p>
 </nav>
 
 <div id="foree-main">
@@ -29,10 +30,26 @@
         top:0;
         background-color: var(--foree-bg-1);
 
-        @media (max-width: 831px) {
+        &:after {
+            content: "";
+            background: linear-gradient(#0000000d, #0000);
+            width: 100%;
+            height: 4px;
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+        }
+
+        @media (max-width: 832px) {
             & {
                 top: unset;
                 bottom: 0;
+            }
+
+            &:after {
+                background: linear-gradient(#0000, #0000000d);
+                top: -4px;
+                bottom: unset;
             }
         }
     }
