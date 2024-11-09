@@ -87,6 +87,19 @@ form {
 :root {
     --foree-nav-height: 4rem;
     --foree-banner-height: 0rem;
-    --foree-sidebar-menu-width: 28rem;
+    --foree-page-padding-top: 6rem;
     --foree-page-padding-side: 3.5rem;
+    --foree-page-padding-bottom: 6rem;
+
+    --foree-fg-1: #141414;
+    --foree-fg-2: #262626;
+    --foree-fg-3: #666;
+    --foree-fg-4: gray;
+
+    --foree-bg-1: #fff;
+    --foree-bg-2: #fdfdfd;
+    --foree-bg-3: #fafafa;
+    --foree-bg-4: #f2f2f2;
+
+    /* --foree-border: #ebebeb */
 }
