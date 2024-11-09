@@ -30,7 +30,7 @@
         top:0;
         background-color: var(--foree-bg-1);
 
-        &:after {
+        &::after {
             content: "";
             background: linear-gradient(#0000000d, #0000);
             width: 100%;
@@ -46,7 +46,7 @@
                 bottom: 0;
             }
 
-            &:after {
+            &::after {
                 background: linear-gradient(#0000, #0000000d);
                 top: -4px;
                 bottom: unset;
@@ -86,7 +86,17 @@
                     left: 0px;
                     top: var(--foree-nav-height);
                     display: block;     
-                    overflow: hidden;   
+                    overflow: hidden;
+
+                    &::after {
+                        content: "";
+                        background: linear-gradient(90deg, rgba(0,0,0,0), rgba(0,0,0,0.03));
+                        width: 3px;
+                        height: 100%;
+                        position: absolute;
+                        top: 0px;
+                        right: 0px;
+                    }
                 }
             }
 
