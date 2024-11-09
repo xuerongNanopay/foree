@@ -1,7 +1,7 @@
 * {
     margin: 0px;
     padding: 0px;
-    box-sizing: border-box;
+    box-sizing: inherit;
     font-family: Arial, sans-serif;
 }
 
@@ -82,4 +82,11 @@ form {
     .input-error {
         color: var(--rose-400);
     }
+}
+
+:root {
+    --foree-nav-height: 4rem;
+    --foree-banner-height: 0rem;
+    --foree-sidebar-menu-width: 28rem;
+    --foree-page-padding-side: 3.5rem;
 }
