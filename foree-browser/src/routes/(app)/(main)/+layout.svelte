@@ -157,6 +157,8 @@
                 
                 &.selected {
                     background-color: var(--foree-bg-4);
+                    color: white;
+                    background-color: var(--emerald-700);
                 }
 
                 &.selected::after {
