@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { page } from '$app/stores'
     const { children } = $props()
 </script>
 
@@ -11,8 +12,8 @@
     <div class="container">
         <div class="nav-container">
             <ul>
-                <li><a href="dashboard">Dashboard</a></li>
-                <li><a href="transaction">Transaction</a></li>
+                <li><a href="dashboard" class:selected={$page.url.pathname === "/dashboard"}>Dashboard</a></li>
+                <li><a href="transaction" class:selected={$page.url.pathname === "/transaction"} >Transaction</a></li>
             </ul>
         </div>
         <div class="page-container">
@@ -137,6 +138,7 @@
     .nav-container {
         & a {
            display: block;
+           position: relative;
            height: var(--foree-side-menu-item-height);
            padding-left: var(--foree-page-padding-side);
            line-height: var(--foree-side-menu-item-height);
@@ -152,7 +154,12 @@
            }
 
            @media (min-width: 832px) {
-                &::after {
+                
+                &.selected {
+                    background-color: var(--foree-bg-4);
+                }
+
+                &.selected::after {
                     --size: 1rem;
                     content: "";
                     width: var(--size);
