@@ -1,5 +1,7 @@
 <script lang="ts">
-    import { page } from '$app/stores'
+    import { page } from "$app/stores"
+    import dropDownIcon from "$lib/assets/icons/drop_down_arrow.png"
+
     const { children } = $props()
 </script>
 
@@ -7,7 +9,13 @@
 <nav class="header">
     <a class="desktop home-link" href="dashboard" title="Homepage" aria-label="Homepage"></a>
     <a class="mobile" href="dashboard" title="Homepage" aria-label="Homepage">X</a>
-    <div class="desktop"></div>
+    <div class="desktop">
+        <div>
+            <button>
+                <p>XXXX XXX</p> <img src={dropDownIcon} alt=""/>
+            </button>
+        </div>
+    </div>
     <div class="mobile"></div>
 </nav>
 
@@ -40,37 +48,74 @@
         }
     }
 
-    .header {
-        & a[class*="mobile"] {
-            background-color: var(--emerald-800);
-            text-decoration: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: xx-large;
-            font-weight: 600;
-            color: var(--slate-100);
-            text-align: center;
-            line-height: 50px;
-            margin: auto 0;
-            position: relative;
-            -moz-box-shadow: 0 0 1px 1px var(--emerald-600);
-            -webkit-box-shadow: 0 0 1px 1px var(--emerald-600);
-            box-shadow: 0 0 1px 1px var(--emerald-600);
+    .header > a[class*="mobile"] {
+        background-color: var(--emerald-800);
+        text-decoration: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: xx-large;
+        font-weight: 600;
+        color: var(--slate-100);
+        text-align: center;
+        line-height: 50px;
+        margin: auto 0;
+        position: relative;
+        -moz-box-shadow: 0 0 1px 1px var(--emerald-600);
+        -webkit-box-shadow: 0 0 1px 1px var(--emerald-600);
+        box-shadow: 0 0 1px 1px var(--emerald-600);
 
-            &::after {
-                content: "";
-                background: var(--rose-700);
-                height: 15px;
-                width: 15px;
-                right: 0;
-                top: 0;
-                position: absolute;
-                border-radius: 50%;
-                -moz-box-shadow: 0 0 1px 1px var(--rose-600);
-                -webkit-box-shadow: 0 0 1px 1px var(--rose-600);
-                box-shadow: 0 0 1px 1px var(--rose-600);
+        &::after {
+            content: "";
+            background: var(--rose-700);
+            height: 15px;
+            width: 15px;
+            right: 0;
+            top: 0;
+            position: absolute;
+            border-radius: 50%;
+            -moz-box-shadow: 0 0 1px 1px var(--rose-600);
+            -webkit-box-shadow: 0 0 1px 1px var(--rose-600);
+            box-shadow: 0 0 1px 1px var(--rose-600);
+        }
+    }
+
+    .header > div[class*="desktop"] > div {
+        display: flex;
+        justify-content: end;
+        height: 100%;
+
+        & button {
+            display: flex;
+            gap: 0.5rem;
+            background: transparent;
+            border: none;
+            align-items: center;
+            padding: 0 0.5rem;
+
+            & p {
+                font-size: large;
             }
+
+            &:hover {
+                background-color: var(--foree-bg-4);
+            }
+
+            & img {
+                height: 17px;
+                width: 17px;
+            }
+        }
+    }
+
+    .header > a[class*="desktop"]  {
+        background-size: 100% 100%;
+        background-image: url("$lib/assets/images/foree_remittance_small_logo.svg");
+        width: 50px;
+
+        @media (min-width: 823px) {
+            background-image: url("$lib/assets/images/foree_remittance_logo.svg");
+            width: 7.5rem;
         }
     }
 
@@ -85,6 +130,7 @@
         background-color: var(--foree-bg-1);
         display: grid;
         grid-template-columns: auto 1fr;
+        box-sizing: border-box;
 
         &::after {
             content: "";
@@ -107,17 +153,6 @@
                 top: -4px;
                 bottom: unset;
             }
-        }
-    }
-
-    .header .home-link {
-        background-size: 100% 100%;
-        background-image: url("$lib/assets/images/foree_remittance_small_logo.svg");
-        width: 50px;
-
-        @media (min-width: 823px) {
-            background-image: url("$lib/assets/images/foree_remittance_logo.svg");
-            width: 7.5rem;
         }
     }
 
@@ -187,24 +222,24 @@
 
     .nav-container {
         & a {
-           display: block;
-           position: relative;
-           height: var(--foree-side-menu-item-height);
-           padding-left: var(--foree-page-padding-side);
-           line-height: var(--foree-side-menu-item-height);
-           text-wrap: nowrap;
-           text-overflow: ellipsis;
-           text-decoration: none;
-           font-size: large;
-           font-weight: 600;
-           color: var(--slate-600);
+            display: block;
+            position: relative;
+            height: var(--foree-side-menu-item-height);
+            padding-left: var(--foree-page-padding-side);
+            line-height: var(--foree-side-menu-item-height);
+            text-wrap: nowrap;
+            text-overflow: ellipsis;
+            text-decoration: none;
+            font-size: large;
+            font-weight: 600;
+            color: var(--slate-600);
 
-           &:hover {
-            background-color: var(--foree-bg-4);
-           }
+            &:hover {
+                background-color: var(--foree-bg-4);
+            }
 
-           @media (min-width: 832px) {
-                
+            @media (min-width: 832px) {
+                    
                 &.selected {
                     background-color: var(--foree-bg-4);
                     color: white;
