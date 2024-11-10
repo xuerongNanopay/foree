@@ -13,7 +13,7 @@
     <a class="mobile" href="dashboard" title="Homepage" aria-label="Homepage">X</a>
     <div class="desktop">
         <div class="dropdown">
-            <button onclick={_ => {dropdownOn = !dropdownOn}}>
+            <button onclick={_ => {dropdownOn = !dropdownOn}} class:dropdown-content-on={dropdownOn}>
                 <p>XXXX XXX</p> <img src={dropDownIcon} alt=""/>
             </button>
             <nav class="dropdown-content" class:dropdown-content-on={dropdownOn}>
@@ -192,6 +192,10 @@
                 pointer-events: all;
                 opacity: 1;
             }
+        }
+
+        & button.dropdown-content-on {
+            background-color: var(--foree-bg-4);
         }
 
         & a {
