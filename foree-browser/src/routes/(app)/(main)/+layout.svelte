@@ -204,7 +204,7 @@
             color: var(--slate-600);
             font-weight: 500;
 
-            &:hover {
+            &:hover, &.selected {
                 background-color: var(--foree-bg-4);
             }
 
