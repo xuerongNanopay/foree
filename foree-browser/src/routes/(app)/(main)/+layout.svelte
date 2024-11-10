@@ -122,6 +122,7 @@
             display: block;
             width: 100%;
             height: 100%;
+            filter: hue-rotate(5deg);
             background-size: 27px;
             background-repeat: no-repeat;
             background-image: url("$lib/assets/icons/bell.png");
