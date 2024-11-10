@@ -10,7 +10,10 @@
 <div id="foree-main">
     <div class="container">
         <div class="nav-container">
-            <a href="dashboard">Dashboard asdf asdfasdf asdfasdf asdfdfsa asdfasdf asdfasdf</a>
+            <ul>
+                <li><a href="dashboard">Dashboard</a></li>
+                <li><a href="transaction">Transaction</a></li>
+            </ul>
         </div>
         <div class="page-container">
             {@render children()}
@@ -131,4 +134,38 @@
         }
     }
 
+    .nav-container {
+        & a {
+           display: block;
+           height: var(--foree-side-menu-item-height);
+           padding-left: var(--foree-page-padding-side);
+           line-height: var(--foree-side-menu-item-height);
+           text-wrap: nowrap;
+           text-overflow: ellipsis;
+           text-decoration: none;
+           font-size: large;
+           font-weight: 600;
+           color: var(--slate-600);
+
+           &:hover {
+            background-color: var(--foree-bg-4);
+           }
+
+           @media (min-width: 832px) {
+                &::after {
+                    --size: 1rem;
+                    content: "";
+                    width: var(--size);
+                    height: var(--size);
+                    background-color: var(--foree-bg-1);
+                    position: absolute;
+                    top: calc(var(--foree-side-menu-item-height)*.5 - var(--size)*.5);
+                    right: calc(-.5*var(--size));
+                    rotate: 45deg;
+                    z-index: 2;
+                    /* box-shadow: rgba(0, 0, 0, 0.12) 0px 0px 3px; */
+                }
+            }
+        }
+    }
 </style>
