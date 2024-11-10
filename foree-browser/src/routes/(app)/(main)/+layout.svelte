@@ -13,31 +13,36 @@
     <a class="desktop home-link" href="dashboard" title="Homepage" aria-label="Homepage"></a>
     <a class="mobile" href="dashboard" title="Homepage" aria-label="Homepage">X</a>
     <div class="desktop">
-        <div 
-            class="dropdown"
-        >
-            <button 
-                onclick={_ => {dropdownOn = !dropdownOn}} 
-                class:dropdown-content-on={dropdownOn}
-                use:clickOutside={() => {
-                    dropdownOn = false
-                }}
+        <div>
+            <div class="notifications">
+                <a href="transaction" title="Notifications" aria-label="notifications"></a>
+            </div>
+            <div 
+                class="dropdown"
             >
-                <p>XXXX XXX</p> <img src={dropDownIcon} alt=""/>
-            </button>
-            <nav class="dropdown-content" class:dropdown-content-on={dropdownOn}>
-                <ul>
-                    <li>
-                        <a class="desktop home-link" href="dashboard" title="Homepage" aria-label="Homepage">Home</a>
-                    </li>
-                    <li>
-                        <a href="transaction" class:selected={$page.url.pathname === "/transaction"} >Transaction</a>
-                    </li>
-                    <li>
-                        <a class="desktop home-link" href="dashboard" title="Homepage" aria-label="Homepage">Sign Out</a>
-                    </li>
-                </ul>
-            </nav>
+                <button 
+                    onclick={_ => {dropdownOn = !dropdownOn}} 
+                    class:dropdown-content-on={dropdownOn}
+                    use:clickOutside={() => {
+                        dropdownOn = false
+                    }}
+                >
+                    <p>XXXX XXXXXXXXXX xxx</p> <img src={dropDownIcon} alt=""/>
+                </button>
+                <nav class="dropdown-content" class:dropdown-content-on={dropdownOn}>
+                    <ul>
+                        <li>
+                            <a class="desktop home-link" href="dashboard" title="Homepage" aria-label="Homepage">Home</a>
+                        </li>
+                        <li>
+                            <a href="transaction" class:selected={$page.url.pathname === "/transaction"} >Transaction</a>
+                        </li>
+                        <li>
+                            <a class="desktop home-link" href="dashboard" title="Homepage" aria-label="Homepage">Sign Out</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
     <div class="mobile"></div>
@@ -108,6 +113,30 @@
         display: flex;
         justify-content: end;
         height: 100%;
+    }
+
+    .header > div[class*="desktop"] > div > .notifications {
+        width: var(--foree-nav-height);
+
+        & > a {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-size: 27px;
+            background-repeat: no-repeat;
+            background-image: url("$lib/assets/icons/bell.png");
+            background-position: center;
+
+            &:hover {
+                background-color: var(--foree-bg-4);
+            }
+        }
+    }
+
+    .header > div[class*="desktop"] > div > .dropdown {
+        display: flex;
+        justify-content: end;
+        height: 100%;
 
         & button {
             display: flex;
@@ -116,18 +145,23 @@
             border: none;
             align-items: center;
             padding: 0 0.5rem;
+            width: 150px;
 
             & p {
                 font-size: large;
-            }
-
-            &:hover {
-                background-color: var(--foree-bg-4);
+                text-wrap: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
             }
 
             & img {
                 height: 17px;
                 width: 17px;
+                /* flex: 0 0 17px; */
+            }
+
+            &:hover {
+                background-color: var(--foree-bg-4);
             }
         }
     }
