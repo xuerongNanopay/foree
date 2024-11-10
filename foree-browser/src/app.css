@@ -14,6 +14,14 @@ button, a {
     cursor: pointer;
 }
 
+a {
+    color: black;
+}
+
+ul {
+    list-style-type: none;
+}
+
 form {
     /* overflow: hidden; */
     /* text-overflow: ellipsis;  */
@@ -88,9 +96,13 @@ form {
 :root {
     --foree-nav-height: 4rem;
     --foree-banner-height: 0rem;
+
     --foree-page-padding-top: 3rem;
     --foree-page-padding-side: 3rem;
     --foree-page-padding-bottom: 6rem;
+
+    --foree-border: #ebebeb;
+    --foree-shadow: drop-shadow(0px 10px 15px #0000001a);
 
     --foree-fg-1: #141414;
     --foree-fg-2: #262626;

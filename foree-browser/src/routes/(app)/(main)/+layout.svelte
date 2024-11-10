@@ -3,17 +3,32 @@
     import dropDownIcon from "$lib/assets/icons/drop_down_arrow.png"
 
     const { children } = $props()
-</script>
 
+    let dropdownOn = $state(false)
+    
+</script>
 
 <nav class="header">
     <a class="desktop home-link" href="dashboard" title="Homepage" aria-label="Homepage"></a>
     <a class="mobile" href="dashboard" title="Homepage" aria-label="Homepage">X</a>
     <div class="desktop">
-        <div>
-            <button>
+        <div class="dropdown">
+            <button onclick={_ => {dropdownOn = !dropdownOn}}>
                 <p>XXXX XXX</p> <img src={dropDownIcon} alt=""/>
             </button>
+            <nav class="dropdown-content" class:dropdown-content-on={dropdownOn}>
+                <ul>
+                    <li>
+                        <a class="desktop home-link" href="dashboard" title="Homepage" aria-label="Homepage">Home</a>
+                    </li>
+                    <li>
+                        <a href="transaction" class:selected={$page.url.pathname === "/transaction"} >Transaction</a>
+                    </li>
+                    <li>
+                        <a class="desktop home-link" href="dashboard" title="Homepage" aria-label="Homepage">Sign Out</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
     <div class="mobile"></div>
@@ -154,6 +169,52 @@
                 bottom: unset;
             }
         }
+    }
+
+    .header .desktop .dropdown {
+        position: relative;
+
+        & > .dropdown-content {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            background-color: var(--foree-bg-2);
+            border: 1px solid var(--slate-200);
+            border-top: none;
+            filter: var(--foree-shadow);
+            top: var(--foree-nav-height);
+            width: 150px;
+            padding: 0rem 0rem 0.5rem;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+
+            &.dropdown-content-on {
+                pointer-events: all;
+                opacity: 1;
+            }
+        }
+
+        & a {
+            display: block;
+            padding: 0.5rem 0.3rem;
+            text-decoration: none;
+            color: var(--slate-600);
+            font-weight: 500;
+
+            &:hover {
+                background-color: var(--foree-bg-4);
+            }
+
+        }
+
+        & li:last-child a {
+            color: var(--rose-600);
+            
+            &:hover {
+                background-color: var(--rose-100);
+            }
+        }
+
     }
 
     #foree-main {
