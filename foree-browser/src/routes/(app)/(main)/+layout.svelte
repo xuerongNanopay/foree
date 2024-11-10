@@ -5,7 +5,10 @@
 
 
 <nav class="header">
-    <a class="home-link" href="dashboard" title="Homepage" aria-label="Homepage"></a>
+    <a class="desktop home-link" href="dashboard" title="Homepage" aria-label="Homepage"></a>
+    <a class="mobile" href="dashboard" title="Homepage" aria-label="Homepage">X</a>
+    <div class="desktop"></div>
+    <div class="mobile"></div>
 </nav>
 
 <div id="foree-main">
@@ -23,6 +26,54 @@
 </div>
 
 <style>
+
+    .desktop {
+        display: none;
+        @media (min-width: 832px) {
+            display: unset;
+        }
+    }
+
+    .mobile {
+        @media (min-width: 832px) {
+            display: none;
+        }
+    }
+
+    .header {
+        & a[class*="mobile"] {
+            background-color: var(--emerald-800);
+            text-decoration: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: xx-large;
+            font-weight: 600;
+            color: var(--slate-100);
+            text-align: center;
+            line-height: 50px;
+            margin: auto 0;
+            position: relative;
+            -moz-box-shadow: 0 0 1px 1px var(--emerald-600);
+            -webkit-box-shadow: 0 0 1px 1px var(--emerald-600);
+            box-shadow: 0 0 1px 1px var(--emerald-600);
+
+            &::after {
+                content: "";
+                background: var(--rose-700);
+                height: 15px;
+                width: 15px;
+                right: 0;
+                top: 0;
+                position: absolute;
+                border-radius: 50%;
+                -moz-box-shadow: 0 0 1px 1px var(--rose-600);
+                -webkit-box-shadow: 0 0 1px 1px var(--rose-600);
+                box-shadow: 0 0 1px 1px var(--rose-600);
+            }
+        }
+    }
+
     .header {
         z-index: 101;
         height: var(--foree-nav-height);
@@ -73,8 +124,7 @@
     #foree-main {
         padding-top: var(--foree-banner-height);
         height: 100%;
-        border: 1px solid salmon;
-        /* margin: o auto;
+        /* margin: 0 auto;
         position: relative; */
 
         @media (min-width: 832px) {
