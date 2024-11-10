@@ -1,6 +1,7 @@
 <script lang="ts">
     import { page } from "$app/stores"
     import dropDownIcon from "$lib/assets/icons/drop_down_arrow.png"
+    import { clickOutside } from "$lib/utils/use_directives"
 
     const { children } = $props()
 
@@ -12,8 +13,16 @@
     <a class="desktop home-link" href="dashboard" title="Homepage" aria-label="Homepage"></a>
     <a class="mobile" href="dashboard" title="Homepage" aria-label="Homepage">X</a>
     <div class="desktop">
-        <div class="dropdown">
-            <button onclick={_ => {dropdownOn = !dropdownOn}} class:dropdown-content-on={dropdownOn}>
+        <div 
+            class="dropdown"
+        >
+            <button 
+                onclick={_ => {dropdownOn = !dropdownOn}} 
+                class:dropdown-content-on={dropdownOn}
+                use:clickOutside={() => {
+                    dropdownOn = false
+                }}
+            >
                 <p>XXXX XXX</p> <img src={dropDownIcon} alt=""/>
             </button>
             <nav class="dropdown-content" class:dropdown-content-on={dropdownOn}>
@@ -224,6 +233,8 @@
     #foree-main {
         padding-top: var(--foree-banner-height);
         height: 100%;
+        border: 1px solid red;
+        min-height: 100vh;
         /* margin: 0 auto;
         position: relative; */
 
