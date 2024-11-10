@@ -57,8 +57,13 @@
 
     .header .home-link {
         background-size: 100% 100%;
-        background-image: url("$lib/assets/images/foree_remittance_logo.svg");
-        width: 7.5rem;
+        background-image: url("$lib/assets/images/foree_remittance_small_logo.svg");
+        width: 50px;
+
+        @media (min-width: 823px) {
+            background-image: url("$lib/assets/images/foree_remittance_logo.svg");
+            width: 7.5rem;
+        }
     }
 
     #foree-main {
