@@ -15,7 +15,7 @@
     <div class="desktop">
         <div>
             <div class="notifications">
-                <a href="transaction" title="Notifications" aria-label="notifications"></a>
+                <a class:selected={$page.url.pathname === "/transaction"} href="transaction" title="Notifications" aria-label="notifications"></a>
             </div>
             <div 
                 class="dropdown"
@@ -130,6 +130,10 @@
             &:hover {
                 background-color: var(--foree-bg-4);
             }
+
+            &.selected {
+                background-color: var(--foree-bg-4);
+            }
         }
     }
 
@@ -162,54 +166,6 @@
 
             &:hover {
                 background-color: var(--foree-bg-4);
-            }
-        }
-    }
-
-    .header > a[class*="desktop"]  {
-        background-size: 100% 100%;
-        background-image: url("$lib/assets/images/foree_remittance_small_logo.svg");
-        width: 50px;
-
-        @media (min-width: 823px) {
-            background-image: url("$lib/assets/images/foree_remittance_logo.svg");
-            width: 7.5rem;
-        }
-    }
-
-    .header {
-        z-index: 101;
-        height: var(--foree-nav-height);
-        padding: 0 var(--foree-page-padding-side);
-        width: 100vw;
-        margin: 0 auto;
-        position:fixed;
-        top:0;
-        background-color: var(--foree-bg-1);
-        display: grid;
-        grid-template-columns: auto 1fr;
-        box-sizing: border-box;
-
-        &::after {
-            content: "";
-            background: linear-gradient(#0000000d, #0000);
-            width: 100%;
-            height: 4px;
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-        }
-
-        @media (max-width: 832px) {
-            & {
-                top: unset;
-                bottom: 0;
-            }
-
-            &::after {
-                background: linear-gradient(#0000, #0000000d);
-                top: -4px;
-                bottom: unset;
             }
         }
     }
@@ -262,6 +218,54 @@
             }
         }
 
+    }
+
+    .header > a[class*="desktop"]  {
+        background-size: 100% 100%;
+        background-image: url("$lib/assets/images/foree_remittance_small_logo.svg");
+        width: 50px;
+
+        @media (min-width: 823px) {
+            background-image: url("$lib/assets/images/foree_remittance_logo.svg");
+            width: 7.5rem;
+        }
+    }
+
+    .header {
+        z-index: 101;
+        height: var(--foree-nav-height);
+        padding: 0 var(--foree-page-padding-side);
+        width: 100vw;
+        margin: 0 auto;
+        position:fixed;
+        top:0;
+        background-color: var(--foree-bg-1);
+        display: grid;
+        grid-template-columns: auto 1fr;
+        box-sizing: border-box;
+
+        &::after {
+            content: "";
+            background: linear-gradient(#0000000d, #0000);
+            width: 100%;
+            height: 4px;
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+        }
+
+        @media (max-width: 832px) {
+            & {
+                top: unset;
+                bottom: 0;
+            }
+
+            &::after {
+                background: linear-gradient(#0000, #0000000d);
+                top: -4px;
+                bottom: unset;
+            }
+        }
     }
 
     #foree-main {
@@ -351,7 +355,6 @@
             @media (min-width: 832px) {
                     
                 &.selected {
-                    background-color: var(--foree-bg-4);
                     color: white;
                     background-color: var(--emerald-700);
                 }
