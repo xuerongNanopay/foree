@@ -48,7 +48,7 @@
     <div class="mobile">
         <div class="mobile-menu">
             <button aria-label="transfer"></button>
-            <button aria-label="menu"></button>
+            <button aria-label="menu" class:open={true}></button>
         </div>
     </div>
 </nav>
@@ -119,7 +119,7 @@
         }
     }
 
-    .header > a[class*="mobile"] {
+    .header > a.mobile {
         background-color: var(--emerald-800);
         text-decoration: none;
         width: 50px;
@@ -181,16 +181,20 @@
 
         & button[aria-label="menu"] {
             background-image: url("$lib/assets/icons/more_bar.png");
+
+            &.open {
+                background-image: url("$lib/assets/icons/x.png");
+            }
         }
     }
 
-    .header > div[class*="desktop"] > div {
+    .header > div.desktop > div {
         display: flex;
         justify-content: end;
         height: 100%;
     }
 
-    .header > div[class*="desktop"] > div > .notifications {
+    .header > div.desktop > div > .notifications {
         width: var(--foree-nav-height);
 
         & > a {
@@ -213,7 +217,7 @@
         }
     }
 
-    .header > div[class*="desktop"] > div > .dropdown {
+    .header > div.desktop > div > .dropdown {
         display: flex;
         justify-content: end;
         height: 100%;
@@ -296,7 +300,7 @@
 
     }
 
-    .header > a[class*="desktop"]  {
+    .header > a.desktop {
         background-size: 100% 100%;
         background-image: url("$lib/assets/images/foree_remittance_small_logo.svg");
         width: 50px;
