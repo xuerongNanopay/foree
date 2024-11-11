@@ -5,7 +5,9 @@
 
     const { children } = $props()
 
-    let dropdownOn = $state(false)
+    let desktopDropdownOn = $state(false)
+
+    let mobileMenuOn = $state(false)
     
 </script>
 
@@ -21,15 +23,15 @@
                 class="dropdown"
             >
                 <button 
-                    onclick={_ => {dropdownOn = !dropdownOn}} 
-                    class:dropdown-content-on={dropdownOn}
+                    onclick={_ => {desktopDropdownOn = !desktopDropdownOn}} 
+                    class:dropdown-content-on={desktopDropdownOn}
                     use:clickOutside={() => {
-                        dropdownOn = false
+                        desktopDropdownOn = false
                     }}
                 >
                     <p>XXXX XXXXXXXXXX xxx</p> <img src={dropDownIcon} alt=""/>
                 </button>
-                <nav class="dropdown-content" class:dropdown-content-on={dropdownOn}>
+                <nav class="dropdown-content" class:dropdown-content-on={desktopDropdownOn}>
                     <ul>
                         <li>
                             <a class="desktop home-link" href="dashboard" title="Homepage" aria-label="Homepage">Home</a>
@@ -48,10 +50,16 @@
     <div class="mobile">
         <div class="mobile-menu">
             <button aria-label="transfer"></button>
-            <button aria-label="menu" class:open={true}></button>
+            <button aria-label="menu" class:open={mobileMenuOn} onclick={_ => mobileMenuOn = !mobileMenuOn} ></button>
         </div>
     </div>
 </nav>
+
+{#if mobileMenuOn}
+<div class="mobile">
+    aaaa
+</div>
+{/if}
 
 <div id="foree-main">
     <div class="container">
