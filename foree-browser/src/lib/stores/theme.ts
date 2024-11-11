@@ -1,0 +1,1 @@
+import { BROWSER } from 'esm-env'
