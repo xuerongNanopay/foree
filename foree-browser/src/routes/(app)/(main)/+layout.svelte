@@ -7,8 +7,8 @@
     const { children } = $props()
 
     let desktopDropdownOn = $state(false)
+    let mobileMenuOn = $state(true)
 
-    let mobileMenuOn = $state(false)
 </script>
 
 <nav class="header">
@@ -56,7 +56,9 @@
 </nav>
 
 {#if mobileMenuOn}
-    <MobileMenu></MobileMenu>
+<div class="mobile">
+    <MobileMenu onclose={() => (mobileMenuOn = false)} ></MobileMenu>
+</div>
 {/if}
 
 <div id="foree-main">
