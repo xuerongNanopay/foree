@@ -45,7 +45,12 @@
             </div>
         </div>
     </div>
-    <div class="mobile"></div>
+    <div class="mobile">
+        <div class="mobile-menu">
+            <button aria-label="transfer"></button>
+            <button aria-label="menu"></button>
+        </div>
+    </div>
 </nav>
 
 <div id="foree-main">
@@ -74,6 +79,43 @@
     .mobile {
         @media (min-width: 832px) {
             display: none;
+        }
+    }
+
+    .header {
+        z-index: 101;
+        height: var(--foree-nav-height);
+        padding: 0 var(--foree-page-padding-side);
+        width: 100vw;
+        margin: 0 auto;
+        position:fixed;
+        top:0;
+        background-color: var(--foree-bg-1);
+        display: grid;
+        grid-template-columns: auto 1fr;
+        box-sizing: border-box;
+
+        &::after {
+            content: "";
+            background: linear-gradient(#0000000d, #0000);
+            width: 100%;
+            height: 4px;
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+        }
+
+        @media (max-width: 832px) {
+            & {
+                top: unset;
+                bottom: 0;
+            }
+
+            &::after {
+                background: linear-gradient(#0000, #0000000d);
+                top: -4px;
+                bottom: unset;
+            }
         }
     }
 
@@ -106,6 +148,39 @@
             -moz-box-shadow: 0 0 1px 1px var(--rose-600);
             -webkit-box-shadow: 0 0 1px 1px var(--rose-600);
             box-shadow: 0 0 1px 1px var(--rose-600);
+        }
+    }
+
+    .header .mobile-menu {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: end;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+
+        button {
+            background: transparent;
+            width: 2.5rem;
+            height: 2.5rem;
+            background-size: 1.3rem;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: var(--foree-border-radius);
+            border-width: var(--foree-raised-width);
+            border-color: var(--foree-raised-color);
+
+            &:hover {
+                background-color: var(--foree-raised-hover-color);
+            }
+        }
+
+        & button[aria-label="transfer"] {
+            background-image: url("$lib/assets/icons/send.png");
+        }
+
+        & button[aria-label="menu"] {
+            background-image: url("$lib/assets/icons/more_bar.png");
         }
     }
 
@@ -229,43 +304,6 @@
         @media (min-width: 823px) {
             background-image: url("$lib/assets/images/foree_remittance_logo.svg");
             width: 7.5rem;
-        }
-    }
-
-    .header {
-        z-index: 101;
-        height: var(--foree-nav-height);
-        padding: 0 var(--foree-page-padding-side);
-        width: 100vw;
-        margin: 0 auto;
-        position:fixed;
-        top:0;
-        background-color: var(--foree-bg-1);
-        display: grid;
-        grid-template-columns: auto 1fr;
-        box-sizing: border-box;
-
-        &::after {
-            content: "";
-            background: linear-gradient(#0000000d, #0000);
-            width: 100%;
-            height: 4px;
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-        }
-
-        @media (max-width: 832px) {
-            & {
-                top: unset;
-                bottom: 0;
-            }
-
-            &::after {
-                background: linear-gradient(#0000, #0000000d);
-                top: -4px;
-                bottom: unset;
-            }
         }
     }
 

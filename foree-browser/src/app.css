@@ -103,6 +103,17 @@ form {
 
     --foree-border: #ebebeb;
     --foree-shadow: drop-shadow(0px 10px 15px #0000001a);
+    --foree-border-radius: .4rem;
+
+
+    --foree-raised-border: var(--foree-border);
+    --foree-raised-highlight: #f2f2f2;
+    --foree-raised-shadow: #dbdbdb;
+    --foree-raised-color: var(--foree-raised-highlight) var(--foree-raised-border) var(--foree-raised-border) var(--foree-raised-highlight);
+    --foree-raised-hover-color: var(--foree-raised-border) var(--foree-raised-shadow) var(--foree-raised-shadow) var(--foree-raised-border);
+    --foree-raised-active-color: var(--foree-raised-shadow) var(--foree-raised-border) var(--foree-raised-border) var(--foree-raised-shadow);
+    --foree-raised-width: 1px 2px 2px 1px;
+    --foree-raised-active-width: 2px 1px 1px 2px;
 
     --foree-fg-1: #141414;
     --foree-fg-2: #262626;
