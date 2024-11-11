@@ -58,6 +58,31 @@
 {#if mobileMenuOn}
 <div id="mobile-menu-item" class="mobile">
     <div class="modal-overlay" aria-hidden="true"></div>
+    <div class="menu">
+        <div class="mobile-main-menu">
+            <div class="menu-background ready" style:height="100%">
+                <p>Laborum sunt ea irure culpa. Ad elit culpa eu aliqua elit minim officia aute Lorem. Consequat irure voluptate adipisicing qui minim irure duis in elit cillum sint nisi labore. Eu nostrud aliqua aliquip ullamco. Laboris sit duis magna dolor reprehenderit anim minim proident.
+
+Duis non aliquip nulla et occaecat voluptate dolore ullamco labore labore ea. Ad adipisicing irure culpa anim nostrud proident. Culpa do enim aliqua ad est velit in quis do. Mollit officia nulla labore consectetur commodo. Cillum proident excepteur velit et sit ullamco veniam est. Ipsum laboris sunt et ullamco. Labore labore mollit voluptate sunt ex amet laboris id minim consectetur in.
+
+Consectetur proident do excepteur dolore cupidatat commodo culpa sunt. Occaecat consequat voluptate amet reprehenderit proident sunt nulla amet voluptate ea culpa. Et incididunt pariatur et deserunt tempor excepteur veniam. Dolor quis deserunt eiusmod id aute occaecat qui aute sint labore adipisicing et proident. Ad incididunt proident et fugiat occaecat ipsum reprehenderit deserunt labore sunt sint exercitation do.
+
+Sint ullamco quis ex id elit. Velit minim non exercitation non nostrud. Aute eu nulla ad esse amet pariatur aute pariatur. Duis tempor irure magna deserunt deserunt nisi aute aliqua sit magna id aute nulla. Aute magna labore voluptate pariatur do do velit sit minim.
+
+Sit ullamco et non qui. Dolor irure consectetur reprehenderit in. Elit ipsum proident officia non amet deserunt consequat. Do elit pariatur dolor cillum excepteur. Quis in enim eu proident quis. Veniam ex dolor amet deserunt sunt reprehenderit dolore quis dolore laboris.
+
+Do nulla commodo aliqua sunt magna Lorem veniam et. Proident magna magna culpa ex non aute voluptate laboris in fugiat proident. Id eu id veniam exercitation laborum irure eiusmod magna incididunt. Excepteur nisi nulla eiusmod sint. Elit irure quis tempor cillum deserunt excepteur ad qui excepteur proident ex incididunt.
+
+Ad fugiat eu id cillum ullamco fugiat sunt consequat eiusmod adipisicing do incididunt elit occaecat. Eiusmod amet eiusmod est culpa. Incididunt ullamco et ad aliqua. Minim consectetur reprehenderit anim qui consequat non aute enim est ex labore eu quis id. Ex sit ut non nostrud voluptate aliqua ad pariatur do nisi.
+
+Exercitation incididunt est veniam ut magna excepteur dolor velit sunt. Anim anim quis est proident dolore sit fugiat culpa minim laborum. Reprehenderit ut ullamco proident ea laborum adipisicing non do id aliqua occaecat amet. Anim officia amet et duis. Lorem commodo ullamco tempor Lorem irure ad ad veniam qui. Cillum dolor culpa aliquip sint duis fugiat irure duis aliquip reprehenderit officia et.
+
+Dolor laboris est fugiat ut qui. Consectetur fugiat laboris eu ea occaecat id dolore sint ex officia. Ex excepteur dolor ea occaecat non culpa ex labore magna duis aute esse. Reprehenderit sint reprehenderit tempor velit excepteur occaecat.
+
+Cillum ipsum Lorem incididunt nostrud id commodo tempor nostrud. Est eu est sunt quis. Incididunt ipsum quis velit irure. Eiusmod enim esse consectetur do esse cupidatat adipisicing pariatur laboris id cupidatat minim.</p>
+            </div>
+        </div>
+    </div>
 </div>
 {/if}
 
@@ -427,7 +452,7 @@
         }
     }
 
-    #mobile-menu-item .modal-overlay {
+    #mobile-menu-item > .modal-overlay {
         z-index: 99;
         opacity: .7;
         pointer-events: auto;
@@ -437,5 +462,39 @@
         background: var(--foree-bg-1);
         position: fixed;
         inset: 0 auto atuo 0;
+    }
+
+    #mobile-menu-item > .menu {
+        z-index: 100;
+        position: fixed;
+        left: 0;
+        bottom: var(--foree-nav-height, 0);
+        filter: drop-shadow(0px 0px 15px #0000001a);
+        width: 100%;
+        height: 70vh;
+        overflow: hidden;
+        border-radius: 1rem 1rem 0 0;
+
+        & > .mobile-main-menu {
+            height: 100%;
+            contain: layout paint;
+
+            & > .menu-background {
+                background: var(--foree-bg-2);
+                will-change: height;
+                position: absolute;
+                width: 99.5%;
+                left: 0;
+                bottom: 0;
+                height: 0%;
+                border-radius: 1rem 1rem 0 0;
+                transition-property: none;
+                transition: .4s ease-in;
+            }
+
+            & > .ready {
+                transition-property: height;
+            }
+        }
     }
 </style>
