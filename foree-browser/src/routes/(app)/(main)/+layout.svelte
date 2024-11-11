@@ -56,8 +56,8 @@
 </nav>
 
 {#if mobileMenuOn}
-<div class="mobile">
-    aaaa
+<div id="mobile-menu-item" class="mobile">
+    <div class="modal-overlay" aria-hidden="true"></div>
 </div>
 {/if}
 
@@ -425,5 +425,17 @@
                 }
             }
         }
+    }
+
+    #mobile-menu-item .modal-overlay {
+        z-index: 99;
+        opacity: .7;
+        pointer-events: auto;
+        width: 100%;
+        height: 100%;
+        height: 100dvh;
+        background: var(--foree-bg-1);
+        position: fixed;
+        inset: 0 auto atuo 0;
     }
 </style>
