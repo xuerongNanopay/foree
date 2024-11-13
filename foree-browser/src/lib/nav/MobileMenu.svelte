@@ -6,6 +6,7 @@
     import ModalOverlay from "$lib/components/ModalOverlay.svelte"
     import { reduced_motion } from "$lib/stores/reduced_motion"
     import { trap } from "$lib/actions/focus";
+    import MobileSubMenu from "./MobileSubMenu.svelte";
 
     interface Props {
 		// links: NavigationLink[];
@@ -41,6 +42,7 @@
 		></div>
         <div class="clip-wapper">
             <div class="viewport">
+                <MobileSubMenu></MobileSubMenu>
             </div>
         </div>
     </div>
@@ -78,22 +80,20 @@
 		height: 99.5%;
 		border-radius: 1rem 1rem 0 0;
 		background: var(--background, var(--foree-bg-2));
-        /* background-color: red; */
 		will-change: height;
 	}
 
     .clip-wapper {
-        /* background: seagreen; */
 		width: 100%;
 		height: 100%;
 		transition: clip-path 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         /* Why this affect background absolute? */
 		will-change: clip-path;
-        overflow: scroll;
+        overflow-x: hidden;
+		overflow-y: scroll;
 	}
 
     .viewport {
-		position: relative;
-		bottom: -12px;
+		margin: 1rem 0;
 	}
 </style>
