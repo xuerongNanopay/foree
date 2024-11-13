@@ -9,6 +9,9 @@
     let desktopDropdownOn = $state(false)
     let mobileMenuOn = $state(true)
 
+    $effect(() => {
+		document.body.style.overflow = mobileMenuOn ? 'hidden' : '';
+	})
 </script>
 
 <nav class="header">

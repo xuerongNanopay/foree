@@ -14,13 +14,7 @@
 	}
 
 	// let { links, current, onclose }: Props = $props();
-    let current = $state.raw<NavigationLink | undefined>();
     let { onclose }: Props = $props()
-    let universal_menu_inner_height = $state(0);
-    let menu_height = $state(0);
-    let show_context_menu = $state(false);
-    let ready = $state(false);
-    let universal_menu: HTMLElement | undefined = $state();
 
 
     function popup(node: HTMLElement, { duration = 400, easing = expoOut } = {}): TransitionConfig {
@@ -44,28 +38,35 @@
     <div class="mobile-menu-content" transition:popup={{ duration: 400, easing: quintOut }}>
 		<div
 			class="mobile-menu-content-background"
-			class:ready
-			style:height='100%'
 		></div>
-        <div 
-            class="clip-wapper"
-            style:--height-difference="{menu_height - universal_menu_inner_height}px"
-        >
-            <div
-                class="viewport"
-                class:reduced-motion={$reduced_motion}
-                class:offset={show_context_menu}
-                bind:clientHeight={menu_height}
-                onscroll={(e:Event) => {e.stopPropagation()}}
-            >
-                <div class="universal" inert={false} bind:this={universal_menu}>
-                    <div class="contents" bind:clientHeight={universal_menu_inner_height} onscroll={(e:Event) => {e.stopPropagation()}}>
-						<ul>
-							<li><a href="/chat">Discord</a></li>
-							<li><a href="https://bsky.app/profile/sveltesociety.dev">Bluesky</a></li>
-							<li><a href="https://github.com/sveltejs/svelte">GitHub</a></li>
-						</ul>
-                    </div>
+        <div class="clip-wapper">
+            <div class="viewport" >
+                <div class="contents">
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA</h1>
+                    <h1>AAAAAA 1</h1>
                 </div>
             </div>
         </div>
@@ -106,16 +107,6 @@
 		background: var(--background, var(--foree-bg-2));
         background-color: red;
 		will-change: height;
-		/* transition: 0.3s var(--quint-out);
-		transition-property: none; */
-
-		&.ready {
-			/* transition-property: height; */
-		}
-
-		/* :root.dark & {
-			border-top: solid 1px var(--sk-raised-highlight);
-		} */
 	}
 
     .clip-wapper {
@@ -123,60 +114,16 @@
 		width: 100%;
 		height: 100%;
 		transition: clip-path 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-        /* Why this affect background absolute. */
+        /* Why this affect background absolute? */
 		will-change: clip-path;
+        overflow: scroll;
 	}
 
     .viewport {
 		position: relative;
 		bottom: -1px;
-
-		/* display: grid; */
-		width: 200%;
-		height: 100%;
-		grid-template-columns: 50% 50%;
-		transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-		grid-auto-rows: 100%;
-
-		&.reduced-motion {
-			transition-duration: 0.01ms;
-		}
-
-		&.offset {
-			transform: translate3d(-50%, 0, 0);
-		}
-
-		& > * {
-			overflow-y: scroll;
-			transition: inherit;
-			transition-property: transform, opacity;
-		}
-
-        & * {
-            /* overscroll-behavior: contain; */
-        }
-
-		/* & :global(a) {
-			position: relative;
-			padding: 0.3rem 0;
-			color: inherit;
-			font: var(--sk-font-ui-medium);
-			width: 100%;
-			height: 100%;
-		} */
 	}
 
-    .universal .contents {
-		position: absolute;
-		width: 50%;
-		bottom: 0;
-		padding: 1rem var(--foree-page-padding-side);
-		max-height: 70vh;
-		overflow-y: scroll;
-
-		button {
-			/* width: 2.6rem; */
-			height: 2.6rem;
-		}
-	}
+    .contents {
+    }
 </style>
