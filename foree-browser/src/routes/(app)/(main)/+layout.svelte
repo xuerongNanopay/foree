@@ -7,7 +7,7 @@
     const { children } = $props()
 
     let desktopDropdownOn = $state(false)
-    let mobileMenuOn = $state(true)
+    let mobileMenuOn = $state(false)
 
     $effect(() => {
 		document.body.style.overflow = mobileMenuOn ? 'hidden' : '';
