@@ -40,34 +40,7 @@
 			class="mobile-menu-content-background"
 		></div>
         <div class="clip-wapper">
-            <div class="viewport" >
-                <div class="contents">
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA</h1>
-                    <h1>AAAAAA 1</h1>
-                </div>
+            <div class="viewport">
             </div>
         </div>
     </div>
@@ -105,12 +78,12 @@
 		height: 99.5%;
 		border-radius: 1rem 1rem 0 0;
 		background: var(--background, var(--foree-bg-2));
-        background-color: red;
+        /* background-color: red; */
 		will-change: height;
 	}
 
     .clip-wapper {
-        background: seagreen;
+        /* background: seagreen; */
 		width: 100%;
 		height: 100%;
 		transition: clip-path 0.3s cubic-bezier(0.23, 1, 0.32, 1);
@@ -121,9 +94,6 @@
 
     .viewport {
 		position: relative;
-		bottom: -1px;
+		bottom: -12px;
 	}
-
-    .contents {
-    }
 </style>
