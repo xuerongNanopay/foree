@@ -18,5 +18,20 @@ export const mobileNavigation: MobileNavigation = [
                 icon: Transaction
             },
         ]
+    },
+    {
+        subMenuTitle: "Profile",
+        navigations: [
+            {
+                title: "Personal",
+                href: "/dashboard",
+                icon: Dashboard
+            },
+            {
+                title: "Notification Settings",
+                href: "/transaction",
+                icon: Transaction
+            },
+        ]
     }
 ]

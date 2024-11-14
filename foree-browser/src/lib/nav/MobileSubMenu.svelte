@@ -15,7 +15,7 @@
         <li>
             <input type="checkbox" name={""+id} id={""+id} checked={!!subMenu.defaultActive}>
             <label for={""+id}>
-                <p>Menu</p>
+                <p>{subMenu.subMenuTitle}</p>
                 <img src={UpArrow} alt="">
             </label>
             <ul class="content">
