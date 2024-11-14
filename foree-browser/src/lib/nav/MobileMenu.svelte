@@ -1,5 +1,4 @@
 <script lang="ts">
-    import type { NavigationLink } from "$lib/types"
     import { expoOut, quintOut } from 'svelte/easing'
     import type { TransitionConfig } from 'svelte/transition'
 
