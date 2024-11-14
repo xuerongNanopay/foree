@@ -10,35 +10,20 @@
 </script>
 
 <ul class="accordion">
-    <li>
-        <input type="checkbox" name="first" id="first" checked>
-        <label for="first">
-            <p>Menu</p>
-            <img src={UpArrow} alt="">
-        </label>
-        <ul class="content">
-            <li>Dashboard</li>
-            <li>Send</li>
-            <li>Send</li>
-            <li>Send</li>
-            <li>Send</li>
-        </ul>
-    </li>
-    <li>
-        <input type="checkbox" name="second" id="second">
-        <label for="second">
-            <p>Menu</p>
-            <img src={UpArrow} alt="">
-        </label>
-        <ul class="content">
-            <li>me</li>
-            <li>About</li>
-            <li>About</li>
-            <li>About</li>
-            <li>About</li>
-            <li>About</li>
-        </ul>
-    </li>
+    {#each mobileNavigation as subMenu, id}
+        <li>
+            <input type="checkbox" name={""+id} id={""+id} checked={!!subMenu.defaultActive}>
+            <label for={""+id}>
+                <p>Menu</p>
+                <img src={UpArrow} alt="">
+            </label>
+            <ul class="content">
+                {#each subMenu.navigations as navLik}
+                    <li>{navLik.title}</li>
+                {/each}
+            </ul>
+        </li>
+    {/each}
 </ul>
 
 <style>
