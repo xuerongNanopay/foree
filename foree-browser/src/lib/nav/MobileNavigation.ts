@@ -1,4 +1,6 @@
-import type { MobileNavigation } from "$lib/types";
+import type { MobileNavigation } from "$lib/types"
+import Dashboard from "$lib/assets/icons/dashboard.png"
+import Transaction from "$lib/assets/icons/transaction.png"
 
 export const mobileNavigation: MobileNavigation = [
     {
@@ -7,13 +9,13 @@ export const mobileNavigation: MobileNavigation = [
         navigations: [
             {
                 title: "Dashboard",
-                href: "aaaa",
-                icon: "aaaa"
+                href: "/dashboard",
+                icon: Dashboard
             },
             {
                 title: "Transaction",
-                href: "aaaa",
-                icon: "aaaa"
+                href: "/transaction",
+                icon: Transaction
             },
         ]
     }

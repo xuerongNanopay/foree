@@ -19,7 +19,10 @@
             </label>
             <ul class="content">
                 {#each subMenu.navigations as navLik}
-                    <li>{navLik.title}</li>
+                    <li><a href={navLik.href}>
+                        <img src={navLik.icon} alt=" "/>
+                        <p>{navLik.title}</p>
+                    </a></li>
                 {/each}
             </ul>
         </li>
@@ -52,14 +55,6 @@
         }
     }
 
-    .accordion > li > ul > li{
-        padding: .5rem 1rem;
-        border-radius: 7px;
-        &:hover {
-            background-color: var(--foree-bg-4);
-        }
-    }
-
     .accordion input[type="checkbox"] {
         display: none;
     }
@@ -68,6 +63,23 @@
         max-height: 0;
         overflow: hidden;
         transition: max-height .5s ease-in-out;
+
+        & a {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            text-decoration: none;
+            padding: .5rem 1rem;
+            border-radius: 7px;
+            &:hover {
+                background-color: var(--foree-bg-4);
+            }
+
+            & img {
+                width: 14px;
+                height: 14px;
+            }
+        }
     }
 
     .accordion input[type="checkbox"]:checked {
