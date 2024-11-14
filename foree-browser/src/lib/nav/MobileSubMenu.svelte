@@ -56,6 +56,7 @@
         & img {
             height: 17px;
             width: 17px;
+            transition: all .5s ease-in-out;
         }
     }
 
@@ -77,7 +78,13 @@
         transition: max-height .5s ease-in-out;
     }
 
-    .accordion input[type="checkbox"]:checked ~ .content {
-        max-height: 300px;
+    .accordion input[type="checkbox"]:checked {
+        & ~ .content {
+            max-height: 300px;
+        }
+
+        & ~ label > img {
+            transform: rotate(180deg);
+        }
     }
 </style>
