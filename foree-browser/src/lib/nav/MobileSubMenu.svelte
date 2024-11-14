@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { page } from "$app/stores"
     import UpArrow from "$lib/assets/icons/up_arrow.png"
     import type { MobileNavigation } from "$lib/types"
 
@@ -19,7 +20,7 @@
             </label>
             <ul class="content">
                 {#each subMenu.navigations as navLik}
-                    <li><a href={navLik.href}>
+                    <li><a href={navLik.href} class:selected={$page.url.pathname === navLik.href}>
                         <img src={navLik.icon} alt=" "/>
                         <p>{navLik.title}</p>
                     </a></li>
@@ -72,6 +73,10 @@
             padding: .5rem 1rem;
             border-radius: 7px;
             &:hover {
+                background-color: var(--foree-bg-4);
+            }
+
+            &.selected {
                 background-color: var(--foree-bg-4);
             }
 
