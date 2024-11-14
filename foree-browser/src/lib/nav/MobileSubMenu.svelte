@@ -1,5 +1,12 @@
 <script lang="ts">
     import UpArrow from "$lib/assets/icons/up_arrow.png"
+    import type { MobileNavigation } from "$lib/types"
+
+    interface Props {
+		mobileNavigation: MobileNavigation
+	}
+
+    let { mobileNavigation }: Props = $props()
 </script>
 
 <ul class="accordion">
