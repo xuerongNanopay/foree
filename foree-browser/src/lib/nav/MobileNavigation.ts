@@ -33,6 +33,11 @@ export const mobileNavigations: MobileNavigations = [
                 href: "/transaction",
                 icon: Transaction
             },
+            {
+                title: "Transfer",
+                href: "/create_transaction",
+                icon: Send
+            }
         ]
     }
 ]
@@ -53,4 +58,12 @@ export const sideMenuNavigations: Navigations = [
         href: "/create_transaction",
         icon: "not use"
     }
+]
+
+export const headerDropdownNavigations: Navigations = [
+    {
+        title: "Dashboard",
+        href: "/dashboard",
+        icon: "not use"
+    },
 ]

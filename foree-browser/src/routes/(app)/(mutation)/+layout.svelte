@@ -1,17 +1,22 @@
 <script lang="ts">
     import xIcon  from "$lib/assets/icons/x.png"
-    import { afterNavigate } from "$app/navigation";
+    import { afterNavigate, goto } from "$app/navigation";
     const { children } = $props()
+    let backUrl = "/transaction"
 
     afterNavigate(({from})=> {
-        console.log(from)
+        backUrl = from?.url.pathname ?? backUrl
     })
+
+    function goBack() {
+        goto(backUrl, {replaceState: true})
+    }
 </script>
 
 <div class="wrapper">
     <header>
         <div class="logo"></div>
-        <button>
+        <button onclick={goBack}>
             <img src={xIcon} alt="close"/>
         </button>
     </header>
