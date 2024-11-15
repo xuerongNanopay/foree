@@ -2,6 +2,7 @@
     import { page } from "$app/stores"
     import dropDownIcon from "$lib/assets/icons/drop_down_arrow.png"
     import MobileMenu from "$lib/nav/MobileMenu.svelte";
+    import { sideMenuNavigations } from "$lib/nav/MobileNavigation";
     import { clickOutside } from "$lib/utils/use_directives"
 
     const { children } = $props()
@@ -68,8 +69,9 @@
     <div class="container">
         <div class="nav-container">
             <ul>
-                <li><a href="dashboard" class:selected={$page.url.pathname === "/dashboard"}>Dashboard</a></li>
-                <li><a href="transaction" class:selected={$page.url.pathname === "/transaction"} >Transaction</a></li>
+                {#each sideMenuNavigations as menu}
+                <li><a href={menu.href} class:selected={$page.url.pathname === menu.href}>{menu.title}</a></li>
+                {/each}
             </ul>
         </div>
         <div class="page-container">

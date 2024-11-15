@@ -125,7 +125,7 @@ form {
     --foree-bg-3: #fafafa;
     --foree-bg-4: #f2f2f2;
 
-    --foree-side-menu-item-height: 3.5rem;
+    --foree-side-menu-item-height: 3.3rem;
 
     @media (max-width: 832px) {
         --foree-page-padding-top: 1rem;
