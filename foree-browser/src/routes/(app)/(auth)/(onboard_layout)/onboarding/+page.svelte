@@ -262,6 +262,7 @@
     }
 
     .step {
+        overflow: hidden;
         & > p:first-of-type {
             text-align: center;
             margin: 1.5rem 0;
