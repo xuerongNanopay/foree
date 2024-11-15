@@ -18,6 +18,11 @@ export const mobileNavigations: MobileNavigations = [
                 href: "/transaction",
                 icon: Transaction
             },
+            {
+                title: "Send Money",
+                href: "/create_transaction",
+                icon: Send
+            }
         ]
     },
     {
@@ -32,11 +37,6 @@ export const mobileNavigations: MobileNavigations = [
                 title: "Notification Settings",
                 href: "/transaction",
                 icon: Transaction
-            },
-            {
-                title: "Transfer",
-                href: "/create_transaction",
-                icon: Send
             }
         ]
     }
@@ -46,17 +46,17 @@ export const sideMenuNavigations: Navigations = [
     {
         title: "Dashboard",
         href: "/dashboard",
-        icon: "not use"
+        icon: Transaction
     },
     {
         title: "Transaction",
         href: "/transaction",
-        icon: "not use"
+        icon: Transaction
     },
     {
-        title: "Transfer",
+        title: "Send Money",
         href: "/create_transaction",
-        icon: "not use"
+        icon: Send
     }
 ]
 
