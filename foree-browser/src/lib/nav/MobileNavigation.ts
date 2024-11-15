@@ -46,7 +46,7 @@ export const sideMenuNavigations: Navigations = [
     {
         title: "Dashboard",
         href: "/dashboard",
-        icon: Transaction
+        icon: Dashboard
     },
     {
         title: "Transaction",
