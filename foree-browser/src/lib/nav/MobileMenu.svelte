@@ -4,9 +4,9 @@
 
     import ModalOverlay from "$lib/components/ModalOverlay.svelte"
     import { reduced_motion } from "$lib/stores/reduced_motion"
-    import { trap } from "$lib/actions/focus";
+    import { trap } from "$lib/actions/focus"
     import MobileSubMenu from "./MobileSubMenu.svelte"
-	import { mobileNavigation } from './MobileNavigation'
+    import { mobileNavigations } from './MobileNavigation'
 
     interface Props {
 		// links: NavigationLink[];
@@ -42,7 +42,7 @@
 		></div>
         <div class="clip-wapper">
             <div class="viewport">
-                <MobileSubMenu mobileNavigation={mobileNavigation}></MobileSubMenu>
+                <MobileSubMenu mobileNavigations={mobileNavigations}></MobileSubMenu>
             </div>
         </div>
     </div>

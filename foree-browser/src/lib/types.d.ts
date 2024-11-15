@@ -1,8 +1,10 @@
-export type MobileNavigation = {
+export type MobileNavigations = {
 	subMenuTitle: string,
 	defaultActive?: boolean,
 	navigations: NavigationLink[]
 }[]
+
+export type Navigations = NavigationLink[]
 
 export interface NavigationLink {
 	title: string;

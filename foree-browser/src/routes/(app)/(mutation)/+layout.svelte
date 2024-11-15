@@ -1,6 +1,11 @@
 <script lang="ts">
     import xIcon  from "$lib/assets/icons/x.png"
+    import { afterNavigate } from "$app/navigation";
     const { children } = $props()
+
+    afterNavigate(({from})=> {
+        console.log(from)
+    })
 </script>
 
 <div class="wrapper">

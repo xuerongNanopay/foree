@@ -1,17 +1,17 @@
 <script lang="ts">
     import { page } from "$app/stores"
     import UpArrow from "$lib/assets/icons/up_arrow.png"
-    import type { MobileNavigation } from "$lib/types"
+    import type { MobileNavigations } from "$lib/types"
 
     interface Props {
-		mobileNavigation: MobileNavigation
+		mobileNavigations: MobileNavigations
 	}
 
-    let { mobileNavigation }: Props = $props()
+    let { mobileNavigations }: Props = $props()
 </script>
 
 <ul class="accordion">
-    {#each mobileNavigation as subMenu, id}
+    {#each mobileNavigations as subMenu, id}
         <li>
             <input type="checkbox" name={""+id} id={""+id} checked={!!subMenu.defaultActive}>
             <label for={""+id}>

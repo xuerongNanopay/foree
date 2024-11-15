@@ -1,8 +1,8 @@
-import type { MobileNavigation } from "$lib/types"
+import type { MobileNavigations } from "$lib/types"
 import Dashboard from "$lib/assets/icons/dashboard.png"
 import Transaction from "$lib/assets/icons/transaction.png"
 
-export const mobileNavigation: MobileNavigation = [
+export const mobileNavigations: MobileNavigations = [
     {
         subMenuTitle: "Menu",
         defaultActive: true,
