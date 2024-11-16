@@ -15,9 +15,19 @@
     </div>
 {/snippet}
 
+{#snippet step2()}
+    <div class="step">
+        <h2>Transaction Details</h2>
+        <p>Enter the details for your transaction.</p>
+        <div class="remittance-fields">
+            <Select id="from" name="from"></Select>
+        </div>
+    </div>
+{/snippet}
+
 <main>
     <MultiStepForm
-        steps={[step1]}
+        steps={[step1, step2]}
         method="POST"
     >
 
@@ -36,8 +46,6 @@
     }
 
     .step {
-        /* overflow: hidden; */
-        overflow-x: hidden;
         & > p:first-of-type {
             text-align: center;
             margin: 1.5rem 0;

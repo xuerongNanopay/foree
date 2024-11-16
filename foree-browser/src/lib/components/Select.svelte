@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { clickOutside } from "$lib/utils/use_directives";
     import type { HTMLInputAttributes } from "svelte/elements"
 
     interface Props extends HTMLInputAttributes {
@@ -6,20 +7,32 @@
     }
 
     let { id, name, label }: Props = $props()
-    let openDropdown = $state(true)
+    let openDropdown = $state(false)
 
     function toggleDropdown() {
         openDropdown = !openDropdown
         console.log(openDropdown)
     }
+    $inspect(openDropdown)
 </script>
 
 <div id="select">
     <label for={id}>{label ?? name ?? id}</label>
-    <input id={id} name={name} readonly onclick={toggleDropdown} placeholder="please select..."/>
+    <input 
+        id={id} 
+        name={name} 
+        readonly 
+        onclick={toggleDropdown} 
+        placeholder="please select..."
+        use:clickOutside={() => {
+            if (openDropdown) openDropdown = false
+        }}
+    />
 
     {#if openDropdown}
-        <div class="dropdown-wrap">
+        <div 
+            class="dropdown-wrap"
+        >
             <div class="dropdown">
                 <ul>
                     <li><p>aaaaaa</p></li>
