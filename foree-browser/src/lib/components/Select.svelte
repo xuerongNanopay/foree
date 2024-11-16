@@ -8,12 +8,13 @@
 
     let { id, name, label }: Props = $props()
     let openDropdown = $state(false)
+    let inputWidth = $state()
 
     function toggleDropdown() {
         openDropdown = !openDropdown
         console.log(openDropdown)
     }
-    $inspect(openDropdown)
+    $inspect(inputWidth)
 </script>
 
 <div id="select">
@@ -24,6 +25,7 @@
         readonly 
         onclick={toggleDropdown} 
         placeholder="please select..."
+        bind:offsetWidth={inputWidth}
         use:clickOutside={() => {
             if (openDropdown) openDropdown = false
         }}
@@ -32,6 +34,7 @@
     {#if openDropdown}
         <div 
             class="dropdown-wrap"
+            style:--dropdown-width={inputWidth+"px"}
         >
             <div class="dropdown">
                 <ul>
@@ -51,15 +54,25 @@
     }
 
     #select .dropdown-wrap {
-        position: relative;
+        position: fixed;
+        margin-top: .5rem;
+        width: var(--dropdown-width);
         & .dropdown {
-            margin-top: .5rem;
+            padding: .5rem 0;
             border: 1px solid var(--emerald-800);
             background-color: #fff;
             border-radius: 7px;
             width: 100%;
             z-index: 99;
             position: absolute;
+        }
+    }
+
+    #select .dropdown li {
+        padding: .5rem .2rem;
+
+        &:hover{
+            background: var(--slate-200);
         }
     }
 
