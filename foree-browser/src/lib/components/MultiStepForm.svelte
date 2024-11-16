@@ -50,6 +50,10 @@
 
 
 <style>
+    form, form * {
+        box-sizing: border-box;
+    }
+
     form {
         overflow: hidden;
 
