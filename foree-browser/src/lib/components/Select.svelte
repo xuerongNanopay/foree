@@ -4,11 +4,13 @@
 
     interface Props extends HTMLInputAttributes {
         label?: string
+        options: { value: string, title: string}[]
     }
 
-    let { id, name, label }: Props = $props()
+    let { id, name, label, options }: Props = $props()
     let openDropdown = $state(false)
     let inputWidth = $state()
+    let value = $state()
 
     function toggleDropdown() {
         openDropdown = !openDropdown
@@ -23,7 +25,8 @@
         id={id} 
         name={name} 
         readonly 
-        onclick={toggleDropdown} 
+        onclick={toggleDropdown}
+        value={value}
         placeholder="please select..."
         bind:offsetWidth={inputWidth}
         use:clickOutside={() => {
@@ -38,9 +41,9 @@
         >
             <div class="dropdown">
                 <ul>
-                    <li><p>aaaaaa</p></li>
-                    <li><p>aaaaaa</p></li>
-                    <li><p>aaaaaa</p></li>
+                    {#each options as option}
+                        <li><button type="button" onclick={_=>value=option.value}>{option.title}</button></li>
+                    {/each}
                 </ul>
             </div>
         </div>
@@ -61,16 +64,20 @@
             padding: .5rem 0;
             border: 1px solid var(--emerald-800);
             background-color: #fff;
-            border-radius: 7px;
+            border-radius: 4px;
             width: 100%;
             z-index: 99;
             position: absolute;
         }
     }
 
-    #select .dropdown li {
+    #select .dropdown button {
         padding: .5rem .2rem;
-
+        background: none;
+        border: none;
+        display: block;
+        width: 100%;
+        text-align: left;
         &:hover{
             background: var(--slate-200);
         }

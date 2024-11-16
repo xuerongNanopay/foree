@@ -10,12 +10,12 @@
         <h2>Transaction Details</h2>
         <p>Enter the details for your transaction.</p>
         <div class="remittance-fields">
-            <Select id="from" name="from"></Select>
+            <Select id="from" name="from" options={[{value: "33", title: "AAA"}]}></Select>
         </div>
     </div>
 {/snippet}
 
-{#snippet step2()}
+<!-- {#snippet step2()}
     <div class="step">
         <h2>Transaction Details</h2>
         <p>Enter the details for your transaction.</p>
@@ -23,11 +23,11 @@
             <Select id="from" name="from"></Select>
         </div>
     </div>
-{/snippet}
+{/snippet} -->
 
 <main>
     <MultiStepForm
-        steps={[step1, step2]}
+        steps={[step1]}
         method="POST"
     >
 
