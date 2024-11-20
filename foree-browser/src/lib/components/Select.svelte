@@ -16,23 +16,22 @@
         openDropdown = !openDropdown
         console.log(openDropdown)
     }
-    $inspect(inputWidth)
+    $inspect(value)
 </script>
 
 <div id="select">
     <label for={id}>{label ?? name ?? id}</label>
-    <input 
+    <select 
         id={id} 
-        name={name} 
-        readonly 
+        name={name}
         onclick={toggleDropdown}
         value={value}
-        placeholder="please select..."
         bind:offsetWidth={inputWidth}
         use:clickOutside={() => {
             if (openDropdown) openDropdown = false
         }}
-    />
+        required
+    ></select>
 
     {#if openDropdown}
         <div 
@@ -52,8 +51,18 @@
 
 <style>
 
-    #select input {
+    #select select {
         cursor: pointer;
+        position: relative;
+        &::after {
+            position: absolute;
+            content: "";
+            top: 14px;
+            right: 10px;
+            width: 0;
+            height: 0;
+            border: 6px solid transparent;
+        }
     }
 
     #select .dropdown-wrap {
@@ -67,7 +76,6 @@
             border-radius: 4px;
             width: 100%;
             z-index: 99;
-            position: absolute;
         }
     }
 
