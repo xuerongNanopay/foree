@@ -1,15 +1,17 @@
 {
   "name": "@foreeui/storybook",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "The ForeeUI svelte components storybook ",
+  "author": "xuerongNanopay",
+  "license": "MIT",
+  "keywords": [
+    "storybook"
+  ],
   "scripts": {
-    "storybook": "storybook dev -p 6006",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "pnpm storybook dev -p 6666",
+    "build": "pnpm storybook build",
+    "start": "pnpm dlx http-server storybook-static"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@storybook/svelte-vite": "^8.4.5",
     "@chromatic-com/storybook": "^3.2.2",
