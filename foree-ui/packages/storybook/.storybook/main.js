@@ -10,7 +10,10 @@ function getAbsolutePath(value) {
 
 /** @type { import('@storybook/sveltekit').StorybookConfig } */
 const config = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|ts|svelte)'],
+  stories: [
+    // './welcome.stories.mdx',
+    '../../utilities/icons/stories/*.stories.@(js|ts|svelte)'
+  ],
   addons: [
     // turborepo + pnpm won't work with storybook8
     // getAbsolutePath('@storybook/addon-svelte-csf'),
