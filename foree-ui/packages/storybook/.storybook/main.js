@@ -20,7 +20,7 @@ const config = {
     // getAbsolutePath('@storybook/addon-essentials'),
     // getAbsolutePath('@chromatic-com/storybook'),
     // getAbsolutePath('@storybook/addon-interactions'),
-    '@storybook/addon-svelte-csf',
+    // '@storybook/addon-svelte-csf',
     '@storybook/addon-essentials',
     '@chromatic-com/storybook',
     '@storybook/addon-interactions',

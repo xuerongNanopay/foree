@@ -1,0 +1,14 @@
+.icon--small {
+    height: 1em;
+    width: 1em;
+}
+
+.icon--medium {
+    height: 2em;
+    width: 2em;
+}
+
+.icon--large {
+    height: 3em;
+    width: 3em;
+}

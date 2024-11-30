@@ -9,6 +9,7 @@
     "sb": "pnpm --filter @foreeui/storybook dev"
   },
   "devDependencies": {
+    "@storybook/svelte": "^8.4.6",
     "prettier": "^3.2.5",
     "prettier-plugin-svelte": "^3.2.2",
     "turbo": "^2.3.0"
