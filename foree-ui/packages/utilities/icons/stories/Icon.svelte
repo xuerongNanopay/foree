@@ -8,6 +8,7 @@
 
   type Prop = {
     size: 'small' | 'medium' | 'large' | 'xlarge',
+    fill?: 'string',
   }
   
   for (let n of Object.keys(allIcons)) {
@@ -15,7 +16,7 @@
       icons.push({name: n, component: allIcons[n]})
     }
   }
-  const { size='medium' }: Prop = $props();
+  const { size='medium', fill }: Prop = $props();
 
   function formatCellName(name: string): string {
     return (name.slice(0,1).toLocaleLowerCase() + name.slice(1)).replace('Icon', '').replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
@@ -26,7 +27,7 @@
 {#snippet cell(icon)}
   <div class="cell">
     <div class="cell__icon__container">
-      <icon.component class={`cell__icon--${size}`}/>
+      <icon.component class={`cell__icon--${size}`} fill={fill}/>
     </div>
     <small class="cell__desp">{formatCellName(icon.name)}</small>
   </div>
