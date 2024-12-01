@@ -19,7 +19,7 @@
   const { size='medium', fill }: Prop = $props();
 
   function formatCellName(name: string): string {
-    return (name.slice(0,1).toLocaleLowerCase() + name.slice(1)).replace('Icon', '').replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+    return (name.slice(0,1).toLocaleLowerCase() + name.slice(1)).replace('Icon', '').replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)
   }
 </script>
 
