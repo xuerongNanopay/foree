@@ -12,9 +12,7 @@
   }
   
   for (let n of Object.keys(allIcons)) {
-    for (let _ of Array(140)) {
-      icons.push({name: n, component: allIcons[n]})
-    }
+    icons.push({name: n, component: allIcons[n]})
   }
   const { size='medium', fill }: Prop = $props();
 
@@ -24,17 +22,23 @@
 </script>
 
 <!-- TODO: why typescript error -->
-{#snippet cell(icon)}
+<!-- {#snippet cell(icon)}
   <div class="cell">
     <div class="cell__icon__container">
       <icon.component class={`cell__icon--${size}`} fill={fill}/>
     </div>
     <small class="cell__desp">{formatCellName(icon.name)}</small>
   </div>
-{/snippet}
+{/snippet} -->
 
 <div>
   {#each icons as icon}
-    {@render cell(icon)}
+    <!-- {@render cell(icon)} -->
+    <div class="cell">
+      <div class="cell__icon__container">
+        <icon.component class={`cell__icon--${size}`} fill={fill}/>
+      </div>
+      <small class="cell__desp">{formatCellName(icon.name)}</small>
+    </div>
   {/each}
 </div>
