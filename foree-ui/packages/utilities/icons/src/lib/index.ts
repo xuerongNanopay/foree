@@ -8,3 +8,4 @@ export { default as ChevronDownIcon } from './ChevronDown.svelte';
 export { default as ChevronRightIcon } from './ChevronRight.svelte';
 export { default as ChevronUpIcon } from './ChevronUp.svelte';
 export { default as ChevronIcon } from './Chevron.svelte';
+export { default as CloseIcon } from './Close.svelte';
