@@ -14,7 +14,7 @@ export const SupportIcons: Story = {
       control: { type: 'select' },
       options: ['small', 'medium', 'large', 'xlarge'],
     },
-    fill: {
+    color: {
       control: { type: 'color' },
     }
   },

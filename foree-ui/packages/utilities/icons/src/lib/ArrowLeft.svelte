@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { SVGAttributes } from 'svelte/elements';
-  let { fill="currentColor", ...props }: SVGAttributes<EventTarget> = $props();
+  let { color="currentColor", ...props }: SVGAttributes<EventTarget> = $props();
 </script>
   
 <svg
@@ -15,11 +15,11 @@
 >
   <path
     d="M9.57 5.92993L3.5 11.9999L9.57 18.0699"
-    stroke="currentColor"
+    stroke={color}
   />
   <path
     d="M20.5 12H3.67004"
-    stroke="currentColor"
+    stroke={color}
   />
 </svg>
 
