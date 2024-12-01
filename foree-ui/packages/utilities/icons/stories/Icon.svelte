@@ -7,18 +7,34 @@
   const icons: {name: string, component: Component<SVGAttributes<EventTarget>>}[] = []
   
   for (let n of Object.keys(allIcons)) {
-    icons.push({name: n, component: allIcons[n]})
+    for (let _ of Array(140)) {
+      icons.push({name: n, component: allIcons[n]})
+    }
   }
   const { size= 'medium' } = $props();
 
+  function formatCellName(name: string): string {
+    return (name.slice(0,1).toLocaleLowerCase() + name.slice(1)).replace('Icon', '').replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+  }
 </script>
 
-{#each icons as icon}
+{#snippet cell(icon)}
   <div class="cell">
     <div class="cell__icon__container">
       <icon.component/>
     </div>
-    <!-- <small class="cell__desp">{icon.name.replace('Icon', '').toLowerCase()}</small> -->
-    <small class="cell__desp">{'1111111111111'}</small>
+    <small class="cell__desp">{formatCellName(icon.name)}</small>
   </div>
-{/each}
+{/snippet}
+
+<div>
+  {#each icons as icon}
+    <!-- <div class="cell">
+      <div class="cell__icon__container">
+        <icon.component/>
+      </div>
+      <small class="cell__desp">{formatCellName(icon.name)}</small>
+    </div> -->
+    {@render cell(icon)}
+  {/each}
+</div>
