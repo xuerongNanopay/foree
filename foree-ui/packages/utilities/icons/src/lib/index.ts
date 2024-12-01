@@ -13,3 +13,5 @@ export { default as CopyIcon } from './Copy.svelte';
 // export { default as DangerIcon } from './Danger.svelte';
 export { default as EditIcon } from './Edit.svelte';
 export { default as EllipsisIcon } from './Ellipsis.svelte';
+export { default as EyeIcon } from './Eye.svelte';
+export { default as EyeSlashIcon } from './EyeSlash.svelte';
