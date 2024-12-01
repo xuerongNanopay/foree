@@ -14,7 +14,7 @@
   for (let n of Object.keys(allIcons)) {
     icons.push({name: n, component: allIcons[n]})
   }
-  const { size='medium', color }: Prop = $props();
+  const { size='large', color }: Prop = $props();
 
   function formatCellName(name: string): string {
     return (name.slice(0,1).toLocaleLowerCase() + name.slice(1)).replace('Icon', '').replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)
