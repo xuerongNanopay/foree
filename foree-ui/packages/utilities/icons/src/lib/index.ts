@@ -9,3 +9,7 @@ export { default as ChevronRightIcon } from './ChevronRight.svelte';
 export { default as ChevronUpIcon } from './ChevronUp.svelte';
 export { default as ChevronIcon } from './Chevron.svelte';
 export { default as CloseIcon } from './Close.svelte';
+export { default as CopyIcon } from './Copy.svelte';
+// export { default as DangerIcon } from './Danger.svelte';
+export { default as EditIcon } from './Edit.svelte';
+export { default as EllipsisIcon } from './Ellipsis.svelte';
