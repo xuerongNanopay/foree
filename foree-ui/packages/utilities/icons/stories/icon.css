@@ -1,16 +1,21 @@
-.icon--small {
+.cell__icon--small {
+    height: .7em;
+    width: .7em;
+}
+
+.cell__icon--medium {
     height: 1em;
     width: 1em;
 }
 
-.icon--medium {
-    height: 2em;
-    width: 2em;
+.cell__icon--large {
+    height: 1.4em;
+    width: 1.4em;
 }
 
-.icon--large {
-    height: 3em;
-    width: 3em;
+.cell__icon--xlarge {
+    height: 2em;
+    width: 2em;
 }
 
 .cell {
