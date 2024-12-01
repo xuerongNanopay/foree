@@ -16,6 +16,9 @@ export const SupportIcons: Story = {
     },
     color: {
       control: { type: 'color' },
+    },
+    filled: {
+      control: { type: 'boolean' },
     }
   },
 };
