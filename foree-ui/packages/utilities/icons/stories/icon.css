@@ -24,10 +24,6 @@
     align-items: center;
 }
 
-.cell:nth-of-type(even) {
-    background: gainsboro;
-}
-
 .cell__icon__container {
     height: 50px;
     width: 50px;
@@ -38,4 +34,8 @@
 .cell__desp {
     font-size: smaller;
     padding: 0 .5rem;
+}
+
+.cell:nth-of-type(even)  .cell__desp {
+    background: gainsboro;
 }
