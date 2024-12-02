@@ -40,3 +40,7 @@ export { default as CalendarIcon } from './bold/Calendar.svelte';
 export { default as SquareClockIcon } from './bold/SquareClock.svelte';
 export { default as PetIcon } from './bold/Pet.svelte';
 export { default as PlusIcon } from './bold/Plus.svelte';
+export { default as SendIcon } from './bold/Send.svelte';
+export { default as ShoppingCartIcon } from './bold/ShoppingCart.svelte';
+export { default as VolumeHighIcon } from './bold/VolumeHigh.svelte';
+export { default as VolumeLowIcon } from './bold/VolumeLow.svelte';
