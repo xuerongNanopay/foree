@@ -29,3 +29,10 @@ export { default as SelectorIcon } from './Selector.svelte';
 export { default as ShieldSecurityIcon } from './ShieldSecurity.svelte';
 export { default as SuccessIcon } from './Success.svelte';
 export { default as SunIcon } from './Sun.svelte';
+
+export { default as AlignBottomIcon } from './bold/AlignBottom.svelte';
+export { default as AlignHorizontallyIcon } from './bold/AlignHorizontally.svelte';
+export { default as AlignLeftIcon } from './bold/AlignLeft.svelte';
+export { default as AlignRightIcon } from './bold/AlignRight.svelte';
+export { default as AlignTopIcon } from './bold/AlignTop.svelte';
+export { default as AlignVerticallyIcon } from './bold/AlignVertically.svelte';
