@@ -44,3 +44,8 @@ export { default as SendIcon } from './bold/Send.svelte';
 export { default as ShoppingCartIcon } from './bold/ShoppingCart.svelte';
 export { default as VolumeHighIcon } from './bold/VolumeHigh.svelte';
 export { default as VolumeLowIcon } from './bold/VolumeLow.svelte';
+
+export { default as AddNoteIcon } from './bulk/AddNote.svelte';
+export { default as CopyDocumentIcon } from './bulk/CopyDocument.svelte';
+export { default as DeleteDocumentIcon } from './bulk/DeleteDocument.svelte';
+export { default as EditDocumentIcon } from './bulk/EditDocument.svelte';
