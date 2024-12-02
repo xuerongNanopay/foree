@@ -17,3 +17,6 @@ export { default as EyeIcon } from './Eye.svelte';
 export { default as EyeSlashIcon } from './EyeSlash.svelte';
 export { default as HeadphonesIcon } from './Headphones.svelte';
 export { default as InfoCircleIcon } from './InfoCircle.svelte';
+export { default as InfoIcon } from './Info.svelte';
+export { default as InvalidCardIcon } from './InvalidCard.svelte';
+export { default as LinkIcon } from './Link.svelte';
