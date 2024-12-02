@@ -15,3 +15,5 @@ export { default as EditIcon } from './Edit.svelte';
 export { default as EllipsisIcon } from './Ellipsis.svelte';
 export { default as EyeIcon } from './Eye.svelte';
 export { default as EyeSlashIcon } from './EyeSlash.svelte';
+export { default as HeadphonesIcon } from './Headphones.svelte';
+export { default as InfoCircleIcon } from './InfoCircle.svelte';
