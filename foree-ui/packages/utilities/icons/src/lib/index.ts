@@ -23,3 +23,4 @@ export { default as LinkIcon } from './Link.svelte';
 export { default as LockIcon } from './Lock.svelte';
 export { default as MailIcon } from './Mail.svelte';
 export { default as MonitorMobileIcon } from './MonitorMobile.svelte';
+export { default as MoonIcon } from './Moon.svelte';
