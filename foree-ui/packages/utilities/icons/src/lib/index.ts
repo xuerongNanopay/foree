@@ -36,3 +36,7 @@ export { default as AlignLeftIcon } from './bold/AlignLeft.svelte';
 export { default as AlignRightIcon } from './bold/AlignRight.svelte';
 export { default as AlignTopIcon } from './bold/AlignTop.svelte';
 export { default as AlignVerticallyIcon } from './bold/AlignVertically.svelte';
+export { default as CalendarIcon } from './bold/Calendar.svelte';
+export { default as SquareClockIcon } from './bold/SquareClock.svelte';
+export { default as PetIcon } from './bold/Pet.svelte';
+export { default as PlusIcon } from './bold/Plus.svelte';
