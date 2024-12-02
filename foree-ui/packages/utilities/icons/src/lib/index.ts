@@ -28,3 +28,4 @@ export { default as SearchIcon } from './Search.svelte';
 export { default as SelectorIcon } from './Selector.svelte';
 export { default as ShieldSecurityIcon } from './ShieldSecurity.svelte';
 export { default as SuccessIcon } from './Success.svelte';
+export { default as SunIcon } from './Sun.svelte';
