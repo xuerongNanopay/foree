@@ -49,3 +49,9 @@ export { default as AddNoteIcon } from './bulk/AddNote.svelte';
 export { default as CopyDocumentIcon } from './bulk/CopyDocument.svelte';
 export { default as DeleteDocumentIcon } from './bulk/DeleteDocument.svelte';
 export { default as EditDocumentIcon } from './bulk/EditDocument.svelte';
+
+export { default as CheckLinearIcon } from './linear/CheckLinear.svelte';
+export { default as ChevronCircleTopLinearIcon } from './linear/ChevronCircleTopLinear.svelte';
+export { default as ClockCircleLinearIcon } from './linear/ClockCircleLinear.svelte';
+export { default as CopyLinearIcon } from './linear/CopyLinear.svelte';
+export { default as SearchLinearIcon } from './linear/SearchLinear.svelte';
