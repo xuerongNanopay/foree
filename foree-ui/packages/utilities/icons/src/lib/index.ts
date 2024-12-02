@@ -20,3 +20,6 @@ export { default as InfoCircleIcon } from './InfoCircle.svelte';
 export { default as InfoIcon } from './Info.svelte';
 export { default as InvalidCardIcon } from './InvalidCard.svelte';
 export { default as LinkIcon } from './Link.svelte';
+export { default as LockIcon } from './Lock.svelte';
+export { default as MailIcon } from './Mail.svelte';
+export { default as MonitorMobileIcon } from './MonitorMobile.svelte';
