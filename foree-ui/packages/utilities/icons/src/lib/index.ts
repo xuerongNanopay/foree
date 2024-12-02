@@ -24,3 +24,7 @@ export { default as LockIcon } from './Lock.svelte';
 export { default as MailIcon } from './Mail.svelte';
 export { default as MonitorMobileIcon } from './MonitorMobile.svelte';
 export { default as MoonIcon } from './Moon.svelte';
+export { default as SearchIcon } from './Search.svelte';
+export { default as SelectorIcon } from './Selector.svelte';
+export { default as ShieldSecurityIcon } from './ShieldSecurity.svelte';
+export { default as SuccessIcon } from './Success.svelte';
